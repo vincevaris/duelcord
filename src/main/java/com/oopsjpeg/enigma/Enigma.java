@@ -1,5 +1,6 @@
 package com.oopsjpeg.enigma;
 
+import com.oopsjpeg.enigma.commands.AvatarCommand;
 import com.oopsjpeg.enigma.commands.ClearCommand;
 import com.oopsjpeg.enigma.commands.QueueCommand;
 import com.oopsjpeg.enigma.commands.util.Command;
@@ -68,6 +69,7 @@ public class Enigma {
 
     public static void buildCommands() {
         commands.clear();
+        commands.add(new AvatarCommand());
         commands.add(new ClearCommand());
         commands.add(new QueueCommand());
     }
