@@ -541,16 +541,19 @@ public class Game {
 
             if (stats.critChance > 0 && Util.randFloat() <= stats.critChance) {
                 crit = true;
-                damage *= 1.5f + stats.critDamage;
+                float critAmt = 1.5f + stats.critDamage;
+
                 if (unit instanceof ThiefUnit) {
                     ThiefUnit tu = (ThiefUnit) unit;
-                    if (!tu.getCrit()) {
-                        tu.setCrit(true);
+                    critAmt += tu.getCrit() * 0.1f;
+                    if (tu.crit() == 1) {
                         int steal = Math.round(Math.max(1, Math.min(stats.damage * 0.2f, target.stats.gold)));
                         target.stats.gold = Math.max(0, target.stats.gold - steal);
                         output += Emoji.BUY + "**" + getName() + "** stole **" + steal + "** gold.\n";
                     }
                 }
+
+                damage *= Math.max(1, critAmt);
             }
 
             output += damage(target, damage);

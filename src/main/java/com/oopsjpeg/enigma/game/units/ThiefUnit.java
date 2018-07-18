@@ -10,26 +10,32 @@ public class ThiefUnit extends Unit {
 
     static {
         STATS.energy = 150;
-        STATS.maxHp = 494;
-        STATS.damage = 19;
+        STATS.maxHp = 474;
+        STATS.damage = 17;
         STATS.critChance = 0.15f;
+        STATS.critDamage = -0.2f;
         PER_TURN.hp = 12;
         PER_TURN.gold = 50;
     }
 
-    private boolean crit = false;
+    private int crit = 0;
 
-    public boolean getCrit() {
+    public int getCrit() {
         return crit;
     }
 
-    public void setCrit(boolean crit) {
+    public void setCrit(int crit) {
         this.crit = crit;
+    }
+
+    public int crit() {
+        crit++;
+        return crit;
     }
 
     @Override
     public String onTurn() {
-        crit = false;
+        crit = 0;
         return "";
     }
 
