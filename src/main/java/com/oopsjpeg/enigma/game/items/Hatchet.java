@@ -9,7 +9,7 @@ public class Hatchet extends Item {
     public static final Stats STATS = new Stats();
 
     static {
-        STATS.damage = 15;
+        STATS.damage = 10;
     }
 
     @Override

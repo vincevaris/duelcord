@@ -52,8 +52,10 @@ public class Game {
             if (gameState == 0) gameState = 1;
         }
 
-        if (gameState == 1 && curMember.stats.energy > 0)
+        if (turnCount >= 1 && gameState == 1 && curMember.stats.energy > 0) {
+            curMember.defend = 1;
             Util.sendMessage(channel, curMember.unit.onDefend());
+        }
 
         curMember = getAlive().get(curTurn);
 
@@ -67,12 +69,14 @@ public class Game {
             }
         } else if (gameState == 1) {
             curMember.stats.hp = Math.max(0, Math.min(curMember.stats.maxHp,
-                    curMember.stats.hp + curMember.perTurn.hp));
-            curMember.stats.gold += curMember.perTurn.gold;
-            curMember.stats.energy = curMember.unit.getStats().energy;
+                    curMember.stats.hp + (curMember.perTurn.hp * curMember.defend)));
+            curMember.stats.gold += Math.round(curMember.perTurn.gold + (turnCount * 0.5));
+            curMember.stats.energy = curMember.unit.getStats().energy + curMember.perTurn.energy;
+            curMember.stats.shield = 0;
 
             curMember.unit.onTurn();
             curMember.effects.forEach(Effect::onTurn);
+            curMember.defend = 0;
 
             if (turnCount == 0) {
                 Util.sendMessage(channel, curMember + ", you have the first turn!\n"
@@ -135,10 +139,10 @@ public class Game {
 
     public void notifyAfk() {
         notifyAfk++;
-        if (notifyAfk == 5)
-            Util.sendMessage(channel, Emoji.WARN + curMember.getUser() + ", you have around **5** minutes " +
+        if (notifyAfk == 3)
+            Util.sendMessage(channel, Emoji.WARN + curMember.getUser() + ", you have around **3** minutes " +
                     "to make an action, otherwise you will **forfeit due to AFKing**.");
-        else if (notifyAfk >= 10)
+        else if (notifyAfk >= 6)
             Util.sendMessage(channel, curMember.lose());
     }
 
@@ -153,7 +157,7 @@ public class Game {
             String content = message.getContent();
             IUser author = message.getAuthor();
 
-            if (getUsers().contains(author) && content.startsWith(Enigma.PREFIX_GAME)) {
+            if (gameState != 2 && getUsers().contains(author) && content.startsWith(Enigma.PREFIX_GAME)) {
                 String[] split = content.split(" ");
                 String alias = split[0].replaceFirst(Enigma.PREFIX_GAME, "");
                 String[] args = Arrays.copyOfRange(split, 1, split.length);
@@ -296,12 +300,19 @@ public class Game {
             else if (build.size() >= 6)
                 Util.sendMessage(channel, Emoji.NO + "You do not have enough inventory space.");
             else {
+                String output = "";
                 actor.stats.gold -= cost;
                 actor.items.add(item);
                 actor.items.removeAll(Arrays.asList(item.getBuild()));
                 actor.updateStats();
+
+                if (item.getStats().maxHp > 0 && !actor.shields.contains(item)) {
+                    output += actor.shield(item.getStats().maxHp);
+                    actor.shields.add(item);
+                }
+
                 Util.sendMessage(channel, Emoji.BUY + "**" + actor.getName() + "** purchased a(n) **"
-                        + item.getName() + "** for **" + cost + "** gold.");
+                        + item.getName() + "** for **" + cost + "** gold.\n" + output);
                 return true;
             }
             return false;
@@ -405,12 +416,15 @@ public class Game {
 
     public class Member {
         private Player player;
+        private Unit unit;
         private boolean alive = true;
+        private int defend = 0;
+
         private Stats stats = new Stats();
         private Stats perTurn = new Stats();
         private List<Item> items = new ArrayList<>();
         private List<Effect> effects = new ArrayList<>();
-        private Unit unit;
+        private List<Item> shields = new ArrayList<>();
 
         public Member(Player player) {
             this.player = player;
@@ -430,6 +444,14 @@ public class Game {
 
         public boolean isAlive() {
             return alive;
+        }
+
+        public int getDefend() {
+            return defend;
+        }
+
+        public void setDefend(int defend) {
+            this.defend = defend;
         }
 
         public Stats getStats() {
@@ -496,6 +518,7 @@ public class Game {
 
             for (Effect e : effects) {
                 stats.add(e.getStats());
+                perTurn.add(e.getPerTurn());
             }
         }
 
@@ -509,6 +532,11 @@ public class Game {
             }
         }
 
+        public String shield(int amount) {
+            stats.shield += amount;
+            return Emoji.HEAL + "**" + getName() + "** shielded by **" + amount + "**! [**" + stats.shield + "**]";
+        }
+
         public String heal(int amount) {
             stats.hp = Math.min(stats.maxHp, stats.hp + amount);
             return Emoji.HEAL + "**" + getName() + "** healed by **" + amount + "**! [**"
@@ -516,7 +544,9 @@ public class Game {
         }
 
         public String damage(Member target) {
-            String output = "";
+            String out = "";
+            String bonus = "";
+
             int damage = stats.damage;
             boolean crit = false;
 
@@ -537,7 +567,7 @@ public class Game {
                 ((BerserkerUnit) target.unit).rage();
 
             if (stats.lifeSteal > 0)
-                output += heal(Math.round(stats.lifeSteal * damage));
+                bonus += heal(Math.round(stats.lifeSteal * damage));
 
             if (stats.critChance > 0 && Util.randFloat() <= stats.critChance) {
                 crit = true;
@@ -547,20 +577,38 @@ public class Game {
                     ThiefUnit tu = (ThiefUnit) unit;
                     critAmt += tu.getCrit() * 0.1f;
                     if (tu.crit() == 1) {
-                        int steal = Math.round(Math.max(1, Math.min(stats.damage * 0.2f, target.stats.gold)));
+                        int steal = Math.round(Math.max(1, Math.min(stats.damage * 0.4f, target.stats.gold)));
                         target.stats.gold = Math.max(0, target.stats.gold - steal);
-                        output += Emoji.BUY + "**" + getName() + "** stole **" + steal + "** gold.\n";
+                        bonus += Emoji.BUY + "**" + getName() + "** stole **" + steal + "** gold.\n";
                     }
                 }
 
                 damage *= Math.max(1, critAmt);
             }
 
-            output += damage(target, damage);
+            if (target.defend == 1) damage *= 0.8f;
 
-            return Emoji.ATTACK + "**" + getName() + "** damaged **" + target.getName() + "** by **"
-                    + damage + "**! " + (crit ? "**CRIT**! " : "")
-                    + "[**" + target.stats.hp + " / " + target.stats.maxHp + "**]\n" + output;
+            if (target.stats.shield > 0) {
+                int shieldDmg = Math.round(Math.max(0, Math.min(damage, target.stats.shield)));
+                target.stats.shield -= shieldDmg;
+
+                if (target.stats.shield > 0)
+                    out += Emoji.SHIELD + "**" + getName() + "** damaged **" + target.getName() + "'s Shield** by **"
+                        + shieldDmg + "**! " + (crit ? "**CRIT**! " : "") + "[**" + target.stats.shield + "**]\n";
+                else {
+                    damage -= shieldDmg;
+                    out += Emoji.SHIELD + "**" + getName() + "** destroyed **" + target.getName() + "'s Shield**!\n";
+                }
+            }
+
+            if (target.stats.shield <= 0) {
+                bonus += damage(target, damage);
+                out += Emoji.ATTACK + "**" + getName() + "** damaged **" + target.getName() + "** by **"
+                        + damage + "**! " + (crit ? "**CRIT**! " : "")
+                        + "[**" + target.stats.hp + " / " + target.stats.maxHp + "**]\n";
+            }
+
+            return out + bonus;
         }
 
         public String damage(Member target, int damage) {
@@ -571,6 +619,7 @@ public class Game {
         }
 
         public String win() {
+            Enigma.endGame(Game.this);
             return Emoji.TROPHY + getUser() + ", you have won the battle!\n";
         }
 

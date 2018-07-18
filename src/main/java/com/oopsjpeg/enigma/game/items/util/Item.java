@@ -9,8 +9,10 @@ import java.lang.reflect.InvocationTargetException;
 
 public abstract class Item {
     private static final Item[] values = {
+            new AuroralMask(),
             new BloodlustBlade(),
             new BronzeCutlass(),
+            new Crystal(),
             new Hatchet(),
             new IronScimitar(),
             new Knife(),

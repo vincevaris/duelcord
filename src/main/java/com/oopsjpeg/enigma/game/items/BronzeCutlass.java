@@ -5,7 +5,7 @@ import com.oopsjpeg.enigma.game.items.util.Item;
 
 public class BronzeCutlass extends Item {
     public static final String NAME = "Bronze Cutlass";
-    public static final int COST = 500;
+    public static final int COST = 575;
     public static final Stats STATS = new Stats();
     public static final Item[] BUILD = new Item[]{new Knife()};
 

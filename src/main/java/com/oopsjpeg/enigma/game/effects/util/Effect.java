@@ -13,6 +13,10 @@ public abstract class Effect {
         return new Stats();
     }
 
+    public Stats getPerTurn() {
+        return new Stats();
+    }
+
     public void onTurn() {
 
     }

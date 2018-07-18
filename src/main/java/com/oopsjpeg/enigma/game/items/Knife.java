@@ -9,7 +9,7 @@ public class Knife extends Item {
     public static final Stats STATS = new Stats();
 
     static {
-        STATS.damage = 8;
+        STATS.damage = 6;
     }
 
     @Override

@@ -10,11 +10,11 @@ public class ThiefUnit extends Unit {
 
     static {
         STATS.energy = 150;
-        STATS.maxHp = 474;
-        STATS.damage = 17;
+        STATS.maxHp = 525;
+        STATS.damage = 18;
         STATS.critChance = 0.15f;
         STATS.critDamage = -0.2f;
-        PER_TURN.hp = 12;
+        PER_TURN.hp = 8;
         PER_TURN.gold = 50;
     }
 

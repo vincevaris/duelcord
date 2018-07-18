@@ -10,9 +10,9 @@ public class BerserkerUnit extends Unit {
 
     static {
         STATS.energy = 75;
-        STATS.maxHp = 513;
+        STATS.maxHp = 610;
         STATS.damage = 28;
-        PER_TURN.hp = 13;
+        PER_TURN.hp = 15;
         PER_TURN.gold = 50;
     }
 

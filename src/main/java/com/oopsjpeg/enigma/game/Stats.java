@@ -4,6 +4,7 @@ public class Stats {
     public int hp;
     public int gold;
     public int energy;
+    public int shield;
 
     public int maxHp;
     public int damage;
@@ -18,6 +19,7 @@ public class Stats {
         hp = other.hp;
         gold = other.gold;
         energy = other.energy;
+        shield = other.shield;
 
         maxHp = other.maxHp;
         damage = other.damage;
@@ -30,6 +32,7 @@ public class Stats {
         hp += other.hp;
         gold += other.gold;
         energy += other.energy;
+        shield += other.shield;
 
         maxHp += other.maxHp;
         damage += other.damage;
@@ -43,6 +46,7 @@ public class Stats {
         hp -= other.hp;
         gold -= other.gold;
         energy -= other.energy;
+        shield -= other.shield;
 
         maxHp -= other.maxHp;
         damage -= other.damage;
@@ -53,7 +57,9 @@ public class Stats {
     }
 
     public Stats clean() {
+        gold = Math.max(0, gold);
         energy = Math.max(0, energy);
+        shield = Math.max(0, shield);
 
         maxHp = Math.max(1, maxHp);
         damage = Math.max(1, damage);

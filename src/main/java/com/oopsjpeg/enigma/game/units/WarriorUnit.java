@@ -10,9 +10,9 @@ public class WarriorUnit extends Unit {
 
     static {
         STATS.energy = 125;
-        STATS.maxHp = 564;
+        STATS.maxHp = 580;
         STATS.damage = 24;
-        PER_TURN.hp = 14;
+        PER_TURN.hp = 13;
         PER_TURN.gold = 50;
     }
 

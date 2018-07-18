@@ -88,6 +88,17 @@ public class Enigma {
                 .findAny().orElse(null);
     }
 
+    public static List<Game> getGames() {
+        return games;
+    }
+
+    public static void endGame(Game game) {
+        SCHEDULER.schedule(() -> {
+            game.getPlayers().forEach(Player::clearGame);
+            games.remove(game);
+        }, 1, TimeUnit.MINUTES);
+    }
+
     public static List<Player> getPlayers() {
         return new ArrayList<>(players.values());
     }
