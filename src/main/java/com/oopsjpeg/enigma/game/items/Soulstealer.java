@@ -10,7 +10,7 @@ public class Soulstealer extends Item {
     public static final String NAME = "Soulstealer";
     public static final int COST = 1200;
     public static final Item[] BUILD = new Item[]{new BloodlustBlade(), new Hatchet()};
-    public static final Effect[] EFFECTS = new Effect[]{new Vampirism(2), new Bruiser(3)};
+    public static final Effect[] EFFECTS = new Effect[]{new Vampirism(0.2f)};
     public static final Stats STATS = new Stats();
 
     static {

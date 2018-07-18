@@ -5,12 +5,12 @@ import com.oopsjpeg.enigma.game.Stats;
 public abstract class Effect {
     public abstract String getName();
 
-    public Stats getStats() {
-        return new Stats();
+    public float getPower() {
+        return 0;
     }
 
-    public int getLevel() {
-        return 1;
+    public Stats getStats() {
+        return new Stats();
     }
 
     public void onTurn() {

@@ -4,12 +4,12 @@ import com.oopsjpeg.enigma.game.effects.util.Effect;
 
 public class LoveOfWar extends Effect {
     public static final String NAME = "Love of War";
-    private final int level;
+    private final float power;
 
     private int attack = 0;
 
-    public LoveOfWar(int level) {
-        this.level = level;
+    public LoveOfWar(float power) {
+        this.power = power;
     }
 
     public int attack() {
@@ -22,6 +22,11 @@ public class LoveOfWar extends Effect {
     }
 
     @Override
+    public float getPower() {
+        return power;
+    }
+
+    @Override
     public void onTurn() {
         attack = 0;
     }
@@ -29,10 +34,5 @@ public class LoveOfWar extends Effect {
     @Override
     public String getName() {
         return NAME;
-    }
-
-    @Override
-    public int getLevel() {
-        return level;
     }
 }

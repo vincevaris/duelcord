@@ -5,11 +5,11 @@ import com.oopsjpeg.enigma.game.effects.util.Effect;
 
 public class CritDamage extends Effect {
     public static final String NAME = "Critical Damage";
+    private final float power;
     private final Stats stats = new Stats();
-    private final int level;
 
-    public CritDamage(int level) {
-        this.level = level;
+    public CritDamage(float power) {
+        this.power = power;
     }
 
     @Override
@@ -18,13 +18,13 @@ public class CritDamage extends Effect {
     }
 
     @Override
-    public Stats getStats() {
-        stats.critDamage = 0.1f * level;
-        return stats;
+    public float getPower() {
+        return power;
     }
 
     @Override
-    public int getLevel() {
-        return level;
+    public Stats getStats() {
+        stats.critDamage = power;
+        return stats;
     }
 }

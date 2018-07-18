@@ -5,11 +5,11 @@ import com.oopsjpeg.enigma.game.effects.util.Effect;
 
 public class Bruiser extends Effect {
     public static final String NAME = "Bruiser";
+    private final float power;
     private final Stats stats = new Stats();
-    private final int level;
 
-    public Bruiser(int level) {
-        this.level = level;
+    public Bruiser(float power) {
+        this.power = power;
     }
 
     @Override
@@ -18,13 +18,13 @@ public class Bruiser extends Effect {
     }
 
     @Override
-    public Stats getStats() {
-        stats.critChance = 0.1f * level;
-        return stats;
+    public float getPower() {
+        return power;
     }
 
     @Override
-    public int getLevel() {
-        return level;
+    public Stats getStats() {
+        stats.critChance = power;
+        return stats;
     }
 }

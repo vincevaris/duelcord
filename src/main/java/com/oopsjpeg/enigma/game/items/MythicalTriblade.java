@@ -10,7 +10,7 @@ public class MythicalTriblade extends Item {
     public static final String NAME = "Mythical Triblade";
     public static final int COST = 1175;
     public static final Item[] BUILD = new Item[]{new BronzeCutlass(), new MidnightDagger()};
-    public static final Effect[] EFFECTS = new Effect[]{new LoveOfWar(2), new Bruiser(3)};
+    public static final Effect[] EFFECTS = new Effect[]{new LoveOfWar(0.2f), new Bruiser(0.2f)};
     public static final Stats STATS = new Stats();
 
     static {

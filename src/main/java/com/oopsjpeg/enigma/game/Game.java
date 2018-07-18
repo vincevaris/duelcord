@@ -486,7 +486,7 @@ public class Game {
                     if (!effects.contains(e)) effects.add(e);
                     else if (effects.contains(e)) {
                         Effect old = effects.get(effects.indexOf(e));
-                        if (e.getLevel() > old.getLevel()) {
+                        if (e.getPower() > old.getPower()) {
                             effects.remove(old);
                             effects.add(e);
                         }
@@ -522,7 +522,7 @@ public class Game {
 
             if (hasEffect(LoveOfWar.class)) {
                 LoveOfWar low = (LoveOfWar) getEffect(LoveOfWar.class);
-                damage *= 1 + ((low.attack() - 1) * 0.25);
+                damage *= 1 + ((low.attack() - 1) * low.getPower());
             }
 
             if (unit instanceof WarriorUnit) {

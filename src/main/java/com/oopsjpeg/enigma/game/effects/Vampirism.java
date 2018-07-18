@@ -6,10 +6,10 @@ import com.oopsjpeg.enigma.game.effects.util.Effect;
 public class Vampirism extends Effect {
     public static final String NAME = "Vampirism";
     private final Stats stats = new Stats();
-    private final int level;
+    private final float power;
 
-    public Vampirism(int level) {
-        this.level = level;
+    public Vampirism(float power) {
+        this.power = power;
     }
 
     @Override
@@ -18,13 +18,13 @@ public class Vampirism extends Effect {
     }
 
     @Override
-    public Stats getStats() {
-        stats.lifeSteal = 0.1f * level;
-        return stats;
+    public float getPower() {
+        return power;
     }
 
     @Override
-    public int getLevel() {
-        return level;
+    public Stats getStats() {
+        stats.lifeSteal = power;
+        return stats;
     }
 }
