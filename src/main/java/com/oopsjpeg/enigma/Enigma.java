@@ -116,7 +116,7 @@ public class Enigma {
                     queues.get(mode).removeAll(players);
                     players.forEach(p -> p.setGame(game));
                     Util.sendMessage(mmChannel, Emoji.INFO + "**" + mode.getName() + "** has been found for "
-                            + players.stream().map(Player::toString).collect(Collectors.joining(", ")) + "\n"
+                            + players.stream().map(Player::getName).collect(Collectors.joining(", ")) + "\n"
                             + "Go to " + game.getChannel() + " to play the game!");
                 }
             }
