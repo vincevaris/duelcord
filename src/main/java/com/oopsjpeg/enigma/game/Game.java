@@ -499,6 +499,7 @@ public class Game {
             stats.lifeSteal = unit.getStats().lifeSteal;
             perTurn.hp = unit.getPerTurn().hp;
             perTurn.gold = unit.getPerTurn().gold;
+            perTurn.energy = unit.getPerTurn().energy;
 
             for (Item i : items) {
                 stats.add(i.getStats());
