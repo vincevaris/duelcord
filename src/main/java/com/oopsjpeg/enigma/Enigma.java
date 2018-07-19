@@ -94,6 +94,7 @@ public class Enigma {
 
     public static void endGame(Game game) {
         SCHEDULER.schedule(() -> {
+            game.getChannel().delete();
             game.getPlayers().forEach(Player::clearGame);
             games.remove(game);
         }, 1, TimeUnit.MINUTES);
