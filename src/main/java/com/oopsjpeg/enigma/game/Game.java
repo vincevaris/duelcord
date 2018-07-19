@@ -13,14 +13,12 @@ import com.oopsjpeg.enigma.game.units.util.Unit;
 import com.oopsjpeg.enigma.storage.Player;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +37,12 @@ public class Game {
 
     public Game(IGuild guild, GameMode mode, List<Player> players) {
         channel = guild.createChannel("game");
+
+        Util.overrideRolePermissions(channel, guild.getEveryoneRole(),
+                EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.READ_MESSAGES));
+        for (Player player : players) Util.overrideUserPermissions(channel, player.getUser(),
+                EnumSet.of(Permissions.READ_MESSAGES), EnumSet.noneOf(Permissions.class));
+
         this.mode = mode;
         members = players.stream().map(Member::new).collect(Collectors.toList());
         nextTurn();

@@ -1,12 +1,11 @@
 package com.oopsjpeg.enigma;
 
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.Permissions;
+import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.RequestBuffer;
 
 import java.awt.*;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +34,24 @@ public class Util {
 
     public static int calcMaxXp(int level) {
         return (int) Math.round(Math.pow(level * 118, 1.07f) + 155);
+    }
+
+    public static void overrideRolePermissions(IChannel channel, IRole role,
+                                               EnumSet<Permissions> allow, EnumSet<Permissions> deny) {
+        RequestBuffer.request(() -> {
+            if (channel.getModifiedPermissions(Enigma.getClient().getOurUser())
+                    .contains(Permissions.MANAGE_CHANNELS))
+                channel.overrideRolePermissions(role, allow, deny);
+        });
+    }
+
+    public static void overrideUserPermissions(IChannel channel, IUser user,
+                                               EnumSet<Permissions> allow, EnumSet<Permissions> deny) {
+        RequestBuffer.request(() -> {
+            if (channel.getModifiedPermissions(Enigma.getClient().getOurUser())
+                    .contains(Permissions.MANAGE_CHANNELS))
+                channel.overrideUserPermissions(user, allow, deny);
+        });
     }
 
     public static void changeTopic(IChannel channel, String topic) {
