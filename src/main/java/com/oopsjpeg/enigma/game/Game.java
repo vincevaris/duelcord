@@ -288,11 +288,10 @@ public class Game {
         public boolean act(Member actor) {
             int cost = item.getCost();
             List<Item> build = new ArrayList<>(actor.items);
-            for (Item i : item.getBuild())
-                if (actor.items.contains(i)) {
-                    cost -= i.getCost();
-                    build.remove(i);
-                }
+            for (Item i : item.getBuild()) if (build.contains(i)) {
+                cost -= i.getCost();
+                build.remove(i);
+            }
 
             if (actor.stats.gold < cost)
                 Util.sendMessage(channel, Emoji.NO + "You need **" + (cost - actor.stats.gold)
