@@ -240,6 +240,9 @@ public class Game {
                         Util.sendMessage(channel, Emoji.NO + "You cannot use **Rage** until the game has started.");
                     else
                         curMember.act(new RageAction());
+                } else if (getAlive().contains(author) && alias.equalsIgnoreCase("forfeit")) {
+                    Util.deleteMessage(message);
+                    Util.sendMessage(channel, getAlive().get(getAlive().indexOf(author)).lose());
                 }
             }
         }
@@ -642,7 +645,7 @@ public class Game {
 
         @Override
         public boolean equals(Object obj) {
-            return getUser().equals(obj);
+            return obj != null && getUser().equals(obj);
         }
 
         @Override

@@ -12,7 +12,7 @@ import sx.blah.discord.handle.obj.Permissions;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ClearCommand extends Command {
+public class ClearCommand implements Command {
     @Override
     public void execute(CommandInput input) {
         IMessage message = input.getMessage();

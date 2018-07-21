@@ -13,7 +13,7 @@ import sx.blah.discord.handle.obj.IUser;
 
 import java.util.List;
 
-public class QueueCommand extends Command {
+public class QueueCommand implements Command {
     @Override
     public void execute(CommandInput input) {
         IMessage message = input.getMessage();

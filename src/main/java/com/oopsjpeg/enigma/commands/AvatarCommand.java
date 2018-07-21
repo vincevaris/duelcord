@@ -10,7 +10,7 @@ import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.Image;
 
-public class AvatarCommand extends Command {
+public class AvatarCommand implements Command {
     @Override
     public void execute(CommandInput input) {
         IMessage message = input.getMessage();
@@ -27,5 +27,10 @@ public class AvatarCommand extends Command {
     @Override
     public String getName() {
         return "avatar";
+    }
+
+    @Override
+    public String getDesc() {
+        return "Updates the bot's avatar.";
     }
 }
