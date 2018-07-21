@@ -1,15 +1,15 @@
 package com.oopsjpeg.enigma.commands.util;
 
 public interface Command {
-    void execute(CommandInput input);
+	void execute(CommandInput input);
 
-    String getName();
+	String getName();
 
-    default String getDesc() {
-        return "";
-    }
+	default String getDesc() {
+		return "";
+	}
 
-    default String[] getAliases() {
-        return new String[0];
-    }
+	default String[] getAliases() {
+		return new String[0];
+	}
 }

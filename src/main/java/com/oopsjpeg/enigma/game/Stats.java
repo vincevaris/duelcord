@@ -1,71 +1,71 @@
 package com.oopsjpeg.enigma.game;
 
 public class Stats {
-    public int hp;
-    public int gold;
-    public int energy;
-    public int shield;
+	public int hp;
+	public int gold;
+	public int energy;
+	public int shield;
 
-    public int maxHp;
-    public int damage;
-    public float critChance;
-    public float critDamage;
-    public float lifeSteal;
+	public int maxHp;
+	public int damage;
+	public float critChance;
+	public float critDamage;
+	public float lifeSteal;
 
-    public Stats() {
-    }
+	public Stats() {
+	}
 
-    public Stats(Stats other) {
-        hp = other.hp;
-        gold = other.gold;
-        energy = other.energy;
-        shield = other.shield;
+	public Stats(Stats other) {
+		hp = other.hp;
+		gold = other.gold;
+		energy = other.energy;
+		shield = other.shield;
 
-        maxHp = other.maxHp;
-        damage = other.damage;
-        critChance = other.critChance;
-        critDamage = other.critDamage;
-        lifeSteal = other.lifeSteal;
-    }
+		maxHp = other.maxHp;
+		damage = other.damage;
+		critChance = other.critChance;
+		critDamage = other.critDamage;
+		lifeSteal = other.lifeSteal;
+	}
 
-    public Stats add(Stats other) {
-        hp += other.hp;
-        gold += other.gold;
-        energy += other.energy;
-        shield += other.shield;
+	public Stats add(Stats other) {
+		hp += other.hp;
+		gold += other.gold;
+		energy += other.energy;
+		shield += other.shield;
 
-        maxHp += other.maxHp;
-        damage += other.damage;
-        critChance += other.critChance;
-        lifeSteal += other.lifeSteal;
+		maxHp += other.maxHp;
+		damage += other.damage;
+		critChance += other.critChance;
+		lifeSteal += other.lifeSteal;
 
-        return clean();
-    }
+		return clean();
+	}
 
-    public Stats subtract(Stats other) {
-        hp -= other.hp;
-        gold -= other.gold;
-        energy -= other.energy;
-        shield -= other.shield;
+	public Stats subtract(Stats other) {
+		hp -= other.hp;
+		gold -= other.gold;
+		energy -= other.energy;
+		shield -= other.shield;
 
-        maxHp -= other.maxHp;
-        damage -= other.damage;
-        critChance -= other.critChance;
-        lifeSteal -= other.lifeSteal;
+		maxHp -= other.maxHp;
+		damage -= other.damage;
+		critChance -= other.critChance;
+		lifeSteal -= other.lifeSteal;
 
-        return clean();
-    }
+		return clean();
+	}
 
-    public Stats clean() {
-        gold = Math.max(0, gold);
-        energy = Math.max(0, energy);
-        shield = Math.max(0, shield);
+	public Stats clean() {
+		gold = Math.max(0, gold);
+		energy = Math.max(0, energy);
+		shield = Math.max(0, shield);
 
-        maxHp = Math.max(1, maxHp);
-        damage = Math.max(1, damage);
-        critChance = Math.max(0, Math.min(1, critChance));
-        lifeSteal = Math.max(0, Math.min(1, lifeSteal));
+		maxHp = Math.max(1, maxHp);
+		damage = Math.max(1, damage);
+		critChance = Math.max(0, Math.min(1, critChance));
+		lifeSteal = Math.max(0, Math.min(1, lifeSteal));
 
-        return this;
-    }
+		return this;
+	}
 }

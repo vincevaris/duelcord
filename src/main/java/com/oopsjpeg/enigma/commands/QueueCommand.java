@@ -14,33 +14,33 @@ import sx.blah.discord.handle.obj.IUser;
 import java.util.List;
 
 public class QueueCommand implements Command {
-    @Override
-    public void execute(CommandInput input) {
-        IMessage message = input.getMessage();
-        IChannel channel = message.getChannel();
-        IUser author = message.getAuthor();
-        Player player = Enigma.getPlayer(author);
+	@Override
+	public void execute(CommandInput input) {
+		IMessage message = input.getMessage();
+		IChannel channel = message.getChannel();
+		IUser author = message.getAuthor();
+		Player player = Enigma.getPlayer(author);
 
-        GameMode mode = GameMode.DUEL;
-        List<Player> queue = Enigma.getQueue(mode);
+		GameMode mode = GameMode.DUEL;
+		List<Player> queue = Enigma.getQueue(mode);
 
-        Util.deleteMessage(message);
-        if (player.getGame() == null) {
-            if (!queue.contains(player)) {
-                queue.add(player);
-                player.setQueue(mode);
-                Util.sendMessage(channel, Emoji.YES + author + " You are now in queue for **" + mode.getName()
-                        + "** (size: **" + queue.size() + "**)");
-            } else {
-                queue.remove(player);
-                player.clearQueue();
-                Util.sendMessage(channel, Emoji.YES + author + " You are no longer in queue.");
-            }
-        }
-    }
+		Util.deleteMessage(message);
+		if (player.getGame() == null) {
+			if (!queue.contains(player)) {
+				queue.add(player);
+				player.setQueue(mode);
+				Util.sendMessage(channel, Emoji.YES + author + " You are now in queue for **" + mode.getName()
+						+ "** (size: **" + queue.size() + "**)");
+			} else {
+				queue.remove(player);
+				player.clearQueue();
+				Util.sendMessage(channel, Emoji.YES + author + " You are no longer in queue.");
+			}
+		}
+	}
 
-    @Override
-    public String getName() {
-        return "queue";
-    }
+	@Override
+	public String getName() {
+		return "queue";
+	}
 }

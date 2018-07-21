@@ -29,141 +29,141 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class Enigma {
-    public static final ScheduledExecutorService SCHEDULER = new ScheduledThreadPoolExecutor(2);
-    public static final String PREFIX_ALL = "-";
-    public static final String PREFIX_GAME = ">";
+	public static final ScheduledExecutorService SCHEDULER = new ScheduledThreadPoolExecutor(2);
+	public static final String PREFIX_ALL = "-";
+	public static final String PREFIX_GAME = ">";
 
-    private static IDiscordClient client;
-    private static List<Command> commands = new ArrayList<>();
-    private static List<Game> games = new ArrayList<>();
-    private static Map<IUser, Player> players = new HashMap<>();
-    private static Map<GameMode, ArrayList<Player>> queues = new HashMap<>();
+	private static IDiscordClient client;
+	private static List<Command> commands = new ArrayList<>();
+	private static List<Game> games = new ArrayList<>();
+	private static Map<IUser, Player> players = new HashMap<>();
+	private static Map<GameMode, ArrayList<Player>> queues = new HashMap<>();
 
-    private static String guildId;
-    private static String mmChannelId;
+	private static String guildId;
+	private static String mmChannelId;
 
-    private static IGuild guild;
-    private static IChannel mmChannel;
+	private static IGuild guild;
+	private static IChannel mmChannel;
 
-    public static void main(String[] args) throws IOException {
-        File f = new File("config.ini");
-        Properties p = new Properties();
+	public static void main(String[] args) throws IOException {
+		File f = new File("config.ini");
+		Properties p = new Properties();
 
-        if (!f.exists()) try (FileWriter fw = new FileWriter(f)) {
-            p.setProperty("token", "");
-            p.setProperty("guild_id", "");
-            p.setProperty("mm_channel_id", "");
-            p.store(fw, "Enigma config");
-            System.out.println("Please setup your configuration file.");
-        }
-        else try (FileReader fr = new FileReader("config.ini")) {
-            p.load(fr);
-            guildId = p.getProperty("guild_id");
-            mmChannelId = p.getProperty("mm_channel_id");
+		if (!f.exists()) try (FileWriter fw = new FileWriter(f)) {
+			p.setProperty("token", "");
+			p.setProperty("guild_id", "");
+			p.setProperty("mm_channel_id", "");
+			p.store(fw, "Enigma config");
+			System.out.println("Please setup your configuration file.");
+		}
+		else try (FileReader fr = new FileReader("config.ini")) {
+			p.load(fr);
+			guildId = p.getProperty("guild_id");
+			mmChannelId = p.getProperty("mm_channel_id");
 
-            client = new ClientBuilder().withToken(p.getProperty("token")).build();
-            client.getDispatcher().registerListener(new Enigma());
-            client.login();
-        }
-    }
+			client = new ClientBuilder().withToken(p.getProperty("token")).build();
+			client.getDispatcher().registerListener(new Enigma());
+			client.login();
+		}
+	}
 
-    public static void buildCommands() {
-        commands.clear();
-        commands.add(new AvatarCommand());
-        commands.add(new ClearCommand());
-        commands.add(new QueueCommand());
-    }
+	public static void buildCommands() {
+		commands.clear();
+		commands.add(new AvatarCommand());
+		commands.add(new ClearCommand());
+		commands.add(new QueueCommand());
+	}
 
-    public static IDiscordClient getClient() {
-        return client;
-    }
+	public static IDiscordClient getClient() {
+		return client;
+	}
 
-    public static List<Command> getCommands() {
-        return commands;
-    }
+	public static List<Command> getCommands() {
+		return commands;
+	}
 
-    public static Command getCommand(String alias) {
-        return commands.stream()
-                .filter(c -> c.getName().equalsIgnoreCase(alias))
-                .findAny().orElse(null);
-    }
+	public static Command getCommand(String alias) {
+		return commands.stream()
+				.filter(c -> c.getName().equalsIgnoreCase(alias))
+				.findAny().orElse(null);
+	}
 
-    public static List<Game> getGames() {
-        return games;
-    }
+	public static List<Game> getGames() {
+		return games;
+	}
 
-    public static void endGame(Game game) {
-        SCHEDULER.schedule(() -> {
-            game.getChannel().delete();
-            game.getPlayers().forEach(Player::clearGame);
-            games.remove(game);
-        }, 1, TimeUnit.MINUTES);
-    }
+	public static void endGame(Game game) {
+		SCHEDULER.schedule(() -> {
+			game.getChannel().delete();
+			game.getPlayers().forEach(Player::clearGame);
+			games.remove(game);
+		}, 1, TimeUnit.MINUTES);
+	}
 
-    public static List<Player> getPlayers() {
-        return new ArrayList<>(players.values());
-    }
+	public static List<Player> getPlayers() {
+		return new ArrayList<>(players.values());
+	}
 
-    public static Player getPlayer(IUser user) {
-        if (!players.containsKey(user))
-            players.put(user, new Player(user));
-        return players.get(user);
-    }
+	public static Player getPlayer(IUser user) {
+		if (!players.containsKey(user))
+			players.put(user, new Player(user));
+		return players.get(user);
+	}
 
-    public static List<Player> getQueue(GameMode mode) {
-        if (!queues.containsKey(mode))
-            queues.put(mode, new ArrayList<>());
-        return queues.get(mode);
-    }
+	public static List<Player> getQueue(GameMode mode) {
+		if (!queues.containsKey(mode))
+			queues.put(mode, new ArrayList<>());
+		return queues.get(mode);
+	}
 
-    public void refreshQueues() {
-        for (Map.Entry<GameMode, ArrayList<Player>> queue : queues.entrySet()) {
-            GameMode mode = queue.getKey();
-            ArrayList<Player> players = new ArrayList<>();
-            for (Player player : queue.getValue()) {
-                players.add(player);
-                if (players.size() >= queue.getKey().getPlayers()) {
-                    Game game = new Game(guild, mode, players);
-                    games.add(game);
-                    queues.get(mode).removeAll(players);
-                    players.forEach(p -> p.setGame(game));
-                    Util.sendMessage(mmChannel, Emoji.INFO + "**" + mode.getName() + "** has been found for "
-                            + players.stream().map(Player::getName).collect(Collectors.joining(", ")) + "\n"
-                            + "Go to " + game.getChannel() + " to play the game!");
-                }
-            }
-        }
-    }
+	public void refreshQueues() {
+		for (Map.Entry<GameMode, ArrayList<Player>> queue : queues.entrySet()) {
+			GameMode mode = queue.getKey();
+			ArrayList<Player> players = new ArrayList<>();
+			for (Player player : queue.getValue()) {
+				players.add(player);
+				if (players.size() >= queue.getKey().getPlayers()) {
+					Game game = new Game(guild, mode, players);
+					games.add(game);
+					queues.get(mode).removeAll(players);
+					players.forEach(p -> p.setGame(game));
+					Util.sendMessage(mmChannel, Emoji.INFO + "**" + mode.getName() + "** has been found for "
+							+ players.stream().map(Player::getName).collect(Collectors.joining(", ")) + "\n"
+							+ "Go to " + game.getChannel() + " to play the game!");
+				}
+			}
+		}
+	}
 
-    @EventSubscriber
-    public void onReady(ReadyEvent e) {
-        buildCommands();
+	@EventSubscriber
+	public void onReady(ReadyEvent e) {
+		buildCommands();
 
-        guild = client.getGuildByID(Long.parseLong(guildId));
-        mmChannel = client.getChannelByID(Long.parseLong(mmChannelId));
+		guild = client.getGuildByID(Long.parseLong(guildId));
+		mmChannel = client.getChannelByID(Long.parseLong(mmChannelId));
 
-        SCHEDULER.scheduleAtFixedRate(this::refreshQueues, 5, 5, TimeUnit.SECONDS);
-        SCHEDULER.scheduleAtFixedRate(() -> games.stream().filter(g -> g.getGameState() == 1)
-                .forEach(Game::notifyAfk), 1, 1, TimeUnit.MINUTES);
-    }
+		SCHEDULER.scheduleAtFixedRate(this::refreshQueues, 5, 5, TimeUnit.SECONDS);
+		SCHEDULER.scheduleAtFixedRate(() -> games.stream().filter(g -> g.getGameState() == 1)
+				.forEach(Game::notifyAfk), 1, 1, TimeUnit.MINUTES);
+	}
 
-    @EventSubscriber
-    public void onMessage(MessageReceivedEvent e) {
-        IMessage message = e.getMessage();
-        IChannel channel = e.getChannel();
-        IUser author = e.getAuthor();
-        String content = message.getContent();
+	@EventSubscriber
+	public void onMessage(MessageReceivedEvent e) {
+		IMessage message = e.getMessage();
+		IChannel channel = e.getChannel();
+		IUser author = e.getAuthor();
+		String content = message.getContent();
 
-        if (content.startsWith(PREFIX_ALL)) {
-            String[] split = content.split(" ");
-            String alias = split[0].replaceFirst(PREFIX_ALL, "");
-            String[] args = Arrays.copyOfRange(split, 1, split.length);
+		if (content.startsWith(PREFIX_ALL)) {
+			String[] split = content.split(" ");
+			String alias = split[0].replaceFirst(PREFIX_ALL, "");
+			String[] args = Arrays.copyOfRange(split, 1, split.length);
 
-            Command command = getCommand(alias);
-            if (command != null) {
-                command.execute(new CommandInput(message, args));
-                System.out.println(author.getName() + "#" + author.getDiscriminator() + ": " + content);
-            }
-        }
-    }
+			Command command = getCommand(alias);
+			if (command != null) {
+				command.execute(new CommandInput(message, args));
+				System.out.println(author.getName() + "#" + author.getDiscriminator() + ": " + content);
+			}
+		}
+	}
 }
