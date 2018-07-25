@@ -5,6 +5,7 @@ import com.oopsjpeg.enigma.game.units.BerserkerUnit;
 import com.oopsjpeg.enigma.game.units.ThiefUnit;
 import com.oopsjpeg.enigma.game.units.WarriorUnit;
 
+import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 
 public abstract class Unit {
@@ -13,6 +14,10 @@ public abstract class Unit {
 			new ThiefUnit(),
 			new WarriorUnit()
 	};
+
+	public static Unit[] values() {
+		return values;
+	}
 
 	public static Unit fromName(String name) {
 		for (Unit u : values)
@@ -24,6 +29,10 @@ public abstract class Unit {
 	}
 
 	public abstract String getName();
+
+	public abstract String getDesc();
+
+	public abstract Color getColor();
 
 	public abstract Stats getStats();
 

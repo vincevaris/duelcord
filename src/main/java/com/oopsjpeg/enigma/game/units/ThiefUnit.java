@@ -3,8 +3,14 @@ package com.oopsjpeg.enigma.game.units;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.units.util.Unit;
 
+import java.awt.*;
+
 public class ThiefUnit extends Unit {
 	public static final String NAME = "Thief";
+	public static final String DESC =
+			"The first critical strike in a turn steals gold equal to **40%** of damage.\n" +
+			"Base crit damage is reduced by **20%**, however, subsequent crits in a turn deal increasing damage.";
+	public static final Color COLOR = Color.YELLOW;
 	public static final Stats STATS = new Stats();
 	public static final Stats PER_TURN = new Stats();
 
@@ -34,14 +40,18 @@ public class ThiefUnit extends Unit {
 	}
 
 	@Override
-	public String onTurn() {
-		crit = 0;
-		return "";
+	public String getName() {
+		return NAME;
 	}
 
 	@Override
-	public String getName() {
-		return NAME;
+	public String getDesc() {
+		return DESC;
+	}
+
+	@Override
+	public Color getColor() {
+		return COLOR;
 	}
 
 	@Override
@@ -52,5 +62,11 @@ public class ThiefUnit extends Unit {
 	@Override
 	public Stats getPerTurn() {
 		return PER_TURN;
+	}
+
+	@Override
+	public String onTurn() {
+		crit = 0;
+		return "";
 	}
 }

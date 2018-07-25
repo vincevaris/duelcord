@@ -22,6 +22,10 @@ public abstract class Item {
 			new Soulstealer()
 	};
 
+	public static Item[] values() {
+		return values;
+	}
+
 	public static Item fromName(String name) {
 		for (Item i : values)
 			if (i.getName().toLowerCase().startsWith(name.toLowerCase())) try {

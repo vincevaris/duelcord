@@ -144,10 +144,10 @@ public class Game {
 
 	public void notifyAfk() {
 		notifyAfk++;
-		if (notifyAfk == 3)
+		if (notifyAfk == 4)
 			RoboopsUtil.sendMessage(channel, Emote.WARN + curMember.getUser() + ", you have around **3** minutes " +
 					"to make an action, otherwise you will **forfeit due to AFKing**.");
-		else if (notifyAfk >= 6)
+		else if (notifyAfk >= 8)
 			RoboopsUtil.sendMessage(channel, curMember.lose());
 	}
 
@@ -377,12 +377,23 @@ public class Game {
 				if (wu.getBash())
 					RoboopsUtil.sendMessage(channel, Emote.NO + "You can only use **Bash** once per turn.");
 				else {
-					int damage = Math.round(actor.stats.damage * 0.3f);
-					String output = actor.damage(target, damage);
 					wu.setBash(true);
-					RoboopsUtil.sendMessage(channel, Emote.SHIELD + "**" + actor.getName() + "** bashed **"
+
+					int damage = Math.round(actor.stats.damage * 0.4f);
+					String output = "";
+					String bonus = "";
+
+					if (target.stats.shield > 0)
+						output += Emote.SHIELD + "**" + actor.getName()
+								+ "** destroyed **" + target.getName() + "'s Shield**!\n";
+
+					bonus += actor.damage(target, damage);
+
+					output += Emote.SHIELD + "**" + actor.getName() + "** bashed **"
 							+ target.getName() + "** by **" + damage + "**! [**" + target.stats.hp
-							+ " / " + target.stats.maxHp + "**]\n" + output);
+							+ " / " + target.stats.maxHp + "**]\n";
+
+					RoboopsUtil.sendMessage(channel, output + bonus);
 					return true;
 				}
 			}

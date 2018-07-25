@@ -3,8 +3,14 @@ package com.oopsjpeg.enigma.game.units;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.units.util.Unit;
 
+import java.awt.*;
+
 public class WarriorUnit extends Unit {
 	public static final String NAME = "Warrior";
+	public static final String DESC =
+			"Every third attack deals **25%** more damage.\n" +
+			"Using `>bash` destroys shields and deals **40%** of damage.";
+	public static final Color COLOR = Color.CYAN;
 	public static final Stats STATS = new Stats();
 	public static final Stats PER_TURN = new Stats();
 
@@ -41,14 +47,18 @@ public class WarriorUnit extends Unit {
 	}
 
 	@Override
-	public String onTurn() {
-		bash = false;
-		return "";
+	public String getName() {
+		return NAME;
 	}
 
 	@Override
-	public String getName() {
-		return NAME;
+	public String getDesc() {
+		return DESC;
+	}
+
+	@Override
+	public Color getColor() {
+		return COLOR;
 	}
 
 	@Override
@@ -59,5 +69,11 @@ public class WarriorUnit extends Unit {
 	@Override
 	public Stats getPerTurn() {
 		return PER_TURN;
+	}
+
+	@Override
+	public String onTurn() {
+		bash = false;
+		return "";
 	}
 }
