@@ -1,6 +1,7 @@
 package com.oopsjpeg.enigma.game;
 
-import com.oopsjpeg.enigma.Emote;
+import com.oopsjpeg.enigma.util.ChanceBag;
+import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.effects.LoveOfWar;
 import com.oopsjpeg.enigma.game.effects.util.Effect;
@@ -59,7 +60,8 @@ public class Game {
 
 		if (turnCount >= 1 && gameState == 1 && curMember.stats.energy > 0) {
 			curMember.defend = 1;
-			RoboopsUtil.sendMessage(channel, curMember.unit.onDefend());
+			String onDefend = curMember.unit.onDefend();
+			if (!onDefend.isEmpty()) RoboopsUtil.sendMessage(channel, onDefend);
 		}
 
 		curMember = getAlive().get(curTurn);
@@ -441,6 +443,8 @@ public class Game {
 		private boolean alive = true;
 		private int defend = 0;
 
+		private ChanceBag critBag = new ChanceBag();
+
 		private Stats stats = new Stats();
 		private Stats perTurn = new Stats();
 		private List<Item> items = new ArrayList<>();
@@ -505,8 +509,8 @@ public class Game {
 
 		public void setUnit(Unit unit) {
 			this.unit = unit;
-			stats = new Stats(unit.getStats());
-			perTurn = new Stats(unit.getPerTurn());
+			updateStats();
+
 			stats.hp = stats.maxHp;
 			stats.gold = 300 - (perTurn.gold * (1 - getAlive().indexOf(this)));
 
@@ -542,6 +546,8 @@ public class Game {
 				stats.add(e.getStats());
 				perTurn.add(e.getPerTurn());
 			}
+
+			critBag.setChance(stats.critChance);
 		}
 
 		public void act(Action action) {
@@ -591,7 +597,7 @@ public class Game {
 			if (stats.lifeSteal > 0)
 				bonus += heal(Math.round(stats.lifeSteal * damage));
 
-			if (stats.critChance > 0 && RoboopsUtil.randFloat() <= stats.critChance) {
+			if (critBag.get()) {
 				crit = true;
 				float critAmt = 1.5f + stats.critDamage;
 

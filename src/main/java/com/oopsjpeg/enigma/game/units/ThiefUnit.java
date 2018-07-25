@@ -18,7 +18,7 @@ public class ThiefUnit extends Unit {
 		STATS.energy = 150;
 		STATS.maxHp = 525;
 		STATS.damage = 18;
-		STATS.critChance = 0.15f;
+		STATS.critChance = 0.2f;
 		STATS.critDamage = -0.2f;
 		PER_TURN.hp = 8;
 		PER_TURN.gold = 50;

@@ -9,6 +9,7 @@ import com.oopsjpeg.enigma.game.effects.util.Effect;
 import com.oopsjpeg.enigma.game.items.util.Item;
 import com.oopsjpeg.enigma.game.units.util.Unit;
 import com.oopsjpeg.enigma.storage.Player;
+import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.roboops.framework.RoboopsUtil;
 import com.oopsjpeg.roboops.framework.commands.CommandCenter;
 import sx.blah.discord.api.ClientBuilder;

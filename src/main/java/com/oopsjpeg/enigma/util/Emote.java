@@ -1,4 +1,4 @@
-package com.oopsjpeg.enigma;
+package com.oopsjpeg.enigma.util;
 
 public class Emote {
 	public static final String INFO = ":information_source: ";

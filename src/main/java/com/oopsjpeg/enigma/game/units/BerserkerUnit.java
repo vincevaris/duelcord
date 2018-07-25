@@ -1,6 +1,6 @@
 package com.oopsjpeg.enigma.game.units;
 
-import com.oopsjpeg.enigma.Emote;
+import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.units.util.Unit;
 

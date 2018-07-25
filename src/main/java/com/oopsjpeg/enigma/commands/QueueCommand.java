@@ -1,6 +1,6 @@
 package com.oopsjpeg.enigma.commands;
 
-import com.oopsjpeg.enigma.Emote;
+import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.GameMode;
 import com.oopsjpeg.enigma.storage.Player;
