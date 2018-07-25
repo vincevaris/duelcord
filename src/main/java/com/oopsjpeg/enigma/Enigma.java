@@ -1,21 +1,18 @@
 package com.oopsjpeg.enigma;
 
 import com.oopsjpeg.enigma.commands.AvatarCommand;
-import com.oopsjpeg.enigma.commands.ClearCommand;
 import com.oopsjpeg.enigma.commands.QueueCommand;
-import com.oopsjpeg.enigma.commands.util.Command;
-import com.oopsjpeg.enigma.commands.util.CommandInput;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.GameMode;
 import com.oopsjpeg.enigma.storage.Player;
+import com.oopsjpeg.roboops.framework.RoboopsUtil;
+import com.oopsjpeg.roboops.framework.commands.CommandCenter;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
 import java.io.File;
@@ -34,7 +31,7 @@ public class Enigma {
 	public static final String PREFIX_GAME = ">";
 
 	private static IDiscordClient client;
-	private static List<Command> commands = new ArrayList<>();
+	private static CommandCenter commands = new CommandCenter(PREFIX_ALL);
 	private static List<Game> games = new ArrayList<>();
 	private static Map<IUser, Player> players = new HashMap<>();
 	private static Map<GameMode, ArrayList<Player>> queues = new HashMap<>();
@@ -62,6 +59,7 @@ public class Enigma {
 			mmChannelId = p.getProperty("mm_channel_id");
 
 			client = new ClientBuilder().withToken(p.getProperty("token")).build();
+			client.getDispatcher().registerListener(commands);
 			client.getDispatcher().registerListener(new Enigma());
 			client.login();
 		}
@@ -70,7 +68,6 @@ public class Enigma {
 	public static void buildCommands() {
 		commands.clear();
 		commands.add(new AvatarCommand());
-		commands.add(new ClearCommand());
 		commands.add(new QueueCommand());
 	}
 
@@ -78,14 +75,8 @@ public class Enigma {
 		return client;
 	}
 
-	public static List<Command> getCommands() {
+	public static CommandCenter getCommands() {
 		return commands;
-	}
-
-	public static Command getCommand(String alias) {
-		return commands.stream()
-				.filter(c -> c.getName().equalsIgnoreCase(alias))
-				.findAny().orElse(null);
 	}
 
 	public static List<Game> getGames() {
@@ -116,7 +107,7 @@ public class Enigma {
 		return queues.get(mode);
 	}
 
-	public void refreshQueues() {
+	private  void refreshQueues() {
 		for (Map.Entry<GameMode, ArrayList<Player>> queue : queues.entrySet()) {
 			GameMode mode = queue.getKey();
 			ArrayList<Player> players = new ArrayList<>();
@@ -126,8 +117,12 @@ public class Enigma {
 					Game game = new Game(guild, mode, players);
 					games.add(game);
 					queues.get(mode).removeAll(players);
-					players.forEach(p -> p.setGame(game));
-					Util.sendMessage(mmChannel, Emoji.INFO + "**" + mode.getName() + "** has been found for "
+					players.forEach(p -> {
+						p.setGame(game);
+						p.clearQueue();
+						queue.getValue().remove(p);
+					});
+					RoboopsUtil.sendMessage(mmChannel, Emote.INFO + "**" + mode.getName() + "** has been found for "
 							+ players.stream().map(Player::getName).collect(Collectors.joining(", ")) + "\n"
 							+ "Go to " + game.getChannel() + " to play the game!");
 				}
@@ -145,25 +140,5 @@ public class Enigma {
 		SCHEDULER.scheduleAtFixedRate(this::refreshQueues, 5, 5, TimeUnit.SECONDS);
 		SCHEDULER.scheduleAtFixedRate(() -> games.stream().filter(g -> g.getGameState() == 1)
 				.forEach(Game::notifyAfk), 1, 1, TimeUnit.MINUTES);
-	}
-
-	@EventSubscriber
-	public void onMessage(MessageReceivedEvent e) {
-		IMessage message = e.getMessage();
-		IChannel channel = e.getChannel();
-		IUser author = e.getAuthor();
-		String content = message.getContent();
-
-		if (content.startsWith(PREFIX_ALL)) {
-			String[] split = content.split(" ");
-			String alias = split[0].replaceFirst(PREFIX_ALL, "");
-			String[] args = Arrays.copyOfRange(split, 1, split.length);
-
-			Command command = getCommand(alias);
-			if (command != null) {
-				command.execute(new CommandInput(message, args));
-				System.out.println(author.getName() + "#" + author.getDiscriminator() + ": " + content);
-			}
-		}
 	}
 }

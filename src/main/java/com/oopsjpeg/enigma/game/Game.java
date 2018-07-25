@@ -1,8 +1,7 @@
 package com.oopsjpeg.enigma.game;
 
-import com.oopsjpeg.enigma.Emoji;
+import com.oopsjpeg.enigma.Emote;
 import com.oopsjpeg.enigma.Enigma;
-import com.oopsjpeg.enigma.Util;
 import com.oopsjpeg.enigma.game.effects.LoveOfWar;
 import com.oopsjpeg.enigma.game.effects.util.Effect;
 import com.oopsjpeg.enigma.game.items.util.Item;
@@ -11,6 +10,7 @@ import com.oopsjpeg.enigma.game.units.ThiefUnit;
 import com.oopsjpeg.enigma.game.units.WarriorUnit;
 import com.oopsjpeg.enigma.game.units.util.Unit;
 import com.oopsjpeg.enigma.storage.Player;
+import com.oopsjpeg.roboops.framework.RoboopsUtil;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.*;
@@ -38,10 +38,10 @@ public class Game {
 	public Game(IGuild guild, GameMode mode, List<Player> players) {
 		channel = guild.createChannel("game");
 
-		Util.overrideRolePermissions(channel, guild.getEveryoneRole(),
+		RoboopsUtil.overrideRolePermissions(channel, guild.getEveryoneRole(),
 				EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.READ_MESSAGES));
 		for (Player player : players)
-			Util.overrideUserPermissions(channel, player.getUser(),
+			RoboopsUtil.overrideUserPermissions(channel, player.getUser(),
 					EnumSet.of(Permissions.READ_MESSAGES), EnumSet.noneOf(Permissions.class));
 
 		this.mode = mode;
@@ -59,18 +59,18 @@ public class Game {
 
 		if (turnCount >= 1 && gameState == 1 && curMember.stats.energy > 0) {
 			curMember.defend = 1;
-			Util.sendMessage(channel, curMember.unit.onDefend());
+			RoboopsUtil.sendMessage(channel, curMember.unit.onDefend());
 		}
 
 		curMember = getAlive().get(curTurn);
 
 		if (gameState == 0) {
 			if (curTurn == 0) {
-				Util.sendMessage(channel, "Welcome to **" + mode.getName() + "**! ("
+				RoboopsUtil.sendMessage(channel, "Welcome to **" + mode.getName() + "**! ("
 						+ getPlayers().stream().map(Player::getName).collect(Collectors.joining(", ")) + ")\n"
 						+ curMember + ", you have first pick!");
 			} else {
-				Util.sendMessage(channel, curMember + ", you have next pick!");
+				RoboopsUtil.sendMessage(channel, curMember + ", you have next pick!");
 			}
 		} else if (gameState == 1) {
 			curMember.stats.hp = Math.max(0, Math.min(curMember.stats.maxHp,
@@ -84,10 +84,10 @@ public class Game {
 			curMember.defend = 0;
 
 			if (turnCount == 0) {
-				Util.sendMessage(channel, curMember + ", you have the first turn!\n"
+				RoboopsUtil.sendMessage(channel, curMember + ", you have the first turn!\n"
 						+ "Open the channel's description to review your statistics.");
 			} else {
-				Util.sendMessage(channel, curMember + ", it's your turn!\n"
+				RoboopsUtil.sendMessage(channel, curMember + ", it's your turn!\n"
 						+ "Open the channel's description to review your statistics.");
 			}
 			turnCount++;
@@ -99,9 +99,9 @@ public class Game {
 
 	public void setTopic(Member member) {
 		if (gameState == 0) {
-			Util.changeTopic(channel, member.getUser() + " is picking their unit.");
+			RoboopsUtil.changeTopic(channel, member.getUser() + " is picking their unit.");
 		} else {
-			Util.changeTopic(channel, member.unit.getName() + " " + member.getUser() + " (" + turnCount + ") - \n\n"
+			RoboopsUtil.changeTopic(channel, member.unit.getName() + " " + member.getUser() + " (" + turnCount + ") - \n\n"
 					+ "Gold: **" + member.stats.gold + "**\n"
 					+ "Health: **" + member.stats.hp + " / " + member.stats.maxHp
 					+ "** (+**" + member.perTurn.hp + "**/t)\n"
@@ -145,10 +145,10 @@ public class Game {
 	public void notifyAfk() {
 		notifyAfk++;
 		if (notifyAfk == 3)
-			Util.sendMessage(channel, Emoji.WARN + curMember.getUser() + ", you have around **3** minutes " +
+			RoboopsUtil.sendMessage(channel, Emote.WARN + curMember.getUser() + ", you have around **3** minutes " +
 					"to make an action, otherwise you will **forfeit due to AFKing**.");
 		else if (notifyAfk >= 6)
-			Util.sendMessage(channel, curMember.lose());
+			RoboopsUtil.sendMessage(channel, curMember.lose());
 	}
 
 	public int getGameState() {
@@ -168,82 +168,82 @@ public class Game {
 				String[] args = Arrays.copyOfRange(split, 1, split.length);
 
 				if (alias.equalsIgnoreCase("refresh") || alias.equalsIgnoreCase("refreshtopic")) {
-					Util.deleteMessage(message);
+					RoboopsUtil.deleteMessage(message);
 					setTopic(curMember);
 				} else if (curMember.equals(author) && alias.equalsIgnoreCase("pick")) {
-					Util.deleteMessage(message);
+					RoboopsUtil.deleteMessage(message);
 					if (gameState == 1)
-						Util.sendMessage(channel, Emoji.NO + "You cannot pick a unit after the game has started.");
+						RoboopsUtil.sendMessage(channel, Emote.NO + "You cannot pick a unit after the game has started.");
 					else {
 						Unit unit = Unit.fromName(String.join(" ", args));
 						if (unit == null)
-							Util.sendMessage(channel, Emoji.NO + "Invalid unit.");
+							RoboopsUtil.sendMessage(channel, Emote.NO + "Invalid unit.");
 						else {
 							curMember.setUnit(unit);
-							Util.sendMessage(channel, Emoji.YES + " **" + author.getName() + "** has selected **"
+							RoboopsUtil.sendMessage(channel, Emote.YES + " **" + author.getName() + "** has selected **"
 									+ unit.getName() + "**.");
 							nextTurn();
 						}
 					}
 				} else if (curMember.equals(author) && alias.equalsIgnoreCase("end")) {
-					Util.deleteMessage(message);
+					RoboopsUtil.deleteMessage(message);
 					if (gameState == 0)
-						Util.sendMessage(channel, Emoji.NO + "You cannot end your turn until the game has started.");
+						RoboopsUtil.sendMessage(channel, Emote.NO + "You cannot end your turn until the game has started.");
 					else
 						nextTurn();
 				} else if (curMember.equals(author) && alias.equalsIgnoreCase("attack")) {
-					Util.deleteMessage(message);
+					RoboopsUtil.deleteMessage(message);
 					if (gameState == 0)
-						Util.sendMessage(channel, Emoji.NO + "You cannot attack until the game has started.");
+						RoboopsUtil.sendMessage(channel, Emote.NO + "You cannot attack until the game has started.");
 					else {
 						Member target = getAlive().stream().filter(m -> !m.equals(curMember)).findAny().orElse(null);
 						if (target == null)
-							Util.sendMessage(channel, Emoji.NO + "There is no one to attack.");
+							RoboopsUtil.sendMessage(channel, Emote.NO + "There is no one to attack.");
 						else
 							curMember.act(new AttackAction(target));
 					}
 				} else if (curMember.equals(author) && alias.equalsIgnoreCase("buy")) {
-					Util.deleteMessage(message);
+					RoboopsUtil.deleteMessage(message);
 					if (gameState == 0)
-						Util.sendMessage(channel, Emoji.NO + "You cannot buy items until the game has started.");
+						RoboopsUtil.sendMessage(channel, Emote.NO + "You cannot buy items until the game has started.");
 					else {
 						Item item = Item.fromName(String.join(" ", args));
 						if (item == null)
-							Util.sendMessage(channel, Emoji.NO + "Invalid item.");
+							RoboopsUtil.sendMessage(channel, Emote.NO + "Invalid item.");
 						else
 							curMember.act(new BuyAction(item));
 					}
 				} else if (curMember.equals(author) && alias.equalsIgnoreCase("use")) {
-					Util.deleteMessage(message);
+					RoboopsUtil.deleteMessage(message);
 					if (gameState == 0)
-						Util.sendMessage(channel, Emoji.NO + "You cannot use items until the game has started.");
+						RoboopsUtil.sendMessage(channel, Emote.NO + "You cannot use items until the game has started.");
 					else {
 						Item item = Item.fromName(String.join(" ", args));
 						if (item == null)
-							Util.sendMessage(channel, Emoji.NO + "Invalid item.");
+							RoboopsUtil.sendMessage(channel, Emote.NO + "Invalid item.");
 						else
 							curMember.act(new UseAction(item));
 					}
 				} else if (curMember.equals(author) && alias.equalsIgnoreCase("bash")) {
-					Util.deleteMessage(message);
+					RoboopsUtil.deleteMessage(message);
 					if (gameState == 0)
-						Util.sendMessage(channel, Emoji.NO + "You cannot use **Bash** until the game has started.");
+						RoboopsUtil.sendMessage(channel, Emote.NO + "You cannot use **Bash** until the game has started.");
 					else {
 						Member target = getAlive().stream().filter(m -> !m.equals(curMember)).findAny().orElse(null);
 						if (target == null)
-							Util.sendMessage(channel, Emoji.NO + "There is no one to use **Bash** on.");
+							RoboopsUtil.sendMessage(channel, Emote.NO + "There is no one to use **Bash** on.");
 						else
 							curMember.act(new BashAction(target));
 					}
 				} else if (curMember.equals(author) && alias.equalsIgnoreCase("rage")) {
-					Util.deleteMessage(message);
+					RoboopsUtil.deleteMessage(message);
 					if (gameState == 0)
-						Util.sendMessage(channel, Emoji.NO + "You cannot use **Rage** until the game has started.");
+						RoboopsUtil.sendMessage(channel, Emote.NO + "You cannot use **Rage** until the game has started.");
 					else
 						curMember.act(new RageAction());
 				} else if (getAlive().contains(author) && alias.equalsIgnoreCase("forfeit")) {
-					Util.deleteMessage(message);
-					Util.sendMessage(channel, getAlive().get(getAlive().indexOf(author)).lose());
+					RoboopsUtil.deleteMessage(message);
+					RoboopsUtil.sendMessage(channel, getAlive().get(getAlive().indexOf(author)).lose());
 				}
 			}
 		}
@@ -274,8 +274,8 @@ public class Game {
 
 		@Override
 		public boolean act(Member actor) {
-			Util.sendMessage(channel, actor.damage(target));
-			actor.stats.gold += Util.randInt(15, 25);
+			RoboopsUtil.sendMessage(channel, actor.damage(target));
+			actor.stats.gold += RoboopsUtil.randInt(15, 25);
 			return true;
 		}
 
@@ -303,10 +303,10 @@ public class Game {
 				}
 
 			if (actor.stats.gold < cost)
-				Util.sendMessage(channel, Emoji.NO + "You need **" + (cost - actor.stats.gold)
+				RoboopsUtil.sendMessage(channel, Emote.NO + "You need **" + (cost - actor.stats.gold)
 						+ "** more gold. You have **" + actor.stats.gold + "**.");
 			else if (build.size() >= 6)
-				Util.sendMessage(channel, Emoji.NO + "You do not have enough inventory space.");
+				RoboopsUtil.sendMessage(channel, Emote.NO + "You do not have enough inventory space.");
 			else {
 				String output = "";
 				actor.stats.gold -= cost;
@@ -319,7 +319,7 @@ public class Game {
 					actor.shields.add(item);
 				}
 
-				Util.sendMessage(channel, Emoji.BUY + "**" + actor.getName() + "** purchased a(n) **"
+				RoboopsUtil.sendMessage(channel, Emote.BUY + "**" + actor.getName() + "** purchased a(n) **"
 						+ item.getName() + "** for **" + cost + "** gold.\n" + output);
 				return true;
 			}
@@ -342,11 +342,11 @@ public class Game {
 		@Override
 		public boolean act(Member actor) {
 			if (!actor.items.contains(item))
-				Util.sendMessage(channel, Emoji.NO + "You don't have a(n) **" + item.getName() + "**.");
+				RoboopsUtil.sendMessage(channel, Emote.NO + "You don't have a(n) **" + item.getName() + "**.");
 			else if (!item.canUse())
-				Util.sendMessage(channel, Emoji.NO + "That item can't be used.");
+				RoboopsUtil.sendMessage(channel, Emote.NO + "That item can't be used.");
 			else {
-				Util.sendMessage(channel, Emoji.USE + "**" + actor.getName() + "** used a(n) **"
+				RoboopsUtil.sendMessage(channel, Emote.USE + "**" + actor.getName() + "** used a(n) **"
 						+ item.getName() + "**.\n" + item.onUse(actor));
 				if (item.removeOnUse()) actor.items.remove(item);
 				actor.updateStats();
@@ -371,16 +371,16 @@ public class Game {
 		@Override
 		public boolean act(Member actor) {
 			if (!(actor.unit instanceof WarriorUnit))
-				Util.sendMessage(channel, Emoji.NO + "You are not playing **Warrior**.");
+				RoboopsUtil.sendMessage(channel, Emote.NO + "You are not playing **Warrior**.");
 			else {
 				WarriorUnit wu = (WarriorUnit) actor.unit;
 				if (wu.getBash())
-					Util.sendMessage(channel, Emoji.NO + "You can only use **Bash** once per turn.");
+					RoboopsUtil.sendMessage(channel, Emote.NO + "You can only use **Bash** once per turn.");
 				else {
 					int damage = Math.round(actor.stats.damage * 0.3f);
 					String output = actor.damage(target, damage);
 					wu.setBash(true);
-					Util.sendMessage(channel, Emoji.SHIELD + "**" + actor.getName() + "** bashed **"
+					RoboopsUtil.sendMessage(channel, Emote.SHIELD + "**" + actor.getName() + "** bashed **"
 							+ target.getName() + "** by **" + damage + "**! [**" + target.stats.hp
 							+ " / " + target.stats.maxHp + "**]\n" + output);
 					return true;
@@ -399,16 +399,16 @@ public class Game {
 		@Override
 		public boolean act(Member actor) {
 			if (!(actor.unit instanceof BerserkerUnit))
-				Util.sendMessage(channel, Emoji.NO + "You are not playing **Berserker**.");
+				RoboopsUtil.sendMessage(channel, Emote.NO + "You are not playing **Berserker**.");
 			else {
 				BerserkerUnit bu = (BerserkerUnit) actor.unit;
 				if (bu.getRage() < 2)
-					Util.sendMessage(channel, Emoji.NO + "You need at least **2** stacks to use **Rage**.");
+					RoboopsUtil.sendMessage(channel, Emote.NO + "You need at least **2** stacks to use **Rage**.");
 				else {
 					int energy = (int) Math.floor(bu.getRage() / 2) * 25 + (bu.getRage() == 6 ? 50 : 0);
 					actor.stats.energy += energy;
 					bu.setRage(0);
-					Util.sendMessage(channel, Emoji.RAGE + "**" + actor.getName()
+					RoboopsUtil.sendMessage(channel, Emote.RAGE + "**" + actor.getName()
 							+ "** has gained **" + energy + "** energy this turn!");
 					return true;
 				}
@@ -533,7 +533,7 @@ public class Game {
 
 		public void act(Action action) {
 			if (stats.energy < action.getEnergy())
-				Util.sendMessage(channel, Emoji.NO + "You do not have **" + action.getEnergy() + "** energy.");
+				RoboopsUtil.sendMessage(channel, Emote.NO + "You do not have **" + action.getEnergy() + "** energy.");
 			else if (action.execute(this)) {
 				stats.energy -= action.getEnergy();
 				if (stats.energy <= 0) nextTurn();
@@ -543,12 +543,12 @@ public class Game {
 
 		public String shield(int amount) {
 			stats.shield += amount;
-			return Emoji.HEAL + "**" + getName() + "** shielded by **" + amount + "**! [**" + stats.shield + "**]";
+			return Emote.HEAL + "**" + getName() + "** shielded by **" + amount + "**! [**" + stats.shield + "**]";
 		}
 
 		public String heal(int amount) {
 			stats.hp = Math.min(stats.maxHp, stats.hp + amount);
-			return Emoji.HEAL + "**" + getName() + "** healed by **" + amount + "**! [**"
+			return Emote.HEAL + "**" + getName() + "** healed by **" + amount + "**! [**"
 					+ stats.hp + " / " + stats.maxHp + "**]\n";
 		}
 
@@ -578,7 +578,7 @@ public class Game {
 			if (stats.lifeSteal > 0)
 				bonus += heal(Math.round(stats.lifeSteal * damage));
 
-			if (stats.critChance > 0 && Util.randFloat() <= stats.critChance) {
+			if (stats.critChance > 0 && RoboopsUtil.randFloat() <= stats.critChance) {
 				crit = true;
 				float critAmt = 1.5f + stats.critDamage;
 
@@ -588,7 +588,7 @@ public class Game {
 					if (tu.crit() == 1) {
 						int steal = Math.round(Math.max(1, Math.min(stats.damage * 0.4f, target.stats.gold)));
 						target.stats.gold = Math.max(0, target.stats.gold - steal);
-						bonus += Emoji.BUY + "**" + getName() + "** stole **" + steal + "** gold.\n";
+						bonus += Emote.BUY + "**" + getName() + "** stole **" + steal + "** gold.\n";
 					}
 				}
 
@@ -602,17 +602,17 @@ public class Game {
 				target.stats.shield -= shieldDmg;
 
 				if (target.stats.shield > 0)
-					out += Emoji.SHIELD + "**" + getName() + "** damaged **" + target.getName() + "'s Shield** by **"
+					out += Emote.SHIELD + "**" + getName() + "** damaged **" + target.getName() + "'s Shield** by **"
 							+ shieldDmg + "**! " + (crit ? "**CRIT**! " : "") + "[**" + target.stats.shield + "**]\n";
 				else {
 					damage -= shieldDmg;
-					out += Emoji.SHIELD + "**" + getName() + "** destroyed **" + target.getName() + "'s Shield**!\n";
+					out += Emote.SHIELD + "**" + getName() + "** destroyed **" + target.getName() + "'s Shield**!\n";
 				}
 			}
 
 			if (target.stats.shield <= 0) {
 				bonus += damage(target, damage);
-				out += Emoji.ATTACK + "**" + getName() + "** damaged **" + target.getName() + "** by **"
+				out += Emote.ATTACK + "**" + getName() + "** damaged **" + target.getName() + "** by **"
 						+ damage + "**! " + (crit ? "**CRIT**! " : "")
 						+ "[**" + target.stats.hp + " / " + target.stats.maxHp + "**]\n";
 			}
@@ -629,7 +629,7 @@ public class Game {
 
 		public String win() {
 			Enigma.endGame(Game.this);
-			return Emoji.TROPHY + getUser() + ", you have won the battle!\n";
+			return Emote.TROPHY + getUser() + ", you have won the battle!\n";
 		}
 
 		public String lose() {
@@ -642,7 +642,7 @@ public class Game {
 			} else if (curMember.equals(this))
 				nextTurn();
 
-			return Emoji.SKULL + getUser() + " has been slain and removed from the battle.\n" + bonus;
+			return Emote.SKULL + getUser() + " has been slain and removed from the battle.\n" + bonus;
 		}
 
 		@Override
