@@ -146,6 +146,14 @@ public class Enigma {
 		}
 	}
 
+	public static IGuild getGuild() {
+		return guild;
+	}
+
+	public static IChannel getUnitsChannel() {
+		return unitsChannel;
+	}
+
 	public static void buildUnitsChannel() {
 		RoboopsUtil.bulkDelete(unitsChannel, unitsChannel.getMessageHistory());
 		Arrays.stream(Unit.values()).map(u -> {
@@ -161,6 +169,10 @@ public class Enigma {
 			builder.appendField("Passives / Abilities", u.getDesc() ,true);
 			return builder.build();
 		}).forEach(b -> RoboopsUtil.sendMessage(unitsChannel, b));
+	}
+
+	public static IChannel getItemsChannel() {
+		return itemsChannel;
 	}
 
 	public static void buildItemsChannel() {

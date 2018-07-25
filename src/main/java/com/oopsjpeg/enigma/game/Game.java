@@ -68,7 +68,8 @@ public class Game {
 			if (curTurn == 0) {
 				RoboopsUtil.sendMessage(channel, "Welcome to **" + mode.getName() + "**! ("
 						+ getPlayers().stream().map(Player::getName).collect(Collectors.joining(", ")) + ")\n"
-						+ curMember + ", you have first pick!");
+						+ curMember + ", you have first pick!\n"
+						+ "Check " + Enigma.getUnitsChannel() + " to view available units.");
 			} else {
 				RoboopsUtil.sendMessage(channel, curMember + ", you have next pick!");
 			}
@@ -85,7 +86,8 @@ public class Game {
 
 			if (turnCount == 0) {
 				RoboopsUtil.sendMessage(channel, curMember + ", you have the first turn!\n"
-						+ "Open the channel's description to review your statistics.");
+						+ "Open the channel's description to review your statistics.\n"
+						+ "Check " + Enigma.getItemsChannel() + " to view purchasable items.");
 			} else {
 				RoboopsUtil.sendMessage(channel, curMember + ", it's your turn!\n"
 						+ "Open the channel's description to review your statistics.");
