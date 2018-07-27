@@ -10,8 +10,7 @@ import com.oopsjpeg.enigma.game.items.util.Item;
 import com.oopsjpeg.enigma.game.units.util.Unit;
 import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.Emote;
-import com.oopsjpeg.roboops.framework.Bufferer;
-import com.oopsjpeg.roboops.framework.RoboopsTray;
+import com.oopsjpeg.roboops.framework.RoboopsUtil;
 import com.oopsjpeg.roboops.framework.commands.CommandCenter;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
@@ -38,8 +37,6 @@ public class Enigma {
 	public static final ScheduledExecutorService SCHEDULER = new ScheduledThreadPoolExecutor(2);
 	public static final String PREFIX_ALL = "-";
 	public static final String PREFIX_GAME = ">";
-
-	private static RoboopsTray tray = new RoboopsTray("Enigma");
 
 	private static IDiscordClient client;
 	private static CommandCenter commands = new CommandCenter(PREFIX_ALL);
@@ -142,7 +139,7 @@ public class Enigma {
 						p.clearQueue();
 						queue.getValue().remove(p);
 					});
-					Bufferer.sendMessage(mmChannel, Emote.INFO + "**" + mode.getName() + "** has been found for "
+					RoboopsUtil.sendMessage(mmChannel, Emote.INFO + "**" + mode.getName() + "** has been found for "
 							+ players.stream().map(Player::getName).collect(Collectors.joining(", ")) + "\n"
 							+ "Go to " + game.getChannel() + " to play the game!");
 				}
@@ -159,7 +156,7 @@ public class Enigma {
 	}
 
 	public static void buildUnitsChannel() {
-		Bufferer.bulkDelete(unitsChannel, unitsChannel.getMessageHistory());
+		RoboopsUtil.bulkDelete(unitsChannel, unitsChannel.getMessageHistory());
 		Arrays.stream(Unit.values()).map(u -> {
 			EmbedBuilder builder = new EmbedBuilder();
 			builder.withTitle(u.getName());
@@ -172,7 +169,7 @@ public class Enigma {
 				builder.appendDesc("Life Steal: **" + Math.round(u.getStats().lifeSteal * 100) + "%**\n");
 			builder.appendField("Passives / Abilities", u.getDesc() ,true);
 			return builder.build();
-		}).forEach(b -> Bufferer.sendMessage(unitsChannel, b));
+		}).forEach(b -> RoboopsUtil.sendMessage(unitsChannel, b));
 	}
 
 	public static IChannel getItemsChannel() {
@@ -180,7 +177,7 @@ public class Enigma {
 	}
 
 	public static void buildItemsChannel() {
-		Bufferer.bulkDelete(itemsChannel, itemsChannel.getMessageHistory());
+		RoboopsUtil.bulkDelete(itemsChannel, itemsChannel.getMessageHistory());
 		Arrays.stream(Item.values()).sorted(Comparator.comparingInt(Item::getCost)).map(i -> {
 			EmbedBuilder builder = new EmbedBuilder();
 			builder.withTitle(i.getName() + " (" + i.getCost() + "g)");
@@ -208,7 +205,7 @@ public class Enigma {
 				builder.appendField("Build", String.join("\n", Arrays.stream(i.getBuild())
 						.map(Item::getName).collect(Collectors.toList())), true);
 			return builder.build();
-		}).forEach(b -> Bufferer.sendMessage(itemsChannel, b));
+		}).forEach(b -> RoboopsUtil.sendMessage(itemsChannel, b));
 	}
 
 	@EventSubscriber

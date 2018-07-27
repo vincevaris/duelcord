@@ -4,7 +4,6 @@ import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.GameMode;
 import com.oopsjpeg.enigma.storage.Player;
-import com.oopsjpeg.roboops.framework.Bufferer;
 import com.oopsjpeg.roboops.framework.RoboopsUtil;
 import com.oopsjpeg.roboops.framework.commands.Command;
 import sx.blah.discord.handle.obj.IChannel;
@@ -23,17 +22,17 @@ public class QueueCommand implements Command {
 		GameMode mode = GameMode.DUEL;
 		List<Player> queue = Enigma.getQueue(mode);
 
-		Bufferer.deleteMessage(message);
+		RoboopsUtil.deleteMessage(message);
 		if (player.getGame() == null) {
 			if (!queue.contains(player)) {
 				queue.add(player);
 				player.setQueue(mode);
-				Bufferer.sendMessage(channel, Emote.YES + author + " You are now in queue for **" + mode.getName()
+				RoboopsUtil.sendMessage(channel, Emote.YES + author + " You are now in queue for **" + mode.getName()
 						+ "** (size: **" + queue.size() + "**)");
 			} else {
 				queue.remove(player);
 				player.clearQueue();
-				Bufferer.sendMessage(channel, Emote.YES + author + " You are no longer in queue.");
+				RoboopsUtil.sendMessage(channel, Emote.YES + author + " You are no longer in queue.");
 			}
 		}
 	}
