@@ -17,8 +17,7 @@ public class ChanceBag {
 		if (getChance() > 0 && (random.nextFloat() <= getChance() || count())) {
 			setCount(0);
 			return true;
-		}
-		else return false;
+		} else return false;
 	}
 
 	public boolean count() {

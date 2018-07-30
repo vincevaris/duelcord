@@ -1,8 +1,8 @@
 package com.oopsjpeg.enigma.commands;
 
-import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.Enigma;
-import com.oopsjpeg.roboops.framework.RoboopsUtil;
+import com.oopsjpeg.enigma.util.Emote;
+import com.oopsjpeg.roboops.framework.Bufferer;
 import com.oopsjpeg.roboops.framework.commands.Command;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
@@ -17,7 +17,7 @@ public class AvatarCommand implements Command {
 		if (Enigma.getClient().getApplicationOwner().equals(author)) {
 			IChannel channel = message.getChannel();
 			Enigma.getClient().changeAvatar(Image.forUrl(args[0], args[1]));
-			RoboopsUtil.sendMessage(channel, Emote.INFO + author + " Attempting to apply new avatar.");
+			Bufferer.sendMessage(channel, Emote.INFO + author + " Attempting to apply new avatar.");
 		}
 	}
 
