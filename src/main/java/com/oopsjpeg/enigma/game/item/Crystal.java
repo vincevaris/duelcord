@@ -1,9 +1,9 @@
-package com.oopsjpeg.enigma.game.items;
+package com.oopsjpeg.enigma.game.item;
 
 import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.items.util.Item;
+import com.oopsjpeg.enigma.game.item.util.Item;
 
-public class Crystal extends Item {
+public class Crystal implements Item {
 	public static final String NAME = "Crystal";
 	public static final int COST = 200;
 	public static final Stats STATS = new Stats();

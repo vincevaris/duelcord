@@ -11,7 +11,7 @@ import sx.blah.discord.util.Image;
 
 public class AvatarCommand implements Command {
 	@Override
-	public void execute(IMessage message, String alias, String[] args) {
+	public int execute(IMessage message, String alias, String[] args) {
 		IUser author = message.getAuthor();
 
 		if (Enigma.getClient().getApplicationOwner().equals(author)) {
@@ -19,6 +19,8 @@ public class AvatarCommand implements Command {
 			Enigma.getClient().changeAvatar(Image.forUrl(args[0], args[1]));
 			Bufferer.sendMessage(channel, Emote.INFO + author + " Attempting to apply new avatar.");
 		}
+
+		return SUCCESS;
 	}
 
 	@Override

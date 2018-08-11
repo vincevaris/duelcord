@@ -14,7 +14,7 @@ import java.util.List;
 
 public class QueueCommand implements Command {
 	@Override
-	public void execute(IMessage message, String alias, String[] args) {
+	public int execute(IMessage message, String alias, String[] args) {
 		IChannel channel = message.getChannel();
 		IUser author = message.getAuthor();
 		Player player = Enigma.getPlayer(author);
@@ -22,7 +22,6 @@ public class QueueCommand implements Command {
 		GameMode mode = GameMode.DUEL;
 		List<Player> queue = Enigma.getQueue(mode);
 
-		Bufferer.deleteMessage(message);
 		if (player.getGame() == null) {
 			if (!queue.contains(player)) {
 				queue.add(player);
@@ -35,6 +34,8 @@ public class QueueCommand implements Command {
 				Bufferer.sendMessage(channel, Emote.YES + author + " You are no longer in queue.");
 			}
 		}
+
+		return SUCCESS;
 	}
 
 	@Override

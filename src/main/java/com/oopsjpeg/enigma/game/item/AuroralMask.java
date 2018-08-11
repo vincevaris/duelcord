@@ -1,11 +1,11 @@
-package com.oopsjpeg.enigma.game.items;
+package com.oopsjpeg.enigma.game.item;
 
 import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.effects.Vitalist;
-import com.oopsjpeg.enigma.game.effects.util.Effect;
-import com.oopsjpeg.enigma.game.items.util.Item;
+import com.oopsjpeg.enigma.game.effect.Vitalist;
+import com.oopsjpeg.enigma.game.effect.util.Effect;
+import com.oopsjpeg.enigma.game.item.util.Item;
 
-public class AuroralMask extends Item {
+public class AuroralMask implements Item {
 	public static final String NAME = "Auroral Mask";
 	public static final int COST = 675;
 	public static final Item[] BUILD = new Item[]{new Crystal(), new Crystal()};

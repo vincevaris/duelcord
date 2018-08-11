@@ -1,9 +1,9 @@
-package com.oopsjpeg.enigma.game.effects;
+package com.oopsjpeg.enigma.game.effect;
 
 import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.effects.util.Effect;
+import com.oopsjpeg.enigma.game.effect.util.Effect;
 
-public class Vitalist extends Effect {
+public class Vitalist implements Effect {
 	public static final String NAME = "Vitalist";
 	private final float power;
 	private final Stats perTurn = new Stats();

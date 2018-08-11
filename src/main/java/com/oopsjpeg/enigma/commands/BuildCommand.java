@@ -9,11 +9,12 @@ import java.util.EnumSet;
 
 public class BuildCommand implements Command {
 	@Override
-	public void execute(IMessage message, String alias, String[] args) {
+	public int execute(IMessage message, String alias, String[] args) {
 		if (args[0].equalsIgnoreCase("items"))
 			Enigma.buildItemsChannel();
 		else if (args[0].equalsIgnoreCase("units"))
 			Enigma.buildUnitsChannel();
+		return SUCCESS;
 	}
 
 	@Override
