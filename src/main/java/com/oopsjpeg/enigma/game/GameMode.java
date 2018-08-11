@@ -4,18 +4,18 @@ public enum GameMode {
 	DUEL("Duel", 2);
 
 	private final String name;
-	private final int players;
+	private final int size;
 
-	GameMode(String name, int players) {
+	GameMode(String name, int size) {
 		this.name = name;
-		this.players = players;
+		this.size = size;
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public int getPlayers() {
-		return players;
+	public int getSize() {
+		return size;
 	}
 }

@@ -93,10 +93,10 @@ public class Enigma {
 	}
 
 	public static void endGame(Game game) {
-		SCHEDULER.schedule(() -> {
+		game.getPlayers().forEach(Player::clearGame);
+		games.remove(game);
+		SCHEDULER.schedule(() -> { //TODO add delete channel to bufferer
 			game.getChannel().delete();
-			game.getPlayers().forEach(Player::clearGame);
-			games.remove(game);
 		}, 1, TimeUnit.MINUTES);
 	}
 
@@ -113,23 +113,34 @@ public class Enigma {
 	}
 
 	private static void refreshQueues() {
+		// Loops queues for each game mode
 		for (Map.Entry<GameMode, ArrayList<Player>> queue : queues.entrySet()) {
 			GameMode mode = queue.getKey();
-			ArrayList<Player> players = new ArrayList<>();
-			for (Player player : queue.getValue()) {
-				players.add(player);
-				if (players.size() >= queue.getKey().getPlayers()) {
-					Game game = new Game(guild, mode, players);
+			ArrayList<Player> players = queue.getValue();
+			ArrayList<Player> matched = new ArrayList<>();
+
+			// Find players for a match
+			for (Player player : players) {
+				matched.add(player);
+
+				// Create the match
+				if (matched.size() >= mode.getSize()) {
+					Game game = new Game(guild, mode, matched);
+
 					games.add(game);
 					queues.get(mode).removeAll(players);
+
 					players.forEach(p -> {
 						p.setGame(game);
 						p.clearQueue();
 						queue.getValue().remove(p);
 					});
+
 					Bufferer.sendMessage(mmChannel, Emote.INFO + "**" + mode.getName() + "** has been found for "
 							+ players.stream().map(Player::getName).collect(Collectors.joining(", ")) + "\n"
 							+ "Go to " + game.getChannel() + " to play the game!");
+
+					break;
 				}
 			}
 		}
@@ -201,7 +212,7 @@ public class Enigma {
 		unitsChannel = client.getChannelByID(Long.parseLong(unitsChannelId));
 		itemsChannel = client.getChannelByID(Long.parseLong(itemsChannelId));
 
-		SCHEDULER.scheduleAtFixedRate(Enigma::refreshQueues, 5, 5, TimeUnit.SECONDS);
+		SCHEDULER.scheduleAtFixedRate(Enigma::refreshQueues, 10, 10, TimeUnit.SECONDS);
 		SCHEDULER.scheduleAtFixedRate(() -> games.stream().filter(g -> g.getGameState() == 1)
 				.forEach(Game::notifyAfk), 1, 1, TimeUnit.MINUTES);
 	}
