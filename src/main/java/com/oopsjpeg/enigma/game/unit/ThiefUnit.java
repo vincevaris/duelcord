@@ -8,20 +8,22 @@ import java.awt.*;
 
 public class ThiefUnit implements Unit {
 	public static final String NAME = "Thief";
-	public static final String DESC = "The first critical strike in a turn steals gold equal to **40%** of damage.\n"
-			+ "Base crit damage is reduced by **20%**, however, subsequent crits in a turn deal increasing damage.";
+	public static final String DESC = "The first critical strike in a turn steals gold equal to **40%** of damage."
+			+ "\nBase crit damage is reduced by **20%**, however, subsequent crits in a turn deal increasing damage.";
 	public static final Color COLOR = Color.YELLOW;
 	public static final Stats STATS = new Stats();
 	public static final Stats PER_TURN = new Stats();
 
 	static {
 		STATS.energy = 150;
+
 		STATS.maxHp = 525;
 		STATS.damage = 18;
 		STATS.critChance = 0.2f;
 		STATS.critDamage = -0.2f;
+
 		PER_TURN.hp = 8;
-		PER_TURN.gold = 50;
+		PER_TURN.gold = 75;
 	}
 
 	private int crit = 0;

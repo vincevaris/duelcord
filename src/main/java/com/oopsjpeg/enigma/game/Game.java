@@ -5,6 +5,7 @@ import com.oopsjpeg.enigma.game.effect.LoveOfWar;
 import com.oopsjpeg.enigma.game.effect.util.Effect;
 import com.oopsjpeg.enigma.game.item.util.Item;
 import com.oopsjpeg.enigma.game.unit.BerserkerUnit;
+import com.oopsjpeg.enigma.game.unit.GunslingerUnit;
 import com.oopsjpeg.enigma.game.unit.ThiefUnit;
 import com.oopsjpeg.enigma.game.unit.WarriorUnit;
 import com.oopsjpeg.enigma.game.unit.util.Unit;
@@ -12,6 +13,7 @@ import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.ChanceBag;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.roboops.framework.Bufferer;
+import com.oopsjpeg.roboops.framework.RoUtil;
 import com.oopsjpeg.roboops.framework.RoboopsUtil;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
@@ -115,6 +117,8 @@ public class Game {
 					? "Strike: **" + ((WarriorUnit) member.unit).getBonus() + " / 3**\n" : "")
 					+ (member.unit instanceof BerserkerUnit
 					? "Rage: **" + ((BerserkerUnit) member.unit).getRage() + " / 6**\n" : "")
+					+ (member.unit instanceof GunslingerUnit
+					? "Shot: **" + ((GunslingerUnit) member.unit).getShot() + " / 4**\n" : "")
 					+ "Items: **" + member.items + "**\n");
 		}
 	}
@@ -528,6 +532,7 @@ public class Game {
 		public void updateStats() {
 			stats.maxHp = unit.getStats().maxHp;
 			stats.damage = unit.getStats().damage;
+			stats.accuracy = unit.getStats().accuracy;
 			stats.critChance = unit.getStats().critChance;
 			stats.lifeSteal = unit.getStats().lifeSteal;
 			perTurn.hp = unit.getPerTurn().hp;
@@ -553,6 +558,9 @@ public class Game {
 				stats.add(e.getStats());
 				perTurn.add(e.getPerTurn());
 			}
+
+			if (unit instanceof GunslingerUnit)
+				stats.damage *= 1 + (stats.critChance * 0.75);
 
 			critBag.setChance(stats.critChance);
 		}
@@ -590,6 +598,14 @@ public class Game {
 				damage *= 1 + ((low.attack() - 1) * low.getPower());
 			}
 
+			if (unit instanceof GunslingerUnit && ((GunslingerUnit) unit).shot() >= 4) {
+				((GunslingerUnit) unit).setShot(0);
+				crit = true;
+			} else if (unit.isRanged() && stats.accuracy < 1 && RoUtil.randFloat() > stats.accuracy) {
+				damage *= 0.4f;
+				bonus += Emote.GUN + "**" + getName() + "** missed the target!\n";
+			}
+
 			if (unit instanceof WarriorUnit) {
 				WarriorUnit wu = (WarriorUnit) unit;
 				if (wu.bonus() >= 3) {
@@ -604,7 +620,7 @@ public class Game {
 			if (stats.lifeSteal > 0)
 				bonus += heal(Math.round(stats.lifeSteal * damage));
 
-			if (critBag.get()) {
+			if ((!(unit instanceof GunslingerUnit) && critBag.get()) || crit) {
 				crit = true;
 				float critAmt = 1.5f + stats.critDamage;
 
@@ -614,7 +630,7 @@ public class Game {
 					if (tu.crit() == 1) {
 						int steal = Math.round(Math.max(1, Math.min(stats.damage * 0.4f, target.stats.gold)));
 						target.stats.gold = Math.max(0, target.stats.gold - steal);
-						bonus += Emote.BUY + "**" + getName() + "** stole **" + steal + "** gold.\n";
+						bonus += Emote.BUY + "**" + getName() + "** stole **" + steal + "** gold!\n";
 					}
 				}
 
@@ -655,7 +671,7 @@ public class Game {
 
 		public String win() {
 			Enigma.endGame(Game.this);
-			return Emote.TROPHY + getUser() + ", you have won the battle!\n";
+			return Emote.TROPHY + getUser() + ", you have won the game!\n";
 		}
 
 		public String lose() {
@@ -668,7 +684,7 @@ public class Game {
 			} else if (curMember.equals(this))
 				nextTurn();
 
-			return Emote.SKULL + getUser() + " has been slain and removed from the battle.\n" + bonus;
+			return Emote.SKULL + getUser() + " has been slain and removed from the game!\n" + bonus;
 		}
 
 		@Override

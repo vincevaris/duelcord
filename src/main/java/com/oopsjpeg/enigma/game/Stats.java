@@ -1,19 +1,19 @@
 package com.oopsjpeg.enigma.game;
 
 public class Stats {
-	public int hp;
-	public int gold;
-	public int energy;
-	public int shield;
+	public int hp = 0;
+	public int gold = 0;
+	public int energy = 0;
+	public int shield = 0;
 
-	public int maxHp;
-	public int damage;
-	public float critChance;
-	public float critDamage;
-	public float lifeSteal;
+	public int maxHp = 1;
+	public int damage = 1;
+	public float accuracy = 1.0f;
+	public float critChance = 0.0f;
+	public float critDamage = 0.0f;
+	public float lifeSteal = 0.0f;
 
-	public Stats() {
-	}
+	public Stats() { }
 
 	public Stats(Stats other) {
 		hp = other.hp;
@@ -23,6 +23,7 @@ public class Stats {
 
 		maxHp = other.maxHp;
 		damage = other.damage;
+		accuracy = other.accuracy;
 		critChance = other.critChance;
 		critDamage = other.critDamage;
 		lifeSteal = other.lifeSteal;
@@ -36,6 +37,7 @@ public class Stats {
 
 		maxHp += other.maxHp;
 		damage += other.damage;
+		accuracy += other.accuracy;
 		critChance += other.critChance;
 		lifeSteal += other.lifeSteal;
 
@@ -50,6 +52,7 @@ public class Stats {
 
 		maxHp -= other.maxHp;
 		damage -= other.damage;
+		accuracy -= other.accuracy;
 		critChance -= other.critChance;
 		lifeSteal -= other.lifeSteal;
 
@@ -63,6 +66,7 @@ public class Stats {
 
 		maxHp = Math.max(1, maxHp);
 		damage = Math.max(1, damage);
+		accuracy = Math.max(0, Math.min(1, accuracy));
 		critChance = Math.max(0, Math.min(1, critChance));
 		lifeSteal = Math.max(0, Math.min(1, lifeSteal));
 

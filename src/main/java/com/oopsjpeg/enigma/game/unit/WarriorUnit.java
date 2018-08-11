@@ -8,18 +8,20 @@ import java.awt.*;
 
 public class WarriorUnit implements Unit {
 	public static final String NAME = "Warrior";
-	public static final String DESC = "Every third attack deals **25%** more damage.\n"
-			+ "Using `>bash` destroys shields and deals **40%** of damage.";
+	public static final String DESC = "Every third attack deals **25%** more damage."
+			+ "\nUsing `>bash` destroys shields and deals **40%** of damage.";
 	public static final Color COLOR = Color.CYAN;
 	public static final Stats STATS = new Stats();
 	public static final Stats PER_TURN = new Stats();
 
 	static {
 		STATS.energy = 125;
+
 		STATS.maxHp = 580;
 		STATS.damage = 24;
+
 		PER_TURN.hp = 13;
-		PER_TURN.gold = 50;
+		PER_TURN.gold = 75;
 	}
 
 	private int bonus = 0;
