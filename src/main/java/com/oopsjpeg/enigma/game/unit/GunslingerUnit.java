@@ -12,19 +12,14 @@ public class GunslingerUnit implements Unit {
 			+ "\nAdditionally, crit chance from items and effects increase damage.";
 	public static final Color COLOR = new Color(255, 88, 0);
 	public static final boolean RANGED = true;
-	public static final Stats STATS = new Stats();
-	public static final Stats PER_TURN = new Stats();
-
-	static {
-		STATS.energy = 125;
-
-		STATS.maxHp = 545;
-		STATS.damage = 21;
-		STATS.accuracy = 0.6f;
-
-		PER_TURN.hp = 12;
-		PER_TURN.gold = 75;
-	}
+	public static final Stats STATS = new Stats()
+			.put(Stats.ENERGY, 125)
+			.put(Stats.MAX_HP, 545)
+			.put(Stats.DAMAGE, 21)
+			.put(Stats.ACCURACY, 0.6f);
+	public static final Stats PER_TURN = new Stats()
+			.put(Stats.HP, 12)
+			.put(Stats.GOLD, 75);
 
 	private int shot = 0;
 

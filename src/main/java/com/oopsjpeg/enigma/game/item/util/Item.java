@@ -7,8 +7,8 @@ import com.oopsjpeg.enigma.game.item.*;
 
 import java.lang.reflect.InvocationTargetException;
 
-public interface Item {
-	Item[] values = {
+public abstract class Item {
+	private static final Item[] values = {
 			new AuroralMask(),
 			new BloodlustBlade(),
 			new BronzeCutlass(),
@@ -22,14 +22,14 @@ public interface Item {
 			new Soulstealer()
 	};
 
-	static Item[] values() {
+	public static Item[] values() {
 		return values;
 	}
 
-	static Item fromName(String name) {
+	public static Item fromName(String name) {
 		for (Item i : values)
 			if (name.equalsIgnoreCase(i.getName()) || (name.length() >= 3
-					&& name.toLowerCase().startsWith(i.getName().toLowerCase()))) {
+					&& i.getName().toLowerCase().startsWith(name.toLowerCase()))) {
 				try {
 					return i.getClass().getConstructor().newInstance();
 				} catch (IllegalAccessException | InstantiationException
@@ -40,35 +40,49 @@ public interface Item {
 		return null;
 	}
 
-	String getName();
+	public abstract String getName();
 
-	int getCost();
+	public String getDesc() {
+		return "";
+	}
 
-	default Item[] getBuild() {
+	public abstract int getCost();
+
+	public Item[] getBuild() {
 		return new Item[0];
 	}
 
-	default Effect[] getEffects() {
+	public Effect[] getEffects() {
 		return new Effect[0];
 	}
 
-	default Stats getStats() {
+	public Stats getStats() {
 		return new Stats();
 	}
 
-	default Stats getPerTurn() {
+	public Stats getPerTurn() {
 		return new Stats();
 	}
 
-	default boolean canUse() {
+	public boolean canUse() {
 		return false;
 	}
 
-	default boolean removeOnUse() {
+	public boolean removeOnUse() {
 		return true;
 	}
 
-	default String onUse(Game.Member user) {
+	public String onUse(Game.Member user) {
 		return "";
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj != null && obj.getClass().equals(getClass());
+	}
+
+	@Override
+	public String toString() {
+		return getName();
 	}
 }

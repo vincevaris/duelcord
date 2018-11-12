@@ -11,18 +11,13 @@ public class WarriorUnit implements Unit {
 	public static final String DESC = "Every third attack deals **25%** more damage."
 			+ "\nUsing `>bash` destroys shields and deals **40%** of damage.";
 	public static final Color COLOR = Color.CYAN;
-	public static final Stats STATS = new Stats();
-	public static final Stats PER_TURN = new Stats();
-
-	static {
-		STATS.energy = 125;
-
-		STATS.maxHp = 580;
-		STATS.damage = 24;
-
-		PER_TURN.hp = 13;
-		PER_TURN.gold = 75;
-	}
+	public static final Stats STATS = new Stats()
+			.put(Stats.ENERGY, 125)
+			.put(Stats.MAX_HP, 580)
+			.put(Stats.DAMAGE, 24);
+	public static final Stats PER_TURN = new Stats()
+			.put(Stats.HP, 13)
+			.put(Stats.GOLD, 75);
 
 	private int bonus = 0;
 	private boolean bash = false;

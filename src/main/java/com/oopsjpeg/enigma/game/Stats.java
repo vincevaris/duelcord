@@ -1,74 +1,100 @@
 package com.oopsjpeg.enigma.game;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Stats {
-	public int hp = 0;
-	public int gold = 0;
-	public int energy = 0;
-	public int shield = 0;
+	public static String HP = "hp";
+	public static String GOLD = "gold";
+	public static String ENERGY = "energy";
+	public static String SHIELD = "shield";
 
-	public int maxHp = 1;
-	public int damage = 1;
-	public float accuracy = 1.0f;
-	public float critChance = 0.0f;
-	public float critDamage = 0.0f;
-	public float lifeSteal = 0.0f;
+	public static String MAX_HP = "max_hp";
+	public static String DAMAGE = "damage";
+	public static String ACCURACY = "accuracy";
+	public static String CRIT_CHANCE = "crit_chance";
+	public static String CRIT_DAMAGE = "crit_damage";
+	public static String LIFE_STEAL = "life_steal";
 
-	public Stats() { }
+	private Map<String, Float> values = new HashMap<>();
+
+	public Stats() {
+		values.put(HP, 0.0f);
+		values.put(GOLD, 0.0f);
+		values.put(ENERGY, 0.0f);
+		values.put(SHIELD, 0.0f);
+
+		values.put(MAX_HP, 0.0f);
+		values.put(DAMAGE, 0.0f);
+		values.put(ACCURACY, 1.0f);
+		values.put(CRIT_CHANCE, 0.0f);
+		values.put(CRIT_DAMAGE, 0.0f);
+		values.put(LIFE_STEAL, 0.0f);
+	}
 
 	public Stats(Stats other) {
-		hp = other.hp;
-		gold = other.gold;
-		energy = other.energy;
-		shield = other.shield;
+		for (String key : values.keySet())
+			values.put(key, other.values.get(key));
+	}
 
-		maxHp = other.maxHp;
-		damage = other.damage;
-		accuracy = other.accuracy;
-		critChance = other.critChance;
-		critDamage = other.critDamage;
-		lifeSteal = other.lifeSteal;
+	public Stats put(String key, float value) {
+		values.put(key, value);
+		return clean();
+	}
+
+	public float get(String key) {
+		return values.getOrDefault(key, 0.0f);
+	}
+
+	public int getInt(String key) {
+		return (int) Math.ceil(get(key));
+	}
+
+	public Stats add(String key, float value) {
+		put(key, get(key) + value);
+		return this;
+	}
+
+	public Stats sub(String key, float value) {
+		put(key, get(key) - value);
+		return this;
+	}
+
+	public Stats mul(String key, float value) {
+		put(key, get(key) * value);
+		return this;
+	}
+
+	public Stats div(String key, float value) {
+		put(key, get(key) / value);
+		return this;
 	}
 
 	public Stats add(Stats other) {
-		hp += other.hp;
-		gold += other.gold;
-		energy += other.energy;
-		shield += other.shield;
-
-		maxHp += other.maxHp;
-		damage += other.damage;
-		accuracy += other.accuracy;
-		critChance += other.critChance;
-		lifeSteal += other.lifeSteal;
-
-		return clean();
+		for (String key : values.keySet())
+			values.put(key, values.get(key) + other.values.get(key));
+		return this;
 	}
 
-	public Stats subtract(Stats other) {
-		hp -= other.hp;
-		gold -= other.gold;
-		energy -= other.energy;
-		shield -= other.shield;
-
-		maxHp -= other.maxHp;
-		damage -= other.damage;
-		accuracy -= other.accuracy;
-		critChance -= other.critChance;
-		lifeSteal -= other.lifeSteal;
-
-		return clean();
+	public Stats sub(Stats other) {
+		for (String key : values.keySet())
+			values.put(key, values.get(key) - other.values.get(key));
+		return this;
 	}
 
 	public Stats clean() {
-		gold = Math.max(0, gold);
-		energy = Math.max(0, energy);
-		shield = Math.max(0, shield);
+		values.put(MAX_HP, Math.max(0, values.get(MAX_HP)));
 
-		maxHp = Math.max(1, maxHp);
-		damage = Math.max(1, damage);
-		accuracy = Math.max(0, Math.min(1, accuracy));
-		critChance = Math.max(0, Math.min(1, critChance));
-		lifeSteal = Math.max(0, Math.min(1, lifeSteal));
+		values.put(HP, Math.max(0, Math.min(get(Stats.MAX_HP), values.get(HP))));
+		values.put(GOLD, Math.max(0, values.get(GOLD)));
+		values.put(ENERGY, Math.max(0, values.get(ENERGY)));
+		values.put(SHIELD, Math.max(0, values.get(SHIELD)));
+
+		values.put(DAMAGE, Math.max(0, values.get(DAMAGE)));
+		values.put(ACCURACY, Math.max(0, Math.min(1, values.get(ACCURACY))));
+		values.put(CRIT_CHANCE, Math.max(0, Math.min(1, values.get(CRIT_CHANCE))));
+		values.put(CRIT_DAMAGE, Math.max(0, Math.min(1, values.get(CRIT_DAMAGE))));
+		values.put(LIFE_STEAL, Math.max(0, Math.min(1, values.get(LIFE_STEAL))));
 
 		return this;
 	}

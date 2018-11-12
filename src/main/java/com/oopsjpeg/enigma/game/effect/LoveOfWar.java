@@ -22,6 +22,16 @@ public class LoveOfWar implements Effect {
 	}
 
 	@Override
+	public String getName() {
+		return NAME;
+	}
+
+	@Override
+	public String getDesc() {
+		return "Each attack increases damage dealt by **" + Math.round(power * 100) + "%** for that turn.";
+	}
+
+	@Override
 	public float getPower() {
 		return power;
 	}
@@ -29,10 +39,5 @@ public class LoveOfWar implements Effect {
 	@Override
 	public void onTurn() {
 		attack = 0;
-	}
-
-	@Override
-	public String getName() {
-		return NAME;
 	}
 }

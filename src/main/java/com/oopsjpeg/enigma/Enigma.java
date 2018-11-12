@@ -5,11 +5,12 @@ import com.oopsjpeg.enigma.commands.BuildCommand;
 import com.oopsjpeg.enigma.commands.QueueCommand;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.GameMode;
-import com.oopsjpeg.enigma.game.effect.util.Effect;
+import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.item.util.Item;
 import com.oopsjpeg.enigma.game.unit.util.Unit;
 import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.Emote;
+import com.oopsjpeg.enigma.util.Util;
 import com.oopsjpeg.roboops.framework.Bufferer;
 import com.oopsjpeg.roboops.framework.commands.CommandCenter;
 import sx.blah.discord.api.ClientBuilder;
@@ -41,7 +42,7 @@ public class Enigma {
 	private static IDiscordClient client;
 	private static CommandCenter commands = new CommandCenter(PREFIX_ALL);
 	private static List<Game> games = new ArrayList<>();
-	private static List<Player> players = new ArrayList<>();
+	private static Map<Long, Player> players = new HashMap<>();
 	private static Map<GameMode, ArrayList<Player>> queues = new HashMap<>();
 
 	private static String guildId;
@@ -92,8 +93,12 @@ public class Enigma {
 		commands.add(new QueueCommand());
 	}
 
+	public static List<Game> getGames() {
+		return games;
+	}
+
 	public static void endGame(Game game) {
-		game.getPlayers().forEach(Player::clearGame);
+		game.getPlayers().forEach(Player::removeGame);
 		games.remove(game);
 		SCHEDULER.schedule(() -> { //TODO add delete channel to bufferer
 			game.getChannel().delete();
@@ -101,9 +106,9 @@ public class Enigma {
 	}
 
 	public static Player getPlayer(IUser user) {
-		if (!players.contains(user))
-			players.add(new Player(user));
-		return players.get(players.indexOf(user));
+		if (!players.containsKey(user.getLongID()))
+			players.put(user.getLongID(), new Player(user.getLongID()));
+		return players.get(user.getLongID());
 	}
 
 	public static List<Player> getQueue(GameMode mode) {
@@ -128,16 +133,17 @@ public class Enigma {
 					Game game = new Game(guild, mode, matched);
 
 					games.add(game);
-					queues.get(mode).removeAll(players);
-
 					players.forEach(p -> {
 						p.setGame(game);
-						p.clearQueue();
+						p.setQueue(null);
 						queue.getValue().remove(p);
+
+						System.out.println(p.getUser().getName() + " - " + p.getGame());
 					});
+					queues.get(mode).removeAll(players);
 
 					Bufferer.sendMessage(mmChannel, Emote.INFO + "**" + mode.getName() + "** has been found for "
-							+ players.stream().map(Player::getName).collect(Collectors.joining(", ")) + "\n"
+							+ game.getUsers().stream().map(IUser::getName).collect(Collectors.joining(", ")) + "\n"
 							+ "Go to " + game.getChannel() + " to play the game!");
 
 					break;
@@ -151,18 +157,18 @@ public class Enigma {
 	}
 
 	public static void buildUnitsChannel() {
-		Bufferer.bulkDelete(unitsChannel, unitsChannel.getMessageHistory());
+		Bufferer.bulkDelete(unitsChannel, unitsChannel.getMessageHistory(100));
 		Arrays.stream(Unit.values()).map(u -> {
 			EmbedBuilder builder = new EmbedBuilder();
 			builder.withTitle(u.getName());
 			builder.withColor(u.getColor());
-			builder.appendDesc("Max Health: **" + u.getStats().maxHp + "** (+**" + u.getPerTurn().hp + "**/t)\n");
-			builder.appendDesc("Damage: **" + u.getStats().damage + "**\n");
-			if (u.getStats().critChance > 0)
-				builder.appendDesc("Critical Chance: **" + Math.round(u.getStats().critChance * 100) + "%**\n");
-			if (u.getStats().lifeSteal > 0)
-				builder.appendDesc("Life Steal: **" + Math.round(u.getStats().lifeSteal * 100) + "%**\n");
-			builder.appendField("Passives / Abilities", u.getDesc(), true);
+			builder.appendDesc("Max Health: **" + u.getStats().getInt(Stats.MAX_HP) + "** (+**" + u.getPerTurn().getInt(Stats.HP) + "**/turn)\n");
+			builder.appendDesc("Damage: **" + u.getStats().getInt(Stats.DAMAGE) + "**\n");
+			if (u.getStats().get(Stats.CRIT_CHANCE) > 0)
+				builder.appendDesc("Critical Chance: **" + Math.round(u.getStats().get(Stats.CRIT_CHANCE) * 100) + "%**\n");
+			if (u.getStats().get(Stats.LIFE_STEAL) > 0)
+				builder.appendDesc("Life Steal: **" + Math.round(u.getStats().get(Stats.LIFE_STEAL) * 100) + "%**\n");
+			builder.appendField("Passives / Abilities", u.getDesc(), false);
 			return builder.build();
 		}).forEach(b -> Bufferer.sendMessage(unitsChannel, b));
 	}
@@ -172,33 +178,21 @@ public class Enigma {
 	}
 
 	public static void buildItemsChannel() {
-		Bufferer.bulkDelete(itemsChannel, itemsChannel.getMessageHistory());
+		Bufferer.bulkDelete(itemsChannel, itemsChannel.getMessageHistory(100));
 		Arrays.stream(Item.values()).sorted(Comparator.comparingInt(Item::getCost)).map(i -> {
 			EmbedBuilder builder = new EmbedBuilder();
 			builder.withTitle(i.getName() + " (" + i.getCost() + "g)");
 			builder.withColor(Color.CYAN);
-			if (i.getStats().maxHp > 0)
-				builder.appendDesc("Max Health: +**" + i.getStats().maxHp + "**\n");
-			if (i.getStats().damage > 0)
-				builder.appendDesc("Damage: +**" + i.getStats().damage + "**\n");
-			if (i.getStats().critChance > 0)
-				builder.appendDesc("Critical Chance: +**" + Math.round(i.getStats().critChance * 100) + "%**\n");
-			if (i.getStats().critDamage > 0)
-				builder.appendDesc("Critical Damage: +**" + Math.round(i.getStats().critDamage * 100) + "%**\n");
-			if (i.getStats().lifeSteal > 0)
-				builder.appendDesc("Life Steal: **" + Math.round(i.getStats().lifeSteal * 100) + "%**\n");
-			if (i.getPerTurn().hp > 0)
-				builder.appendDesc("Health/turn: +**" + i.getPerTurn().hp + "**\n");
-			if (i.getPerTurn().energy > 0)
-				builder.appendDesc("Bonus Energy: +**" + i.getPerTurn().energy + "**\n");
-			if (i.getPerTurn().gold > 0)
-				builder.appendDesc("Bonus Gold: +**" + i.getPerTurn().gold + "**\n");
+			builder.appendDesc(i.getDesc() + "\n");
+			builder.appendDesc(Util.formatStats(i.getStats()) + "\n");
+			builder.appendDesc(Util.formatPerTurn(i.getPerTurn()));
 			if (i.getEffects() != null && i.getEffects().length > 0)
-				builder.appendField("Effects", String.join("\n", Arrays.stream(i.getEffects())
-						.map(Effect::getName).collect(Collectors.toList())), true);
+				builder.appendField("Unique Effects", Arrays.stream(i.getEffects())
+						.map(e -> "**" + e.getName() + "**: " + e.getDesc())
+						.collect(Collectors.joining("\n")), false);
 			if (i.getBuild() != null && i.getBuild().length > 0)
 				builder.appendField("Build", String.join("\n", Arrays.stream(i.getBuild())
-						.map(Item::getName).collect(Collectors.toList())), true);
+						.map(Item::getName).collect(Collectors.toList())), false);
 			return builder.build();
 		}).forEach(b -> Bufferer.sendMessage(itemsChannel, b));
 	}

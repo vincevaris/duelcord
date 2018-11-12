@@ -1,20 +1,18 @@
 package com.oopsjpeg.enigma.game.item;
 
 import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.effect.Vitalist;
+import com.oopsjpeg.enigma.game.effect.StatsEffect;
 import com.oopsjpeg.enigma.game.effect.util.Effect;
 import com.oopsjpeg.enigma.game.item.util.Item;
 
-public class AuroralMask implements Item {
+public class AuroralMask extends Item {
 	public static final String NAME = "Auroral Mask";
 	public static final int COST = 675;
 	public static final Item[] BUILD = new Item[]{new Crystal(), new Crystal()};
-	public static final Effect[] EFFECTS = new Effect[]{new Vitalist(25)};
-	public static final Stats STATS = new Stats();
-
-	static {
-		STATS.maxHp = 80;
-	}
+	public static final Effect[] EFFECTS = new Effect[]{StatsEffect.perTurn(new Stats()
+			.put(Stats.ENERGY, 25))};
+	public static final Stats STATS = new Stats()
+			.put(Stats.HP, 80.0f);
 
 	@Override
 	public String getName() {

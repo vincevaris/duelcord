@@ -13,18 +13,13 @@ public class BerserkerUnit implements Unit {
 			+ "\nUsing `>rage` consumes stacks (min. 2) to increase energy for a turn (**25** per **2** stacks)."
 			+ "\nUsing `>rage` at full capacity grants a bonus **50** energy.";
 	public static final Color COLOR = Color.RED;
-	public static final Stats STATS = new Stats();
-	public static final Stats PER_TURN = new Stats();
-
-	static {
-		STATS.energy = 75;
-
-		STATS.maxHp = 610;
-		STATS.damage = 28;
-
-		PER_TURN.hp = 15;
-		PER_TURN.gold = 75;
-	}
+	public static final Stats STATS = new Stats()
+			.put(Stats.ENERGY, 75)
+			.put(Stats.MAX_HP, 610)
+			.put(Stats.DAMAGE, 28);
+	public static final Stats PER_TURN = new Stats()
+			.put(Stats.HP, 15)
+			.put(Stats.GOLD, 75);
 
 	private int rage = 0;
 

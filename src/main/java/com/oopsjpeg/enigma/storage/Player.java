@@ -1,36 +1,45 @@
 package com.oopsjpeg.enigma.storage;
 
+import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.GameMode;
 import sx.blah.discord.handle.obj.IUser;
 
+import java.util.List;
+
 public class Player {
-	private final IUser user;
-	private GameMode queue;
+	private final long id;
+	private GameMode queueMode;
 	private Game game;
 
-	public Player(IUser user) {
-		this.user = user;
+	public Player(long id) {
+		this.id = id;
+	}
+
+	public long getID() {
+		return id;
 	}
 
 	public IUser getUser() {
-		return user;
+		return Enigma.getClient().getUserByID(id);
 	}
 
-	public String getName() {
-		return user.getName();
+	public GameMode getQueueMode() {
+		return queueMode;
 	}
 
-	public GameMode getQueue() {
-		return queue;
+	public List<Player> getQueue() {
+		return Enigma.getQueue(queueMode);
 	}
 
-	public void setQueue(GameMode queue) {
-		this.queue = queue;
+	public void setQueue(GameMode mode) {
+		if (queueMode != null) getQueue().remove(this);
+		queueMode = mode;
+		if (queueMode != null) getQueue().add(this);
 	}
 
-	public void clearQueue() {
-		queue = null;
+	public void removeQueue() {
+		setQueue(null);
 	}
 
 	public Game getGame() {
@@ -41,22 +50,22 @@ public class Player {
 		this.game = game;
 	}
 
-	public void clearGame() {
-		game = null;
+	public void removeGame() {
+		setGame(null);
 	}
 
 	@Override
 	public int hashCode() {
-		return user.hashCode();
+		return getUser().hashCode();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		return user.equals(obj);
+		return obj instanceof Player && ((Player) obj).id == id;
 	}
 
 	@Override
 	public String toString() {
-		return user.toString();
+		return getUser().getName();
 	}
 }

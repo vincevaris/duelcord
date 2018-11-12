@@ -1,21 +1,19 @@
 package com.oopsjpeg.enigma.game.item;
 
 import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.effect.Bruiser;
-import com.oopsjpeg.enigma.game.effect.CritDamage;
+import com.oopsjpeg.enigma.game.effect.StatsEffect;
 import com.oopsjpeg.enigma.game.effect.util.Effect;
 import com.oopsjpeg.enigma.game.item.util.Item;
 
-public class IronScimitar implements Item {
+public class IronScimitar extends Item {
 	public static final String NAME = "Iron Scimitar";
 	public static final int COST = 1275;
 	public static final Item[] BUILD = new Item[]{new BronzeCutlass(), new Hatchet()};
-	public static final Effect[] EFFECTS = new Effect[]{new CritDamage(0.5f), new Bruiser(0.4f)};
-	public static final Stats STATS = new Stats();
-
-	static {
-		STATS.damage = 25;
-	}
+	public static final Effect[] EFFECTS = new Effect[]{StatsEffect.stats(new Stats()
+			.put(Stats.CRIT_DAMAGE, 0.5f))};
+	public static final Stats STATS = new Stats()
+			.put(Stats.DAMAGE, 25)
+			.put(Stats.CRIT_CHANCE, 0.4f);
 
 	@Override
 	public String getName() {

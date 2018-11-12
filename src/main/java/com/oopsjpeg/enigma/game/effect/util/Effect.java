@@ -5,6 +5,8 @@ import com.oopsjpeg.enigma.game.Stats;
 public interface Effect {
 	String getName();
 
+	String getDesc();
+
 	default float getPower() {
 		return 0;
 	}
@@ -17,7 +19,5 @@ public interface Effect {
 		return new Stats();
 	}
 
-	default void onTurn() {
-
-	}
+	default void onTurn() { }
 }

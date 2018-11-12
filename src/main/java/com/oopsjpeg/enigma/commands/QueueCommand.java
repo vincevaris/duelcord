@@ -14,7 +14,7 @@ import java.util.List;
 
 public class QueueCommand implements Command {
 	@Override
-	public int execute(IMessage message, String alias, String[] args) {
+	public void execute(IMessage message, String alias, String[] args) {
 		IChannel channel = message.getChannel();
 		IUser author = message.getAuthor();
 		Player player = Enigma.getPlayer(author);
@@ -22,24 +22,27 @@ public class QueueCommand implements Command {
 		GameMode mode = GameMode.DUEL;
 		List<Player> queue = Enigma.getQueue(mode);
 
-		if (player.getGame() == null) {
+		if (player.getGame() != null)
+			Bufferer.sendMessage(channel, Emote.NO + author + " You are already in a match.");
+		else {
 			if (!queue.contains(player)) {
-				queue.add(player);
 				player.setQueue(mode);
 				Bufferer.sendMessage(channel, Emote.YES + author + " You are now in queue for **" + mode.getName()
-						+ "** (size: **" + queue.size() + "**)");
+						+ "**. (size: **" + queue.size() + "**)");
 			} else {
-				queue.remove(player);
-				player.clearQueue();
-				Bufferer.sendMessage(channel, Emote.YES + author + " You are no longer in queue.");
+				player.removeQueue();
+				Bufferer.sendMessage(channel, Emote.NO + author + " You are no longer in queue.");
 			}
 		}
-
-		return SUCCESS;
 	}
 
 	@Override
 	public String getName() {
 		return "queue";
+	}
+
+	@Override
+	public String[] getAliases() {
+		return new String[]{"find", "mm", "q"};
 	}
 }
