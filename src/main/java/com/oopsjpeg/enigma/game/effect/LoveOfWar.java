@@ -1,5 +1,6 @@
 package com.oopsjpeg.enigma.game.effect;
 
+import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.effect.util.Effect;
 
 public class LoveOfWar implements Effect {
@@ -37,7 +38,8 @@ public class LoveOfWar implements Effect {
 	}
 
 	@Override
-	public void onTurn() {
+	public String onTurnEnd(Game.Member user) {
 		attack = 0;
+		return "";
 	}
 }

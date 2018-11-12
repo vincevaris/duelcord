@@ -69,7 +69,7 @@ public class WarriorUnit implements Unit {
 	}
 
 	@Override
-	public String onTurn(Game.Member member) {
+	public String onTurnEnd(Game.Member member) {
 		bash = false;
 		return "";
 	}

@@ -62,7 +62,7 @@ public class ThiefUnit implements Unit {
 	}
 
 	@Override
-	public String onTurn(Game.Member member) {
+	public String onTurnEnd(Game.Member member) {
 		crit = 0;
 		return "";
 	}

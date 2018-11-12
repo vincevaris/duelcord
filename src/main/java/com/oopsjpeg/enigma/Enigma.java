@@ -133,14 +133,14 @@ public class Enigma {
 					Game game = new Game(guild, mode, matched);
 
 					games.add(game);
-					players.forEach(p -> {
+					matched.forEach(p -> {
 						p.setGame(game);
-						p.setQueue(null);
+						p.removeQueue();
 						queue.getValue().remove(p);
 
 						System.out.println(p.getUser().getName() + " - " + p.getGame());
 					});
-					queues.get(mode).removeAll(players);
+					queues.get(mode).removeAll(matched);
 
 					Bufferer.sendMessage(mmChannel, Emote.INFO + "**" + mode.getName() + "** has been found for "
 							+ game.getUsers().stream().map(IUser::getName).collect(Collectors.joining(", ")) + "\n"

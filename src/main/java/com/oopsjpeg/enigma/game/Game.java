@@ -52,6 +52,8 @@ public class Game {
 	}
 
 	public void nextTurn() {
+		String extra = "";
+
 		if (curTurn >= getAlive().size()) {
 			curTurn = 0;
 			if (gameState == 0) gameState = 1;
@@ -59,13 +61,11 @@ public class Game {
 
 		if (turnCount >= 1 && gameState == 1 && curMember.stats.get(Stats.ENERGY) > 0) {
 			curMember.defend = 1;
-			String onDefend = curMember.unit.onDefend(curMember);
-			if (!onDefend.isEmpty()) Bufferer.sendMessage(channel, onDefend);
+			extra += curMember.unit.onDefend(curMember);
 		}
 
-		curMember = getAlive().get(curTurn);
-
 		if (gameState == 0) {
+			curMember = getAlive().get(curTurn);
 			if (curTurn == 0) {
 				Bufferer.sendMessage(channel, "Welcome to **" + mode.getName() + "**! ("
 						+ getPlayers().stream().map(p -> p.getUser().getName()).collect(Collectors.joining(", ")) + ")\n"
@@ -75,22 +75,31 @@ public class Game {
 				Bufferer.sendMessage(channel, curMember + ", you have next pick!");
 			}
 		} else if (gameState == 1) {
+			extra += curMember.unit.onTurnEnd(curMember);
+			extra += curMember.effects.stream()
+					.map(e -> e.onTurnEnd(curMember))
+					.collect(Collectors.joining());
+
+			curMember = getAlive().get(curTurn);
+
 			curMember.stats.add(Stats.HP, curMember.perTurn.get(Stats.HP) * curMember.defend);
 			curMember.stats.add(Stats.GOLD, Math.round(curMember.perTurn.get(Stats.GOLD) + (turnCount * 0.5)));
 			curMember.stats.put(Stats.ENERGY, curMember.unit.getStats().get(Stats.ENERGY));
 			curMember.stats.add(Stats.ENERGY, curMember.perTurn.get(Stats.ENERGY));
 			curMember.stats.put(Stats.SHIELD, 0);
 
-			curMember.unit.onTurn(curMember);
-			curMember.effects.forEach(Effect::onTurn);
+			extra += curMember.unit.onTurnStart(curMember);
+			extra += curMember.effects.stream()
+					.map(e -> e.onTurnStart(curMember))
+					.collect(Collectors.joining());
 			curMember.defend = 0;
 
 			if (turnCount == 0) {
-				Bufferer.sendMessage(channel, curMember + ", you have the first turn!\n"
+				Bufferer.sendMessage(channel, extra + curMember + ", you have the first turn!\n"
 						+ "Open the channel's description to review your statistics.\n"
 						+ "Check " + Enigma.getItemsChannel() + " to view purchasable items.");
 			} else {
-				Bufferer.sendMessage(channel, curMember + ", it's your turn!\n"
+				Bufferer.sendMessage(channel, extra + curMember + ", it's your turn!\n"
 						+ "Open the channel's description to review your statistics.");
 			}
 			turnCount++;
@@ -585,8 +594,8 @@ public class Game {
 
 		public String shield(float amount) {
 			stats.add(Stats.SHIELD, amount);
-			return Emote.HEAL + "**" + getName() + "** shielded by **" + amount
-					+ "**! [**" + stats.getInt(Stats.SHIELD) + "**]";
+			return Emote.HEAL + "**" + getName() + "** shielded by **" + Math.round(amount)
+					+ "**! [**" + stats.getInt(Stats.SHIELD) + "**]\n";
 		}
 
 		public String heal(float amount) {
@@ -640,7 +649,8 @@ public class Game {
 					if (tu.crit() == 1) {
 						int steal = Math.round(Math.max(1, Math.min(stats.get(Stats.DAMAGE) * 0.4f,
 								target.stats.get(Stats.GOLD))));
-						target.stats.add(Stats.GOLD, target.stats.get(Stats.GOLD) - steal);
+						stats.add(Stats.GOLD, steal);
+						target.stats.sub(Stats.GOLD, steal);
 						bonus += Emote.BUY + "**" + getName() + "** stole **" + steal + "** gold!\n";
 					}
 				}

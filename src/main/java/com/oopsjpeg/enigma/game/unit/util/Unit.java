@@ -46,7 +46,11 @@ public interface Unit {
 
 	Stats getPerTurn();
 
-	default String onTurn(Game.Member member) {
+	default String onTurnStart(Game.Member member) {
+		return "";
+	}
+
+	default String onTurnEnd(Game.Member member) {
 		return "";
 	}
 

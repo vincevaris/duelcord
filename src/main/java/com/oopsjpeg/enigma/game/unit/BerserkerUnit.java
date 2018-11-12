@@ -62,9 +62,9 @@ public class BerserkerUnit implements Unit {
 	}
 
 	@Override
-	public String onDefend(Game.Member member) {
+	public String onTurnStart(Game.Member member) {
 		if (rage() == 6)
-			return Emote.RAGE + "**Rage** is at maximum capacity.";
+			return Emote.RAGE + "**" + member.getName() + "'s Rage** is at maximum capacity.\n";
 		return "";
 	}
 }
