@@ -39,7 +39,7 @@ public class Stats {
 
 	public Stats put(String key, float value) {
 		values.put(key, value);
-		return clean();
+		return this;
 	}
 
 	public float get(String key) {
@@ -52,22 +52,22 @@ public class Stats {
 
 	public Stats add(String key, float value) {
 		put(key, get(key) + value);
-		return this;
+		return clean();
 	}
 
 	public Stats sub(String key, float value) {
 		put(key, get(key) - value);
-		return this;
+		return clean();
 	}
 
 	public Stats mul(String key, float value) {
 		put(key, get(key) * value);
-		return this;
+		return clean();
 	}
 
 	public Stats div(String key, float value) {
 		put(key, get(key) / value);
-		return this;
+		return clean();
 	}
 
 	public Stats add(Stats other) {
@@ -85,7 +85,7 @@ public class Stats {
 	public Stats clean() {
 		values.put(MAX_HP, Math.max(0, values.get(MAX_HP)));
 
-		values.put(HP, Math.max(0, Math.min(get(Stats.MAX_HP), values.get(HP))));
+		values.put(HP, Math.max(0, Math.min(values.get(MAX_HP), values.get(HP))));
 		values.put(GOLD, Math.max(0, values.get(GOLD)));
 		values.put(ENERGY, Math.max(0, values.get(ENERGY)));
 		values.put(SHIELD, Math.max(0, values.get(SHIELD)));
@@ -97,5 +97,10 @@ public class Stats {
 		values.put(LIFE_STEAL, Math.max(0, Math.min(1, values.get(LIFE_STEAL))));
 
 		return this;
+	}
+
+	@Override
+	public String toString() {
+		return values.toString();
 	}
 }

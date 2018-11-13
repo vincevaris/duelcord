@@ -162,7 +162,8 @@ public class Enigma {
 			EmbedBuilder builder = new EmbedBuilder();
 			builder.withTitle(u.getName());
 			builder.withColor(u.getColor());
-			builder.appendDesc("Max Health: **" + u.getStats().getInt(Stats.MAX_HP) + "** (+**" + u.getPerTurn().getInt(Stats.HP) + "**/turn)\n");
+			builder.appendDesc("Health: **" + u.getStats().getInt(Stats.MAX_HP) + "** (+**"
+					+ u.getPerTurn().getInt(Stats.HP) + "**/turn)\n");
 			builder.appendDesc("Damage: **" + u.getStats().getInt(Stats.DAMAGE) + "**\n");
 			if (u.getStats().get(Stats.CRIT_CHANCE) > 0)
 				builder.appendDesc("Critical Chance: **" + Math.round(u.getStats().get(Stats.CRIT_CHANCE) * 100) + "%**\n");

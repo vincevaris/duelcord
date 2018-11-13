@@ -5,7 +5,7 @@ import com.oopsjpeg.enigma.game.item.util.Item;
 
 public class Potion extends Item {
 	public static final String NAME = "Potion";
-	public static final String DESC = "Heals for **20** health.";
+	public static final String DESC = "Heals for **50** health.";
 	public static final int COST = 50;
 
 	@Override
