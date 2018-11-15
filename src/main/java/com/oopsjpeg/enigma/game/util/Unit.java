@@ -21,13 +21,15 @@ public interface Unit {
 
 	static Unit fromName(String name) {
 		for (Unit u : values)
-			if (u.getName().toLowerCase().startsWith(name.toLowerCase()))
+			if (name.equalsIgnoreCase(u.getName()) || (name.length() >= 3
+					&& u.getName().toLowerCase().startsWith(name.toLowerCase()))) {
 				try {
 					return u.getClass().getConstructor().newInstance();
-				} catch (NoSuchMethodException | IllegalAccessException
-						| InstantiationException | InvocationTargetException ignored) {
-
+				} catch (IllegalAccessException | InstantiationException
+						| NoSuchMethodException | InvocationTargetException e) {
+					e.printStackTrace();
 				}
+			}
 		return null;
 	}
 

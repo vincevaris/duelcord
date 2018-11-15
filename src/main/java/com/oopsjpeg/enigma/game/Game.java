@@ -193,24 +193,6 @@ public class Game {
 		return gameState;
 	}
 
-	public class GameListener {
-		@EventSubscriber
-		public void onMessage(MessageReceivedEvent event) {
-			IMessage message = event.getMessage();
-			String content = message.getContent();
-			IUser author = message.getAuthor();
-
-			if (gameState != 2 && getUsers().contains(author) && content.startsWith(Enigma.PREFIX_GAME)) {
-				String[] split = content.split(" ");
-				String alias = split[0].replaceFirst(Enigma.PREFIX_GAME, "");
-				String[] args = Arrays.copyOfRange(split, 1, split.length);
-				Member member = getMember(author);
-
-				Bufferer.deleteMessage(message);
-			}
-		}
-	}
-
 	public abstract class Action {
 		public boolean execute(Member actor) {
 			lastAction = LocalDateTime.now();
