@@ -9,26 +9,35 @@ import java.awt.*;
 
 public class BerserkerUnit implements Unit {
 	public static final String NAME = "Berserker";
-	public static final String DESC = "Being attacked and defending builds up to **6** stacks of **Rage**."
-			+ "\nUsing `>rage` consumes stacks (min. 2) to increase energy for a turn (**25** per **2** stacks)."
-			+ "\nUsing `>rage` at full capacity grants a bonus **50** energy.";
+	public static final String DESC = "Attacking or being attacked builds up to **5** stacks of **Rage**."
+			+ "\nUsing `>rage` consumes stacks to increase damage for a single turn (**4%** per stack)."
+			+ "\nAt maximum stacks, `>rage` grants **75** bonus energy.";
 	public static final Color COLOR = Color.RED;
 	public static final Stats STATS = new Stats()
-			.put(Stats.ENERGY, 75)
-			.put(Stats.MAX_HP, 610)
-			.put(Stats.DAMAGE, 28);
+			.put(Stats.ENERGY, 100)
+			.put(Stats.MAX_HP, 590)
+			.put(Stats.DAMAGE, 19);
 	public static final Stats PER_TURN = new Stats()
-			.put(Stats.HP, 15)
+			.put(Stats.HP, 14)
 			.put(Stats.GOLD, 75);
 
 	private int rage = 0;
+	private float bonus = 0;
 
 	public int getRage() {
 		return rage;
 	}
 
 	public void setRage(int rage) {
-		this.rage = Math.max(0, Math.min(6, rage));
+		this.rage = Math.max(0, Math.min(5, rage));
+	}
+
+	public float getBonus() {
+		return bonus;
+	}
+
+	public void setBonus(float bonus) {
+		this.bonus = bonus;
 	}
 
 	public int rage() {
@@ -62,9 +71,20 @@ public class BerserkerUnit implements Unit {
 	}
 
 	@Override
-	public String onTurnStart(Game.Member member) {
-		if (rage() == 6)
+	public String onAttack(Game.Member member) {
+		return stack(member);
+	}
+
+	@Override
+	public String onAttacked(Game.Member member) {
+		return stack(member);
+	}
+
+	public String stack(Game.Member member) {
+		if (rage == 5) {
+			rage();
 			return Emote.RAGE + "**" + member.getName() + "'s Rage** is at maximum capacity.\n";
+		}
 		return "";
 	}
 }

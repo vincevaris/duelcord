@@ -1,11 +1,18 @@
 package com.oopsjpeg.enigma.util;
 
 import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.roboops.framework.Bufferer;
+import sx.blah.discord.handle.obj.IChannel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class Util {
+	public static void sendError(IChannel channel, String error) {
+		Bufferer.deleteMessage(Bufferer.sendMessage(channel, Emote.NO + error), 5, TimeUnit.SECONDS);
+	}
+
 	public static String formatStats(Stats stats) {
 		List<String> output = new ArrayList<>();
 		if (stats.get(Stats.MAX_HP) > 0)

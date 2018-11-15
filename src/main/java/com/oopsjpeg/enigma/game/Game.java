@@ -1,6 +1,7 @@
 package com.oopsjpeg.enigma.game;
 
 import com.oopsjpeg.enigma.Enigma;
+import com.oopsjpeg.enigma.commands.game.*;
 import com.oopsjpeg.enigma.game.effect.LoveOfWar;
 import com.oopsjpeg.enigma.game.effect.util.Effect;
 import com.oopsjpeg.enigma.game.item.util.Item;
@@ -14,6 +15,7 @@ import com.oopsjpeg.enigma.util.ChanceBag;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.roboops.framework.Bufferer;
 import com.oopsjpeg.roboops.framework.RoUtil;
+import com.oopsjpeg.roboops.framework.commands.CommandCenter;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.*;
@@ -38,6 +40,19 @@ public class Game {
 	public Game(IGuild guild, GameMode mode, List<Player> players) {
 		channel = guild.createChannel("game");
 
+		CommandCenter commands = new CommandCenter(Enigma.PREFIX_GAME);
+		commands.add(new AttackCommand());
+		commands.add(new BashCommand());
+		commands.add(new BuyCommand());
+		commands.add(new EndCommand());
+		commands.add(new ForfeitCommand());
+		commands.add(new PickCommand());
+		commands.add(new RageCommand());
+		commands.add(new RefreshCommand());
+		commands.add(new StatsCommand());
+		commands.add(new UseCommand());
+		Enigma.getClient().getDispatcher().registerListener(commands);
+
 		Bufferer.overrideRolePermissions(channel, guild.getEveryoneRole(),
 				EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.READ_MESSAGES));
 		for (Player player : players)
@@ -47,8 +62,6 @@ public class Game {
 		this.mode = mode;
 		members = players.stream().map(Member::new).collect(Collectors.toList());
 		nextTurn();
-
-		Enigma.getClient().getDispatcher().registerListeners(new GameListener());
 	}
 
 	public void nextTurn() {
@@ -109,7 +122,7 @@ public class Game {
 		curTurn++;
 	}
 
-	private void setTopic(Member member) {
+	public void setTopic(Member member) {
 		if (gameState == 0) {
 			Bufferer.changeTopic(channel, member + " is picking their unit.");
 		} else {
@@ -121,7 +134,7 @@ public class Game {
 					+ (member.unit instanceof WarriorUnit
 					? "Strike: **" + ((WarriorUnit) member.unit).getBonus() + " / 3**\n" : "")
 					+ (member.unit instanceof BerserkerUnit
-					? "Rage: **" + ((BerserkerUnit) member.unit).getRage() + " / 6**\n" : "")
+					? "Rage: **" + ((BerserkerUnit) member.unit).getRage() + " / 5**\n" : "")
 					+ (member.unit instanceof GunslingerUnit
 					? "Shot: **" + ((GunslingerUnit) member.unit).getShot() + " / 4**\n" : "")
 					+ "Items: **" + member.items + "**\n");
@@ -140,6 +153,10 @@ public class Game {
 		return members.stream()
 				.filter(m -> m.getUser().equals(user))
 				.findAny().orElse(null);
+	}
+
+	public Member getCurrentMember() {
+		return curMember;
 	}
 
 	public List<Member> getMembers() {
@@ -186,94 +203,9 @@ public class Game {
 				String[] split = content.split(" ");
 				String alias = split[0].replaceFirst(Enigma.PREFIX_GAME, "");
 				String[] args = Arrays.copyOfRange(split, 1, split.length);
+				Member member = getMember(author);
 
 				Bufferer.deleteMessage(message);
-				if (alias.equalsIgnoreCase("refresh") || alias.equalsIgnoreCase("refreshtopic")) {
-					setTopic(curMember);
-				} else if (alias.equalsIgnoreCase("gold")) {
-					if (gameState == 0)
-						Bufferer.deleteMessage(Bufferer.sendMessage(channel,
-								Emote.NO + "You cannot check your gold until the game has started."), 5);
-				} else if (curMember.getUser().equals(author) && alias.equalsIgnoreCase("pick")) {
-					if (gameState == 1)
-						Bufferer.deleteMessage(Bufferer.sendMessage(channel,
-								Emote.NO + "You cannot pick a unit after the game has started."), 5);
-					else {
-						Unit unit = Unit.fromName(String.join(" ", args));
-						if (unit == null)
-							Bufferer.deleteMessage(Bufferer.sendMessage(channel,
-									Emote.NO + "Invalid unit. Please try again."), 5);
-						else {
-							curMember.setUnit(unit);
-							Bufferer.sendMessage(channel, Emote.YES + " **" + author.getName() + "** has selected **"
-									+ unit.getName() + "**.");
-							nextTurn();
-						}
-					}
-				} else if (curMember.getUser().equals(author) && alias.equalsIgnoreCase("end")) {
-					if (gameState == 0)
-						Bufferer.deleteMessage(Bufferer.sendMessage(channel,
-								Emote.NO + "You cannot end your turn until the game has started."), 5);
-					else
-						nextTurn();
-				} else if (curMember.getUser().equals(author) && alias.equalsIgnoreCase("attack")) {
-					if (gameState == 0)
-						Bufferer.deleteMessage(Bufferer.sendMessage(channel,
-								Emote.NO + "You cannot attack until the game has started."), 5);
-					else {
-						Member target = getAlive().stream().filter(m -> !m.equals(curMember)).findAny().orElse(null);
-						if (target == null)
-							Bufferer.deleteMessage(Bufferer.sendMessage(channel,
-									Emote.NO + "There is no one to attack."), 5);
-						else
-							curMember.act(new AttackAction(target));
-					}
-				} else if (curMember.getUser().equals(author) && alias.equalsIgnoreCase("buy")) {
-					if (gameState == 0)
-						Bufferer.deleteMessage(Bufferer.sendMessage(channel,
-								Emote.NO + "You cannot buy items until the game has started."), 5);
-					else {
-						Item item = Item.fromName(String.join(" ", args));
-						if (item == null)
-							Bufferer.deleteMessage(Bufferer.sendMessage(channel,
-									Emote.NO + "Invalid item. Please try again."), 5);
-						else
-							curMember.act(new BuyAction(item));
-					}
-				} else if (curMember.getUser().equals(author) && alias.equalsIgnoreCase("use")) {
-					if (gameState == 0)
-						Bufferer.deleteMessage(Bufferer.sendMessage(channel,
-								Emote.NO + "You cannot use items until the game has started."), 5);
-					else {
-						Item item = Item.fromName(String.join(" ", args));
-						if (item == null)
-							Bufferer.deleteMessage(Bufferer.sendMessage(channel,
-									Emote.NO + "Invalid item. Please try again."), 5);
-						else
-							curMember.act(new UseAction(item));
-					}
-				} else if (curMember.getUser().equals(author) && alias.equalsIgnoreCase("bash")) {
-					if (gameState == 0)
-						Bufferer.deleteMessage(Bufferer.sendMessage(channel,
-								Emote.NO + "You cannot use **Bash** until the game has started."), 5);
-					else {
-						Member target = getAlive().stream().filter(m -> !m.equals(curMember)).findAny().orElse(null);
-						if (target == null)
-							Bufferer.deleteMessage(Bufferer.sendMessage(channel,
-									Emote.NO + "There is no one to use **Bash** on."), 5);
-						else
-							curMember.act(new BashAction(target));
-					}
-				} else if (curMember.getUser().equals(author) && alias.equalsIgnoreCase("rage")) {
-					if (gameState == 0)
-						Bufferer.deleteMessage(Bufferer.sendMessage(channel,
-								Emote.NO + "You cannot use **Rage** until the game has started."), 5);
-					else
-						curMember.act(new RageAction());
-				} else if (getAlive().contains(getMember(author)) && (alias.equalsIgnoreCase("forfeit")
-						|| alias.equalsIgnoreCase("ff"))) {
-					Bufferer.sendMessage(channel, getMember(author).lose());
-				}
 			}
 		}
 	}
@@ -443,16 +375,11 @@ public class Game {
 				Bufferer.sendMessage(channel, Emote.NO + "You are not playing **Berserker**.");
 			else {
 				BerserkerUnit bu = (BerserkerUnit) actor.unit;
-				if (bu.getRage() < 2)
-					Bufferer.sendMessage(channel, Emote.NO + "You need at least **2** stacks to use **Rage**.");
-				else {
-					int energy = (int) Math.floor((float) bu.getRage() / 2) * 25 + (bu.getRage() == 6 ? 50 : 0);
-					actor.stats.add(Stats.ENERGY, energy);
-					bu.setRage(0);
-					Bufferer.sendMessage(channel, Emote.RAGE + "**" + actor.getName()
-							+ "** has gained **" + energy + "** energy this turn!");
-					return true;
-				}
+				bu.setBonus(0.04f * bu.getRage());
+				bu.setRage(0);
+				Bufferer.sendMessage(channel, Emote.RAGE + "**" + actor.getName() + "** has gained **"
+						+ Math.round(bu.getBonus() * 100) + "** bonus damage this turn!");
+				return true;
 			}
 			return false;
 		}
@@ -610,6 +537,7 @@ public class Game {
 
 			float damage = stats.get(Stats.DAMAGE);
 			boolean crit = false;
+			boolean miss = false;
 
 			if (hasEffect(LoveOfWar.class)) {
 				LoveOfWar low = (LoveOfWar) getEffect(LoveOfWar.class);
@@ -622,7 +550,7 @@ public class Game {
 			} else if (unit.isRanged() && stats.get(Stats.ACCURACY) < 1
 					&& RoUtil.RANDOM.nextFloat() > stats.get(Stats.ACCURACY)) {
 				damage *= 0.4f;
-				bonus += Emote.GUN + "**" + getName() + "** missed the target!\n";
+				miss = true;
 			}
 
 			if (unit instanceof WarriorUnit) {
@@ -632,9 +560,6 @@ public class Game {
 					wu.setBonus(0);
 				}
 			}
-
-			if (target.unit instanceof BerserkerUnit)
-				((BerserkerUnit) target.unit).rage();
 
 			if (stats.get(Stats.LIFE_STEAL) > 0)
 				bonus += heal(Math.round(stats.get(Stats.LIFE_STEAL) * damage));
@@ -666,7 +591,7 @@ public class Game {
 
 				if (target.stats.get(Stats.SHIELD) > 0)
 					out += Emote.SHIELD + "**" + getName() + "** damaged **" + target.getName() + "'s Shield** by **"
-							+ Math.round(shieldDmg) + "**! " + (crit ? "**CRIT**! " : "")
+							+ Math.round(shieldDmg) + "**! " + (crit ? "**CRIT**! " : "") + (miss ? "**MISS**! " : "")
 							+ "[**" + target.stats.getInt(Stats.SHIELD) + "**]\n";
 				else {
 					damage -= shieldDmg;
@@ -677,7 +602,7 @@ public class Game {
 			if (target.stats.get(Stats.SHIELD) <= 0) {
 				bonus += damage(target, damage);
 				out += Emote.ATTACK + "**" + getName() + "** damaged **" + target.getName() + "** by **"
-						+ Math.round(damage) + "**! " + (crit ? "**CRIT**! " : "")
+						+ Math.round(damage) + "**! " + (crit ? "**CRIT**! " : "") + (miss ? "**MISS**! " : "")
 						+ "[**" + target.stats.getInt(Stats.HP) + " / " + target.stats.getInt(Stats.MAX_HP) + "**]\n";
 			}
 
