@@ -1,13 +1,13 @@
 package com.oopsjpeg.enigma.game.unit;
 
 import com.oopsjpeg.enigma.game.Game;
-import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.unit.util.Unit;
+import com.oopsjpeg.enigma.game.util.Stats;
+import com.oopsjpeg.enigma.game.util.Unit;
 import com.oopsjpeg.enigma.util.Emote;
 
 import java.awt.*;
 
-public class BerserkerUnit implements Unit {
+public class Berserker implements Unit {
 	public static final String NAME = "Berserker";
 	public static final String DESC = "Attacking or being attacked builds up to **5** stacks of **Rage**."
 			+ "\nUsing `>rage` consumes stacks to increase damage for a single turn (**4%** per stack)."

@@ -3,13 +3,14 @@ package com.oopsjpeg.enigma.game;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.commands.game.*;
 import com.oopsjpeg.enigma.game.effect.LoveOfWar;
-import com.oopsjpeg.enigma.game.effect.util.Effect;
-import com.oopsjpeg.enigma.game.item.util.Item;
-import com.oopsjpeg.enigma.game.unit.BerserkerUnit;
-import com.oopsjpeg.enigma.game.unit.GunslingerUnit;
-import com.oopsjpeg.enigma.game.unit.ThiefUnit;
-import com.oopsjpeg.enigma.game.unit.WarriorUnit;
-import com.oopsjpeg.enigma.game.unit.util.Unit;
+import com.oopsjpeg.enigma.game.util.Effect;
+import com.oopsjpeg.enigma.game.util.Item;
+import com.oopsjpeg.enigma.game.unit.Berserker;
+import com.oopsjpeg.enigma.game.unit.Gunslinger;
+import com.oopsjpeg.enigma.game.unit.Thief;
+import com.oopsjpeg.enigma.game.unit.Warrior;
+import com.oopsjpeg.enigma.game.util.Stats;
+import com.oopsjpeg.enigma.game.util.Unit;
 import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.ChanceBag;
 import com.oopsjpeg.enigma.util.Emote;
@@ -131,12 +132,12 @@ public class Game {
 					+ "Health: **" + member.stats.getInt(Stats.HP) + " / " + member.stats.getInt(Stats.MAX_HP)
 					+ "** (+**" + member.perTurn.getInt(Stats.HP) + "**/t)\n"
 					+ "Energy: **" + member.stats.getInt(Stats.ENERGY) + "**\n"
-					+ (member.unit instanceof WarriorUnit
-					? "Strike: **" + ((WarriorUnit) member.unit).getBonus() + " / 3**\n" : "")
-					+ (member.unit instanceof BerserkerUnit
-					? "Rage: **" + ((BerserkerUnit) member.unit).getRage() + " / 5**\n" : "")
-					+ (member.unit instanceof GunslingerUnit
-					? "Shot: **" + ((GunslingerUnit) member.unit).getShot() + " / 4**\n" : "")
+					+ (member.unit instanceof Warrior
+					? "Strike: **" + ((Warrior) member.unit).getBonus() + " / 3**\n" : "")
+					+ (member.unit instanceof Berserker
+					? "Rage: **" + ((Berserker) member.unit).getRage() + " / 5**\n" : "")
+					+ (member.unit instanceof Gunslinger
+					? "Shot: **" + ((Gunslinger) member.unit).getShot() + " / 4**\n" : "")
 					+ "Items: **" + member.items + "**\n");
 		}
 	}
@@ -332,10 +333,10 @@ public class Game {
 
 		@Override
 		public boolean act(Member actor) {
-			if (!(actor.unit instanceof WarriorUnit))
+			if (!(actor.unit instanceof Warrior))
 				Bufferer.sendMessage(channel, Emote.NO + "You are not playing **Warrior**.");
 			else {
-				WarriorUnit wu = (WarriorUnit) actor.unit;
+				Warrior wu = (Warrior) actor.unit;
 				if (wu.getBash())
 					Bufferer.sendMessage(channel, Emote.NO + "You can only use **Bash** once per turn.");
 				else {
@@ -371,10 +372,10 @@ public class Game {
 	public class RageAction extends Action {
 		@Override
 		public boolean act(Member actor) {
-			if (!(actor.unit instanceof BerserkerUnit))
+			if (!(actor.unit instanceof Berserker))
 				Bufferer.sendMessage(channel, Emote.NO + "You are not playing **Berserker**.");
 			else {
-				BerserkerUnit bu = (BerserkerUnit) actor.unit;
+				Berserker bu = (Berserker) actor.unit;
 				bu.setBonus(0.04f * bu.getRage());
 				bu.setRage(0);
 				Bufferer.sendMessage(channel, Emote.RAGE + "**" + actor.getName() + "** has gained **"
@@ -468,8 +469,8 @@ public class Game {
 			stats.put(Stats.HP, stats.get(Stats.MAX_HP));
 			stats.put(Stats.GOLD, 300 - (perTurn.get(Stats.GOLD) * (1 - getAlive().indexOf(this))));
 
-			if (unit instanceof BerserkerUnit)
-				((BerserkerUnit) unit).setRage(getAlive().indexOf(this));
+			if (unit instanceof Berserker)
+				((Berserker) unit).setRage(getAlive().indexOf(this));
 		}
 
 		public void updateStats() {
@@ -503,7 +504,7 @@ public class Game {
 				perTurn.add(e.getPerTurn());
 			}
 
-			if (unit instanceof GunslingerUnit)
+			if (unit instanceof Gunslinger)
 				stats.mul(Stats.DAMAGE, 1 + (stats.get(Stats.CRIT_CHANCE) * 0.75f));
 
 			critBag.setChance(stats.get(Stats.CRIT_CHANCE));
@@ -544,8 +545,8 @@ public class Game {
 				damage *= 1 + ((low.attack() - 1) * low.getPower());
 			}
 
-			if (unit instanceof GunslingerUnit && ((GunslingerUnit) unit).shot() >= 4) {
-				((GunslingerUnit) unit).setShot(0);
+			if (unit instanceof Gunslinger && ((Gunslinger) unit).shot() >= 4) {
+				((Gunslinger) unit).setShot(0);
 				crit = true;
 			} else if (unit.isRanged() && stats.get(Stats.ACCURACY) < 1
 					&& RoUtil.RANDOM.nextFloat() > stats.get(Stats.ACCURACY)) {
@@ -553,8 +554,8 @@ public class Game {
 				miss = true;
 			}
 
-			if (unit instanceof WarriorUnit) {
-				WarriorUnit wu = (WarriorUnit) unit;
+			if (unit instanceof Warrior) {
+				Warrior wu = (Warrior) unit;
 				if (wu.bonus() >= 3) {
 					damage *= 1.25;
 					wu.setBonus(0);
@@ -564,12 +565,12 @@ public class Game {
 			if (stats.get(Stats.LIFE_STEAL) > 0)
 				bonus += heal(Math.round(stats.get(Stats.LIFE_STEAL) * damage));
 
-			if ((!(unit instanceof GunslingerUnit) && critBag.get()) || crit) {
+			if ((!(unit instanceof Gunslinger) && critBag.get()) || crit) {
 				crit = true;
 				float critAmt = 1.5f + stats.get(Stats.CRIT_DAMAGE);
 
-				if (unit instanceof ThiefUnit) {
-					ThiefUnit tu = (ThiefUnit) unit;
+				if (unit instanceof Thief) {
+					Thief tu = (Thief) unit;
 					critAmt += tu.getCrit() * 0.1f;
 					if (tu.crit() == 1) {
 						int steal = Math.round(Math.max(1, Math.min(stats.get(Stats.DAMAGE) * 0.4f,

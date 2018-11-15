@@ -1,7 +1,7 @@
 package com.oopsjpeg.enigma.game.effect;
 
 import com.oopsjpeg.enigma.game.Game;
-import com.oopsjpeg.enigma.game.effect.util.Effect;
+import com.oopsjpeg.enigma.game.util.Effect;
 
 public class LoveOfWar implements Effect {
 	public static final String NAME = "Love of War";

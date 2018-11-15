@@ -1,12 +1,12 @@
 package com.oopsjpeg.enigma.game.unit;
 
 import com.oopsjpeg.enigma.game.Game;
-import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.unit.util.Unit;
+import com.oopsjpeg.enigma.game.util.Stats;
+import com.oopsjpeg.enigma.game.util.Unit;
 
 import java.awt.*;
 
-public class WarriorUnit implements Unit {
+public class Warrior implements Unit {
 	public static final String NAME = "Warrior";
 	public static final String DESC = "Every third attack deals **25%** more damage."
 			+ "\nUsing `>bash` destroys shields and deals **40%** of damage.";

@@ -1,7 +1,6 @@
-package com.oopsjpeg.enigma.game.effect.util;
+package com.oopsjpeg.enigma.game.util;
 
 import com.oopsjpeg.enigma.game.Game;
-import com.oopsjpeg.enigma.game.Stats;
 
 public interface Effect {
 	String getName();

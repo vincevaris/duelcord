@@ -1,8 +1,8 @@
 package com.oopsjpeg.enigma.game.effect;
 
 import com.oopsjpeg.enigma.game.Game;
-import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.effect.util.Effect;
+import com.oopsjpeg.enigma.game.util.Stats;
+import com.oopsjpeg.enigma.game.util.Effect;
 
 public class DawnShield implements Effect {
 	@Override

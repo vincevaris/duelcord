@@ -1,7 +1,7 @@
 package com.oopsjpeg.enigma.game.item;
 
-import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.item.util.Item;
+import com.oopsjpeg.enigma.game.util.Stats;
+import com.oopsjpeg.enigma.game.util.Item;
 
 public class Crystal extends Item {
 	public static final String NAME = "Crystal";

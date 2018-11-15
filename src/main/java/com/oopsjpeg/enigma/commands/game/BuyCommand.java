@@ -3,7 +3,7 @@ package com.oopsjpeg.enigma.commands.game;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.commands.util.GameCommand;
 import com.oopsjpeg.enigma.game.Game;
-import com.oopsjpeg.enigma.game.item.util.Item;
+import com.oopsjpeg.enigma.game.util.Item;
 import com.oopsjpeg.enigma.util.Util;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;

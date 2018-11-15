@@ -1,11 +1,11 @@
 package com.oopsjpeg.enigma.game.unit;
 
-import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.unit.util.Unit;
+import com.oopsjpeg.enigma.game.util.Stats;
+import com.oopsjpeg.enigma.game.util.Unit;
 
 import java.awt.*;
 
-public class GunslingerUnit implements Unit {
+public class Gunslinger implements Unit {
 	public static final String NAME = "Gunslinger";
 	public static final String DESC = "Every **4th** shot is a guaranteed crit and never misses."
 			+ "\nHowever, attacks before the **4th** shot cannot crit."

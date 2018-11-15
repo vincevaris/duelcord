@@ -1,19 +1,18 @@
-package com.oopsjpeg.enigma.game.unit.util;
+package com.oopsjpeg.enigma.game.util;
 
 import com.oopsjpeg.enigma.game.Game;
-import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.unit.BerserkerUnit;
-import com.oopsjpeg.enigma.game.unit.GunslingerUnit;
-import com.oopsjpeg.enigma.game.unit.ThiefUnit;
-import com.oopsjpeg.enigma.game.unit.WarriorUnit;
+import com.oopsjpeg.enigma.game.unit.Berserker;
+import com.oopsjpeg.enigma.game.unit.Gunslinger;
+import com.oopsjpeg.enigma.game.unit.Thief;
+import com.oopsjpeg.enigma.game.unit.Warrior;
 
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 
 public interface Unit {
 	Unit[] values = {
-			new BerserkerUnit(), new ThiefUnit(), new WarriorUnit(),
-			new GunslingerUnit()
+			new Berserker(), new Thief(), new Warrior(),
+			new Gunslinger()
 	};
 
 	static Unit[] values() {

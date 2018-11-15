@@ -1,12 +1,12 @@
 package com.oopsjpeg.enigma.game.unit;
 
 import com.oopsjpeg.enigma.game.Game;
-import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.unit.util.Unit;
+import com.oopsjpeg.enigma.game.util.Stats;
+import com.oopsjpeg.enigma.game.util.Unit;
 
 import java.awt.*;
 
-public class ThiefUnit implements Unit {
+public class Thief implements Unit {
 	public static final String NAME = "Thief";
 	public static final String DESC = "The first critical strike in a turn steals gold equal to **40%** of damage."
 			+ "\nBase crit damage is reduced by **20%**, however, subsequent crits in a turn deal increasing damage.";

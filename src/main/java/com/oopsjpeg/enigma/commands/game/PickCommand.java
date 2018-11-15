@@ -3,7 +3,7 @@ package com.oopsjpeg.enigma.commands.game;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.commands.util.GameCommand;
 import com.oopsjpeg.enigma.game.Game;
-import com.oopsjpeg.enigma.game.unit.util.Unit;
+import com.oopsjpeg.enigma.game.util.Unit;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Util;
 import com.oopsjpeg.roboops.framework.Bufferer;

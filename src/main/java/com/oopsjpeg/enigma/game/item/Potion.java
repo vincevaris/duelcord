@@ -1,7 +1,7 @@
 package com.oopsjpeg.enigma.game.item;
 
 import com.oopsjpeg.enigma.game.Game;
-import com.oopsjpeg.enigma.game.item.util.Item;
+import com.oopsjpeg.enigma.game.util.Item;
 
 public class Potion extends Item {
 	public static final String NAME = "Potion";

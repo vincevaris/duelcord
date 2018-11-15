@@ -1,9 +1,9 @@
 package com.oopsjpeg.enigma.game.item;
 
-import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.util.Stats;
 import com.oopsjpeg.enigma.game.effect.StatsEffect;
-import com.oopsjpeg.enigma.game.effect.util.Effect;
-import com.oopsjpeg.enigma.game.item.util.Item;
+import com.oopsjpeg.enigma.game.util.Effect;
+import com.oopsjpeg.enigma.game.util.Item;
 
 public class Soulstealer extends Item {
 	public static final String NAME = "Soulstealer";

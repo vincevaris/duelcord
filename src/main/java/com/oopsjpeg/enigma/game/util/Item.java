@@ -1,8 +1,6 @@
-package com.oopsjpeg.enigma.game.item.util;
+package com.oopsjpeg.enigma.game.util;
 
 import com.oopsjpeg.enigma.game.Game;
-import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.effect.util.Effect;
 import com.oopsjpeg.enigma.game.item.*;
 
 import java.lang.reflect.InvocationTargetException;
