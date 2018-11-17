@@ -579,7 +579,7 @@ public class Game {
 
 			// Critical strike bonus damage
 			if (crit) {
-				float critMul = 2 + stats.get(Stats.CRIT_DAMAGE);
+				float critMul = 1.5f + stats.get(Stats.CRIT_DAMAGE);
 
 				// Thief bonus crit damage + gold steal
 				if (unit instanceof Thief) {
