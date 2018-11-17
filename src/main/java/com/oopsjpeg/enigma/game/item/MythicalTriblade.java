@@ -1,10 +1,10 @@
 package com.oopsjpeg.enigma.game.item;
 
-import com.oopsjpeg.enigma.game.util.Stats;
 import com.oopsjpeg.enigma.game.effect.LoveOfWar;
 import com.oopsjpeg.enigma.game.effect.StatsEffect;
 import com.oopsjpeg.enigma.game.util.Effect;
 import com.oopsjpeg.enigma.game.util.Item;
+import com.oopsjpeg.enigma.game.util.Stats;
 
 public class MythicalTriblade extends Item {
 	public static final String NAME = "Mythical Triblade";

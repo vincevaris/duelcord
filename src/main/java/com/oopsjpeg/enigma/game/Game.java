@@ -538,26 +538,26 @@ public class Game {
 			}
 
 			// Warrior bonus damage
-			if (unit instanceof Warrior && ((Warrior)unit).bonus() >= 3) {
+			if (unit instanceof Warrior && ((Warrior) unit).bonus() >= 3) {
 				int bonusDmg = Math.round(damage * 0.25f);
 				damage += bonusDmg;
-				((Warrior)unit).setBonus(0);
+				((Warrior) unit).setBonus(0);
 				bonus += Emote.KNIFE + "**" + getName() + "** dealt **" + bonusDmg + "** bonus damage!\n";
 			}
 
 			// Berserker attacker checks
 			if (unit instanceof Berserker) {
-				if (((Berserker)unit).getBonus() > 0)
+				if (((Berserker) unit).getBonus() > 0)
 					// Berserker bonus damage
-					damage *= 1 + ((Berserker)unit).getBonus();
+					damage *= 1 + ((Berserker) unit).getBonus();
 				else
 					// Berserker rage stack from attacking
-					((Berserker)unit).rage();
+					((Berserker) unit).rage();
 			}
 
 			// Berserker victim rage stack
-			if (target.unit instanceof Berserker && ((Berserker)target.unit).getBonus() <= 0)
-				((Berserker)target.unit).rage();
+			if (target.unit instanceof Berserker && ((Berserker) target.unit).getBonus() <= 0)
+				((Berserker) target.unit).rage();
 
 			// Crit checks
 			if (!miss) {
@@ -577,8 +577,8 @@ public class Game {
 
 				// Thief bonus crit damage + gold steal
 				if (unit instanceof Thief) {
-					critMul += ((Thief)unit).getCrit() * 0.2f;
-					if (((Thief)unit).crit() == 1) {
+					critMul += ((Thief) unit).getCrit() * 0.2f;
+					if (((Thief) unit).crit() == 1) {
 						int steal = (int) Math.min(stats.get(Stats.DAMAGE) * 0.4f, target.stats.getInt(Stats.GOLD));
 						stats.add(Stats.GOLD, steal);
 						target.stats.sub(Stats.GOLD, steal);

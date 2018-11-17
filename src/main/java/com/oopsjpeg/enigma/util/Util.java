@@ -2,13 +2,14 @@ package com.oopsjpeg.enigma.util;
 
 import com.oopsjpeg.enigma.game.util.Stats;
 import com.oopsjpeg.roboops.framework.Bufferer;
+import com.oopsjpeg.roboops.framework.RoUtil;
 import sx.blah.discord.handle.obj.IChannel;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class Util {
+public class Util extends RoUtil {
 	public static void sendError(IChannel channel, String error) {
 		Bufferer.deleteMessage(Bufferer.sendMessage(channel, Emote.NO + error), 5, TimeUnit.SECONDS);
 	}
