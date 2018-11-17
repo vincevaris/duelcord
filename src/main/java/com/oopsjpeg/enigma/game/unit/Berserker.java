@@ -11,14 +11,14 @@ public class Berserker implements Unit {
 	public static final String NAME = "Berserker";
 	public static final String DESC = "Attacking or being attacked builds up to **5** stacks of **Rage**."
 			+ "\nUsing `>rage` consumes stacks to increase damage for a single turn (**4%** per stack)."
-			+ "\nAt maximum stacks, `>rage` grants **75** bonus energy.";
+			+ "\nAt maximum stacks, `>rage` grants **100** bonus energy.";
 	public static final Color COLOR = Color.RED;
 	public static final Stats STATS = new Stats()
 			.put(Stats.ENERGY, 100)
-			.put(Stats.MAX_HP, 590)
+			.put(Stats.MAX_HP, 560)
 			.put(Stats.DAMAGE, 19);
 	public static final Stats PER_TURN = new Stats()
-			.put(Stats.HP, 14)
+			.put(Stats.HP, 12)
 			.put(Stats.GOLD, 75);
 
 	private int rage = 0;

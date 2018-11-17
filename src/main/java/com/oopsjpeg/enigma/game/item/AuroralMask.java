@@ -13,7 +13,7 @@ public class AuroralMask extends Item {
 	public static final Effect[] EFFECTS = new Effect[]{StatsEffect.perTurn(new Stats()
 			.put(Stats.ENERGY, 25)), new DawnShield()};
 	public static final Stats STATS = new Stats()
-			.put(Stats.HP, 80.0f);
+			.put(Stats.MAX_HP, 80.0f);
 
 	@Override
 	public String getName() {

@@ -359,11 +359,17 @@ public class Game {
 			if (!(actor.unit instanceof Berserker))
 				Bufferer.sendMessage(channel, Emote.NO + "You are not playing **Berserker**.");
 			else {
-				Berserker bu = (Berserker) actor.unit;
-				bu.setBonus(0.04f * bu.getRage());
-				bu.setRage(0);
+				Berserker berserk = (Berserker) actor.unit;
+				berserk.setBonus(0.04f * berserk.getRage());
+
+				if (berserk.getRage() == 5) actor.stats.add(Stats.ENERGY, 100);
+
 				Bufferer.sendMessage(channel, Emote.RAGE + "**" + actor.getName() + "** has gained **"
-						+ Math.round(bu.getBonus() * 100) + "** bonus damage this turn!");
+						+ Math.round(berserk.getBonus() * 100) + "%** bonus damage "
+						+ (berserk.getRage() == 5 ? "and **100** energy " : "") + "this turn!");
+
+				berserk.setRage(0);
+
 				return true;
 			}
 			return false;
