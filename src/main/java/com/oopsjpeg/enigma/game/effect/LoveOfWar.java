@@ -1,9 +1,9 @@
 package com.oopsjpeg.enigma.game.effect;
 
 import com.oopsjpeg.enigma.game.Game;
-import com.oopsjpeg.enigma.game.util.Effect;
+import com.oopsjpeg.enigma.game.obj.Effect;
 
-public class LoveOfWar implements Effect {
+public class LoveOfWar extends Effect {
 	public static final String NAME = "Love of War";
 	private final float power;
 

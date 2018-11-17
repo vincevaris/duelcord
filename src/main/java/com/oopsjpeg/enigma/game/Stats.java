@@ -1,4 +1,4 @@
-package com.oopsjpeg.enigma.game.util;
+package com.oopsjpeg.enigma.game;
 
 import java.util.HashMap;
 import java.util.Map;

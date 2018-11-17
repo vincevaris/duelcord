@@ -1,10 +1,10 @@
 package com.oopsjpeg.enigma.game.effect;
 
 import com.oopsjpeg.enigma.game.Game;
-import com.oopsjpeg.enigma.game.util.Effect;
-import com.oopsjpeg.enigma.game.util.Stats;
+import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.obj.Effect;
 
-public class DawnShield implements Effect {
+public class DawnShield extends Effect {
 	@Override
 	public String getName() {
 		return "Dawn Shield";

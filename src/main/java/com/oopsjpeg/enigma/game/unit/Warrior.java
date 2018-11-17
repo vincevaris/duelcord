@@ -1,19 +1,19 @@
 package com.oopsjpeg.enigma.game.unit;
 
 import com.oopsjpeg.enigma.game.Game;
-import com.oopsjpeg.enigma.game.util.Stats;
-import com.oopsjpeg.enigma.game.util.Unit;
+import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.obj.Unit;
 
 import java.awt.*;
 
-public class Warrior implements Unit {
+public class Warrior extends Unit {
 	public static final String NAME = "Warrior";
 	public static final String DESC = "Every third attack deals **25%** more damage."
 			+ "\nUsing `>bash` destroys shields and deals **40%** of damage.";
 	public static final Color COLOR = Color.CYAN;
 	public static final Stats STATS = new Stats()
 			.put(Stats.ENERGY, 125)
-			.put(Stats.MAX_HP, 580)
+			.put(Stats.MAX_HP, 800)
 			.put(Stats.DAMAGE, 24);
 	public static final Stats PER_TURN = new Stats()
 			.put(Stats.HP, 13)

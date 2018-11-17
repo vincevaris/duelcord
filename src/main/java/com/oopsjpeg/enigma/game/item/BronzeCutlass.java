@@ -1,7 +1,7 @@
 package com.oopsjpeg.enigma.game.item;
 
-import com.oopsjpeg.enigma.game.util.Item;
-import com.oopsjpeg.enigma.game.util.Stats;
+import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.obj.Item;
 
 public class BronzeCutlass extends Item {
 	public static final String NAME = "Bronze Cutlass";

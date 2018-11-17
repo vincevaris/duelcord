@@ -1,11 +1,13 @@
-package com.oopsjpeg.enigma.game.util;
+package com.oopsjpeg.enigma.game.obj;
 
 import com.oopsjpeg.enigma.game.Game;
+import com.oopsjpeg.enigma.game.GameObject;
+import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.item.*;
 
 import java.lang.reflect.InvocationTargetException;
 
-public abstract class Item {
+public abstract class Item implements GameObject {
 	private static final Item[] values = {
 			new AuroralMask(),
 			new BloodlustBlade(),

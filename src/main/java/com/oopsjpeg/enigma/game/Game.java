@@ -3,14 +3,14 @@ package com.oopsjpeg.enigma.game;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.commands.game.*;
 import com.oopsjpeg.enigma.game.effect.LoveOfWar;
+import com.oopsjpeg.enigma.game.obj.Buff;
+import com.oopsjpeg.enigma.game.obj.Effect;
+import com.oopsjpeg.enigma.game.obj.Item;
+import com.oopsjpeg.enigma.game.obj.Unit;
 import com.oopsjpeg.enigma.game.unit.Berserker;
 import com.oopsjpeg.enigma.game.unit.Gunslinger;
 import com.oopsjpeg.enigma.game.unit.Thief;
 import com.oopsjpeg.enigma.game.unit.Warrior;
-import com.oopsjpeg.enigma.game.util.Effect;
-import com.oopsjpeg.enigma.game.util.Item;
-import com.oopsjpeg.enigma.game.util.Stats;
-import com.oopsjpeg.enigma.game.util.Unit;
 import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.ChanceBag;
 import com.oopsjpeg.enigma.util.Emote;
@@ -24,7 +24,10 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Permissions;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class Game {
@@ -92,7 +95,7 @@ public class Game {
 			}
 		} else if (gameState == 1) {
 			extra += curMember.unit.onTurnEnd(curMember);
-			extra += curMember.effects.stream()
+			extra += curMember.data.stream()
 					.map(e -> e.onTurnEnd(curMember))
 					.collect(Collectors.joining());
 
@@ -105,7 +108,7 @@ public class Game {
 			curMember.stats.put(Stats.SHIELD, 0);
 
 			extra += curMember.unit.onTurnStart(curMember);
-			extra += curMember.effects.stream()
+			extra += curMember.data.stream()
 					.map(e -> e.onTurnStart(curMember))
 					.collect(Collectors.joining());
 			curMember.defend = 0;
@@ -140,7 +143,7 @@ public class Game {
 					? "Rage: **" + ((Berserker) member.unit).getRage() + " / 5**\n" : "")
 					+ (member.unit instanceof Gunslinger
 					? "Shot: **" + ((Gunslinger) member.unit).getShot() + " / 4**\n" : "")
-					+ "Items: **" + member.items + "**\n");
+					+ "Items: **" + member.getItems() + "**\n");
 		}
 	}
 
@@ -241,7 +244,7 @@ public class Game {
 		@Override
 		public boolean act(Member actor) {
 			int cost = item.getCost();
-			List<Item> build = new ArrayList<>(actor.items);
+			List<Item> build = actor.getItems();
 			for (Item i : item.getBuild())
 				if (build.contains(i)) {
 					cost -= i.getCost();
@@ -257,8 +260,8 @@ public class Game {
 			else {
 				String output = "";
 				actor.stats.sub(Stats.GOLD, cost);
-				actor.items.add(item);
-				actor.items.removeAll(Arrays.asList(item.getBuild()));
+				actor.data.add(item);
+				actor.data.removeAll(Arrays.asList(item.getBuild()));
 				actor.updateStats();
 
 				if (item.getStats().get(Stats.MAX_HP) > 0 && !actor.shields.contains(item)) {
@@ -288,14 +291,14 @@ public class Game {
 
 		@Override
 		public boolean act(Member actor) {
-			if (!actor.items.contains(item))
+			if (!actor.data.contains(item))
 				Bufferer.sendMessage(channel, Emote.NO + "You don't have a(n) **" + item.getName() + "**.");
 			else if (!item.canUse())
 				Bufferer.sendMessage(channel, Emote.NO + "**" + item.getName() + "** can't be used.");
 			else {
 				Bufferer.sendMessage(channel, Emote.USE + "**" + actor.getName() + "** used a(n) **"
 						+ item.getName() + "**.\n" + item.onUse(actor));
-				if (item.removeOnUse()) actor.items.remove(item);
+				if (item.removeOnUse()) actor.data.remove(item);
 				actor.updateStats();
 				return true;
 			}
@@ -386,15 +389,14 @@ public class Game {
 		private Unit unit;
 		private boolean alive = true;
 		private int defend = 0;
-		private Map<Object, Object> data = new HashMap<>();
+
+		private List<GameObject> data = new ArrayList<>();
+		private List<Item> shields = new ArrayList<>();
 
 		private ChanceBag critBag = new ChanceBag();
 
 		private Stats stats = new Stats();
 		private Stats perTurn = new Stats();
-		private List<Item> items = new ArrayList<>();
-		private List<Effect> effects = new ArrayList<>();
-		private List<Item> shields = new ArrayList<>();
 
 		public Member(Player player) {
 			this.player = player;
@@ -433,15 +435,28 @@ public class Game {
 		}
 
 		public List<Item> getItems() {
-			return items;
+			return data.stream()
+					.filter(o -> o instanceof Item)
+					.map(o -> (Item) o)
+					.collect(Collectors.toList());
 		}
 
 		public List<Effect> getEffects() {
-			return effects;
+			return data.stream()
+					.filter(o -> o instanceof Effect)
+					.map(o -> (Effect) o)
+					.collect(Collectors.toList());
+		}
+
+		public List<Buff> getBuffs() {
+			return data.stream()
+					.filter(o -> o instanceof Buff)
+					.map(o -> (Buff) o)
+					.collect(Collectors.toList());
 		}
 
 		public Effect getEffect(Class clazz) {
-			return effects.stream().filter(e -> e.getClass().equals(clazz)).findAny().orElse(null);
+			return getEffects().stream().filter(e -> e.getClass().equals(clazz)).findAny().orElse(null);
 		}
 
 		public boolean hasEffect(Class clazz) {
@@ -474,24 +489,24 @@ public class Game {
 			perTurn.put(Stats.GOLD, unit.getPerTurn().get(Stats.GOLD));
 			perTurn.put(Stats.ENERGY, unit.getPerTurn().get(Stats.ENERGY));
 
-			for (Item i : items) {
-				stats.add(i.getStats());
-				perTurn.add(i.getPerTurn());
-				for (Effect e : i.getEffects()) {
-					if (!effects.contains(e)) effects.add(e);
-					else if (effects.contains(e)) {
-						Effect old = effects.get(effects.indexOf(e));
-						if (e.getPower() > old.getPower()) {
-							effects.remove(old);
-							effects.add(e);
+			for (Item item : getItems()) {
+				stats.add(item.getStats());
+				perTurn.add(item.getPerTurn());
+				for (Effect effect : item.getEffects()) {
+					if (!data.contains(effect)) data.add(effect);
+					else {
+						Effect oldEffect = (Effect) data.get(data.indexOf(effect));
+						if (effect.getPower() > oldEffect.getPower()) {
+							data.remove(oldEffect);
+							data.add(effect);
 						}
 					}
 				}
 			}
 
-			for (Effect e : effects) {
-				stats.add(e.getStats());
-				perTurn.add(e.getPerTurn());
+			for (Effect effect : getEffects()) {
+				stats.add(effect.getStats());
+				perTurn.add(effect.getPerTurn());
 			}
 
 			if (unit instanceof Gunslinger)

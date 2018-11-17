@@ -1,6 +1,6 @@
 package com.oopsjpeg.enigma.util;
 
-import com.oopsjpeg.enigma.game.util.Stats;
+import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.roboops.framework.Bufferer;
 import com.oopsjpeg.roboops.framework.RoUtil;
 import sx.blah.discord.handle.obj.IChannel;

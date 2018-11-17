@@ -1,10 +1,10 @@
 package com.oopsjpeg.enigma.game.effect;
 
-import com.oopsjpeg.enigma.game.util.Effect;
-import com.oopsjpeg.enigma.game.util.Stats;
+import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.util.Util;
 
-public class StatsEffect implements Effect {
+public class StatsEffect extends Effect {
 	private final Stats stats;
 	private final Stats perTurn;
 
