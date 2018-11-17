@@ -3,23 +3,25 @@ package com.oopsjpeg.enigma.game;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.commands.game.*;
 import com.oopsjpeg.enigma.game.effect.LoveOfWar;
-import com.oopsjpeg.enigma.game.util.Effect;
-import com.oopsjpeg.enigma.game.util.Item;
 import com.oopsjpeg.enigma.game.unit.Berserker;
 import com.oopsjpeg.enigma.game.unit.Gunslinger;
 import com.oopsjpeg.enigma.game.unit.Thief;
 import com.oopsjpeg.enigma.game.unit.Warrior;
+import com.oopsjpeg.enigma.game.util.Effect;
+import com.oopsjpeg.enigma.game.util.Item;
 import com.oopsjpeg.enigma.game.util.Stats;
 import com.oopsjpeg.enigma.game.util.Unit;
 import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.ChanceBag;
 import com.oopsjpeg.enigma.util.Emote;
+import com.oopsjpeg.enigma.util.Util;
 import com.oopsjpeg.roboops.framework.Bufferer;
 import com.oopsjpeg.roboops.framework.RoUtil;
 import com.oopsjpeg.roboops.framework.commands.CommandCenter;
-import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.Permissions;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -522,52 +524,79 @@ public class Game {
 			boolean crit = false;
 			boolean miss = false;
 
+			// Missed attack damage reduction
+			if (unit.isRanged() && stats.get(Stats.ACCURACY) < 1
+					&& Util.RANDOM.nextFloat() <= stats.get(Stats.ACCURACY)) {
+				damage *= 0.4f;
+				miss = true;
+			}
+
+			// Love of War damage multiplier
 			if (hasEffect(LoveOfWar.class)) {
 				LoveOfWar low = (LoveOfWar) getEffect(LoveOfWar.class);
 				damage *= 1 + ((low.attack() - 1) * low.getPower());
 			}
 
-			if (unit instanceof Gunslinger && ((Gunslinger) unit).shot() >= 4) {
-				((Gunslinger) unit).setShot(0);
-				crit = true;
-			} else if (unit.isRanged() && stats.get(Stats.ACCURACY) < 1
-					&& RoUtil.RANDOM.nextFloat() > stats.get(Stats.ACCURACY)) {
-				damage *= 0.4f;
-				miss = true;
+			// Warrior bonus damage
+			if (unit instanceof Warrior && ((Warrior)unit).bonus() >= 3) {
+				int bonusDmg = Math.round(damage * 0.25f);
+				damage += bonusDmg;
+				((Warrior)unit).setBonus(0);
+				bonus += Emote.KNIFE + "**" + getName() + "** dealt **" + bonusDmg + "** bonus damage!\n";
 			}
 
-			if (unit instanceof Warrior) {
-				Warrior wu = (Warrior) unit;
-				if (wu.bonus() >= 3) {
-					damage *= 1.25;
-					wu.setBonus(0);
+			// Berserker attacker checks
+			if (unit instanceof Berserker) {
+				if (((Berserker)unit).getBonus() > 0)
+					// Berserker bonus damage
+					damage *= 1 + ((Berserker)unit).getBonus();
+				else
+					// Berserker rage stack from attacking
+					((Berserker)unit).rage();
+			}
+
+			// Berserker victim rage stack
+			if (target.unit instanceof Berserker && ((Berserker)target.unit).getBonus() <= 0)
+				((Berserker)target.unit).rage();
+
+			// Crit checks
+			if (!miss) {
+				if (unit instanceof Gunslinger && ((Gunslinger) unit).shot() >= 4) {
+					// Gunslinger passive crit
+					crit = true;
+					((Gunslinger) unit).setShot(0);
+				} else if (critBag.get()) {
+					// Pseudo RNG crit bag
+					crit = true;
 				}
 			}
 
-			if (stats.get(Stats.LIFE_STEAL) > 0)
-				bonus += heal(Math.round(stats.get(Stats.LIFE_STEAL) * damage));
+			// Critical strike bonus damage
+			if (crit) {
+				float critMul = 2 + stats.get(Stats.CRIT_DAMAGE);
 
-			if ((!(unit instanceof Gunslinger) && critBag.get()) || crit) {
-				crit = true;
-				float critAmt = 1.5f + stats.get(Stats.CRIT_DAMAGE);
-
+				// Thief bonus crit damage + gold steal
 				if (unit instanceof Thief) {
-					Thief tu = (Thief) unit;
-					critAmt += tu.getCrit() * 0.1f;
-					if (tu.crit() == 1) {
-						int steal = Math.round(Math.max(1, Math.min(stats.get(Stats.DAMAGE) * 0.4f,
-								target.stats.get(Stats.GOLD))));
+					critMul += ((Thief)unit).getCrit() * 0.2f;
+					if (((Thief)unit).crit() == 1) {
+						int steal = (int) Math.min(stats.get(Stats.DAMAGE) * 0.4f, target.stats.getInt(Stats.GOLD));
 						stats.add(Stats.GOLD, steal);
 						target.stats.sub(Stats.GOLD, steal);
 						bonus += Emote.BUY + "**" + getName() + "** stole **" + steal + "** gold!\n";
 					}
 				}
 
-				damage *= Math.max(1, critAmt);
+				damage *= Math.max(1, critMul);
 			}
 
+			// Defensive stance damage reduction
 			if (target.defend == 1) damage *= 0.8f;
 
+			// Life steal healing
+			if (stats.get(Stats.LIFE_STEAL) > 0)
+				bonus += heal(Math.round(stats.get(Stats.LIFE_STEAL) * damage));
+
+			// Shield damaging
 			if (target.stats.get(Stats.SHIELD) > 0) {
 				float shieldDmg = Math.max(0, Math.min(damage, target.stats.get(Stats.SHIELD)));
 				target.stats.sub(Stats.SHIELD, shieldDmg);
@@ -582,6 +611,7 @@ public class Game {
 				}
 			}
 
+			// Direct damaging
 			if (target.stats.get(Stats.SHIELD) <= 0) {
 				bonus += damage(target, damage);
 				out += Emote.ATTACK + "**" + getName() + "** damaged **" + target.getName() + "** by **"

@@ -5,8 +5,8 @@ import com.oopsjpeg.enigma.commands.BuildCommand;
 import com.oopsjpeg.enigma.commands.QueueCommand;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.GameMode;
-import com.oopsjpeg.enigma.game.util.Stats;
 import com.oopsjpeg.enigma.game.util.Item;
+import com.oopsjpeg.enigma.game.util.Stats;
 import com.oopsjpeg.enigma.game.util.Unit;
 import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.Emote;
@@ -137,8 +137,6 @@ public class Enigma {
 						p.setGame(game);
 						p.removeQueue();
 						queue.getValue().remove(p);
-
-						System.out.println(p.getUser().getName() + " - " + p.getGame());
 					});
 					queues.get(mode).removeAll(matched);
 

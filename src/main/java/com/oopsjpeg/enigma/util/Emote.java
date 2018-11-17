@@ -15,4 +15,5 @@ public class Emote {
 	public static final String WARN = ":warning: ";
 	public static final String RAGE = ":anger: ";
 	public static final String GUN = ":gun: ";
+	public static final String KNIFE = ":knife: ";
 }

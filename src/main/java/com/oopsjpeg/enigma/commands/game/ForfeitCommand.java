@@ -1,16 +1,16 @@
 package com.oopsjpeg.enigma.commands.game;
 
 import com.oopsjpeg.enigma.Enigma;
-import com.oopsjpeg.enigma.commands.util.GameCommand;
 import com.oopsjpeg.roboops.framework.Bufferer;
+import com.oopsjpeg.roboops.framework.commands.Command;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
-public class ForfeitCommand implements GameCommand {
+public class ForfeitCommand implements Command {
 	@Override
 	public void execute(IMessage message, String alias, String[] args) {
-		GameCommand.super.execute(message, alias, args);
 		IUser author = message.getAuthor();
+		Bufferer.deleteMessage(message);
 		Bufferer.sendMessage(message.getChannel(), Enigma.getPlayer(author)
 				.getGame().getMember(author).lose());
 	}
