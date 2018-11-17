@@ -10,10 +10,13 @@ import sx.blah.discord.handle.obj.IUser;
 public class RefreshCommand implements Command {
 	@Override
 	public void execute(IMessage message, String alias, String[] args) {
-		Bufferer.deleteMessage(message);
 		IUser author = message.getAuthor();
 		Game game = Enigma.getPlayer(author).getGame();
-		game.setTopic(game.getMember(author));
+
+		if (message.getChannel().equals(game.getChannel())) {
+			Bufferer.deleteMessage(message);
+			game.setTopic(game.getMember(author));
+		}
 	}
 
 	@Override

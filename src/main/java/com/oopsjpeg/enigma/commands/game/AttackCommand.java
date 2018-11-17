@@ -17,7 +17,7 @@ public class AttackCommand implements Command {
 		Game game = Enigma.getPlayer(author).getGame();
 		Game.Member member = game.getMember(author);
 
-		if (member.equals(game.getCurrentMember())) {
+		if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
 			Bufferer.deleteMessage(message);
 			if (game.getGameState() == 0)
 				Util.sendError(channel, "You cannot attack until the game has started.");

@@ -14,15 +14,18 @@ import sx.blah.discord.handle.obj.IUser;
 public class StatsCommand implements Command {
 	@Override
 	public void execute(IMessage message, String alias, String[] args) {
-		Bufferer.deleteMessage(message);
 		IUser author = message.getAuthor();
 		IChannel channel = message.getChannel();
 		Game game = Enigma.getPlayer(author).getGame();
-		if (game.getGameState() == 0)
-			Util.sendError(channel, "You cannot check your gold until the game has started.");
-		else
-			Bufferer.sendMessage(channel, Emote.BUY + "**" + author.getName() + "** has **"
-					+ game.getMember(author).getStats().getInt(Stats.GOLD) + "** gold.");
+
+		if (channel.equals(game.getChannel())) {
+			Bufferer.deleteMessage(message);
+			if (game.getGameState() == 0)
+				Util.sendError(channel, "You cannot check your gold until the game has started.");
+			else
+				Bufferer.sendMessage(channel, Emote.BUY + "**" + author.getName() + "** has **"
+						+ game.getMember(author).getStats().getInt(Stats.GOLD) + "** gold.");
+		}
 	}
 
 	@Override
