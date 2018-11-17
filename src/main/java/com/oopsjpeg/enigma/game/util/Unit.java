@@ -55,14 +55,6 @@ public interface Unit {
 		return "";
 	}
 
-	default String onAttack(Game.Member member) {
-		return "";
-	}
-
-	default String onAttacked(Game.Member member) {
-		return "";
-	}
-
 	default String onDefend(Game.Member member) {
 		return "";
 	}

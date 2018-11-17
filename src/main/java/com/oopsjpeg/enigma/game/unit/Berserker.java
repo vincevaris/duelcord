@@ -71,13 +71,9 @@ public class Berserker implements Unit {
 	}
 
 	@Override
-	public String onAttack(Game.Member member) {
-		return stack(member);
-	}
-
-	@Override
-	public String onAttacked(Game.Member member) {
-		return stack(member);
+	public String onTurnEnd(Game.Member member) {
+		bonus = 0;
+		return "";
 	}
 
 	public String stack(Game.Member member) {
