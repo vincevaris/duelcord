@@ -8,7 +8,7 @@ import java.awt.*;
 
 public class Warrior extends Unit {
 	public static final String NAME = "Warrior";
-	public static final String DESC = "Every third attack deals **25%** more damage."
+	public static final String DESC = "Every **3rd** attack deals **25%** more damage."
 			+ "\nUsing `>bash` destroys shields and deals **40%** of damage.";
 	public static final Color COLOR = Color.CYAN;
 	public static final Stats STATS = new Stats()
