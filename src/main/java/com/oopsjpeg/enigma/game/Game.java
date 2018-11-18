@@ -97,13 +97,6 @@ public class Game {
 					.map(e -> e.onTurnEnd(curMember))
 					.collect(Collectors.toList()));
 
-			curMember.getBuffs().forEach(buff -> {
-				if (buff.turn() == 0) {
-					output.add(Emote.INFO + "**" + curMember.getName() + "'s " + buff.getName() + "** has expired.");
-					curMember.data.remove(buff);
-				}
-			});
-
 			curMember = getAlive().get(curTurn);
 
 			curMember.stats.add(Stats.HP, curMember.perTurn.get(Stats.HP) * curMember.defend);
@@ -117,6 +110,13 @@ public class Game {
 			output.add(curMember.data.stream()
 					.map(e -> e.onTurnStart(curMember))
 					.collect(Collectors.joining()));
+
+			curMember.getBuffs().forEach(buff -> {
+				if (buff.turn() == 0) {
+					output.add(Emote.INFO + "**" + curMember.getName() + "'s " + buff.getName() + "** has expired.");
+					curMember.data.remove(buff);
+				}
+			});
 
 			output.removeAll(Arrays.asList(null, ""));
 
@@ -270,19 +270,21 @@ public class Game {
 				Bufferer.sendMessage(channel, Emote.NO
 						+ "You do not have enough inventory space for a(n) **" + item.getName() + "**..");
 			else {
-				String output = "";
+				List<String> output = new ArrayList<>();
 				actor.stats.sub(Stats.GOLD, cost);
 				actor.data.add(item);
 				actor.data.removeAll(Arrays.asList(item.getBuild()));
 				actor.updateStats();
 
 				if (item.getStats().get(Stats.MAX_HP) > 0 && !actor.shields.contains(item)) {
-					output += actor.shield(item.getStats().get(Stats.MAX_HP));
+					output.add(actor.shield(item.getStats().get(Stats.MAX_HP)));
 					actor.shields.add(item);
 				}
 
-				Bufferer.sendMessage(channel, Emote.BUY + "**" + actor.getName() + "** purchased a(n) **"
-						+ item.getName() + "** for **" + cost + "** gold.\n" + output);
+				output.add(Emote.BUY + "**" + actor.getName() + "** purchased a(n) **"
+						+ item.getName() + "** for **" + cost + "** gold.");
+
+				Bufferer.sendMessage(channel, String.join("\n", output));
 				return true;
 			}
 			return false;
@@ -342,20 +344,19 @@ public class Game {
 					wu.setBash(true);
 
 					float damage = Math.round(actor.stats.get(Stats.DAMAGE) * 0.4f);
-					String output = "";
-					String bonus = "";
+					List<String> output = new ArrayList<>();
 
 					if (target.stats.get(Stats.SHIELD) > 0)
-						output += Emote.SHIELD + "**" + actor.getName()
-								+ "** destroyed **" + target.getName() + "'s Shield**!\n";
+						output.add(Emote.SHIELD + "**" + actor.getName()
+								+ "** destroyed **" + target.getName() + "'s Shield**!");
 
-					bonus += actor.damage(target, damage);
+					output.add(actor.damage(target, damage));
 
-					output += Emote.SHIELD + "**" + actor.getName() + "** bashed **"
+					output.add(0, Emote.SHIELD + "**" + actor.getName() + "** bashed **"
 							+ target.getName() + "** by **" + damage + "**! [**"
-							+ target.stats.getInt(Stats.HP) + " / " + target.stats.getInt(Stats.MAX_HP) + "**]\n";
+							+ target.stats.getInt(Stats.HP) + " / " + target.stats.getInt(Stats.MAX_HP) + "**]");
 
-					Bufferer.sendMessage(channel, output + bonus);
+					Bufferer.sendMessage(channel, String.join("\n", output));
 					return true;
 				}
 			}
@@ -436,6 +437,10 @@ public class Game {
 
 		public void setDefend(int defend) {
 			this.defend = defend;
+		}
+
+		public List<GameObject> getData() {
+			return data;
 		}
 
 		public Stats getStats() {
@@ -540,18 +545,17 @@ public class Game {
 		public String shield(float amount) {
 			stats.add(Stats.SHIELD, amount);
 			return Emote.HEAL + "**" + getName() + "** shielded by **" + Math.round(amount)
-					+ "**! [**" + stats.getInt(Stats.SHIELD) + "**]\n";
+					+ "**! [**" + stats.getInt(Stats.SHIELD) + "**]";
 		}
 
 		public String heal(float amount) {
 			stats.add(Stats.HP, amount);
 			return Emote.HEAL + "**" + getName() + "** healed by **" + Math.round(amount) + "**! [**"
-					+ stats.getInt(Stats.HP) + " / " + stats.getInt(Stats.MAX_HP) + "**]\n";
+					+ stats.getInt(Stats.HP) + " / " + stats.getInt(Stats.MAX_HP) + "**]";
 		}
 
 		public String damage(Member target) {
-			String out = "";
-			String bonus = "";
+			List<String> output = new ArrayList<>();
 
 			float damage = stats.get(Stats.DAMAGE);
 			boolean crit = false;
@@ -575,7 +579,7 @@ public class Game {
 				int bonusDmg = Math.round(damage * 0.25f);
 				damage += bonusDmg;
 				((Warrior) unit).setBonus(0);
-				bonus += Emote.KNIFE + "**" + getName() + "** dealt **" + bonusDmg + "** bonus damage!\n";
+				output.add(Emote.KNIFE + "**" + getName() + "** dealt **" + bonusDmg + "** bonus damage!");
 			}
 
 			// Berserker attacker checks
@@ -597,8 +601,8 @@ public class Game {
 				((Duelist) unit).setAttack(0);
 				float bonusDmg = target.stats.getInt(Stats.MAX_HP) * 0.04f;
 				float bleedDmg = stats.get(Stats.DAMAGE) * 0.4f;
-				bonus += Emote.KNIFE + "**" + getName() + "** dealt **" + Math.round(bonusDmg) + "** bonus damage!\n";
-				bonus += Emote.BLEED + "**" + getName() + "** applied **Bleed** for **2** turns!\n";
+				output.add(Emote.KNIFE + "**" + getName() + "** dealt **" + Math.round(bonusDmg) + "** bonus damage!");
+				output.add(Emote.BLEED + "**" + getName() + "** applied **Bleed** for **2** turns!");
 				damage += bonusDmg;
 				target.data.add(new Bleed(this, 2, bleedDmg));
 			}
@@ -626,7 +630,7 @@ public class Game {
 						int steal = (int) Math.min(stats.get(Stats.DAMAGE) * 0.4f, target.stats.getInt(Stats.GOLD));
 						stats.add(Stats.GOLD, steal);
 						target.stats.sub(Stats.GOLD, steal);
-						bonus += Emote.BUY + "**" + getName() + "** stole **" + steal + "** gold!\n";
+						output.add(Emote.BUY + "**" + getName() + "** stole **" + steal + "** gold!");
 					}
 				}
 
@@ -638,7 +642,7 @@ public class Game {
 
 			// Life steal healing
 			if (stats.get(Stats.LIFE_STEAL) > 0)
-				bonus += heal(Math.round(stats.get(Stats.LIFE_STEAL) * damage));
+				output.add(heal(Math.round(stats.get(Stats.LIFE_STEAL) * damage)));
 
 			// Shield damaging
 			if (target.stats.get(Stats.SHIELD) > 0) {
@@ -646,31 +650,31 @@ public class Game {
 				target.stats.sub(Stats.SHIELD, shieldDmg);
 
 				if (target.stats.get(Stats.SHIELD) > 0)
-					out += Emote.SHIELD + "**" + getName() + "** damaged **" + target.getName() + "'s Shield** by **"
+					output.add(0, Emote.SHIELD + "**" + getName() + "** damaged **" + target.getName() + "'s Shield** by **"
 							+ Math.round(shieldDmg) + "**! " + (crit ? "**CRIT**! " : "") + (miss ? "**MISS**! " : "")
-							+ "[**" + target.stats.getInt(Stats.SHIELD) + "**]\n";
+							+ "[**" + target.stats.getInt(Stats.SHIELD) + "**]");
 				else {
 					damage -= shieldDmg;
-					out += Emote.SHIELD + "**" + getName() + "** destroyed **" + target.getName() + "'s Shield**!\n";
+					output.add(0, Emote.SHIELD + "**" + getName() + "** destroyed **" + target.getName() + "'s Shield**!");
 				}
 			}
 
 			// Direct damaging
 			if (target.stats.get(Stats.SHIELD) <= 0) {
-				bonus += damage(target, damage);
-				out += Emote.ATTACK + "**" + getName() + "** damaged **" + target.getName() + "** by **"
+				output.add(damage(target, damage));
+				output.add(0, Emote.ATTACK + "**" + getName() + "** damaged **" + target.getName() + "** by **"
 						+ Math.round(damage) + "**! " + (crit ? "**CRIT**! " : "") + (miss ? "**MISS**! " : "")
-						+ "[**" + target.stats.getInt(Stats.HP) + " / " + target.stats.getInt(Stats.MAX_HP) + "**]\n";
+						+ "[**" + target.stats.getInt(Stats.HP) + " / " + target.stats.getInt(Stats.MAX_HP) + "**]");
 			}
 
-			return out + bonus;
+			return String.join("\n", output);
 		}
 
 		public String damage(Member target, float damage) {
-			String output = "";
 			target.stats.sub(Stats.HP, damage);
-			if (target.stats.get(Stats.HP) <= 0) output += target.lose();
-			return output;
+			if (target.stats.get(Stats.HP) <= 0)
+				return target.lose();
+			return "";
 		}
 
 		public String win() {
@@ -679,16 +683,18 @@ public class Game {
 		}
 
 		public String lose() {
-			String bonus = "";
+			List<String> output = new ArrayList<>();
+			output.add(Emote.SKULL + getUser() + " has been slain and removed from the game!");
+
 			alive = false;
 
 			if (getAlive().size() == 1) {
 				gameState = 2;
-				bonus += getAlive().get(0).win();
+				output.add(getAlive().get(0).win());
 			} else if (curMember.equals(this))
 				nextTurn();
 
-			return Emote.SKULL + getUser() + " has been slain and removed from the game!\n" + bonus;
+			return String.join("\n", output);
 		}
 
 		@Override
