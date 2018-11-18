@@ -29,7 +29,7 @@ public class Potion extends Item {
 	}
 
 	@Override
-	public String onUse(Game.Member user) {
-		return user.heal(50);
+	public String onUse(Game.Member member) {
+		return member.heal(50);
 	}
 }

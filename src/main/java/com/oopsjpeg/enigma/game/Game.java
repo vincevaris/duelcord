@@ -2,15 +2,13 @@ package com.oopsjpeg.enigma.game;
 
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.commands.game.*;
+import com.oopsjpeg.enigma.game.buff.Bleed;
 import com.oopsjpeg.enigma.game.effect.LoveOfWar;
 import com.oopsjpeg.enigma.game.obj.Buff;
 import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.game.obj.Item;
 import com.oopsjpeg.enigma.game.obj.Unit;
-import com.oopsjpeg.enigma.game.unit.Berserker;
-import com.oopsjpeg.enigma.game.unit.Gunslinger;
-import com.oopsjpeg.enigma.game.unit.Thief;
-import com.oopsjpeg.enigma.game.unit.Warrior;
+import com.oopsjpeg.enigma.game.unit.*;
 import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.ChanceBag;
 import com.oopsjpeg.enigma.util.Emote;
@@ -71,7 +69,7 @@ public class Game {
 	}
 
 	public void nextTurn() {
-		String extra = "";
+		List<String> output = new ArrayList<>();
 
 		if (curTurn >= getAlive().size()) {
 			curTurn = 0;
@@ -80,7 +78,7 @@ public class Game {
 
 		if (turnCount >= 1 && gameState == 1 && curMember.stats.get(Stats.ENERGY) > 0) {
 			curMember.defend = 1;
-			extra += curMember.unit.onDefend(curMember);
+			output.add(curMember.unit.onDefend(curMember));
 		}
 
 		if (gameState == 0) {
@@ -94,10 +92,17 @@ public class Game {
 				Bufferer.sendMessage(channel, curMember + ", you have next pick!");
 			}
 		} else if (gameState == 1) {
-			extra += curMember.unit.onTurnEnd(curMember);
-			extra += curMember.data.stream()
+			output.add(curMember.unit.onTurnEnd(curMember));
+			output.addAll(curMember.data.stream()
 					.map(e -> e.onTurnEnd(curMember))
-					.collect(Collectors.joining());
+					.collect(Collectors.toList()));
+
+			curMember.getBuffs().forEach(buff -> {
+				if (buff.turn() == 0) {
+					output.add(Emote.INFO + "**" + curMember.getName() + "'s " + buff.getName() + "** has expired.");
+					curMember.data.remove(buff);
+				}
+			});
 
 			curMember = getAlive().get(curTurn);
 
@@ -106,21 +111,26 @@ public class Game {
 			curMember.stats.put(Stats.ENERGY, curMember.unit.getStats().get(Stats.ENERGY));
 			curMember.stats.add(Stats.ENERGY, curMember.perTurn.get(Stats.ENERGY));
 			curMember.stats.put(Stats.SHIELD, 0);
-
-			extra += curMember.unit.onTurnStart(curMember);
-			extra += curMember.data.stream()
-					.map(e -> e.onTurnStart(curMember))
-					.collect(Collectors.joining());
 			curMember.defend = 0;
 
+			output.add(curMember.unit.onTurnStart(curMember));
+			output.add(curMember.data.stream()
+					.map(e -> e.onTurnStart(curMember))
+					.collect(Collectors.joining()));
+
+			output.removeAll(Arrays.asList(null, ""));
+
 			if (turnCount == 0) {
-				Bufferer.sendMessage(channel, extra + curMember + ", you have the first turn!\n"
+				output.add(0, curMember + ", you have the first turn!\n"
 						+ "Open the channel's description to review your statistics.\n"
 						+ "Check " + Enigma.getItemsChannel() + " to view purchasable items.");
 			} else {
-				Bufferer.sendMessage(channel, extra + curMember + ", it's your turn!\n"
+				output.add(0, curMember + ", it's your turn!\n"
 						+ "Open the channel's description to review your statistics.");
 			}
+
+			Bufferer.sendMessage(channel, String.join("\n", output));
+
 			turnCount++;
 		}
 
@@ -138,11 +148,13 @@ public class Game {
 					+ "** (+**" + member.perTurn.getInt(Stats.HP) + "**/t)\n"
 					+ "Energy: **" + member.stats.getInt(Stats.ENERGY) + "**\n"
 					+ (member.unit instanceof Warrior
-					? "Strike: **" + ((Warrior) member.unit).getBonus() + " / 3**\n" : "")
+					? "Attack: **" + ((Warrior) member.unit).getBonus() + " / 3**\n" : "")
 					+ (member.unit instanceof Berserker
 					? "Rage: **" + ((Berserker) member.unit).getRage() + " / 5**\n" : "")
 					+ (member.unit instanceof Gunslinger
 					? "Shot: **" + ((Gunslinger) member.unit).getShot() + " / 4**\n" : "")
+					+ (member.unit instanceof Duelist
+					? "Attack: **" + ((Duelist) member.unit).getAttack() + " / 4**\n" : "")
 					+ "Items: **" + member.getItems() + "**\n");
 		}
 	}
@@ -579,6 +591,17 @@ public class Game {
 			// Berserker victim rage stack
 			if (target.unit instanceof Berserker && ((Berserker) target.unit).getBonus() <= 0)
 				((Berserker) target.unit).rage();
+
+			// Duelist stack
+			if (unit instanceof Duelist && ((Duelist) unit).attack() >= 4) {
+				((Duelist) unit).setAttack(0);
+				float bonusDmg = target.stats.getInt(Stats.MAX_HP) * 0.04f;
+				float bleedDmg = stats.get(Stats.DAMAGE) * 0.4f;
+				bonus += Emote.KNIFE + "**" + getName() + "** dealt **" + Math.round(bonusDmg) + "** bonus damage!\n";
+				bonus += Emote.BLEED + "**" + getName() + "** applied **Bleed** for **2** turns!\n";
+				damage += bonusDmg;
+				target.data.add(new Bleed(this, 2, bleedDmg));
+			}
 
 			// Crit checks
 			if (!miss) {

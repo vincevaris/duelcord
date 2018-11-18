@@ -38,7 +38,7 @@ public class LoveOfWar extends Effect {
 	}
 
 	@Override
-	public String onTurnEnd(Game.Member user) {
+	public String onTurnEnd(Game.Member member) {
 		attack = 0;
 		return "";
 	}

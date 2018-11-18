@@ -2,10 +2,7 @@ package com.oopsjpeg.enigma.game.obj;
 
 import com.oopsjpeg.enigma.game.GameObject;
 import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.unit.Berserker;
-import com.oopsjpeg.enigma.game.unit.Gunslinger;
-import com.oopsjpeg.enigma.game.unit.Thief;
-import com.oopsjpeg.enigma.game.unit.Warrior;
+import com.oopsjpeg.enigma.game.unit.*;
 
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
@@ -13,7 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 public abstract class Unit implements GameObject {
 	private static final Unit[] values = {
 			new Berserker(), new Thief(), new Warrior(),
-			new Gunslinger()
+			new Gunslinger(), new Duelist()
 	};
 
 	public static Unit[] values() {

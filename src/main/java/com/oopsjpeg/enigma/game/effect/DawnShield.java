@@ -16,7 +16,7 @@ public class DawnShield extends Effect {
 	}
 
 	@Override
-	public String onTurnEnd(Game.Member user) {
-		return user.shield(user.getStats().get(Stats.ENERGY));
+	public String onTurnEnd(Game.Member member) {
+		return member.shield(member.getStats().get(Stats.ENERGY));
 	}
 }

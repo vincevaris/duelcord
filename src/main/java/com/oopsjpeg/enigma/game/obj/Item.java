@@ -72,7 +72,7 @@ public abstract class Item implements GameObject {
 		return true;
 	}
 
-	public String onUse(Game.Member user) {
+	public String onUse(Game.Member member) {
 		return "";
 	}
 

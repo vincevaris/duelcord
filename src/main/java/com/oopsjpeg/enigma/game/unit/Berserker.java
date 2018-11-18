@@ -71,6 +71,11 @@ public class Berserker extends Unit {
 	}
 
 	@Override
+	public String onTurnStart(Game.Member member) {
+		return stack(member);
+	}
+
+	@Override
 	public String onTurnEnd(Game.Member member) {
 		bonus = 0;
 		return "";
@@ -79,7 +84,7 @@ public class Berserker extends Unit {
 	public String stack(Game.Member member) {
 		if (rage == 5) {
 			rage();
-			return Emote.RAGE + "**" + member.getName() + "'s Rage** is at maximum capacity.\n";
+			return Emote.RAGE + "**" + member.getName() + "'s Rage** is at maximum capacity.";
 		}
 		return "";
 	}

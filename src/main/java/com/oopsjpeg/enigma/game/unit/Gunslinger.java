@@ -7,8 +7,8 @@ import java.awt.*;
 
 public class Gunslinger extends Unit {
 	public static final String NAME = "Gunslinger";
-	public static final String DESC = "Every **4th** shot is a guaranteed crit and never misses."
-			+ "\nHowever, attacks before the **4th** shot cannot crit."
+	public static final String DESC = "Every **4th** attack is a guaranteed crit and never misses."
+			+ "\nHowever, attacks before the **4th** cannot crit."
 			+ "\nAdditionally, crit chance from items and effects increase damage.";
 	public static final Color COLOR = new Color(255, 88, 0);
 	public static final boolean RANGED = true;
