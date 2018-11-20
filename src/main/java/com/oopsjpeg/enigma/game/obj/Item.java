@@ -9,17 +9,18 @@ import java.lang.reflect.InvocationTargetException;
 
 public abstract class Item implements GameObject {
 	private static final Item[] values = {
-			new AuroralMask(),
+			new SteelMallet(),
 			new BloodlustBlade(),
 			new BronzeCutlass(),
 			new Crystal(),
+			new DawnHammer(),
 			new Hatchet(),
 			new IronScimitar(),
 			new Knife(),
 			new MidnightDagger(),
-			new MythicalTriblade(),
 			new Potion(),
-			new Soulstealer()
+			new Soulstealer(),
+			new SteelMallet()
 	};
 
 	public static Item[] values() {

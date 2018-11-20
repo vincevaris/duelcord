@@ -11,7 +11,7 @@ public class MidnightDagger extends Item {
 	public static final Item[] BUILD = new Item[]{new Knife()};
 	public static final Effect[] EFFECTS = new Effect[]{new LoveOfWar(0.12f)};
 	public static final Stats STATS = new Stats()
-			.put(Stats.DAMAGE, 8);
+			.put(Stats.DAMAGE, 6);
 
 	@Override
 	public String getName() {

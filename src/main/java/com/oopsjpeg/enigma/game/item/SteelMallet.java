@@ -1,20 +1,18 @@
 package com.oopsjpeg.enigma.game.item;
 
 import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.effect.LoveOfWar;
-import com.oopsjpeg.enigma.game.effect.StatsEffect;
+import com.oopsjpeg.enigma.game.effect.DawnShield;
 import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.game.obj.Item;
 
-public class MythicalTriblade extends Item {
-	public static final String NAME = "Mythical Triblade";
-	public static final int COST = 1250;
-	public static final Item[] BUILD = new Item[]{new BronzeCutlass(), new MidnightDagger()};
-	public static final Effect[] EFFECTS = new Effect[]{StatsEffect.stats(new Stats()
-			.put(Stats.CRIT_CHANCE, 0.2f)),
-			new LoveOfWar(0.2f)};
+public class SteelMallet extends Item {
+	public static final String NAME = "Steel Mallet";
+	public static final int COST = 575;
+	public static final Item[] BUILD = new Item[]{new Knife(), new Crystal()};
+	public static final Effect[] EFFECTS = new Effect[]{new DawnShield()};
 	public static final Stats STATS = new Stats()
-			.put(Stats.DAMAGE, 22);
+			.put(Stats.DAMAGE, 6)
+			.put(Stats.MAX_HP, 25);
 
 	@Override
 	public String getName() {

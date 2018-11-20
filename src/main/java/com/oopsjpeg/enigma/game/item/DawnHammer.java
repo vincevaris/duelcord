@@ -6,36 +6,28 @@ import com.oopsjpeg.enigma.game.effect.StatsEffect;
 import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.game.obj.Item;
 
-public class AuroralMask extends Item {
-	public static final String NAME = "Auroral Mask";
-	public static final int COST = 750;
-	public static final Item[] BUILD = new Item[]{new Crystal(), new Crystal()};
+public class DawnHammer extends Item {
+	public static final String NAME = "Dawn Hammer";
+	public static final int COST = 1025;
+	public static final Item[] BUILD = new Item[]{new SteelMallet(), new Knife()};
 	public static final Effect[] EFFECTS = new Effect[]{StatsEffect.perTurn(new Stats()
 			.put(Stats.ENERGY, 25)), new DawnShield()};
 	public static final Stats STATS = new Stats()
-			.put(Stats.MAX_HP, 80.0f);
+			.put(Stats.DAMAGE, 15)
+			.put(Stats.MAX_HP, 40);
 
-	@Override
 	public String getName() {
 		return NAME;
 	}
 
-	@Override
 	public int getCost() {
 		return COST;
 	}
 
-	@Override
 	public Item[] getBuild() {
 		return BUILD;
 	}
 
-	@Override
-	public Effect[] getEffects() {
-		return EFFECTS;
-	}
-
-	@Override
 	public Stats getStats() {
 		return STATS;
 	}

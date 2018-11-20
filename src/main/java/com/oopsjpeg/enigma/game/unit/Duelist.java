@@ -7,9 +7,8 @@ import java.awt.*;
 
 public class Duelist extends Unit {
 	public static final String NAME = "Duelist";
-	public static final String DESC = "Every **5th** attack deals bonus damage equal to"
-			+ " **4%** of the target's max health and applies"
-			+ " **Bleed** by **40%** of your damage for **2** turns.";
+	public static final String DESC = "Every **5th** attack deals bonus damage equal to **4%** of the"
+			+ " target's max health and applies **Bleed** by **40%** of your damage for **2** turns.";
 	public static final Color COLOR = Color.MAGENTA;
 	public static final Stats STATS = new Stats()
 			.put(Stats.ENERGY, 125)

@@ -8,13 +8,13 @@ import java.awt.*;
 
 public class Thief extends Unit {
 	public static final String NAME = "Thief";
-	public static final String DESC = "The first critical strike in a turn steals gold equal to **40%** of damage."
-			+ "\nBase crit damage is reduced by **20%**, however, subsequent crits in a turn deal increasing damage.";
+	public static final String DESC = "The first critical strike per turn steals gold equal to **40%** of base damage."
+			+ "\nCrit damage is reduced by **20%**, however, subsequent crits in a turn deal increasing damage.";
 	public static final Color COLOR = Color.YELLOW;
 	public static final Stats STATS = new Stats()
 			.put(Stats.ENERGY, 150)
 			.put(Stats.MAX_HP, 735)
-			.put(Stats.DAMAGE, 18)
+			.put(Stats.DAMAGE, 20)
 			.put(Stats.CRIT_CHANCE, 0.2f)
 			.put(Stats.CRIT_DAMAGE, -0.2f);
 	public static final Stats PER_TURN = new Stats()
