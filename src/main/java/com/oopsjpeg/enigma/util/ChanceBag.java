@@ -1,29 +1,33 @@
 package com.oopsjpeg.enigma.util;
 
-import java.util.Random;
-
 public class ChanceBag {
-	private final Random random = new Random();
 	private float chance = 0;
-	private int count = 0;
+	private int attempts = 0;
+	private float influence = 1;
 
-	public ChanceBag() {}
+	public ChanceBag() { }
 
 	public ChanceBag(float chance) {
-		setChance(chance);
+		this.chance = chance;
+	}
+
+	public ChanceBag(float chance, float influence) {
+		this.chance = chance;
+		this.influence = influence;
 	}
 
 	public boolean get() {
-		if (getChance() > 0 && (random.nextFloat() <= getChance() || count())) {
-			setCount(0);
+		if (attempt() || (chance > 0 && Util.RANDOM.nextFloat() <= chance)) {
+			attempts = 0;
 			return true;
-		} else return false;
+		}
+		return false;
 	}
 
-	public boolean count() {
-		if (getChance() > 0) {
-			setCount(getCount() + 1);
-			return getCount() >= Math.ceil(1 / getChance());
+	public boolean attempt() {
+		if (chance > 0) {
+			attempts++;
+			return attempts >= 1 / (chance * influence);
 		}
 		return false;
 	}
@@ -33,19 +37,27 @@ public class ChanceBag {
 	}
 
 	public void setChance(float chance) {
-		this.chance = Math.max(0, Math.min(1, chance));
+		this.chance = chance;
 	}
 
-	public int getCount() {
-		return count;
+	public int getAttempts() {
+		return attempts;
 	}
 
-	public void setCount(int count) {
-		this.count = Math.max(0, count);
+	public void setAttempts(int attempts) {
+		this.attempts = attempts;
+	}
+
+	public float getInfluence() {
+		return influence;
+	}
+
+	public void setInfluence(float influence) {
+		this.influence = influence;
 	}
 
 	@Override
 	public String toString() {
-		return String.valueOf(getChance());
+		return String.valueOf(chance);
 	}
 }

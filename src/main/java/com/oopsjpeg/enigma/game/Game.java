@@ -530,6 +530,7 @@ public class Game {
 				stats.mul(Stats.DAMAGE, 1 + (stats.get(Stats.CRIT_CHANCE) * 0.75f));
 
 			critBag.setChance(stats.get(Stats.CRIT_CHANCE));
+			critBag.setInfluence(0.5f);
 		}
 
 		public void act(Action action) {
