@@ -9,7 +9,6 @@ import java.lang.reflect.InvocationTargetException;
 
 public abstract class Item implements GameObject {
 	private static final Item[] values = {
-			new SteelMallet(),
 			new BloodlustBlade(),
 			new BronzeCutlass(),
 			new Crystal(),

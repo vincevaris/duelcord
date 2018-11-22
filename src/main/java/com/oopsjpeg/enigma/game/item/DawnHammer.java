@@ -28,6 +28,11 @@ public class DawnHammer extends Item {
 		return BUILD;
 	}
 
+	@Override
+	public Effect[] getEffects() {
+		return EFFECTS;
+	}
+
 	public Stats getStats() {
 		return STATS;
 	}
