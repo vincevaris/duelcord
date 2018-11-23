@@ -4,6 +4,7 @@ import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.GameMode;
 import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.Emote;
+import com.oopsjpeg.enigma.util.Util;
 import com.oopsjpeg.roboops.framework.Bufferer;
 import com.oopsjpeg.roboops.framework.commands.Command;
 import sx.blah.discord.handle.obj.IChannel;
@@ -23,7 +24,7 @@ public class QueueCommand implements Command {
 		List<Player> queue = Enigma.getQueue(mode);
 
 		if (player.getGame() != null)
-			Bufferer.sendMessage(channel, Emote.NO + author + " You are already in a match.");
+			Util.sendError(channel, "You are already in a match.");
 		else {
 			if (!queue.contains(player)) {
 				player.setQueue(mode);
@@ -31,7 +32,7 @@ public class QueueCommand implements Command {
 						+ "**. (size: **" + queue.size() + "**)");
 			} else {
 				player.removeQueue();
-				Bufferer.sendMessage(channel, Emote.NO + author + " You are no longer in queue.");
+				Util.sendError(channel, "You are no longer in queue.");
 			}
 		}
 	}

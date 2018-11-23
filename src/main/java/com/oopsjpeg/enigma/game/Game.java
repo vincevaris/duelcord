@@ -3,6 +3,7 @@ package com.oopsjpeg.enigma.game;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.commands.game.*;
 import com.oopsjpeg.enigma.game.buff.Bleed;
+import com.oopsjpeg.enigma.game.buff.Silence;
 import com.oopsjpeg.enigma.game.effect.LoveOfWar;
 import com.oopsjpeg.enigma.game.obj.Buff;
 import com.oopsjpeg.enigma.game.obj.Effect;
@@ -235,9 +236,14 @@ public class Game {
 
 		@Override
 		public boolean act(Member actor) {
-			Bufferer.sendMessage(channel, actor.damage(target));
-			actor.stats.add(Stats.GOLD, RoUtil.nextInt(15, 25));
-			return true;
+			if (actor.data.contains(Silence.class))
+				Util.sendError(channel, "You cannot attack while silenced.");
+			else {
+				Bufferer.sendMessage(channel, actor.damage(target));
+				actor.stats.add(Stats.GOLD, RoUtil.nextInt(15, 25));
+				return true;
+			}
+			return false;
 		}
 
 		@Override
@@ -264,11 +270,10 @@ public class Game {
 				}
 
 			if (actor.stats.get(Stats.GOLD) < cost)
-				Bufferer.sendMessage(channel, Emote.NO + "You need **" + (cost - actor.stats.getInt(Stats.GOLD))
+				Util.sendError(channel, "You need **" + (cost - actor.stats.getInt(Stats.GOLD))
 						+ "** more gold for a(n) **" + item.getName() + "**.");
 			else if (build.size() >= 6)
-				Bufferer.sendMessage(channel, Emote.NO
-						+ "You do not have enough inventory space for a(n) **" + item.getName() + "**..");
+				Util.sendError(channel, "You do not have enough inventory space for a(n) **" + item.getName() + "**..");
 			else {
 				List<String> output = new ArrayList<>();
 				actor.stats.sub(Stats.GOLD, cost);
@@ -306,9 +311,9 @@ public class Game {
 		@Override
 		public boolean act(Member actor) {
 			if (!actor.data.contains(item))
-				Bufferer.sendMessage(channel, Emote.NO + "You don't have a(n) **" + item.getName() + "**.");
+				Util.sendError(channel, "You don't have a(n) **" + item.getName() + "**.");
 			else if (!item.canUse())
-				Bufferer.sendMessage(channel, Emote.NO + "**" + item.getName() + "** can't be used.");
+				Util.sendError(channel, "**" + item.getName() + "** can't be used.");
 			else {
 				Bufferer.sendMessage(channel, Emote.USE + "**" + actor.getName() + "** used a(n) **"
 						+ item.getName() + "**.\n" + item.onUse(actor));
@@ -335,11 +340,11 @@ public class Game {
 		@Override
 		public boolean act(Member actor) {
 			if (!(actor.unit instanceof Warrior))
-				Bufferer.sendMessage(channel, Emote.NO + "You are not playing **Warrior**.");
+				Util.sendError(channel, "You are not playing **Warrior**.");
 			else {
 				Warrior wu = (Warrior) actor.unit;
 				if (wu.getBash())
-					Bufferer.sendMessage(channel, Emote.NO + "You can only use **Bash** once per turn.");
+					Util.sendError(channel, "You can only use **Bash** once per turn.");
 				else {
 					wu.setBash(true);
 
@@ -373,7 +378,7 @@ public class Game {
 		@Override
 		public boolean act(Member actor) {
 			if (!(actor.unit instanceof Berserker))
-				Bufferer.sendMessage(channel, Emote.NO + "You are not playing **Berserker**.");
+				Util.sendError(channel, "You are not playing **Berserker**.");
 			else {
 				Berserker berserk = (Berserker) actor.unit;
 				berserk.setBonus(0.04f * berserk.getRage());
@@ -472,14 +477,6 @@ public class Game {
 					.collect(Collectors.toList());
 		}
 
-		public Effect getEffect(Class clazz) {
-			return getEffects().stream().filter(e -> e.getClass().equals(clazz)).findAny().orElse(null);
-		}
-
-		public boolean hasEffect(Class clazz) {
-			return getEffect(clazz) != null;
-		}
-
 		public Unit getUnit() {
 			return unit;
 		}
@@ -535,7 +532,7 @@ public class Game {
 
 		public void act(Action action) {
 			if (stats.get(Stats.ENERGY) < action.getEnergy())
-				Bufferer.sendMessage(channel, Emote.NO + "You do not have **" + action.getEnergy() + "** energy.");
+				Util.sendError(channel, "You do not have **" + action.getEnergy() + "** energy.");
 			else if (action.execute(this)) {
 				stats.sub(Stats.ENERGY, action.getEnergy());
 				if (stats.get(Stats.ENERGY) <= 0) nextTurn();
@@ -570,8 +567,8 @@ public class Game {
 			}
 
 			// Love of War damage multiplier
-			if (hasEffect(LoveOfWar.class)) {
-				LoveOfWar low = (LoveOfWar) getEffect(LoveOfWar.class);
+			if (data.contains(LoveOfWar.class)) {
+				LoveOfWar low = (LoveOfWar) data.get(data.indexOf(LoveOfWar.class));
 				damage *= 1 + ((low.attack() - 1) * low.getPower());
 			}
 

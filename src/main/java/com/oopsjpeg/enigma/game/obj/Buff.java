@@ -36,4 +36,9 @@ public abstract class Buff implements GameObject {
 	public float getPower() {
 		return power;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj != null && obj.getClass().equals(getClass());
+	}
 }

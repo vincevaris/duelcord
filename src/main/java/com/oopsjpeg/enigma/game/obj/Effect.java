@@ -19,4 +19,9 @@ public abstract class Effect implements GameObject {
 	public Stats getPerTurn() {
 		return new Stats();
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj != null && obj.getClass().equals(getClass());
+	}
 }

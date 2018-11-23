@@ -44,4 +44,9 @@ public abstract class Unit implements GameObject {
 	public abstract Stats getStats();
 
 	public abstract Stats getPerTurn();
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj != null && obj.getClass().equals(getClass());
+	}
 }
