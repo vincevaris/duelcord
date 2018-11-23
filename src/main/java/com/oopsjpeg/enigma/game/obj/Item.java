@@ -7,7 +7,7 @@ import com.oopsjpeg.enigma.game.item.*;
 
 import java.lang.reflect.InvocationTargetException;
 
-public abstract class Item implements GameObject {
+public abstract class Item extends GameObject {
 	private static final Item[] values = {
 			new BloodlustBlade(),
 			new BronzeCutlass(),
@@ -74,11 +74,6 @@ public abstract class Item implements GameObject {
 
 	public String onUse(Game.Member member) {
 		return "";
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		return obj != null && obj.getClass().equals(getClass());
 	}
 
 	@Override

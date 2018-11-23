@@ -3,7 +3,7 @@ package com.oopsjpeg.enigma.game.obj;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.GameObject;
 
-public abstract class Buff implements GameObject {
+public abstract class Buff extends GameObject {
 	private final Game.Member source;
 	private int turns;
 	private float power = 0;
@@ -38,7 +38,7 @@ public abstract class Buff implements GameObject {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		return obj != null && obj.getClass().equals(getClass());
+	public String toString() {
+		return getName();
 	}
 }

@@ -54,6 +54,7 @@ public class Game {
 		commands.add(new PickCommand());
 		commands.add(new RageCommand());
 		commands.add(new RefreshCommand());
+		commands.add(new SlashCommand());
 		commands.add(new StatsCommand());
 		commands.add(new UseCommand());
 		Enigma.getClient().getDispatcher().registerListener(commands);
@@ -98,6 +99,13 @@ public class Game {
 					.map(e -> e.onTurnEnd(curMember))
 					.collect(Collectors.toList()));
 
+			curMember.getBuffs().forEach(buff -> {
+				if (buff.turn() == 0) {
+					output.add(Emote.INFO + "**" + curMember.getName() + "'s " + buff.getName() + "** has expired.");
+					curMember.data.remove(buff);
+				}
+			});
+
 			curMember = getAlive().get(curTurn);
 
 			curMember.stats.add(Stats.HP, curMember.perTurn.get(Stats.HP) * curMember.defend);
@@ -111,13 +119,6 @@ public class Game {
 			output.add(curMember.data.stream()
 					.map(e -> e.onTurnStart(curMember))
 					.collect(Collectors.joining()));
-
-			curMember.getBuffs().forEach(buff -> {
-				if (buff.turn() == 0) {
-					output.add(Emote.INFO + "**" + curMember.getName() + "'s " + buff.getName() + "** has expired.");
-					curMember.data.remove(buff);
-				}
-			});
 
 			output.removeAll(Arrays.asList(null, ""));
 
@@ -156,6 +157,9 @@ public class Game {
 					? "Shot: **" + ((Gunslinger) member.unit).getShot() + " / 4**\n" : "")
 					+ (member.unit instanceof Duelist
 					? "Attack: **" + ((Duelist) member.unit).getAttack() + " / 4**\n" : "")
+					+ (member.unit instanceof Assassin
+					? "Slash: **" + ((Assassin) member.unit).getSlashCount() + " / 4**\n"
+					+ "Potency: **" + Math.round(((Assassin) member.unit).getPotency()) + "**\n" : "")
 					+ "Items: **" + member.getItems() + "**\n");
 		}
 	}
@@ -236,7 +240,7 @@ public class Game {
 
 		@Override
 		public boolean act(Member actor) {
-			if (actor.data.contains(Silence.class))
+			if (actor.hasData(Silence.class))
 				Util.sendError(channel, "You cannot attack while silenced.");
 			else {
 				Bufferer.sendMessage(channel, actor.damage(target));
@@ -351,14 +355,16 @@ public class Game {
 					float damage = Math.round(actor.stats.get(Stats.DAMAGE) * 0.4f);
 					List<String> output = new ArrayList<>();
 
-					if (target.stats.get(Stats.SHIELD) > 0)
+					if (target.stats.get(Stats.SHIELD) > 0) {
+						target.stats.put(Stats.SHIELD, 0);
 						output.add(Emote.SHIELD + "**" + actor.getName()
 								+ "** destroyed **" + target.getName() + "'s Shield**!");
+					}
 
 					output.add(actor.damage(target, damage));
 
 					output.add(0, Emote.SHIELD + "**" + actor.getName() + "** bashed **"
-							+ target.getName() + "** by **" + damage + "**! [**"
+							+ target.getName() + "** by **" + Math.round(damage) + "**! [**"
 							+ target.stats.getInt(Stats.HP) + " / " + target.stats.getInt(Stats.MAX_HP) + "**]");
 
 					Bufferer.sendMessage(channel, String.join("\n", output));
@@ -399,6 +405,54 @@ public class Game {
 		@Override
 		public int getEnergy() {
 			return 0;
+		}
+	}
+
+	public class SlashAction extends Action {
+		private final Member target;
+
+		public SlashAction(Member target) {
+			this.target = target;
+		}
+
+		@Override
+		public boolean act(Member actor) {
+			if (!(actor.unit instanceof Assassin))
+				Util.sendError(channel, "You are not playing **Assassin**.");
+			else {
+				Assassin au = (Assassin) actor.unit;
+				if (au.getSlashed())
+					Util.sendError(channel, "You can only use **Slash** once per turn.");
+				else {
+					List<String> output = new ArrayList<>();
+					au.setSlashed(true);
+
+					float damage = Math.round(actor.stats.get(Stats.DAMAGE) * 0.25f);
+					if (au.slashCount() >= 4) {
+						damage += au.getPotency();
+						target.data.add(new Silence(actor, 1));
+						output.add(Emote.BLEED + "**" + actor.getName() + "** applied **Silence** for **1** turn!");
+						au.setSlashCount(0);
+						au.setPotencyTurns(0);
+						au.setPotency(0);
+					}
+
+					output.add(actor.damage(target, damage));
+
+					output.add(0, Emote.KNIFE + "**" + actor.getName() + "** slashed **"
+							+ target.getName() + "** by **" + Math.round(damage) + "**! [**"
+							+ target.stats.getInt(Stats.HP) + " / " + target.stats.getInt(Stats.MAX_HP) + "**]");
+
+					Bufferer.sendMessage(channel, String.join("\n", output));
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public int getEnergy() {
+			return 25;
 		}
 	}
 
@@ -446,6 +500,14 @@ public class Game {
 
 		public List<GameObject> getData() {
 			return data;
+		}
+
+		public GameObject getData(Class clazz) {
+			return data.stream().filter(o -> o.getClass().equals(clazz)).findAny().orElse(null);
+		}
+
+		public boolean hasData(Class clazz) {
+			return getData(clazz) != null;
 		}
 
 		public Stats getStats() {
@@ -567,8 +629,8 @@ public class Game {
 			}
 
 			// Love of War damage multiplier
-			if (data.contains(LoveOfWar.class)) {
-				LoveOfWar low = (LoveOfWar) data.get(data.indexOf(LoveOfWar.class));
+			if (hasData(LoveOfWar.class)) {
+				LoveOfWar low = (LoveOfWar) getData(LoveOfWar.class);
 				damage *= 1 + ((low.attack() - 1) * low.getPower());
 			}
 
@@ -603,6 +665,13 @@ public class Game {
 				output.add(Emote.BLEED + "**" + getName() + "** applied **Bleed** for **2** turns!");
 				damage += bonusDmg;
 				target.data.add(new Bleed(this, 2, bleedDmg));
+			}
+
+			// Assassin potency stacking
+			if (unit instanceof Assassin && ((Assassin) unit).getPotencyTurns() < 5) {
+				float potency = (damage * 0.2f) * (target.defend == 1 ? 0.8f : 1f);
+				((Assassin) unit).addPotency(potency);
+				((Assassin) unit).addPotencyNow(potency);
 			}
 
 			// Crit checks

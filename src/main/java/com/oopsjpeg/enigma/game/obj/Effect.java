@@ -3,7 +3,7 @@ package com.oopsjpeg.enigma.game.obj;
 import com.oopsjpeg.enigma.game.GameObject;
 import com.oopsjpeg.enigma.game.Stats;
 
-public abstract class Effect implements GameObject {
+public abstract class Effect extends GameObject {
 	public abstract String getName();
 
 	public abstract String getDesc();
@@ -21,7 +21,7 @@ public abstract class Effect implements GameObject {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		return obj != null && obj.getClass().equals(getClass());
+	public String toString() {
+		return getName();
 	}
 }

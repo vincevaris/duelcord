@@ -7,10 +7,10 @@ import com.oopsjpeg.enigma.game.unit.*;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 
-public abstract class Unit implements GameObject {
+public abstract class Unit extends GameObject {
 	private static final Unit[] values = {
 			new Berserker(), new Thief(), new Warrior(),
-			new Gunslinger(), new Duelist()
+			new Gunslinger(), new Duelist(), new Assassin()
 	};
 
 	public static Unit[] values() {
@@ -46,7 +46,7 @@ public abstract class Unit implements GameObject {
 	public abstract Stats getPerTurn();
 
 	@Override
-	public boolean equals(Object obj) {
-		return obj != null && obj.getClass().equals(getClass());
+	public String toString() {
+		return getName();
 	}
 }
