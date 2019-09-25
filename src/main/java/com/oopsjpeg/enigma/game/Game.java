@@ -357,8 +357,9 @@ public class Game {
 					Util.sendError(channel, "You can only use **Bash** once per turn.");
 				else {
 					wu.setBash(true);
+					wu.bonus();
 
-					float damage = Math.round(actor.stats.get(Stats.DAMAGE) * 0.4f);
+					float damage = Math.round(actor.stats.get(Stats.DAMAGE) * 0.5f);
 					List<String> output = new ArrayList<>();
 
 					if (target.stats.get(Stats.SHIELD) > 0) {
@@ -642,7 +643,7 @@ public class Game {
 
 			// Warrior bonus damage
 			if (unit instanceof Warrior && ((Warrior) unit).bonus() >= 3) {
-				int bonusDmg = Math.round(damage * 0.25f);
+				int bonusDmg = Math.round(damage * 0.3f);
 				damage += bonusDmg;
 				((Warrior) unit).setBonus(0);
 				output.add(Emote.KNIFE + "**" + getName() + "** dealt **" + bonusDmg + "** bonus damage!");
