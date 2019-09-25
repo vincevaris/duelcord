@@ -359,7 +359,7 @@ public class Game {
 					wu.setBash(true);
 					wu.bonus();
 
-					float damage = Math.round(actor.stats.get(Stats.DAMAGE) * 0.5f);
+					float damage = actor.stats.get(Stats.DAMAGE) * 0.5f * actor.stats.get(Stats.ABILITY_POWER);
 					List<String> output = new ArrayList<>();
 
 					if (target.stats.get(Stats.SHIELD) > 0) {
@@ -394,7 +394,7 @@ public class Game {
 				Util.sendError(channel, "You are not playing **Berserker**.");
 			else {
 				Berserker berserk = (Berserker) actor.unit;
-				berserk.setBonus(0.04f * berserk.getRage());
+				berserk.setBonus(0.04f * berserk.getRage() * actor.stats.get(Stats.ABILITY_POWER));
 
 				if (berserk.getRage() == 5) actor.stats.add(Stats.ENERGY, 100);
 
@@ -434,7 +434,7 @@ public class Game {
 					List<String> output = new ArrayList<>();
 					au.setSlashed(true);
 
-					float damage = Math.round(actor.stats.get(Stats.DAMAGE) * 0.25f);
+					float damage = actor.stats.get(Stats.DAMAGE) * 0.25f * actor.stats.get(Stats.ABILITY_POWER);
 					if (au.slashCount() >= 4) {
 						damage += au.getPotency();
 						target.data.add(new Silence(actor, 1));
@@ -564,6 +564,7 @@ public class Game {
 		public void updateStats() {
 			stats.put(Stats.MAX_HP, unit.getStats().get(Stats.MAX_HP));
 			stats.put(Stats.DAMAGE, unit.getStats().get(Stats.DAMAGE));
+			stats.put(Stats.ABILITY_POWER, unit.getStats().get(Stats.ABILITY_POWER));
 			stats.put(Stats.ACCURACY, unit.getStats().get(Stats.ACCURACY));
 			stats.put(Stats.CRIT_CHANCE, unit.getStats().get(Stats.CRIT_CHANCE));
 			stats.put(Stats.CRIT_DAMAGE, unit.getStats().get(Stats.CRIT_DAMAGE));
@@ -643,10 +644,10 @@ public class Game {
 
 			// Warrior bonus damage
 			if (unit instanceof Warrior && ((Warrior) unit).bonus() >= 3) {
-				int bonusDmg = Math.round(damage * 0.3f);
+				float bonusDmg = damage * 0.3f * stats.get(Stats.ABILITY_POWER);
 				damage += bonusDmg;
 				((Warrior) unit).setBonus(0);
-				output.add(Emote.KNIFE + "**" + getName() + "** dealt **" + bonusDmg + "** bonus damage!");
+				output.add(Emote.KNIFE + "**" + getName() + "** dealt **" + Math.round(bonusDmg) + "** bonus damage!");
 			}
 
 			// Berserker attacker checks
@@ -666,8 +667,8 @@ public class Game {
 			// Duelist stack
 			if (unit instanceof Duelist && ((Duelist) unit).attack() >= 4) {
 				((Duelist) unit).setAttack(0);
-				float bonusDmg = target.stats.getInt(Stats.MAX_HP) * 0.04f;
-				float bleedDmg = stats.get(Stats.DAMAGE) * 0.4f;
+				float bonusDmg = target.stats.getInt(Stats.MAX_HP) * 0.04f * stats.get(Stats.ABILITY_POWER);
+				float bleedDmg = stats.get(Stats.DAMAGE) * 0.4f * stats.get(Stats.ABILITY_POWER);
 				output.add(Emote.KNIFE + "**" + getName() + "** dealt **" + Math.round(bonusDmg) + "** bonus damage!");
 				output.add(Emote.BLEED + "**" + getName() + "** applied **Bleed** for **2** turns!");
 				damage += bonusDmg;
@@ -701,7 +702,7 @@ public class Game {
 				if (unit instanceof Thief) {
 					critMul += ((Thief) unit).getCrit() * 0.2f;
 					if (((Thief) unit).crit() == 1) {
-						int steal = (int) Math.min(stats.get(Stats.DAMAGE) * 0.4f, target.stats.getInt(Stats.GOLD));
+						int steal = (int) Math.min(stats.get(Stats.DAMAGE) * 0.4f * stats.get(Stats.ABILITY_POWER), target.stats.getInt(Stats.GOLD));
 						stats.add(Stats.GOLD, steal);
 						target.stats.sub(Stats.GOLD, steal);
 						output.add(Emote.BUY + "**" + getName() + "** stole **" + steal + "** gold!");
