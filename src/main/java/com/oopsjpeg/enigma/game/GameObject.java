@@ -12,4 +12,9 @@ public abstract class GameObject {
 	public String onDefend(Game.Member member) {
 		return "";
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj != null && obj.getClass().equals(this.getClass());
+	}
 }

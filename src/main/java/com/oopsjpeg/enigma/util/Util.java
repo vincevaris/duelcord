@@ -1,17 +1,21 @@
 package com.oopsjpeg.enigma.util;
 
 import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.roboops.framework.Bufferer;
-import com.oopsjpeg.roboops.framework.RoUtil;
-import sx.blah.discord.handle.obj.IChannel;
+import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Random;
 
-public class Util extends RoUtil {
-	public static void sendError(IChannel channel, String error) {
-		Bufferer.deleteMessage(Bufferer.sendMessage(channel, Emote.NO + error), 5, TimeUnit.SECONDS);
+public class Util {
+	public static final Random RANDOM = new Random();
+
+	public static void sendError(MessageChannel channel, String error) {
+		channel.sendMessage(Emote.NO + error).complete();
+	}
+
+	public static int nextInt(int min, int max) {
+		return min + RANDOM.nextInt((max - min) + 1);
 	}
 
 	public static String formatStats(Stats stats) {

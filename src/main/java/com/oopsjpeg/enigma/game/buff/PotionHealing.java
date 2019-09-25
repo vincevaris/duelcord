@@ -10,7 +10,7 @@ public class PotionHealing extends Buff {
 
 	@Override
 	public String onTurnStart(Game.Member member) {
-		return member.heal(90);
+		return member.heal(60);
 	}
 
 	@Override

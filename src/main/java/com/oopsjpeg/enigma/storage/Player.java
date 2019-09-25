@@ -3,7 +3,7 @@ package com.oopsjpeg.enigma.storage;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.GameMode;
-import sx.blah.discord.handle.obj.IUser;
+import net.dv8tion.jda.api.entities.User;
 
 import java.util.List;
 
@@ -20,8 +20,8 @@ public class Player {
 		return id;
 	}
 
-	public IUser getUser() {
-		return Enigma.getClient().getUserByID(id);
+	public User getUser() {
+		return Enigma.getClient().getUserById(id);
 	}
 
 	public GameMode getQueueMode() {

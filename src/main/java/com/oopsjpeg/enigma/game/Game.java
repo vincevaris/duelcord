@@ -12,15 +12,13 @@ import com.oopsjpeg.enigma.game.obj.Unit;
 import com.oopsjpeg.enigma.game.unit.*;
 import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.ChanceBag;
+import com.oopsjpeg.enigma.util.CommandCenter;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Util;
-import com.oopsjpeg.roboops.framework.Bufferer;
-import com.oopsjpeg.roboops.framework.RoUtil;
-import com.oopsjpeg.roboops.framework.commands.CommandCenter;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.Permissions;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,9 +28,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Game {
-	private final IChannel channel;
+	private final TextChannel channel;
 	private final GameMode mode;
 	private final List<Member> members;
+	private final CommandCenter commands;
 
 	private LocalDateTime lastAction = LocalDateTime.now();
 	private int notifyAfk = 0;
@@ -42,10 +41,10 @@ public class Game {
 	private int curTurn = 0;
 	private Member curMember;
 
-	public Game(IGuild guild, GameMode mode, List<Player> players) {
-		channel = guild.createChannel("game");
+	public Game(Guild guild, GameMode mode, List<Player> players) {
+		channel = guild.createTextChannel("game").complete();
+		commands = new CommandCenter(Enigma.PREFIX_GAME);
 
-		CommandCenter commands = new CommandCenter(Enigma.PREFIX_GAME);
 		commands.add(new AttackCommand());
 		commands.add(new BashCommand());
 		commands.add(new BuyCommand());
@@ -57,13 +56,16 @@ public class Game {
 		commands.add(new SlashCommand());
 		commands.add(new StatsCommand());
 		commands.add(new UseCommand());
-		Enigma.getClient().getDispatcher().registerListener(commands);
+		Enigma.getClient().addEventListener(commands);
 
-		Bufferer.overrideRolePermissions(channel, guild.getEveryoneRole(),
-				EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.READ_MESSAGES));
+		channel.getManager().putPermissionOverride(guild.getPublicRole(),
+				EnumSet.noneOf(Permission.class),
+				EnumSet.of(Permission.MESSAGE_READ)).complete();
+
 		for (Player player : players)
-			Bufferer.overrideUserPermissions(channel, player.getUser(),
-					EnumSet.of(Permissions.READ_MESSAGES), EnumSet.noneOf(Permissions.class));
+			channel.getManager().putPermissionOverride(guild.getMember(player.getUser()),
+					EnumSet.of(Permission.MESSAGE_READ),
+					EnumSet.noneOf(Permission.class)).complete();
 
 		this.mode = mode;
 		members = players.stream().map(Member::new).collect(Collectors.toList());
@@ -86,12 +88,12 @@ public class Game {
 		if (gameState == 0) {
 			curMember = getAlive().get(curTurn);
 			if (curTurn == 0) {
-				Bufferer.sendMessage(channel, "Welcome to **" + mode.getName() + "**! ("
+				channel.sendMessage("Welcome to **" + mode.getName() + "**! ("
 						+ getPlayers().stream().map(p -> p.getUser().getName()).collect(Collectors.joining(", ")) + ")\n"
 						+ curMember + ", you have first pick!\n"
-						+ "Check " + Enigma.getUnitsChannel() + " to view available units.");
+						+ "Check " + Enigma.getUnitsChannel().getAsMention() + " to view available units.").complete();
 			} else {
-				Bufferer.sendMessage(channel, curMember + ", you have next pick!");
+				channel.sendMessage(curMember + ", you have next pick!").complete();
 			}
 		} else if (gameState == 1) {
 			output.add(curMember.unit.onTurnEnd(curMember));
@@ -125,13 +127,13 @@ public class Game {
 			if (turnCount == 0) {
 				output.add(0, curMember + ", you have the first turn!\n"
 						+ "Open the channel's description to review your statistics.\n"
-						+ "Check " + Enigma.getItemsChannel() + " to view purchasable items.");
+						+ "Check " + Enigma.getItemsChannel().getAsMention() + " to view purchasable items.");
 			} else {
 				output.add(0, curMember + ", it's your turn!\n"
 						+ "Open the channel's description to review your statistics.");
 			}
 
-			Bufferer.sendMessage(channel, String.join("\n", output));
+			channel.sendMessage(String.join("\n", output)).complete();
 
 			turnCount++;
 		}
@@ -142,9 +144,9 @@ public class Game {
 
 	public void setTopic(Member member) {
 		if (gameState == 0) {
-			Bufferer.changeTopic(channel, member + " is picking their unit.");
+			channel.getManager().setTopic(member + " is picking their unit.").complete();
 		} else {
-			Bufferer.changeTopic(channel, member.unit.getName() + " " + member + " (" + turnCount + ") - \n\n"
+			channel.getManager().setTopic(member.unit.getName() + " " + member + " (" + turnCount + ") - \n\n"
 					+ "Gold: **" + member.stats.getInt(Stats.GOLD) + "**\n"
 					+ "Health: **" + member.stats.getInt(Stats.HP) + " / " + member.stats.getInt(Stats.MAX_HP)
 					+ "** (+**" + member.perTurn.getInt(Stats.HP) + "**/t)\n"
@@ -160,19 +162,23 @@ public class Game {
 					+ (member.unit instanceof Assassin
 					? "Slash: **" + ((Assassin) member.unit).getSlashCount() + " / 4**\n"
 					+ "Potency: **" + Math.round(((Assassin) member.unit).getPotency()) + "**\n" : "")
-					+ "Items: **" + member.getItems() + "**\n");
+					+ "Items: **" + member.getItems() + "**\n").complete();
 		}
 	}
 
-	public IChannel getChannel() {
+	public TextChannel getChannel() {
 		return channel;
+	}
+
+	public CommandCenter getCommands() {
+		return commands;
 	}
 
 	public GameMode getMode() {
 		return mode;
 	}
 
-	public Member getMember(IUser user) {
+	public Member getMember(User user) {
 		return members.stream()
 				.filter(m -> m.getUser().equals(user))
 				.findAny().orElse(null);
@@ -186,7 +192,7 @@ public class Game {
 		return members;
 	}
 
-	public List<IUser> getUsers() {
+	public List<User> getUsers() {
 		return members.stream().map(Member::getUser).collect(Collectors.toList());
 	}
 
@@ -205,10 +211,10 @@ public class Game {
 	public void notifyAfk() {
 		notifyAfk++;
 		if (notifyAfk == 4)
-			Bufferer.sendMessage(channel, Emote.WARN + curMember + ", you have around **4** minutes " +
-					"to make an action, otherwise you will **forfeit due to AFKing**.");
+			channel.sendMessage(Emote.WARN + curMember + ", you have around **4** minutes " +
+					"to make an action, otherwise you will **forfeit due to AFKing**.").complete();
 		else if (notifyAfk >= 8)
-			Bufferer.sendMessage(channel, curMember.lose());
+			channel.sendMessage(curMember.lose()).complete();
 	}
 
 	public int getGameState() {
@@ -243,8 +249,8 @@ public class Game {
 			if (actor.hasData(Silence.class))
 				Util.sendError(channel, "You cannot attack while silenced.");
 			else {
-				Bufferer.sendMessage(channel, actor.damage(target));
-				actor.stats.add(Stats.GOLD, RoUtil.nextInt(15, 25));
+				channel.sendMessage(actor.damage(target)).complete();
+				actor.stats.add(Stats.GOLD, Util.nextInt(15, 25));
 				return true;
 			}
 			return false;
@@ -293,7 +299,7 @@ public class Game {
 				output.add(Emote.BUY + "**" + actor.getName() + "** purchased a(n) **"
 						+ item.getName() + "** for **" + cost + "** gold.");
 
-				Bufferer.sendMessage(channel, String.join("\n", output));
+				channel.sendMessage(String.join("\n", output)).complete();
 				return true;
 			}
 			return false;
@@ -319,8 +325,8 @@ public class Game {
 			else if (!item.canUse())
 				Util.sendError(channel, "**" + item.getName() + "** can't be used.");
 			else {
-				Bufferer.sendMessage(channel, Emote.USE + "**" + actor.getName() + "** used a(n) **"
-						+ item.getName() + "**.\n" + item.onUse(actor));
+				channel.sendMessage(Emote.USE + "**" + actor.getName() + "** used a(n) **"
+						+ item.getName() + "**.\n" + item.onUse(actor)).complete();
 				if (item.removeOnUse()) actor.data.remove(item);
 				actor.updateStats();
 				return true;
@@ -367,7 +373,7 @@ public class Game {
 							+ target.getName() + "** by **" + Math.round(damage) + "**! [**"
 							+ target.stats.getInt(Stats.HP) + " / " + target.stats.getInt(Stats.MAX_HP) + "**]");
 
-					Bufferer.sendMessage(channel, String.join("\n", output));
+					channel.sendMessage(String.join("\n", output)).complete();
 					return true;
 				}
 			}
@@ -391,9 +397,9 @@ public class Game {
 
 				if (berserk.getRage() == 5) actor.stats.add(Stats.ENERGY, 100);
 
-				Bufferer.sendMessage(channel, Emote.RAGE + "**" + actor.getName() + "** has gained **"
+				channel.sendMessage(Emote.RAGE + "**" + actor.getName() + "** has gained **"
 						+ Math.round(berserk.getBonus() * 100) + "%** bonus damage "
-						+ (berserk.getRage() == 5 ? "and **100** energy " : "") + "this turn!");
+						+ (berserk.getRage() == 5 ? "and **100** energy " : "") + "this turn!").complete();
 
 				berserk.setRage(0);
 
@@ -443,7 +449,7 @@ public class Game {
 							+ target.getName() + "** by **" + Math.round(damage) + "**! [**"
 							+ target.stats.getInt(Stats.HP) + " / " + target.stats.getInt(Stats.MAX_HP) + "**]");
 
-					Bufferer.sendMessage(channel, String.join("\n", output));
+					channel.sendMessage(String.join("\n", output)).complete();
 					return true;
 				}
 			}
@@ -478,7 +484,7 @@ public class Game {
 			return player;
 		}
 
-		public IUser getUser() {
+		public User getUser() {
 			return player.getUser();
 		}
 
@@ -746,12 +752,12 @@ public class Game {
 
 		public String win() {
 			Enigma.endGame(Game.this);
-			return Emote.TROPHY + getUser() + ", you have won the game!\n";
+			return Emote.TROPHY + getUser().getAsMention() + ", you have won the game!\n";
 		}
 
 		public String lose() {
 			List<String> output = new ArrayList<>();
-			output.add(Emote.SKULL + getUser() + " has been slain and removed from the game!");
+			output.add(Emote.SKULL + getUser().getAsMention() + " has been slain and removed from the game!");
 
 			alive = false;
 
@@ -766,7 +772,7 @@ public class Game {
 
 		@Override
 		public String toString() {
-			return getUser().toString();
+			return getUser().getAsMention();
 		}
 	}
 }

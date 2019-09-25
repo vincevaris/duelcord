@@ -3,21 +3,21 @@ package com.oopsjpeg.enigma.commands;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.GameMode;
 import com.oopsjpeg.enigma.storage.Player;
+import com.oopsjpeg.enigma.util.Command;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Util;
-import com.oopsjpeg.roboops.framework.Bufferer;
-import com.oopsjpeg.roboops.framework.commands.Command;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 
 import java.util.List;
 
 public class QueueCommand implements Command {
 	@Override
-	public void execute(IMessage message, String alias, String[] args) {
-		IChannel channel = message.getChannel();
-		IUser author = message.getAuthor();
+	public void execute(Message message, String alias, String[] args) {
+		MessageChannel channel = message.getChannel();
+		User author = message.getAuthor();
 		Player player = Enigma.getPlayer(author);
 
 		GameMode mode = GameMode.DUEL;
@@ -28,8 +28,8 @@ public class QueueCommand implements Command {
 		else {
 			if (!queue.contains(player)) {
 				player.setQueue(mode);
-				Bufferer.sendMessage(channel, Emote.YES + author + " You are now in queue for **" + mode.getName()
-						+ "**. (size: **" + queue.size() + "**)");
+				channel.sendMessage(Emote.YES + author.getName() + " is now in queue for **" + mode.getName()
+						+ "**. (size: **" + queue.size() + "**)").complete();
 			} else {
 				player.removeQueue();
 				Util.sendError(channel, "You are no longer in queue.");
