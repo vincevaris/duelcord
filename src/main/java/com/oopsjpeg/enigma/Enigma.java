@@ -156,6 +156,7 @@ public class Enigma {
 	}
 
 	public static void buildUnitsChannel() {
+		System.out.println("Building units channel.");
 		Arrays.stream(Unit.values()).map(u -> {
 			EmbedBuilder builder = new EmbedBuilder();
 			builder.setTitle(u.getName());
@@ -177,6 +178,7 @@ public class Enigma {
 	}
 
 	public static void buildItemsChannel() {
+		System.out.println("Building items channel.");
 		Arrays.stream(Item.values()).sorted(Comparator.comparingInt(Item::getCost)).map(i -> {
 			EmbedBuilder builder = new EmbedBuilder();
 			builder.setTitle(i.getName() + " (" + i.getCost() + "g)");
