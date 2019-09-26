@@ -13,7 +13,7 @@ public class ShadowGauntlet extends Item {
 	public static final Effect[] EFFECTS = new Effect[]{new LoveOfWar(0.2f)};
 	public static final Stats STATS = new Stats()
 			.put(Stats.DAMAGE, 10)
-			.put(Stats.ABILITY_POWER, 0.12f);
+			.put(Stats.ABILITY_POWER, 0.15f);
 
 	@Override
 	public String getName() {
