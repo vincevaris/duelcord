@@ -18,6 +18,8 @@ public abstract class Item extends GameObject {
 			new Knife(),
 			new MidnightDagger(),
 			new Potion(),
+			new Ring(),
+			new ShadowGauntlet(),
 			new Soulstealer(),
 			new SteelMallet()
 	};

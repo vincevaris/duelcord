@@ -1,18 +1,19 @@
 package com.oopsjpeg.enigma.game.item;
 
 import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.effect.LoveOfWar;
 import com.oopsjpeg.enigma.game.effect.StatsEffect;
 import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.game.obj.Item;
 
-public class Soulstealer extends Item {
-	public static final String NAME = "Soulstealer";
-	public static final int COST = 1250;
-	public static final Item[] BUILD = new Item[]{new BloodlustBlade(), new Hatchet()};
-	public static final Effect[] EFFECTS = new Effect[]{StatsEffect.stats(new Stats()
-			.put(Stats.LIFE_STEAL, 0.25f))};
+public class ShadowGauntlet extends Item {
+	public static final String NAME = "Shadow Gauntlet";
+	public static final int COST = 1075;
+	public static final Item[] BUILD = new Item[]{new MidnightDagger(), new Ring()};
+	public static final Effect[] EFFECTS = new Effect[]{new LoveOfWar(0.2f)};
 	public static final Stats STATS = new Stats()
-			.put(Stats.DAMAGE, 25);
+			.put(Stats.DAMAGE, 10)
+			.put(Stats.ABILITY_POWER, 0.12f);
 
 	@Override
 	public String getName() {
