@@ -15,7 +15,8 @@ public class Gunslinger extends Unit {
 			.put(Stats.ENERGY, 125)
 			.put(Stats.MAX_HP, 760)
 			.put(Stats.DAMAGE, 22)
-			.put(Stats.ACCURACY, 0.6f);
+			.put(Stats.ACCURACY, 0.6f)
+			.put(Stats.ABILITY_POWER, 1);
 	public static final Stats PER_TURN = new Stats()
 			.put(Stats.HP, 12)
 			.put(Stats.GOLD, 75);

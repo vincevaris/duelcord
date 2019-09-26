@@ -16,7 +16,8 @@ public class Thief extends Unit {
 			.put(Stats.MAX_HP, 735)
 			.put(Stats.DAMAGE, 20)
 			.put(Stats.CRIT_CHANCE, 0.2f)
-			.put(Stats.CRIT_DAMAGE, -0.2f);
+			.put(Stats.CRIT_DAMAGE, -0.2f)
+			.put(Stats.ABILITY_POWER, 1);
 	public static final Stats PER_TURN = new Stats()
 			.put(Stats.HP, 8)
 			.put(Stats.GOLD, 75);

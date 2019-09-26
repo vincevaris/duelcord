@@ -15,7 +15,8 @@ public class Warrior extends Unit {
 	public static final Stats STATS = new Stats()
 			.put(Stats.ENERGY, 125)
 			.put(Stats.MAX_HP, 795)
-			.put(Stats.DAMAGE, 24);
+			.put(Stats.DAMAGE, 24)
+			.put(Stats.ABILITY_POWER, 1);
 	public static final Stats PER_TURN = new Stats()
 			.put(Stats.HP, 13)
 			.put(Stats.GOLD, 75);

@@ -18,7 +18,8 @@ public class Assassin extends Unit {
 	public static final Stats STATS = new Stats()
 			.put(Stats.ENERGY, 125)
 			.put(Stats.MAX_HP, 720)
-			.put(Stats.DAMAGE, 22);
+			.put(Stats.DAMAGE, 22)
+			.put(Stats.ABILITY_POWER, 1);
 	public static final Stats PER_TURN = new Stats()
 			.put(Stats.HP, 11)
 			.put(Stats.GOLD, 75);

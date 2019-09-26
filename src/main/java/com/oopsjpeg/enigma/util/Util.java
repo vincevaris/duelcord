@@ -24,6 +24,8 @@ public class Util {
 			output.add("Max Health: +**" + stats.getInt(Stats.MAX_HP) + "**");
 		if (stats.get(Stats.DAMAGE) > 0)
 			output.add("Damage: +**" + stats.getInt(Stats.DAMAGE) + "**");
+		if (stats.get(Stats.ABILITY_POWER) > 0)
+			output.add("Ability Power: +**" + Math.round(stats.get(Stats.ABILITY_POWER) * 100) + "%**");
 		if (stats.get(Stats.CRIT_CHANCE) > 0)
 			output.add("Critical Chance: +**" + Math.round(stats.get(Stats.CRIT_CHANCE) * 100) + "%**");
 		if (stats.get(Stats.CRIT_DAMAGE) > 0)
