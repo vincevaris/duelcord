@@ -27,8 +27,8 @@ public class Stats {
 
 		values.put(MAX_HP, 0.0f);
 		values.put(DAMAGE, 0.0f);
-		values.put(ABILITY_POWER, 1.0f);
-		values.put(ACCURACY, 1.0f);
+		values.put(ABILITY_POWER, 0.0f);
+		values.put(ACCURACY, 0.0f);
 		values.put(CRIT_CHANCE, 0.0f);
 		values.put(CRIT_DAMAGE, 0.0f);
 		values.put(LIFE_STEAL, 0.0f);
