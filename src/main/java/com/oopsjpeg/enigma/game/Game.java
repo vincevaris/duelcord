@@ -351,6 +351,8 @@ public class Game {
 		public boolean act(Member actor) {
 			if (!(actor.unit instanceof Warrior))
 				Util.sendError(channel, "You are not playing **Warrior**.");
+			else if (actor.hasData(Silence.class))
+				Util.sendError(channel, "You cannot **Bash** while silenced.");
 			else {
 				Warrior wu = (Warrior) actor.unit;
 				if (wu.getBash())
@@ -392,6 +394,8 @@ public class Game {
 		public boolean act(Member actor) {
 			if (!(actor.unit instanceof Berserker))
 				Util.sendError(channel, "You are not playing **Berserker**.");
+			else if (actor.hasData(Silence.class))
+				Util.sendError(channel, "You cannot **Rage** while silenced.");
 			else {
 				Berserker berserk = (Berserker) actor.unit;
 				berserk.setBonus(0.04f * berserk.getRage() * actor.stats.get(Stats.ABILITY_POWER));
@@ -426,6 +430,8 @@ public class Game {
 		public boolean act(Member actor) {
 			if (!(actor.unit instanceof Assassin))
 				Util.sendError(channel, "You are not playing **Assassin**.");
+			else if (actor.hasData(Silence.class))
+				Util.sendError(channel, "You cannot **Slash** while silenced.");
 			else {
 				Assassin au = (Assassin) actor.unit;
 				if (au.getSlashed())
