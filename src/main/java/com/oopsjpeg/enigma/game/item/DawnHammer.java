@@ -13,7 +13,7 @@ public class DawnHammer extends Item {
 	public static final Effect[] EFFECTS = new Effect[]{StatsEffect.perTurn(new Stats()
 			.put(Stats.ENERGY, 25)), new DawnShield()};
 	public static final Stats STATS = new Stats()
-			.put(Stats.DAMAGE, 15)
+			.put(Stats.DAMAGE, 10)
 			.put(Stats.MAX_HP, 40);
 
 	public String getName() {
