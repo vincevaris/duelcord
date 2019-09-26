@@ -32,6 +32,6 @@ public class Potion extends Item {
 	@Override
 	public String onUse(Game.Member member) {
 		member.getData().add(new PotionHealing(member, 2));
-		return member.heal(60);
+		return member.heal(60, "Potion");
 	}
 }

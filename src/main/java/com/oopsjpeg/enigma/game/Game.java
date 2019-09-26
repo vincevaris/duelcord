@@ -88,12 +88,12 @@ public class Game {
 		if (gameState == 0) {
 			curMember = getAlive().get(curTurn);
 			if (curTurn == 0) {
-				channel.sendMessage("Welcome to **" + mode.getName() + "**! ("
-						+ getPlayers().stream().map(p -> p.getUser().getName()).collect(Collectors.joining(", ")) + ")\n"
-						+ curMember + ", you have first pick!\n"
+				channel.sendMessage(Emote.ATTACK + "Welcome to **" + mode.getName() + "**! ("
+						+ getPlayers().stream().map(p -> p.getUser().getName()).collect(Collectors.joining(", ")) + ")\n\n"
+						+ "[**" + curMember + ", you have first pick!**]\n"
 						+ "Check " + Enigma.getUnitsChannel().getAsMention() + " to view available units.").complete();
 			} else {
-				channel.sendMessage(curMember + ", you have next pick!").complete();
+				channel.sendMessage("[**" + curMember + ", you have next pick!**]").complete();
 			}
 		} else if (gameState == 1) {
 			output.add(curMember.unit.onTurnEnd(curMember));
@@ -117,21 +117,21 @@ public class Game {
 			curMember.stats.put(Stats.SHIELD, 0);
 			curMember.defend = 0;
 
-			output.add(curMember.unit.onTurnStart(curMember));
-			output.add(curMember.data.stream()
-					.map(e -> e.onTurnStart(curMember))
-					.collect(Collectors.joining()));
-
-			output.removeAll(Arrays.asList(null, ""));
-
 			if (turnCount == 0) {
-				output.add(0, curMember + ", you have the first turn!\n"
+				output.add("[**" + curMember + ", you have the first turn!**]\n"
 						+ "Open the channel's description to review your statistics.\n"
 						+ "Check " + Enigma.getItemsChannel().getAsMention() + " to view purchasable items.");
 			} else {
-				output.add(0, curMember + ", it's your turn!\n"
+				output.add("[**" + curMember + ", it's your turn!**]\n"
 						+ "Open the channel's description to review your statistics.");
 			}
+
+			output.add(curMember.unit.onTurnStart(curMember));
+			output.addAll(curMember.data.stream()
+					.map(e -> e.onTurnStart(curMember))
+					.collect(Collectors.toList()));
+
+			output.removeAll(Arrays.asList(null, ""));
 
 			channel.sendMessage(String.join("\n", output)).complete();
 
@@ -372,7 +372,7 @@ public class Game {
 
 					output.add(actor.damage(target, damage));
 
-					output.add(0, Emote.SHIELD + "**" + actor.getName() + "** bashed **"
+					output.add(0, Emote.KNIFE + "**" + actor.getName() + "** bashed **"
 							+ target.getName() + "** by **" + Math.round(damage) + "**! [**"
 							+ target.stats.getInt(Stats.HP) + " / " + target.stats.getInt(Stats.MAX_HP) + "**]");
 
@@ -628,10 +628,17 @@ public class Game {
 					+ stats.getInt(Stats.HP) + " / " + stats.getInt(Stats.MAX_HP) + "**]";
 		}
 
+		public String heal(float amount, String source) {
+			stats.add(Stats.HP, amount);
+			return Emote.HEAL + "**" + getName() + "** healed by **" + Math.round(amount) + "**! [**"
+					+ stats.getInt(Stats.HP) + " / " + stats.getInt(Stats.MAX_HP) + "**] (" + source + ")";
+		}
+
 		public String damage(Member target) {
 			List<String> output = new ArrayList<>();
 
 			float damage = stats.get(Stats.DAMAGE);
+			float bonus = 0;
 			boolean crit = false;
 			boolean miss = false;
 
@@ -652,8 +659,8 @@ public class Game {
 			if (unit instanceof Warrior && ((Warrior) unit).bonus() >= 3) {
 				float bonusDmg = damage * 0.3f * stats.get(Stats.ABILITY_POWER);
 				damage += bonusDmg;
+				bonus += bonusDmg;
 				((Warrior) unit).setBonus(0);
-				output.add(Emote.KNIFE + "**" + getName() + "** dealt **" + Math.round(bonusDmg) + "** bonus damage!");
 			}
 
 			// Berserker attacker checks
@@ -675,9 +682,9 @@ public class Game {
 				((Duelist) unit).setAttack(0);
 				float bonusDmg = target.stats.getInt(Stats.MAX_HP) * 0.04f * stats.get(Stats.ABILITY_POWER);
 				float bleedDmg = stats.get(Stats.DAMAGE) * 0.4f * stats.get(Stats.ABILITY_POWER);
-				output.add(Emote.KNIFE + "**" + getName() + "** dealt **" + Math.round(bonusDmg) + "** bonus damage!");
 				output.add(Emote.BLEED + "**" + getName() + "** applied **Bleed** for **2** turns!");
 				damage += bonusDmg;
+				bonus += bonusDmg;
 				target.data.add(new Bleed(this, 2, bleedDmg));
 			}
 
@@ -732,8 +739,8 @@ public class Game {
 
 				if (target.stats.get(Stats.SHIELD) > 0)
 					output.add(0, Emote.SHIELD + "**" + getName() + "** damaged **" + target.getName() + "'s Shield** by **"
-							+ Math.round(shieldDmg) + "**! " + (crit ? "**CRIT**! " : "") + (miss ? "**MISS**! " : "")
-							+ "[**" + target.stats.getInt(Stats.SHIELD) + "**]");
+							+ Math.round(shieldDmg - bonus) + bonusText(bonus) + "**!" + damageText(crit, miss)
+							+ " [**" + target.stats.getInt(Stats.SHIELD) + "**]");
 				else {
 					damage -= shieldDmg;
 					output.add(0, Emote.SHIELD + "**" + getName() + "** destroyed **" + target.getName() + "'s Shield**!");
@@ -744,8 +751,8 @@ public class Game {
 			if (target.stats.get(Stats.SHIELD) <= 0) {
 				output.add(damage(target, damage));
 				output.add(0, Emote.ATTACK + "**" + getName() + "** damaged **" + target.getName() + "** by **"
-						+ Math.round(damage) + "**! " + (crit ? "**CRIT**! " : "") + (miss ? "**MISS**! " : "")
-						+ "[**" + target.stats.getInt(Stats.HP) + " / " + target.stats.getInt(Stats.MAX_HP) + "**]");
+						+ Math.round(damage - bonus) + bonusText(bonus) + "**!" + damageText(crit, miss)
+						+ " [**" + target.stats.getInt(Stats.HP) + " / " + target.stats.getInt(Stats.MAX_HP) + "**]");
 			}
 
 			return String.join("\n", output);
@@ -756,6 +763,14 @@ public class Game {
 			if (target.stats.get(Stats.HP) <= 0)
 				return target.lose();
 			return "";
+		}
+
+		public String damageText(boolean crit, boolean miss) {
+			return (crit ? " **CRIT**!" : "") + (miss ? " **MISS**!" : "");
+		}
+
+		public String bonusText(float bonus) {
+			return (bonus > 0 ? " (+" + Math.round(bonus) + ")" : "");
 		}
 
 		public String win() {
