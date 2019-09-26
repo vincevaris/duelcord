@@ -92,7 +92,7 @@ public class Stats {
 		values.put(SHIELD, Math.max(0, values.get(SHIELD)));
 
 		values.put(DAMAGE, Math.max(0, values.get(DAMAGE)));
-		values.put(ABILITY_POWER, Math.max(0, values.get(DAMAGE)));
+		values.put(ABILITY_POWER, Math.max(0, values.get(ABILITY_POWER)));
 		values.put(ACCURACY, Math.max(0, Math.min(1, values.get(ACCURACY))));
 		values.put(CRIT_CHANCE, Math.max(0, Math.min(1, values.get(CRIT_CHANCE))));
 
