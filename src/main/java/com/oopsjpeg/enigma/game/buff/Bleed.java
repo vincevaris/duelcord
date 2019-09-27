@@ -16,7 +16,7 @@ public class Bleed extends Buff {
 
 	@Override
 	public String onTurnStart(Game.Member member) {
-		return Emote.BLEED + "**" + getSource().getName() + "'s Bleed** dealt **"
+		return Emote.DEBUFF + "**" + getSource().getName() + "'s Bleed** dealt **"
 				+ Math.round(getPower()) + "** damage to **" + member.getName() + "**.\n"
 				+ getSource().damage(member, getPower());
 	}

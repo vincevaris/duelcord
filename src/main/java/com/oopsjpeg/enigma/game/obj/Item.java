@@ -11,6 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 public abstract class Item extends GameObject {
 	private static final Item[] values = {
 			new BloodlustBlade(),
+			new BoneSpear(),
 			new BronzeCutlass(),
 			new Crystal(),
 			new DawnHammer(),

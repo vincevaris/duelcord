@@ -6,7 +6,7 @@ import com.oopsjpeg.enigma.game.obj.Item;
 
 public class Potion extends Item {
 	public static final String NAME = "Potion";
-	public static final String DESC = "Heals for **140** health over **2** turns.";
+	public static final String DESC = "Heals for **160** health over **2** turns.";
 	public static final int COST = 50;
 
 	@Override
@@ -32,6 +32,6 @@ public class Potion extends Item {
 	@Override
 	public String onUse(Game.Member member) {
 		member.getData().add(new PotionHealing(member, 2));
-		return member.heal(70, "Potion");
+		return member.heal(80, "Potion");
 	}
 }

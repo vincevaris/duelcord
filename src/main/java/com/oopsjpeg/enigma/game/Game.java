@@ -4,7 +4,9 @@ import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.commands.game.*;
 import com.oopsjpeg.enigma.game.buff.Bleed;
 import com.oopsjpeg.enigma.game.buff.Silence;
+import com.oopsjpeg.enigma.game.buff.Wound;
 import com.oopsjpeg.enigma.game.effect.LoveOfWar;
+import com.oopsjpeg.enigma.game.effect.Wounder;
 import com.oopsjpeg.enigma.game.obj.Buff;
 import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.game.obj.Item;
@@ -444,8 +446,7 @@ public class Game {
 					float damage = actor.stats.get(Stats.DAMAGE) * Assassin.SLASH_DAMAGE * actor.stats.get(Stats.ABILITY_POWER);
 					if (au.slashCount() >= 4) {
 						damage += au.getPotency();
-						target.data.add(new Silence(actor, Assassin.SILENCE_TURNS));
-						output.add(Emote.BLEED + "**" + actor.getName() + "** applied **Silence** for **" + Assassin.SILENCE_TURNS + "** turn(s)!");
+						output.add(target.buff(new Silence(actor, Assassin.SILENCE_TURNS)));
 						au.setSlashCount(0);
 						au.setPotencyTurn(0);
 						au.setPotency(0);
@@ -617,6 +618,21 @@ public class Game {
 			}
 		}
 
+		public String buff(Buff buff) {
+			if (hasData(buff.getClass())) {
+				Buff oldBuff = (Buff) getData(buff.getClass());
+				if (buff.getPower() > oldBuff.getPower()) {
+					data.remove(oldBuff);
+					data.add(buff);
+					return Emote.DEBUFF + "**" + getName() + "** applied **" + buff.getName() + "** for **" + buff.getTurns() + "** turn(s)!";
+				}
+				return "";
+			}
+
+			data.add(buff);
+			return Emote.DEBUFF + "**" + getName() + "** applied **" + buff.getName() + "** for **" + buff.getTurns() + "** turn(s)!";
+		}
+
 		public String shield(float amount) {
 			stats.add(Stats.SHIELD, amount);
 			return Emote.HEAL + "**" + getName() + "** shielded by **" + Math.round(amount)
@@ -624,15 +640,14 @@ public class Game {
 		}
 
 		public String heal(float amount) {
-			stats.add(Stats.HP, amount);
-			return Emote.HEAL + "**" + getName() + "** healed by **" + Math.round(amount) + "**! [**"
-					+ stats.getInt(Stats.HP) + " / " + stats.getInt(Stats.MAX_HP) + "**]";
+			return heal(amount, "");
 		}
 
 		public String heal(float amount, String source) {
+			amount *= 1 - ((Wound) getData(Wound.class)).getPower();
 			stats.add(Stats.HP, amount);
 			return Emote.HEAL + "**" + getName() + "** healed by **" + Math.round(amount) + "**! [**"
-					+ stats.getInt(Stats.HP) + " / " + stats.getInt(Stats.MAX_HP) + "**] (" + source + ")";
+					+ stats.getInt(Stats.HP) + " / " + stats.getInt(Stats.MAX_HP) + "**] (" + (source.isEmpty() ? "" : source) + ")";
 		}
 
 		public String damage(Member target) {
@@ -654,6 +669,12 @@ public class Game {
 			if (hasData(LoveOfWar.class)) {
 				LoveOfWar low = (LoveOfWar) getData(LoveOfWar.class);
 				damage *= 1 + ((low.attack() - 1) * low.getPower());
+			}
+
+			// Wounder effect
+			if (hasData(Wounder.class)) {
+				Wounder wor = (Wounder) getData(Wounder.class);
+				output.add(target.buff(new Wound(this, 1, wor.getPower())));
 			}
 
 			// Warrior bonus damage
@@ -683,10 +704,9 @@ public class Game {
 				((Duelist) unit).setAttack(0);
 				float bonusDmg = target.stats.getInt(Stats.MAX_HP) * 0.04f * stats.get(Stats.ABILITY_POWER);
 				float bleedDmg = stats.get(Stats.DAMAGE) * 0.4f * stats.get(Stats.ABILITY_POWER);
-				output.add(Emote.BLEED + "**" + getName() + "** applied **Bleed** for **2** turns!");
+				output.add(target.buff(new Bleed(this, 2, bleedDmg)));
 				damage += bonusDmg;
 				bonus += bonusDmg;
-				target.data.add(new Bleed(this, 2, bleedDmg));
 			}
 
 			// Assassin potency stacking

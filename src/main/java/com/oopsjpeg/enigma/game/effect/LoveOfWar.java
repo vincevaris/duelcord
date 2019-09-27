@@ -2,6 +2,7 @@ package com.oopsjpeg.enigma.game.effect;
 
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.obj.Effect;
+import com.oopsjpeg.enigma.util.Util;
 
 public class LoveOfWar extends Effect {
 	public static final String NAME = "Love of War";
@@ -29,7 +30,7 @@ public class LoveOfWar extends Effect {
 
 	@Override
 	public String getDesc() {
-		return "Each attack increases damage dealt by **" + Math.round(power * 100) + "%** for that turn.";
+		return "Each attack increases damage dealt by **" + Util.percent(power) + "** for that turn.";
 	}
 
 	@Override
