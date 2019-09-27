@@ -2,6 +2,7 @@ package com.oopsjpeg.enigma.game.unit;
 
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.util.Util;
 
 import java.awt.*;
 
@@ -26,7 +27,7 @@ public class Duelist extends Unit {
 	}
 
 	public void setAttack(int attack) {
-		this.attack = Math.max(0, Math.min(5, attack));
+		this.attack = Util.limit(attack, 0, 5);
 	}
 
 	public int attack() {

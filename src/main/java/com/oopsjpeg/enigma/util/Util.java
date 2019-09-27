@@ -45,4 +45,16 @@ public class Util {
 			output.add("Gold/turn: +**" + perTurn.getInt(Stats.GOLD) + "**");
 		return String.join("\n", output);
 	}
+
+	public static String percent(float x) {
+		return (Math.round(x) * 100) + "%";
+	}
+
+	public static float limit(float x, float min, float max) {
+		return Math.max(min, Math.min(max, x));
+	}
+
+	public static int limit(int x, int min, int max) {
+		return (int) Math.ceil(limit((float) x, (float) min, (float) max));
+	}
 }

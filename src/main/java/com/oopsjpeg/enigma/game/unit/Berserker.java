@@ -4,6 +4,7 @@ import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Unit;
 import com.oopsjpeg.enigma.util.Emote;
+import com.oopsjpeg.enigma.util.Util;
 
 import java.awt.*;
 
@@ -30,7 +31,7 @@ public class Berserker extends Unit {
 	}
 
 	public void setRage(int rage) {
-		this.rage = Math.max(0, Math.min(5, rage));
+		this.rage = Util.limit(rage, 0, 5);
 	}
 
 	public float getBonus() {

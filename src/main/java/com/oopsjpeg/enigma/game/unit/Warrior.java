@@ -3,6 +3,7 @@ package com.oopsjpeg.enigma.game.unit;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.util.Util;
 
 import java.awt.*;
 
@@ -29,7 +30,7 @@ public class Warrior extends Unit {
 	}
 
 	public void setBonus(int bonus) {
-		this.bonus = Math.max(0, Math.min(3, bonus));
+		this.bonus = Util.limit(bonus, 0, 3);
 	}
 
 	public int bonus() {

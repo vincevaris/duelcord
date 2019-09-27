@@ -1,5 +1,7 @@
 package com.oopsjpeg.enigma.game;
 
+import com.oopsjpeg.enigma.util.Util;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -87,14 +89,14 @@ public class Stats {
 	public Stats clean() {
 		values.put(MAX_HP, Math.max(0, values.get(MAX_HP)));
 
-		values.put(HP, Math.max(0, Math.min(values.get(MAX_HP), values.get(HP))));
+		values.put(HP, Util.limit(values.get(HP), 0, values.get(MAX_HP)));
 		values.put(ENERGY, Math.max(0, values.get(ENERGY)));
 		values.put(SHIELD, Math.max(0, values.get(SHIELD)));
 
 		values.put(DAMAGE, Math.max(0, values.get(DAMAGE)));
 		values.put(ABILITY_POWER, Math.max(0, values.get(ABILITY_POWER)));
-		values.put(ACCURACY, Math.max(0, Math.min(1, values.get(ACCURACY))));
-		values.put(CRIT_CHANCE, Math.max(0, Math.min(1, values.get(CRIT_CHANCE))));
+		values.put(ACCURACY, Util.limit(values.get(ACCURACY), 0, 1));
+		values.put(CRIT_CHANCE, Util.limit(values.get(CRIT_CHANCE), 0, 1));
 
 		return this;
 	}

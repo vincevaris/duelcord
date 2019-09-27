@@ -82,6 +82,7 @@ public class Game {
 
 		if (turnCount >= 1 && gameState == 1 && curMember.stats.get(Stats.ENERGY) > 0) {
 			curMember.defend = 1;
+			output.add(Emote.SHIELD + "**" + curMember.getName() + "** is defending!");
 			output.add(curMember.unit.onDefend(curMember));
 		}
 
@@ -160,7 +161,7 @@ public class Game {
 					+ (member.unit instanceof Duelist
 					? "Attack: **" + ((Duelist) member.unit).getAttack() + " / 4**\n" : "")
 					+ (member.unit instanceof Assassin
-					? "Slash: **" + ((Assassin) member.unit).getSlashCount() + " / 4**\n"
+					? "Slash: **" + ((Assassin) member.unit).getSlashCount() + " / " + Assassin.SLASH_STACK_MAX + "**\n"
 					+ "Potency: **" + Math.round(((Assassin) member.unit).getPotency()) + "**\n" : "")
 					+ "Items: **" + member.getItems() + "**\n").complete();
 		}
@@ -440,13 +441,13 @@ public class Game {
 					List<String> output = new ArrayList<>();
 					au.setSlashed(true);
 
-					float damage = actor.stats.get(Stats.DAMAGE) * 0.25f * actor.stats.get(Stats.ABILITY_POWER);
+					float damage = actor.stats.get(Stats.DAMAGE) * Assassin.SLASH_DAMAGE * actor.stats.get(Stats.ABILITY_POWER);
 					if (au.slashCount() >= 4) {
 						damage += au.getPotency();
-						target.data.add(new Silence(actor, 1));
-						output.add(Emote.BLEED + "**" + actor.getName() + "** applied **Silence** for **1** turn!");
+						target.data.add(new Silence(actor, Assassin.SILENCE_TURNS));
+						output.add(Emote.BLEED + "**" + actor.getName() + "** applied **Silence** for **" + Assassin.SILENCE_TURNS + "** turn(s)!");
 						au.setSlashCount(0);
-						au.setPotencyTurns(0);
+						au.setPotencyTurn(0);
 						au.setPotency(0);
 					}
 
@@ -689,8 +690,8 @@ public class Game {
 			}
 
 			// Assassin potency stacking
-			if (unit instanceof Assassin && ((Assassin) unit).getPotencyTurns() < 5) {
-				float potency = (damage * 0.2f) * (target.defend == 1 ? 0.8f : 1f);
+			if (unit instanceof Assassin && ((Assassin) unit).getPotencyTurn() < Assassin.POTENCY_TURNS) {
+				float potency = damage * Math.min(Assassin.POTENCY_STACK_MAX, Assassin.POTENCY_STACK_MIN + (turnCount * 0.005f));
 				((Assassin) unit).addPotency(potency);
 				((Assassin) unit).addPotencyNow(potency);
 			}
@@ -725,16 +726,13 @@ public class Game {
 				damage *= Math.max(1, critMul);
 			}
 
-			// Defensive stance damage reduction
-			if (target.defend == 1) damage *= 0.8f;
-
 			// Life steal healing
 			if (stats.get(Stats.LIFE_STEAL) > 0)
 				output.add(heal(Math.round(stats.get(Stats.LIFE_STEAL) * damage)));
 
 			// Shield damaging
 			if (target.stats.get(Stats.SHIELD) > 0) {
-				float shieldDmg = Math.max(0, Math.min(damage, target.stats.get(Stats.SHIELD)));
+				float shieldDmg = Util.limit(target.stats.get(Stats.SHIELD), 0, damage);
 				target.stats.sub(Stats.SHIELD, shieldDmg);
 
 				if (target.stats.get(Stats.SHIELD) > 0)
@@ -759,6 +757,9 @@ public class Game {
 		}
 
 		public String damage(Member target, float damage) {
+			// Defensive stance damage reduction
+			if (target.defend == 1) damage *= 0.8f;
+
 			target.stats.sub(Stats.HP, damage);
 			if (target.stats.get(Stats.HP) <= 0)
 				return target.lose();
