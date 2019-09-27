@@ -322,7 +322,7 @@ public class Game {
 		public boolean act(Member actor) {
 			if (!actor.data.contains(item))
 				Util.sendError(channel, "You don't have a(n) **" + item.getName() + "**.");
-			else if (!item.canUse())
+			else if (!item.canUse(actor))
 				Util.sendError(channel, "**" + item.getName() + "** can't be used.");
 			else {
 				channel.sendMessage(Emote.USE + "**" + actor.getName() + "** used a(n) **"

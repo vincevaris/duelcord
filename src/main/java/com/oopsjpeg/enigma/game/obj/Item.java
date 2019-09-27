@@ -3,6 +3,7 @@ package com.oopsjpeg.enigma.game.obj;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.GameObject;
 import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.buff.PotionHealing;
 import com.oopsjpeg.enigma.game.item.*;
 
 import java.lang.reflect.InvocationTargetException;
@@ -67,8 +68,8 @@ public abstract class Item extends GameObject {
 		return new Stats();
 	}
 
-	public boolean canUse() {
-		return false;
+	public boolean canUse(Game.Member member) {
+		return !member.hasData(PotionHealing.class);
 	}
 
 	public boolean removeOnUse() {

@@ -23,7 +23,7 @@ public class Shatterwand extends Item {
 	}
 
 	@Override
-	public boolean canUse() {
+	public boolean canUse(Game.Member member) {
 		return true;
 	}
 
