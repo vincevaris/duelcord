@@ -37,10 +37,6 @@ public abstract class Unit extends GameObject {
 
 	public abstract Color getColor();
 
-	public boolean isRanged() {
-		return false;
-	}
-
 	public abstract Stats getStats();
 
 	public abstract Stats getPerTurn();

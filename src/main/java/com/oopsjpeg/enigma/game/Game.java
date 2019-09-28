@@ -113,7 +113,7 @@ public class Game {
 
 			curMember = getAlive().get(curTurn);
 
-			curMember.stats.add(Stats.HP, curMember.perTurn.get(Stats.HP) * curMember.defend);
+			curMember.stats.add(Stats.HP, curMember.perTurn.get(Stats.HP) * (1 + curMember.defend));
 			curMember.stats.add(Stats.GOLD, Math.round(curMember.perTurn.get(Stats.GOLD) + (turnCount * 0.5)));
 			curMember.stats.put(Stats.ENERGY, curMember.unit.getStats().get(Stats.ENERGY));
 			curMember.stats.add(Stats.ENERGY, curMember.perTurn.get(Stats.ENERGY));
@@ -573,7 +573,6 @@ public class Game {
 			stats.put(Stats.MAX_HP, unit.getStats().get(Stats.MAX_HP));
 			stats.put(Stats.DAMAGE, unit.getStats().get(Stats.DAMAGE));
 			stats.put(Stats.ABILITY_POWER, unit.getStats().get(Stats.ABILITY_POWER));
-			stats.put(Stats.ACCURACY, unit.getStats().get(Stats.ACCURACY));
 			stats.put(Stats.CRIT_CHANCE, unit.getStats().get(Stats.CRIT_CHANCE));
 			stats.put(Stats.CRIT_DAMAGE, unit.getStats().get(Stats.CRIT_DAMAGE));
 			stats.put(Stats.LIFE_STEAL, unit.getStats().get(Stats.LIFE_STEAL));
@@ -602,7 +601,7 @@ public class Game {
 			}
 
 			if (unit instanceof Gunslinger)
-				stats.mul(Stats.DAMAGE, 1 + (stats.get(Stats.CRIT_CHANCE) * 0.75f));
+				stats.mul(Stats.DAMAGE, 1 + stats.get(Stats.CRIT_CHANCE));
 
 			critBag.setChance(stats.get(Stats.CRIT_CHANCE));
 			critBag.setInfluence(0.5f);
@@ -624,13 +623,13 @@ public class Game {
 				if (buff.getPower() > oldBuff.getPower()) {
 					data.remove(oldBuff);
 					data.add(buff);
-					return Emote.DEBUFF + "**" + getName() + "** applied **" + buff.getName() + "** for **" + buff.getTurns() + "** turn(s)!";
+					return Emote.DEBUFF + "**" + buff.getSource() + "** applied **" + buff.getName() + "** for **" + buff.getTurns() + "** turn(s)!";
 				}
 				return "";
 			}
 
 			data.add(buff);
-			return Emote.DEBUFF + "**" + getName() + "** applied **" + buff.getName() + "** for **" + buff.getTurns() + "** turn(s)!";
+			return Emote.DEBUFF + "**" + buff.getSource() + "** applied **" + buff.getName() + "** for **" + buff.getTurns() + "** turn(s)!";
 		}
 
 		public String shield(float amount) {
@@ -644,10 +643,10 @@ public class Game {
 		}
 
 		public String heal(float amount, String source) {
-			amount *= 1 - ((Wound) getData(Wound.class)).getPower();
+			amount *= 1 - (hasData(Wound.class) ? ((Wound) getData(Wound.class)).getPower() : 0);
 			stats.add(Stats.HP, amount);
 			return Emote.HEAL + "**" + getName() + "** healed by **" + Math.round(amount) + "**! [**"
-					+ stats.getInt(Stats.HP) + " / " + stats.getInt(Stats.MAX_HP) + "**] (" + (source.isEmpty() ? "" : source) + ")";
+					+ stats.getInt(Stats.HP) + " / " + stats.getInt(Stats.MAX_HP) + "**]" + (source.isEmpty() ? "" : " (" + source + ")");
 		}
 
 		public String damage(Member target) {
@@ -657,13 +656,6 @@ public class Game {
 			float bonus = 0;
 			boolean crit = false;
 			boolean miss = false;
-
-			// Missed attack damage reduction
-			if (unit.isRanged() && stats.get(Stats.ACCURACY) < 1
-					&& Util.RANDOM.nextFloat() <= stats.get(Stats.ACCURACY)) {
-				damage *= 0.4f;
-				miss = true;
-			}
 
 			// Love of War damage multiplier
 			if (hasData(LoveOfWar.class)) {
@@ -722,7 +714,7 @@ public class Game {
 					// Gunslinger passive crit
 					crit = true;
 					((Gunslinger) unit).setShot(0);
-				} else if (critBag.get()) {
+				} else if (!(unit instanceof Gunslinger) && critBag.get()) {
 					// Pseudo RNG crit bag
 					crit = true;
 				}
@@ -772,6 +764,8 @@ public class Game {
 						+ Math.round(damage - bonus) + bonusText(bonus) + "**!" + damageText(crit, miss)
 						+ " [**" + target.stats.getInt(Stats.HP) + " / " + target.stats.getInt(Stats.MAX_HP) + "**]");
 			}
+
+            output.removeAll(Arrays.asList(null, ""));
 
 			return String.join("\n", output);
 		}

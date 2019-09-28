@@ -10,7 +10,7 @@ public class IronScimitar extends Item {
 	public static final int COST = 1225;
 	public static final Item[] BUILD = new Item[]{new BronzeCutlass(), new Hatchet()};
 	public static final Effect[] EFFECTS = new Effect[]{StatsEffect.stats(new Stats()
-			.put(Stats.CRIT_DAMAGE, 0.5f))};
+			.put(Stats.CRIT_DAMAGE, 0.25f))};
 	public static final Stats STATS = new Stats()
 			.put(Stats.DAMAGE, 25)
 			.put(Stats.CRIT_CHANCE, 0.4f);

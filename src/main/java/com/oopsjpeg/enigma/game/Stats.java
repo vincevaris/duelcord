@@ -14,7 +14,6 @@ public class Stats {
 	public static String MAX_HP = "max_hp";
 	public static String DAMAGE = "damage";
 	public static String ABILITY_POWER = "ability_power";
-	public static String ACCURACY = "accuracy";
 	public static String CRIT_CHANCE = "crit_chance";
 	public static String CRIT_DAMAGE = "crit_damage";
 	public static String LIFE_STEAL = "life_steal";
@@ -30,7 +29,6 @@ public class Stats {
 		values.put(MAX_HP, 0.0f);
 		values.put(DAMAGE, 0.0f);
 		values.put(ABILITY_POWER, 0.0f);
-		values.put(ACCURACY, 0.0f);
 		values.put(CRIT_CHANCE, 0.0f);
 		values.put(CRIT_DAMAGE, 0.0f);
 		values.put(LIFE_STEAL, 0.0f);
@@ -95,7 +93,6 @@ public class Stats {
 
 		values.put(DAMAGE, Math.max(0, values.get(DAMAGE)));
 		values.put(ABILITY_POWER, Math.max(0, values.get(ABILITY_POWER)));
-		values.put(ACCURACY, Util.limit(values.get(ACCURACY), 0, 1));
 		values.put(CRIT_CHANCE, Util.limit(values.get(CRIT_CHANCE), 0, 1));
 
 		return this;

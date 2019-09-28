@@ -164,6 +164,7 @@ public class Enigma {
 			builder.appendDescription("Health: **" + u.getStats().getInt(Stats.MAX_HP) + "** (+**"
 					+ u.getPerTurn().getInt(Stats.HP) + "**/turn)\n");
 			builder.appendDescription("Damage: **" + u.getStats().getInt(Stats.DAMAGE) + "**\n");
+			builder.appendDescription("Energy: **" + u.getStats().getInt(Stats.ENERGY) + "**\n");
 			if (u.getStats().get(Stats.CRIT_CHANCE) > 0)
 				builder.appendDescription("Critical Chance: **" + Math.round(u.getStats().get(Stats.CRIT_CHANCE) * 100) + "%**\n");
 			if (u.getStats().get(Stats.LIFE_STEAL) > 0)
