@@ -9,24 +9,24 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
 public class RageCommand implements Command {
-	@Override
-	public void execute(Message message, String alias, String[] args) {
-		User author = message.getAuthor();
-		MessageChannel channel = message.getChannel();
-		Game game = Enigma.getPlayer(author).getGame();
-		Game.Member member = game.getMember(author);
+    @Override
+    public void execute(Message message, String alias, String[] args) {
+        User author = message.getAuthor();
+        MessageChannel channel = message.getChannel();
+        Game game = Enigma.getPlayer(author).getGame();
+        Game.Member member = game.getMember(author);
 
-		if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
-			message.delete().complete();
-			if (game.getGameState() == 0)
-				Util.sendError(channel, "You cannot use **Rage** until the game has started.");
-			else
-				member.act(game.new RageAction());
-		}
-	}
+        if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
+            message.delete().complete();
+            if (game.getGameState() == 0)
+                Util.sendError(channel, "You cannot use **Rage** until the game has started.");
+            else
+                member.act(game.new RageAction());
+        }
+    }
 
-	@Override
-	public String getName() {
-		return "rage";
-	}
+    @Override
+    public String getName() {
+        return "rage";
+    }
 }

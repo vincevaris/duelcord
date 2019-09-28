@@ -4,23 +4,23 @@ import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Item;
 
 public class Staff extends Item {
-	public static final String NAME = "Staff";
-	public static final int COST = 450;
-	public static final Stats STATS = new Stats()
-			.put(Stats.ABILITY_POWER, 0.1f);
+    public static final String NAME = "Staff";
+    public static final int COST = 450;
+    public static final Stats STATS = new Stats()
+            .put(Stats.ABILITY_POWER, 0.1f);
 
-	@Override
-	public String getName() {
-		return NAME;
-	}
+    @Override
+    public String getName() {
+        return NAME;
+    }
 
-	@Override
-	public int getCost() {
-		return COST;
-	}
+    @Override
+    public int getCost() {
+        return COST;
+    }
 
-	@Override
-	public Stats getStats() {
-		return STATS;
-	}
+    @Override
+    public Stats getStats() {
+        return STATS;
+    }
 }

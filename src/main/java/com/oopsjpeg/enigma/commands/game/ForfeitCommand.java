@@ -8,26 +8,26 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
 public class ForfeitCommand implements Command {
-	@Override
-	public void execute(Message message, String alias, String[] args) {
-		User author = message.getAuthor();
-		MessageChannel channel = message.getChannel();
-		Game game = Enigma.getPlayer(author).getGame();
+    @Override
+    public void execute(Message message, String alias, String[] args) {
+        User author = message.getAuthor();
+        MessageChannel channel = message.getChannel();
+        Game game = Enigma.getPlayer(author).getGame();
 
-		if (channel.equals(game.getChannel())) {
-			message.delete().complete();
-			message.getChannel().sendMessage(Enigma.getPlayer(author)
-					.getGame().getMember(author).lose()).complete();
-		}
-	}
+        if (channel.equals(game.getChannel())) {
+            message.delete().complete();
+            message.getChannel().sendMessage(Enigma.getPlayer(author)
+                    .getGame().getMember(author).lose()).complete();
+        }
+    }
 
-	@Override
-	public String getName() {
-		return "forfeit";
-	}
+    @Override
+    public String getName() {
+        return "forfeit";
+    }
 
-	@Override
-	public String[] getAliases() {
-		return new String[]{"ff"};
-	}
+    @Override
+    public String[] getAliases() {
+        return new String[]{"ff"};
+    }
 }
