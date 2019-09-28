@@ -5,19 +5,19 @@ import com.oopsjpeg.enigma.game.obj.Buff;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Util;
 
-public class Wound extends Buff {
-    public Wound(Game.Member source, int turns, float power) {
+public class Weaken extends Buff {
+    public Weaken(Game.Member source, int turns, float power) {
         super(source, turns, power);
     }
 
     @Override
     public String getName() {
-        return "Wound";
+        return "Weaken";
     }
 
     @Override
     public String onTurnStart(Game.Member member) {
-        return Emote.WOUND + "**" + member.getName() + "** is wounded by **" + Util.percent(getPower()) + "** from **"
+        return Emote.SILENCE + "**" + member.getName() + "** is weakened by **" + Util.percent(getPower()) + "** from **"
                 + getSource().getName() + "** this turn.";
     }
 }
