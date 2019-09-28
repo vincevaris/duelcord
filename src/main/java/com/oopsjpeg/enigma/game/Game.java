@@ -2,16 +2,16 @@ package com.oopsjpeg.enigma.game;
 
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.commands.game.*;
-import com.oopsjpeg.enigma.game.buff.Bleed;
 import com.oopsjpeg.enigma.game.buff.Silence;
 import com.oopsjpeg.enigma.game.buff.Wound;
-import com.oopsjpeg.enigma.game.effect.LoveOfWar;
-import com.oopsjpeg.enigma.game.effect.Wounder;
 import com.oopsjpeg.enigma.game.obj.Buff;
 import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.game.obj.Item;
 import com.oopsjpeg.enigma.game.obj.Unit;
-import com.oopsjpeg.enigma.game.unit.*;
+import com.oopsjpeg.enigma.game.unit.Assassin;
+import com.oopsjpeg.enigma.game.unit.Berserker;
+import com.oopsjpeg.enigma.game.unit.Duelist;
+import com.oopsjpeg.enigma.game.unit.Warrior;
 import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.ChanceBag;
 import com.oopsjpeg.enigma.util.CommandCenter;
@@ -99,7 +99,6 @@ public class Game {
 				channel.sendMessage("[**" + curMember + ", you have next pick!**]").complete();
 			}
 		} else if (gameState == 1) {
-			output.add(curMember.unit.onTurnEnd(curMember));
 			output.addAll(curMember.data.stream()
 					.map(e -> e.onTurnEnd(curMember))
 					.collect(Collectors.toList()));
@@ -129,7 +128,6 @@ public class Game {
 						+ "Open the channel's description to review your statistics.");
 			}
 
-			output.add(curMember.unit.onTurnStart(curMember));
 			output.addAll(curMember.data.stream()
 					.map(e -> e.onTurnStart(curMember))
 					.collect(Collectors.toList()));
@@ -158,8 +156,6 @@ public class Game {
 					? "Attack: **" + ((Warrior) member.unit).getBonus() + " / 3**\n" : "")
 					+ (member.unit instanceof Berserker
 					? "Rage: **" + ((Berserker) member.unit).getRage() + " / 5**\n" : "")
-					+ (member.unit instanceof Gunslinger
-					? "Shot: **" + ((Gunslinger) member.unit).getShot() + " / 4**\n" : "")
 					+ (member.unit instanceof Duelist
 					? "Attack: **" + ((Duelist) member.unit).getAttack() + " / 4**\n" : "")
 					+ (member.unit instanceof Assassin
@@ -224,6 +220,10 @@ public class Game {
 		return gameState;
 	}
 
+	public int getTurnCount() {
+		return turnCount;
+	}
+
 	public abstract class Action {
 		public boolean execute(Member actor) {
 			lastAction = LocalDateTime.now();
@@ -252,7 +252,7 @@ public class Game {
 			if (actor.hasData(Silence.class))
 				Util.sendError(channel, "You cannot attack while silenced.");
 			else {
-				channel.sendMessage(actor.damage(target)).complete();
+				channel.sendMessage(actor.damage(actor.basicAttack(target), Emote.ATTACK, "damaged")).complete();
 				actor.stats.add(Stats.GOLD, Util.nextInt(15, 25));
 				return true;
 			}
@@ -299,7 +299,7 @@ public class Game {
 					actor.shields.add(item);
 				}
 
-				output.add(Emote.BUY + "**" + actor.getName() + "** purchased a(n) **"
+				output.add(0, Emote.BUY + "**" + actor.getName() + "** purchased a(n) **"
 						+ item.getName() + "** for **" + cost + "** gold.");
 
 				channel.sendMessage(String.join("\n", output)).complete();
@@ -364,22 +364,13 @@ public class Game {
 					wu.setBash(true);
 					wu.bonus();
 
-					float damage = actor.stats.get(Stats.DAMAGE) * 0.5f * actor.stats.get(Stats.ABILITY_POWER);
-					List<String> output = new ArrayList<>();
+					DamageEvent event = new DamageEvent(Game.this, actor, target);
 
-					if (target.stats.get(Stats.SHIELD) > 0) {
-						target.stats.put(Stats.SHIELD, 0);
-						output.add(Emote.SHIELD + "**" + actor.getName()
-								+ "** destroyed **" + target.getName() + "'s Shield**!");
-					}
+					event.damage = actor.stats.get(Stats.DAMAGE) * 0.5f * actor.stats.get(Stats.ABILITY_POWER);
+					if (event.target.stats.get(Stats.SHIELD) > 0)
+						event.target.stats.put(Stats.SHIELD, 0.01f);
 
-					output.add(actor.damage(target, damage));
-
-					output.add(0, Emote.KNIFE + "**" + actor.getName() + "** bashed **"
-							+ target.getName() + "** by **" + Math.round(damage) + "**! [**"
-							+ target.stats.getInt(Stats.HP) + " / " + target.stats.getInt(Stats.MAX_HP) + "**]");
-
-					channel.sendMessage(String.join("\n", output)).complete();
+					channel.sendMessage(String.join("\n", actor.damage(event, Emote.KNIFE, "bashed"))).complete();
 					return true;
 				}
 			}
@@ -440,25 +431,22 @@ public class Game {
 				if (au.getSlashed())
 					Util.sendError(channel, "You can only use **Slash** once per turn.");
 				else {
-					List<String> output = new ArrayList<>();
 					au.setSlashed(true);
 
-					float damage = actor.stats.get(Stats.DAMAGE) * Assassin.SLASH_DAMAGE * actor.stats.get(Stats.ABILITY_POWER);
+					DamageEvent event = new DamageEvent(Game.this, actor, target);
+					event.damage = actor.stats.get(Stats.DAMAGE) * Assassin.SLASH_DAMAGE * actor.stats.get(Stats.ABILITY_POWER);
+					event = event.actor.hit(event);
+					event = event.actor.crit(event);
+
 					if (au.slashCount() >= 4) {
-						damage += au.getPotency();
-						output.add(target.buff(new Silence(actor, Assassin.SILENCE_TURNS)));
+						event.damage += au.getPotency();
+						event.output.add(target.buff(new Silence(actor, Assassin.SILENCE_TURNS)));
 						au.setSlashCount(0);
 						au.setPotencyTurn(0);
 						au.setPotency(0);
 					}
 
-					output.add(actor.damage(target, damage));
-
-					output.add(0, Emote.KNIFE + "**" + actor.getName() + "** slashed **"
-							+ target.getName() + "** by **" + Math.round(damage) + "**! [**"
-							+ target.stats.getInt(Stats.HP) + " / " + target.stats.getInt(Stats.MAX_HP) + "**]");
-
-					channel.sendMessage(String.join("\n", output)).complete();
+					channel.sendMessage(actor.damage(event, Emote.KNIFE, "slashed")).complete();
 					return true;
 				}
 			}
@@ -487,6 +475,10 @@ public class Game {
 
 		public Member(Player player) {
 			this.player = player;
+		}
+
+		public Game getGame() {
+			return Game.this;
 		}
 
 		public Player getPlayer() {
@@ -560,6 +552,8 @@ public class Game {
 
 		public void setUnit(Unit unit) {
 			this.unit = unit;
+			data.clear();
+			data.add(unit);
 			updateStats();
 
 			stats.put(Stats.HP, stats.get(Stats.MAX_HP));
@@ -599,9 +593,6 @@ public class Game {
 				stats.add(effect.getStats());
 				perTurn.add(effect.getPerTurn());
 			}
-
-			if (unit instanceof Gunslinger)
-				stats.mul(Stats.DAMAGE, 1 + stats.get(Stats.CRIT_CHANCE));
 
 			critBag.setChance(stats.get(Stats.CRIT_CHANCE));
 			critBag.setInfluence(0.5f);
@@ -649,143 +640,80 @@ public class Game {
 					+ stats.getInt(Stats.HP) + " / " + stats.getInt(Stats.MAX_HP) + "**]" + (source.isEmpty() ? "" : " (" + source + ")");
 		}
 
-		public String damage(Member target) {
-			List<String> output = new ArrayList<>();
+		public DamageEvent hit(DamageEvent event) {
+			// Defensive stance damage reduction
+			if (event.target.defend == 1) event.damage *= 0.8f;
 
-			float damage = stats.get(Stats.DAMAGE);
-			float bonus = 0;
-			boolean crit = false;
-			boolean miss = false;
-
-			// Love of War damage multiplier
-			if (hasData(LoveOfWar.class)) {
-				LoveOfWar low = (LoveOfWar) getData(LoveOfWar.class);
-				damage *= 1 + ((low.attack() - 1) * low.getPower());
-			}
-
-			// Wounder effect
-			if (hasData(Wounder.class)) {
-				Wounder wor = (Wounder) getData(Wounder.class);
-				output.add(target.buff(new Wound(this, 1, wor.getPower())));
-			}
-
-			// Warrior bonus damage
-			if (unit instanceof Warrior && ((Warrior) unit).bonus() >= 3) {
-				float bonusDmg = damage * 0.3f * stats.get(Stats.ABILITY_POWER);
-				damage += bonusDmg;
-				bonus += bonusDmg;
-				((Warrior) unit).setBonus(0);
-			}
-
-			// Berserker attacker checks
-			if (unit instanceof Berserker) {
-				if (((Berserker) unit).getBonus() > 0)
-					// Berserker bonus damage
-					damage *= 1 + ((Berserker) unit).getBonus();
-				else
-					// Berserker rage stack from attacking
-					((Berserker) unit).rage();
-			}
-
-			// Berserker victim rage stack
-			if (target.unit instanceof Berserker && ((Berserker) target.unit).getBonus() <= 0)
-				((Berserker) target.unit).rage();
-
-			// Duelist stack
-			if (unit instanceof Duelist && ((Duelist) unit).attack() >= 4) {
-				((Duelist) unit).setAttack(0);
-				float bonusDmg = target.stats.getInt(Stats.MAX_HP) * 0.04f * stats.get(Stats.ABILITY_POWER);
-				float bleedDmg = stats.get(Stats.DAMAGE) * 0.4f * stats.get(Stats.ABILITY_POWER);
-				output.add(target.buff(new Bleed(this, 2, bleedDmg)));
-				damage += bonusDmg;
-				bonus += bonusDmg;
-			}
-
-			// Assassin potency stacking
-			if (unit instanceof Assassin && ((Assassin) unit).getPotencyTurn() < Assassin.POTENCY_TURNS) {
-				float potency = damage * Math.min(Assassin.POTENCY_STACK_MAX, Assassin.POTENCY_STACK_MIN + (turnCount * 0.005f));
-				((Assassin) unit).addPotency(potency);
-				((Assassin) unit).addPotencyNow(potency);
-			}
-
-			// Crit checks
-			if (!miss) {
-				if (unit instanceof Gunslinger && ((Gunslinger) unit).shot() >= 4) {
-					// Gunslinger passive crit
-					crit = true;
-					((Gunslinger) unit).setShot(0);
-				} else if (!(unit instanceof Gunslinger) && critBag.get()) {
-					// Pseudo RNG crit bag
-					crit = true;
-				}
-			}
-
-			// Critical strike bonus damage
-			if (crit) {
-				float critMul = 1.5f + stats.get(Stats.CRIT_DAMAGE);
-
-				// Thief bonus crit damage + gold steal
-				if (unit instanceof Thief) {
-					critMul += ((Thief) unit).getCrit() * 0.2f;
-					if (((Thief) unit).crit() == 1) {
-						int steal = (int) Math.min(stats.get(Stats.DAMAGE) * 0.4f * stats.get(Stats.ABILITY_POWER), target.stats.getInt(Stats.GOLD));
-						stats.add(Stats.GOLD, steal);
-						target.stats.sub(Stats.GOLD, steal);
-						output.add(Emote.BUY + "**" + getName() + "** stole **" + steal + "** gold!");
-					}
-				}
-
-				damage *= Math.max(1, critMul);
-			}
+			for (GameObject o : event.actor.data) event = o.onHit(event);
+			for (GameObject o : event.target.data) event = o.wasHit(event);
 
 			// Life steal healing
 			if (stats.get(Stats.LIFE_STEAL) > 0)
-				output.add(heal(Math.round(stats.get(Stats.LIFE_STEAL) * damage)));
+				event.output.add(heal(Math.round(stats.get(Stats.LIFE_STEAL) * event.damage)));
 
+			return event;
+		}
+
+		public DamageEvent crit(DamageEvent event) {
+			// Crit checks
+			if (!event.miss && critBag.get()) {
+				// Pseudo RNG crit bag
+				event.crit = true;
+
+				for (GameObject o : event.actor.data) event = o.onCrit(event);
+				for (GameObject o : event.target.data) event = o.wasCrit(event);
+			}
+
+			// Critical strike bonus damage
+			if (event.crit) {
+				event.critMul += .5f + stats.get(Stats.CRIT_DAMAGE);
+				event.damage +=  event.damage * event.critMul;
+			}
+
+			return event;
+		}
+
+		public DamageEvent basicAttack(Member target) {
+			DamageEvent event = new DamageEvent(Game.this, this, target);
+			event.damage = stats.get(Stats.DAMAGE);
+
+			for (GameObject o : event.actor.data) event = o.onBasicAttack(event);
+			for (GameObject o : event.target.data) event = o.wasBasicAttacked(event);
+
+			event = hit(event);
+			event = crit(event);
+
+			return event;
+		}
+
+		public String damage(DamageEvent event, String emote, String action) {
+			return damage(event, event.actor.getName(), emote, action);
+		}
+
+		public String damage(DamageEvent event, String actor, String emote, String action) {
 			// Shield damaging
-			if (target.stats.get(Stats.SHIELD) > 0) {
-				float shieldDmg = Util.limit(target.stats.get(Stats.SHIELD), 0, damage);
-				target.stats.sub(Stats.SHIELD, shieldDmg);
+			if (event.target.stats.get(Stats.SHIELD) > 0) {
+				float shieldDmg = Util.limit(event.target.stats.get(Stats.SHIELD), 0, event.damage);
+				event.target.stats.sub(Stats.SHIELD, shieldDmg);
 
-				if (target.stats.get(Stats.SHIELD) > 0)
-					output.add(0, Emote.SHIELD + "**" + getName() + "** damaged **" + target.getName() + "'s Shield** by **"
-							+ Math.round(shieldDmg - bonus) + bonusText(bonus) + "**!" + damageText(crit, miss)
-							+ " [**" + target.stats.getInt(Stats.SHIELD) + "**]");
+				if (event.target.stats.get(Stats.SHIELD) > 0)
+					event.output.add(0, Util.damageText(event, action, event.target.getName() + "'s Shield", emote, action));
 				else {
-					damage -= shieldDmg;
-					output.add(0, Emote.SHIELD + "**" + getName() + "** destroyed **" + target.getName() + "'s Shield**!");
+					event.damage -= shieldDmg;
+					event.output.add(0, Emote.SHIELD + "**" + actor + "** destroyed **" + event.target.getName() + "'s Shield**!");
 				}
 			}
 
-			// Direct damaging
-			if (target.stats.get(Stats.SHIELD) <= 0) {
-				output.add(damage(target, damage));
-				output.add(0, Emote.ATTACK + "**" + getName() + "** damaged **" + target.getName() + "** by **"
-						+ Math.round(damage - bonus) + bonusText(bonus) + "**!" + damageText(crit, miss)
-						+ " [**" + target.stats.getInt(Stats.HP) + " / " + target.stats.getInt(Stats.MAX_HP) + "**]");
+			if (event.target.stats.get(Stats.SHIELD) <= 0) {
+				event.output.add(0, Util.damageText(event, actor, event.target.getName(), emote, action));
+				event.target.stats.sub(Stats.HP, event.damage + event.bonus);
+				if (event.target.stats.get(Stats.HP) <= 0)
+					event.output.add(event.target.lose());
 			}
 
-            output.removeAll(Arrays.asList(null, ""));
+			event.output.removeAll(Arrays.asList(null, ""));
 
-			return String.join("\n", output);
-		}
-
-		public String damage(Member target, float damage) {
-			// Defensive stance damage reduction
-			if (target.defend == 1) damage *= 0.8f;
-
-			target.stats.sub(Stats.HP, damage);
-			if (target.stats.get(Stats.HP) <= 0)
-				return target.lose();
-			return "";
-		}
-
-		public String damageText(boolean crit, boolean miss) {
-			return (crit ? " **CRIT**!" : "") + (miss ? " **MISS**!" : "");
-		}
-
-		public String bonusText(float bonus) {
-			return (bonus > 0 ? " (+" + Math.round(bonus) + ")" : "");
+			return String.join("\n", event.output);
 		}
 
 		public String win() {

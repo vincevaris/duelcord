@@ -1,5 +1,6 @@
 package com.oopsjpeg.enigma.game.buff;
 
+import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.obj.Buff;
 import com.oopsjpeg.enigma.util.Emote;
@@ -16,8 +17,8 @@ public class Bleed extends Buff {
 
 	@Override
 	public String onTurnStart(Game.Member member) {
-		return Emote.DEBUFF + "**" + getSource().getName() + "'s Bleed** dealt **"
-				+ Math.round(getPower()) + "** damage to **" + member.getName() + "**.\n"
-				+ getSource().damage(member, getPower());
+		DamageEvent event = new DamageEvent(member.getGame(), getSource(), member);
+		event.damage = getPower();
+		return getSource().damage(event, event.actor.getName() + "'s Bleed", Emote.DEBUFF, "damaged");
 	}
 }

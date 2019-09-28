@@ -10,7 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 public abstract class Unit extends GameObject {
 	private static final Unit[] values = {
 			new Berserker(), new Thief(), new Warrior(),
-			new Gunslinger(), new Duelist(), new Assassin()
+			new Duelist(), new Assassin()
 	};
 
 	public static Unit[] values() {

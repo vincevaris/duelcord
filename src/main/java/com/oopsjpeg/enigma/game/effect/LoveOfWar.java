@@ -1,5 +1,6 @@
 package com.oopsjpeg.enigma.game.effect;
 
+import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.util.Util;
@@ -42,5 +43,11 @@ public class LoveOfWar extends Effect {
 	public String onTurnEnd(Game.Member member) {
 		attack = 0;
 		return "";
+	}
+
+	@Override
+	public DamageEvent onHit(DamageEvent event) {
+		event.damage *= 1 + ((attack() - 1) * power);
+		return event;
 	}
 }

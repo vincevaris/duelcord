@@ -1,5 +1,6 @@
 package com.oopsjpeg.enigma.util;
 
+import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Stats;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
@@ -56,5 +57,12 @@ public class Util {
 
 	public static int limit(int x, int min, int max) {
 		return (int) Math.ceil(limit((float) x, (float) min, (float) max));
+	}
+
+	public static String damageText(DamageEvent event, String attacker, String victim, String emote, String action) {
+		return emote + "**" + attacker + "** " + action + " **" + victim + "** by **" + Math.round(event.damage + event.bonus)
+				+ "**" + (event.bonus > 0 ? " (+" + Math.round(event.bonus) + ")" : "") + "!" + (event.crit ? " **CRIT**!" : "")
+				+ (event.miss ? " **MISS**!" : "") + " [**" + Math.round(event.target.getStats().get(Stats.HP) - event.damage + event.bonus)
+				+ " / " + event.target.getStats().getInt(Stats.MAX_HP) + "**]";
 	}
 }

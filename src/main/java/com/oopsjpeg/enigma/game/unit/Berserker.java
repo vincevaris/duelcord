@@ -1,5 +1,6 @@
 package com.oopsjpeg.enigma.game.unit;
 
+import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Unit;
@@ -81,6 +82,22 @@ public class Berserker extends Unit {
 	public String onTurnEnd(Game.Member member) {
 		bonus = 0;
 		return "";
+	}
+
+	@Override
+	public DamageEvent onBasicAttack(DamageEvent event) {
+		if (bonus > 0)
+			event.damage *= 1 + bonus;
+		else
+			rage();
+		return event;
+	}
+
+	@Override
+	public DamageEvent wasBasicAttacked(DamageEvent event) {
+		if (bonus <= 0)
+			rage();
+		return event;
 	}
 
 	public String stack(Game.Member member) {

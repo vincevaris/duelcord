@@ -1,5 +1,6 @@
 package com.oopsjpeg.enigma.game.unit;
 
+import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Unit;
@@ -75,5 +76,15 @@ public class Warrior extends Unit {
 	public String onTurnEnd(Game.Member member) {
 		bash = false;
 		return "";
+	}
+
+	@Override
+	public DamageEvent onBasicAttack(DamageEvent event) {
+		if (bonus() >= 3) {
+			event.bonus += event.damage * 0.3f * event.actor.getStats().get(Stats.ABILITY_POWER);
+			setBonus(0);
+		}
+
+		return event;
 	}
 }

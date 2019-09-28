@@ -1,5 +1,6 @@
 package com.oopsjpeg.enigma.game.unit;
 
+import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Unit;
@@ -103,6 +104,18 @@ public class Assassin extends Unit {
 		if (potencyTurn == 5)
 			return Emote.KNIFE + "**" + member.getName() + "'s Potency** is at maximum capacity.";
 		return "";
+	}
+
+	@Override
+	public DamageEvent onBasicAttack(DamageEvent event) {
+		// Assassin potency stacking
+		if (potencyTurn < Assassin.POTENCY_TURNS) {
+			float potency = event.damage * Math.min(Assassin.POTENCY_STACK_MAX, Assassin.POTENCY_STACK_MIN + (event.game.getTurnCount() * 0.005f));
+			addPotency(potency);
+			addPotencyNow(potency);
+		}
+
+		return event;
 	}
 
 	@Override

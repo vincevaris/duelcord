@@ -17,7 +17,6 @@ public class Wound extends Buff {
 
 	@Override
 	public String onTurnStart(Game.Member member) {
-		System.out.println(getPower());
 		return Emote.WOUND + "**" + getSource().getName() + "'s Wound** reduced **" + member.getName() + "**'s healing"
 				+ " by **" + Util.percent(getPower()) + "** this turn.";
 	}

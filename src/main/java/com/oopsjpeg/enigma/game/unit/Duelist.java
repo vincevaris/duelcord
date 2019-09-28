@@ -1,6 +1,9 @@
 package com.oopsjpeg.enigma.game.unit;
 
+import com.oopsjpeg.enigma.game.DamageEvent;
+import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.buff.Bleed;
 import com.oopsjpeg.enigma.game.obj.Unit;
 import com.oopsjpeg.enigma.util.Util;
 
@@ -33,6 +36,19 @@ public class Duelist extends Unit {
 	public int attack() {
 		setAttack(attack + 1);
 		return attack;
+	}
+
+	@Override
+	public DamageEvent onHit(DamageEvent event) {
+		if (attack() >= 4) {
+			setAttack(0);
+			float bonus = event.target.getStats().getInt(Stats.MAX_HP) * 0.04f * event.actor.getStats().get(Stats.ABILITY_POWER);
+			float bleed = event.actor.getStats().get(Stats.DAMAGE) * 0.4f * event.actor.getStats().get(Stats.ABILITY_POWER);
+			event.bonus += bonus;
+			event.output.add(event.target.buff(new Bleed(event.actor, 2, bleed)));
+		}
+
+		return event;
 	}
 
 	@Override

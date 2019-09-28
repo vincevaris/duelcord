@@ -1,8 +1,10 @@
 package com.oopsjpeg.enigma.game.unit;
 
+import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.util.Emote;
 
 import java.awt.*;
 
@@ -22,19 +24,31 @@ public class Thief extends Unit {
 			.put(Stats.HP, 8)
 			.put(Stats.GOLD, 75);
 
-	private int crit = 0;
+	private int critAmount = 0;
 
-	public int getCrit() {
-		return crit;
+	public int getCritAmount() {
+		return critAmount;
 	}
 
-	public void setCrit(int crit) {
-		this.crit = Math.max(0, crit);
+	public void setCritAmount(int critAmount) {
+		this.critAmount = Math.max(0, critAmount);
 	}
 
 	public int crit() {
-		setCrit(crit + 1);
-		return crit;
+		setCritAmount(critAmount + 1);
+		return critAmount;
+	}
+
+	@Override
+	public DamageEvent onCrit(DamageEvent event) {
+		event.critMul += getCritAmount() * 0.2f;
+		if (crit() == 1) {
+			int steal = (int) Math.min(event.actor.getStats().get(Stats.DAMAGE) * 0.4f * event.actor.getStats().get(Stats.ABILITY_POWER), event.target.getStats().getInt(Stats.GOLD));
+			event.actor.getStats().add(Stats.GOLD, steal);
+			event.target.getStats().sub(Stats.GOLD, steal);
+			event.output.add(Emote.BUY + "**" + getName() + "** stole **" + steal + "** gold!");
+		}
+		return event;
 	}
 
 	@Override
@@ -64,7 +78,7 @@ public class Thief extends Unit {
 
 	@Override
 	public String onTurnEnd(Game.Member member) {
-		crit = 0;
+		critAmount = 0;
 		return "";
 	}
 }
