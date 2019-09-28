@@ -3,6 +3,7 @@ package com.oopsjpeg.enigma.game;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.commands.game.*;
 import com.oopsjpeg.enigma.game.buff.Silence;
+import com.oopsjpeg.enigma.game.buff.Weaken;
 import com.oopsjpeg.enigma.game.buff.Wound;
 import com.oopsjpeg.enigma.game.obj.Buff;
 import com.oopsjpeg.enigma.game.obj.Effect;
@@ -50,6 +51,7 @@ public class Game {
         commands.add(new AttackCommand());
         commands.add(new BashCommand());
         commands.add(new BuyCommand());
+        commands.add(new CrushCommand());
         commands.add(new EndCommand());
         commands.add(new ForfeitCommand());
         commands.add(new PickCommand());
@@ -157,7 +159,7 @@ public class Game {
                     + (member.unit instanceof Berserker
                     ? "Rage: **" + ((Berserker) member.unit).getRage() + " / 5**\n" : "")
                     + (member.unit instanceof Duelist
-                    ? "Attack: **" + ((Duelist) member.unit).getAttack() + " / 4**\n" : "")
+                    ? "Bonus: **" + ((Duelist) member.unit).getBonus() + " / " + Duelist.BONUS_MAX + "**\n" : "")
                     + (member.unit instanceof Assassin
                     ? "Slash: **" + ((Assassin) member.unit).getSlashCount() + " / " + Assassin.SLASH_STACK_MAX + "**\n"
                     + "Potency: **" + Math.round(((Assassin) member.unit).getPotency()) + "**\n" : "")
@@ -459,6 +461,38 @@ public class Game {
         }
     }
 
+    public class CrushAction extends Action {
+        private final Member target;
+
+        public CrushAction(Member target) {
+            this.target = target;
+        }
+
+        @Override
+        public boolean act(Member actor) {
+            if (!(actor.unit instanceof Duelist))
+                Util.sendError(channel, "You are not playing **Duelist**.");
+            else if (actor.hasData(Silence.class))
+                Util.sendError(channel, "You cannot **Crush** while silenced.");
+            else {
+                Duelist du = (Duelist) actor.unit;
+                if (!du.canCrush())
+                    Util.sendError(channel, "**Crush** is on cooldown for **" + (Duelist.CRUSH_COOLDOWN - du.getCrush()) + "** more turn(s).");
+                else {
+                    du.setCrush(Duelist.CRUSH_COOLDOWN);
+                    channel.sendMessage(target.buff(new Weaken(actor, Duelist.CRUSH_TURNS, Duelist.CRUSH_POWER))).complete();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public int getEnergy() {
+            return 25;
+        }
+    }
+
     public class Member {
         private Player player;
         private Unit unit;
@@ -609,6 +643,12 @@ public class Game {
         }
 
         public String buff(Buff buff) {
+            if (hasData(Weaken.class)) {
+                Weaken weaken = (Weaken) getData(Weaken.class);
+                if (weaken.getSource().getUnit() instanceof Duelist)
+                    buff.setTurns(buff.getTurns() + 1);
+            }
+
             if (hasData(buff.getClass())) {
                 Buff oldBuff = (Buff) getData(buff.getClass());
                 if (buff.getPower() > oldBuff.getPower()) {
@@ -691,6 +731,9 @@ public class Game {
         }
 
         public String damage(DamageEvent event, String actor, String emote, String action) {
+            for (GameObject o : event.actor.data) event = o.onDamage(event);
+            for (GameObject o : event.target.data) event = o.wasDamaged(event);
+
             // Shield damaging
             if (event.target.stats.get(Stats.SHIELD) > 0) {
                 float shieldDmg = Util.limit(event.target.stats.get(Stats.SHIELD), 0, event.damage);

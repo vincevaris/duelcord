@@ -26,6 +26,10 @@ public abstract class Buff extends GameObject {
         return turns;
     }
 
+    public void setTurns(int turns) {
+        this.turns = turns;
+    }
+
     public int turn() {
         turns--;
         return turns;

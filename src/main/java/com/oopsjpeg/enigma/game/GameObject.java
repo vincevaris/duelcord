@@ -13,6 +13,14 @@ public abstract class GameObject {
         return "";
     }
 
+    public DamageEvent onDamage(DamageEvent event) {
+        return event;
+    }
+
+    public DamageEvent wasDamaged(DamageEvent event) {
+        return event;
+    }
+
     public DamageEvent onBasicAttack(DamageEvent event) {
         return event;
     }

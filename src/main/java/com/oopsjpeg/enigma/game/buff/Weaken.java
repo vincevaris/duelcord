@@ -1,5 +1,6 @@
 package com.oopsjpeg.enigma.game.buff;
 
+import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.obj.Buff;
 import com.oopsjpeg.enigma.util.Emote;
@@ -19,5 +20,12 @@ public class Weaken extends Buff {
     public String onTurnStart(Game.Member member) {
         return Emote.SILENCE + "**" + member.getName() + "** is weakened by **" + Util.percent(getPower()) + "** from **"
                 + getSource().getName() + "** this turn.";
+    }
+
+    @Override
+    public DamageEvent wasDamaged(DamageEvent event) {
+        event.damage *= 1 + getPower();
+        event.bonus *= 1 + getPower();
+        return event;
     }
 }
