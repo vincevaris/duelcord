@@ -20,10 +20,11 @@ public class Gunslinger extends Unit {
     public static final String NAME = "Gunslinger";
     public static final String DESC = "The first basic attack per turn always crits and deals **"
             + Util.percent(BONUS_DAMAGE) + "** (" + BONUS_AP + " AP) bonus damage.\n\n"
-            + "Using `>barrage` fires **" + BARRAGE_SHOTS + "** shots that each deal **" + BARRAGE_DAMAGE + "** (" + BARRAGE_AP + " AP) base damage.\n"
+            + "Using `>barrage` fires **" + BARRAGE_SHOTS + "** shots that each deal **"
+            + Util.percent(BARRAGE_DAMAGE) + "** (" + BARRAGE_AP + " AP) base damage.\n"
             + "Barrage shots can crit and apply on-hit effects.\n"
             + "Barrage can only be used once every **" + BARRAGE_COOLDOWN + "** turn(s).";
-    public static final Color COLOR = Color.BLUE;
+    public static final Color COLOR = Color.ORANGE;
     public static final Stats STATS = new Stats()
             .put(Stats.ENERGY, 125)
             .put(Stats.MAX_HP, 750)

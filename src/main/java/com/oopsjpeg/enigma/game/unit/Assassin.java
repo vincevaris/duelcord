@@ -18,7 +18,7 @@ public class Assassin extends Unit {
     public static final int SILENCE_TURNS = 1;
 
     public static final String NAME = "Assassin";
-    public static final String DESC = "**" + Util.percent(POTENCY_STACK_MIN) + "-" + Util.percent(POTENCY_STACK_MAX) + "**"
+    public static final String DESC = "**" + Util.percent(POTENCY_STACK_MIN) + "**-**" + Util.percent(POTENCY_STACK_MAX) + "**"
             + " of damage dealt in the last turn is stored as **Potency**."
             + " This can only occur **" + POTENCY_TURNS + "** times until **Potency** is reset."
             + "\n\nUsing `>slash` deals **" + Util.percent(SLASH_DAMAGE) + "** of base damage."
