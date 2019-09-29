@@ -13,10 +13,10 @@ public class Shatterwand extends Item {
     public static final int BONUS_COOLDOWN = 4;
 
     public static final String NAME = "Shatterwand";
-    public static final String DESC = "**Use**: Deals **" + BONUS_DAMAGE + "** (+" + Util.percent(BONUS_AP) + " AP) damage and applies on-hit effects."
+    public static final String DESC = "On use, deals **" + BONUS_DAMAGE + "** (+" + Util.percent(BONUS_AP) + " AP) damage and applies on-hit effects."
             + "\nRefunds **25** energy upon use."
             + "\nCan only be used once every **" + BONUS_COOLDOWN + "** turns.";
-    public static final int COST = 1275;
+    public static final int COST = 1225;
     public static final Item[] BUILD = new Item[]{new Staff(), new Ring()};
     public static final Stats STATS = new Stats()
             .put(Stats.ABILITY_POWER, 40);
@@ -59,6 +59,11 @@ public class Shatterwand extends Item {
     @Override
     public boolean canUse(Game.Member member) {
         return bonus <= 0;
+    }
+
+    @Override
+    public boolean removeOnUse() {
+        return false;
     }
 
     @Override

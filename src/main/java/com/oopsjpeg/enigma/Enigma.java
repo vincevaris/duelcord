@@ -183,7 +183,7 @@ public class Enigma {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setTitle(i.getName() + " (" + i.getCost() + "g)");
             builder.setColor(Color.CYAN);
-            builder.appendDescription(i.getDesc() + "\n");
+            builder.appendDescription(i.getDesc() + "\n\n");
             builder.appendDescription(Util.formatStats(i.getStats()) + "\n");
             builder.appendDescription(Util.formatPerTurn(i.getPerTurn()));
             if (i.getEffects() != null && i.getEffects().length > 0)
