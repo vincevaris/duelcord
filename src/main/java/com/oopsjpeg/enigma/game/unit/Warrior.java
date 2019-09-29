@@ -17,8 +17,7 @@ public class Warrior extends Unit {
     public static final Stats STATS = new Stats()
             .put(Stats.ENERGY, 125)
             .put(Stats.MAX_HP, 795)
-            .put(Stats.DAMAGE, 24)
-            .put(Stats.ABILITY_POWER, 1);
+            .put(Stats.DAMAGE, 24);
     public static final Stats PER_TURN = new Stats()
             .put(Stats.HP, 13)
             .put(Stats.GOLD, 75);
@@ -81,7 +80,7 @@ public class Warrior extends Unit {
     @Override
     public DamageEvent onBasicAttack(DamageEvent event) {
         if (bonus() >= 3) {
-            event.bonus += event.damage * 0.3f * event.actor.getStats().get(Stats.ABILITY_POWER);
+            event.bonus += event.damage * 0.3f * (1 + event.actor.getStats().get(Stats.ABILITY_POWER));
             setBonus(0);
         }
 

@@ -9,10 +9,7 @@ import com.oopsjpeg.enigma.game.obj.Buff;
 import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.game.obj.Item;
 import com.oopsjpeg.enigma.game.obj.Unit;
-import com.oopsjpeg.enigma.game.unit.Assassin;
-import com.oopsjpeg.enigma.game.unit.Berserker;
-import com.oopsjpeg.enigma.game.unit.Duelist;
-import com.oopsjpeg.enigma.game.unit.Warrior;
+import com.oopsjpeg.enigma.game.unit.*;
 import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.ChanceBag;
 import com.oopsjpeg.enigma.util.CommandCenter;
@@ -49,6 +46,7 @@ public class Game {
         commands = new CommandCenter(Enigma.PREFIX_GAME);
 
         commands.add(new AttackCommand());
+        commands.add(new BarrageCommand());
         commands.add(new BashCommand());
         commands.add(new BuyCommand());
         commands.add(new CrushCommand());
@@ -115,7 +113,7 @@ public class Game {
             curMember = getAlive().get(curTurn);
 
             curMember.stats.add(Stats.HP, curMember.perTurn.get(Stats.HP) * (1 + curMember.defend));
-            curMember.stats.add(Stats.GOLD, Math.round(curMember.perTurn.get(Stats.GOLD) + (turnCount * 0.5)));
+            curMember.stats.add(Stats.GOLD, Math.round(curMember.perTurn.get(Stats.GOLD) + (turnCount - 1)));
             curMember.stats.put(Stats.ENERGY, curMember.unit.getStats().get(Stats.ENERGY));
             curMember.stats.add(Stats.ENERGY, curMember.perTurn.get(Stats.ENERGY));
             curMember.stats.put(Stats.SHIELD, 0);
@@ -255,7 +253,6 @@ public class Game {
                 Util.sendError(channel, "You cannot attack while silenced.");
             else {
                 channel.sendMessage(actor.damage(actor.basicAttack(target), Emote.ATTACK, "damaged")).complete();
-                actor.stats.add(Stats.GOLD, Util.nextInt(15, 25));
                 return true;
             }
             return false;
@@ -368,11 +365,11 @@ public class Game {
 
                     DamageEvent event = new DamageEvent(Game.this, actor, target);
 
-                    event.damage = actor.stats.get(Stats.DAMAGE) * 0.5f * actor.stats.get(Stats.ABILITY_POWER);
+                    event.damage = actor.stats.get(Stats.DAMAGE) * 0.5f * (1 + actor.stats.get(Stats.ABILITY_POWER));
                     if (event.target.stats.get(Stats.SHIELD) > 0)
                         event.target.stats.put(Stats.SHIELD, 0.01f);
 
-                    channel.sendMessage(String.join("\n", actor.damage(event, Emote.KNIFE, "bashed"))).complete();
+                    channel.sendMessage(actor.damage(event, Emote.KNIFE, "bashed")).complete();
                     return true;
                 }
             }
@@ -394,7 +391,7 @@ public class Game {
                 Util.sendError(channel, "You cannot **Rage** while silenced.");
             else {
                 Berserker berserk = (Berserker) actor.unit;
-                berserk.setBonus(0.04f * berserk.getRage() * actor.stats.get(Stats.ABILITY_POWER));
+                berserk.setBonus(0.04f * berserk.getRage() * (1 + actor.stats.get(Stats.ABILITY_POWER)));
 
                 if (berserk.getRage() == 5) actor.stats.add(Stats.ENERGY, 100);
 
@@ -436,7 +433,7 @@ public class Game {
                     au.setSlashed(true);
 
                     DamageEvent event = new DamageEvent(Game.this, actor, target);
-                    event.damage = actor.stats.get(Stats.DAMAGE) * Assassin.SLASH_DAMAGE * actor.stats.get(Stats.ABILITY_POWER);
+                    event.damage = actor.stats.get(Stats.DAMAGE) * Assassin.SLASH_DAMAGE * (1 + actor.stats.get(Stats.ABILITY_POWER));
                     event = event.actor.hit(event);
                     event = event.actor.crit(event);
 
@@ -477,10 +474,54 @@ public class Game {
             else {
                 Duelist du = (Duelist) actor.unit;
                 if (!du.canCrush())
-                    Util.sendError(channel, "**Crush** is on cooldown for **" + (Duelist.CRUSH_COOLDOWN - du.getCrush()) + "** more turn(s).");
+                    Util.sendError(channel, "**Crush** is on cooldown.");
                 else {
                     du.setCrush(Duelist.CRUSH_COOLDOWN);
                     channel.sendMessage(target.buff(new Weaken(actor, Duelist.CRUSH_TURNS, Duelist.CRUSH_POWER))).complete();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public int getEnergy() {
+            return 25;
+        }
+    }
+
+    public class BarrageAction extends Action {
+        private final Member target;
+
+        public BarrageAction(Member target) {
+            this.target = target;
+        }
+
+        @Override
+        public boolean act(Member actor) {
+            if (!(actor.unit instanceof Gunslinger))
+                Util.sendError(channel, "You are not playing **Gunslinger**.");
+            else if (actor.hasData(Silence.class))
+                Util.sendError(channel, "You cannot **Barrage** while silenced.");
+            else {
+                Gunslinger gu = (Gunslinger) actor.unit;
+                if (!gu.canBarrage())
+                    Util.sendError(channel, "**Barrage** is on cooldown.");
+                else {
+                    gu.setBarrage(Gunslinger.BARRAGE_COOLDOWN);
+
+                    List<String> output = new ArrayList<>();
+                    for (int i = 0; i < Gunslinger.BARRAGE_SHOTS; i++)
+                        if (target.isAlive()) {
+                            DamageEvent event = new DamageEvent(Game.this, actor, target);
+                            event.damage = actor.stats.get(Stats.DAMAGE) * Gunslinger.BARRAGE_DAMAGE * (1 + (actor.stats.get(Stats.ABILITY_POWER) * Gunslinger.BARRAGE_AP));
+                            actor.crit(event);
+                            actor.hit(event);
+                            output.add(actor.damage(event, Emote.GUN, "shot"));
+                        }
+                    output.add(0, Emote.ATTACK + "**" + actor.getName() + "** used **Barrage**!");
+
+                    channel.sendMessage(String.join("\n", output)).complete();
                     return true;
                 }
             }
@@ -681,9 +722,6 @@ public class Game {
         }
 
         public DamageEvent hit(DamageEvent event) {
-            // Defensive stance damage reduction
-            if (event.target.defend == 1) event.damage *= 0.8f;
-
             for (GameObject o : event.actor.data) event = o.onHit(event);
             for (GameObject o : event.target.data) event = o.wasHit(event);
 
@@ -696,7 +734,7 @@ public class Game {
 
         public DamageEvent crit(DamageEvent event) {
             // Crit checks
-            if (!event.miss && critBag.get()) {
+            if (event.crit || !event.miss && critBag.get()) {
                 // Pseudo RNG crit bag
                 event.crit = true;
 
@@ -716,6 +754,7 @@ public class Game {
         public DamageEvent basicAttack(Member target) {
             DamageEvent event = new DamageEvent(Game.this, this, target);
             event.damage = stats.get(Stats.DAMAGE);
+            event.actor.stats.add(Stats.GOLD, Util.nextInt(15, 25) + (curTurn * 0.5f));
 
             for (GameObject o : event.actor.data) event = o.onBasicAttack(event);
             for (GameObject o : event.target.data) event = o.wasBasicAttacked(event);
@@ -734,6 +773,12 @@ public class Game {
             for (GameObject o : event.actor.data) event = o.onDamage(event);
             for (GameObject o : event.target.data) event = o.wasDamaged(event);
 
+            // Defensive stance damage reduction
+            if (event.target.defend == 1) {
+                event.damage *= 0.8f;
+                event.bonus *= 0.8f;
+            }
+
             // Shield damaging
             if (event.target.stats.get(Stats.SHIELD) > 0) {
                 float shieldDmg = Util.limit(event.target.stats.get(Stats.SHIELD), 0, event.damage);
@@ -748,8 +793,8 @@ public class Game {
             }
 
             if (event.target.stats.get(Stats.SHIELD) <= 0) {
-                event.output.add(0, Util.damageText(event, actor, event.target.getName(), emote, action));
                 event.target.stats.sub(Stats.HP, event.damage + event.bonus);
+                event.output.add(0, Util.damageText(event, actor, event.target.getName(), emote, action));
                 if (event.target.stats.get(Stats.HP) <= 0)
                     event.output.add(event.target.lose());
             }

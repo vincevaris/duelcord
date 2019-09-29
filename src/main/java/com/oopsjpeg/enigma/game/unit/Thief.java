@@ -18,8 +18,7 @@ public class Thief extends Unit {
             .put(Stats.MAX_HP, 735)
             .put(Stats.DAMAGE, 20)
             .put(Stats.CRIT_CHANCE, 0.2f)
-            .put(Stats.CRIT_DAMAGE, -0.2f)
-            .put(Stats.ABILITY_POWER, 1);
+            .put(Stats.CRIT_DAMAGE, -0.2f);
     public static final Stats PER_TURN = new Stats()
             .put(Stats.HP, 8)
             .put(Stats.GOLD, 75);
@@ -43,7 +42,7 @@ public class Thief extends Unit {
     public DamageEvent onCrit(DamageEvent event) {
         event.critMul += getCritAmount() * 0.2f;
         if (crit() == 1) {
-            int steal = (int) Math.min(event.actor.getStats().get(Stats.DAMAGE) * 0.4f * event.actor.getStats().get(Stats.ABILITY_POWER), event.target.getStats().getInt(Stats.GOLD));
+            int steal = (int) Math.min(event.actor.getStats().get(Stats.DAMAGE) * 0.4f * (1 + event.actor.getStats().get(Stats.ABILITY_POWER)), event.target.getStats().getInt(Stats.GOLD));
             event.actor.getStats().add(Stats.GOLD, steal);
             event.target.getStats().sub(Stats.GOLD, steal);
             event.output.add(Emote.BUY + "**" + getName() + "** stole **" + steal + "** gold!");

@@ -26,13 +26,12 @@ public class Duelist extends Unit {
             + Util.percent(BLEED_DAMAGE) + "** of base damage for **" + BLEED_TURNS + "** turn(s).\n\n"
             + "Using `>crush` weakens the target by **" + Util.percent(CRUSH_POWER) + "** for **" + CRUSH_TURNS + "** turn(s).\n"
             + "If the target receives any other debuff while weakened, it is extended by " + CRUSH_EXTEND + " turn(s).\n"
-            + "`>crush` can only be used once every **" + CRUSH_COOLDOWN + "** turns.";
+            + "Crush can only be used once every **" + CRUSH_COOLDOWN + "** turns.";
     public static final Color COLOR = Color.MAGENTA;
     public static final Stats STATS = new Stats()
             .put(Stats.ENERGY, 125)
             .put(Stats.MAX_HP, 750)
-            .put(Stats.DAMAGE, 25)
-            .put(Stats.ABILITY_POWER, 1);
+            .put(Stats.DAMAGE, 25);
     public static final Stats PER_TURN = new Stats()
             .put(Stats.HP, 14)
             .put(Stats.GOLD, 75);
@@ -69,8 +68,8 @@ public class Duelist extends Unit {
     public DamageEvent onBasicAttack(DamageEvent event) {
         if (bonus() >= BONUS_MAX) {
             setBonus(0);
-            float bonus = event.target.getStats().getInt(Stats.MAX_HP) * BONUS_DAMAGE * event.actor.getStats().get(Stats.ABILITY_POWER);
-            float bleed = event.actor.getStats().get(Stats.DAMAGE) * BLEED_DAMAGE * event.actor.getStats().get(Stats.ABILITY_POWER);
+            float bonus = event.target.getStats().getInt(Stats.MAX_HP) * BONUS_DAMAGE * (1 + event.actor.getStats().get(Stats.ABILITY_POWER));
+            float bleed = event.actor.getStats().get(Stats.DAMAGE) * BLEED_DAMAGE * (1 + event.actor.getStats().get(Stats.ABILITY_POWER));
             event.bonus += bonus;
             event.output.add(event.target.buff(new Bleed(event.actor, BLEED_TURNS, bleed)));
         }
@@ -82,7 +81,7 @@ public class Duelist extends Unit {
     public String onTurnStart(Game.Member member) {
         setCrush(getCrush() - 1);
         if (crush == 0)
-            return Emote.INFO + "**" + member.getName() + "' Crush** is ready to use.";
+            return Emote.INFO + "**" + member.getName() + "'s Crush** is ready to use.";
         return "";
     }
 

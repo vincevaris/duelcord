@@ -18,8 +18,7 @@ public class Berserker extends Unit {
     public static final Stats STATS = new Stats()
             .put(Stats.ENERGY, 100)
             .put(Stats.MAX_HP, 780)
-            .put(Stats.DAMAGE, 19)
-            .put(Stats.ABILITY_POWER, 1);
+            .put(Stats.DAMAGE, 19);
     public static final Stats PER_TURN = new Stats()
             .put(Stats.HP, 12)
             .put(Stats.GOLD, 75);
