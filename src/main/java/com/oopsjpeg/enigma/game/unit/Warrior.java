@@ -80,7 +80,7 @@ public class Warrior extends Unit {
     @Override
     public DamageEvent onBasicAttack(DamageEvent event) {
         if (bonus() >= 3) {
-            event.bonus += event.damage * 0.3f * (1 + event.actor.getStats().get(Stats.ABILITY_POWER));
+            event.bonus += event.damage * 0.3f;
             setBonus(0);
         }
 

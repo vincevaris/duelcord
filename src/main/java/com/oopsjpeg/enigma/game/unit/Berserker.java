@@ -10,9 +10,11 @@ import com.oopsjpeg.enigma.util.Util;
 import java.awt.*;
 
 public class Berserker extends Unit {
+    public static final int BONUS_AP = 10;
+
     public static final String NAME = "Berserker";
     public static final String DESC = "Attacking or being attacked builds up to **5** stacks of **Rage**."
-            + "\nUsing `>rage` consumes stacks to increase damage for a single turn (**4%** per stack)."
+            + "\nUsing `>rage` consumes stacks to increase damage for a single turn (**4%** (+1% per " + BONUS_AP + " AP) per stack)."
             + "\nAt maximum stacks, `>rage` grants **100** bonus energy.";
     public static final Color COLOR = Color.RED;
     public static final Stats STATS = new Stats()

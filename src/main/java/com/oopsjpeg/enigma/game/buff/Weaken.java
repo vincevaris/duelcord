@@ -23,6 +23,13 @@ public class Weaken extends Buff {
     }
 
     @Override
+    public DamageEvent onDamage(DamageEvent event) {
+        event.damage *= 1 - (getPower() / 2);
+        event.bonus *= 1 - (getPower() / 2);
+        return event;
+    }
+
+    @Override
     public DamageEvent wasDamaged(DamageEvent event) {
         event.damage *= 1 + getPower();
         event.bonus *= 1 + getPower();

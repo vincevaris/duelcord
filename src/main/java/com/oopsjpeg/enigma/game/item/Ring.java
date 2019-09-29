@@ -7,7 +7,7 @@ public class Ring extends Item {
     public static final String NAME = "Ring";
     public static final int COST = 275;
     public static final Stats STATS = new Stats()
-            .put(Stats.ABILITY_POWER, 0.06f);
+            .put(Stats.ABILITY_POWER, 8);
 
     @Override
     public String getName() {

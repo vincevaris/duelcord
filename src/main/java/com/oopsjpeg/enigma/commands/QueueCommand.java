@@ -27,7 +27,7 @@ public class QueueCommand implements Command {
         else {
             if (!queue.contains(player)) {
                 player.setQueue(mode);
-                channel.sendMessage(Emote.YES + author.getName() + " is now in queue for **" + mode.getName()
+                channel.sendMessage(Emote.YES + "**" + author.getName() + "** is now in queue for **" + mode.getName()
                         + "**. (size: **" + queue.size() + "**)").complete();
             } else {
                 player.removeQueue();

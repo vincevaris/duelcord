@@ -7,7 +7,7 @@ public class Staff extends Item {
     public static final String NAME = "Staff";
     public static final int COST = 450;
     public static final Stats STATS = new Stats()
-            .put(Stats.ABILITY_POWER, 0.1f);
+            .put(Stats.ABILITY_POWER, 20);
 
     @Override
     public String getName() {

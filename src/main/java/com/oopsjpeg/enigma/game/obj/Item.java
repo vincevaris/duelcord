@@ -22,6 +22,7 @@ public abstract class Item extends GameObject {
             new Potion(),
             new Ring(),
             new ShadowGauntlet(),
+            new Shatterwand(),
             new Soulstealer(),
             new Staff(),
             new SteelMallet()

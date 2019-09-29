@@ -5,12 +5,15 @@ import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Unit;
 import com.oopsjpeg.enigma.util.Emote;
+import com.oopsjpeg.enigma.util.Util;
 
 import java.awt.*;
 
 public class Thief extends Unit {
+    public static final float STEAL_AP = 0.6f;
+
     public static final String NAME = "Thief";
-    public static final String DESC = "The first critical strike per turn steals gold equal to **40%** of base damage."
+    public static final String DESC = "The first critical strike per turn steals gold equal to **30%** (+" + Util.percent(STEAL_AP) + " AP) of base damage."
             + "\nCrit damage is reduced by **20%**, however, subsequent crits in a turn deal increasing damage.";
     public static final Color COLOR = Color.YELLOW;
     public static final Stats STATS = new Stats()
@@ -42,7 +45,7 @@ public class Thief extends Unit {
     public DamageEvent onCrit(DamageEvent event) {
         event.critMul += getCritAmount() * 0.2f;
         if (crit() == 1) {
-            int steal = (int) Math.min(event.actor.getStats().get(Stats.DAMAGE) * 0.4f * (1 + event.actor.getStats().get(Stats.ABILITY_POWER)), event.target.getStats().getInt(Stats.GOLD));
+            int steal = (int) Math.min((event.actor.getStats().get(Stats.DAMAGE) * 0.3f) + (event.actor.getStats().get(Stats.ABILITY_POWER) * STEAL_AP), event.target.getStats().getInt(Stats.GOLD));
             event.actor.getStats().add(Stats.GOLD, steal);
             event.target.getStats().sub(Stats.GOLD, steal);
             event.output.add(Emote.BUY + "**" + getName() + "** stole **" + steal + "** gold!");

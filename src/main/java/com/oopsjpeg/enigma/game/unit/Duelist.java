@@ -16,7 +16,7 @@ public class Duelist extends Unit {
     public static final float BLEED_DAMAGE = 0.5f;
     public static final int BLEED_TURNS = 2;
     public static final float CRUSH_POWER = 0.2f;
-    public static final int CRUSH_TURNS = 2;
+    public static final int CRUSH_TURNS = 1;
     public static final int CRUSH_EXTEND = 1;
     public static final int CRUSH_COOLDOWN = 3;
 
@@ -26,7 +26,7 @@ public class Duelist extends Unit {
             + Util.percent(BLEED_DAMAGE) + "** of base damage for **" + BLEED_TURNS + "** turn(s).\n\n"
             + "Using `>crush` weakens the target by **" + Util.percent(CRUSH_POWER) + "** for **" + CRUSH_TURNS + "** turn(s).\n"
             + "If the target receives any other debuff while weakened, it is extended by **" + CRUSH_EXTEND + "** turn(s).\n"
-            + "Crush can only be used once every **" + CRUSH_COOLDOWN + "** turns.";
+            + "Crush can only be used once every **" + CRUSH_COOLDOWN + "** turn(s).";
     public static final Color COLOR = Color.MAGENTA;
     public static final Stats STATS = new Stats()
             .put(Stats.ENERGY, 125)
@@ -68,8 +68,8 @@ public class Duelist extends Unit {
     public DamageEvent onBasicAttack(DamageEvent event) {
         if (bonus() >= BONUS_MAX) {
             setBonus(0);
-            float bonus = event.target.getStats().getInt(Stats.MAX_HP) * BONUS_DAMAGE * (1 + event.actor.getStats().get(Stats.ABILITY_POWER));
-            float bleed = event.actor.getStats().get(Stats.DAMAGE) * BLEED_DAMAGE * (1 + event.actor.getStats().get(Stats.ABILITY_POWER));
+            float bonus = event.target.getStats().getInt(Stats.MAX_HP) * BONUS_DAMAGE;
+            float bleed = event.actor.getStats().get(Stats.DAMAGE) * BLEED_DAMAGE;
             event.bonus += bonus;
             event.output.add(event.target.buff(new Bleed(event.actor, BLEED_TURNS, bleed)));
         }

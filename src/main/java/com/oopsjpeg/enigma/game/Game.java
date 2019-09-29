@@ -82,7 +82,7 @@ public class Game {
             if (gameState == 0) gameState = 1;
         }
 
-        if (turnCount >= 1 && gameState == 1 && curMember.stats.get(Stats.ENERGY) > 0) {
+        if (turnCount >= 1 && gameState == 1 && curMember.stats.get(Stats.ENERGY) > 0 && !curMember.hasData(Silence.class)) {
             curMember.defend = 1;
             output.add(Emote.SHIELD + "**" + curMember.getName() + "** is defending!");
             output.add(curMember.unit.onDefend(curMember));
@@ -365,7 +365,7 @@ public class Game {
 
                     DamageEvent event = new DamageEvent(Game.this, actor, target);
 
-                    event.damage = actor.stats.get(Stats.DAMAGE) * 0.5f * (1 + actor.stats.get(Stats.ABILITY_POWER));
+                    event.damage = actor.stats.get(Stats.DAMAGE) * 0.5f;
                     if (event.target.stats.get(Stats.SHIELD) > 0)
                         event.target.stats.put(Stats.SHIELD, 0.01f);
 
@@ -391,7 +391,7 @@ public class Game {
                 Util.sendError(channel, "You cannot **Rage** while silenced.");
             else {
                 Berserker berserk = (Berserker) actor.unit;
-                berserk.setBonus(0.04f * berserk.getRage() * (1 + actor.stats.get(Stats.ABILITY_POWER)));
+                berserk.setBonus((0.04f * berserk.getRage()) + (actor.getStats().get(Stats.ABILITY_POWER) / 1000));
 
                 if (berserk.getRage() == 5) actor.stats.add(Stats.ENERGY, 100);
 
@@ -433,7 +433,7 @@ public class Game {
                     au.setSlashed(true);
 
                     DamageEvent event = new DamageEvent(Game.this, actor, target);
-                    event.damage = actor.stats.get(Stats.DAMAGE) * Assassin.SLASH_DAMAGE * (1 + actor.stats.get(Stats.ABILITY_POWER));
+                    event.damage = (actor.stats.get(Stats.DAMAGE) * Assassin.SLASH_DAMAGE) + (actor.stats.get(Stats.ABILITY_POWER) * Assassin.SLASH_AP);
                     event = event.actor.hit(event);
                     event = event.actor.crit(event);
 
@@ -514,7 +514,7 @@ public class Game {
                     for (int i = 0; i < Gunslinger.BARRAGE_SHOTS; i++)
                         if (target.isAlive()) {
                             DamageEvent event = new DamageEvent(Game.this, actor, target);
-                            event.damage = actor.stats.get(Stats.DAMAGE) * Gunslinger.BARRAGE_DAMAGE * (1 + (actor.stats.get(Stats.ABILITY_POWER) * Gunslinger.BARRAGE_AP));
+                            event.damage = (actor.stats.get(Stats.DAMAGE) * Gunslinger.BARRAGE_DAMAGE) + (actor.stats.get(Stats.ABILITY_POWER) * Gunslinger.BARRAGE_AP);
                             actor.crit(event);
                             actor.hit(event);
                             output.add(actor.damage(event, Emote.GUN, "shot"));
@@ -785,7 +785,7 @@ public class Game {
                 event.target.stats.sub(Stats.SHIELD, shieldDmg);
 
                 if (event.target.stats.get(Stats.SHIELD) > 0)
-                    event.output.add(0, Util.damageText(event, action, event.target.getName() + "'s Shield", emote, action));
+                    event.output.add(0, Util.damageText(event, actor, event.target.getName() + "'s Shield", emote, action));
                 else {
                     event.damage -= shieldDmg;
                     event.output.add(0, Emote.SHIELD + "**" + actor + "** destroyed **" + event.target.getName() + "'s Shield**!");
