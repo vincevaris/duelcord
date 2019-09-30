@@ -100,7 +100,7 @@ public class Enigma {
         game.getPlayers().forEach(Player::removeGame);
         client.removeEventListener(game.getCommands());
         games.remove(game);
-        SCHEDULER.schedule(() -> { //TODO add delete channel to bufferer
+        SCHEDULER.schedule(() -> {
             game.getChannel().delete().complete();
         }, 1, TimeUnit.MINUTES);
     }
@@ -165,9 +165,9 @@ public class Enigma {
             builder.appendDescription("Damage: **" + u.getStats().getInt(Stats.DAMAGE) + "**\n");
             builder.appendDescription("Energy: **" + u.getStats().getInt(Stats.ENERGY) + "**\n");
             if (u.getStats().get(Stats.CRIT_CHANCE) > 0)
-                builder.appendDescription("Critical Chance: **" + Math.round(u.getStats().get(Stats.CRIT_CHANCE) * 100) + "%**\n");
+                builder.appendDescription("Critical Chance: **" + Util.percent(u.getStats().get(Stats.CRIT_CHANCE)) + "**\n");
             if (u.getStats().get(Stats.LIFE_STEAL) > 0)
-                builder.appendDescription("Life Steal: **" + Math.round(u.getStats().get(Stats.LIFE_STEAL) * 100) + "%**\n");
+                builder.appendDescription("Life Steal: **" + Util.percent(u.getStats().get(Stats.LIFE_STEAL)) + "**\n");
             builder.addField("Passives / Abilities", u.getDesc(), false);
             return builder.build();
         }).forEach(b -> unitsChannel.sendMessage(b).complete());

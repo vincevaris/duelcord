@@ -28,11 +28,11 @@ public class Util {
         if (stats.get(Stats.ABILITY_POWER) > 0)
             output.add("Ability Power: +**" + stats.getInt(Stats.ABILITY_POWER) + "**");
         if (stats.get(Stats.CRIT_CHANCE) > 0)
-            output.add("Critical Chance: +**" + Math.round(stats.get(Stats.CRIT_CHANCE) * 100) + "%**");
+            output.add("Critical Chance: +**" + Util.percent(stats.get(Stats.CRIT_CHANCE)) + "**");
         if (stats.get(Stats.CRIT_DAMAGE) > 0)
-            output.add("Critical Damage: +**" + Math.round(stats.get(Stats.CRIT_DAMAGE) * 100) + "%**");
+            output.add("Critical Damage: +**" + Util.percent(stats.get(Stats.CRIT_DAMAGE)) + "**");
         if (stats.get(Stats.LIFE_STEAL) > 0)
-            output.add("Life Steal: **" + Math.round(stats.get(Stats.LIFE_STEAL) * 100) + "%**");
+            output.add("Life Steal: **" + Util.percent(stats.get(Stats.LIFE_STEAL)) + "**");
         return String.join("\n", output);
     }
 
