@@ -284,7 +284,7 @@ public class Game {
                 Util.sendError(channel, "You need **" + (cost - actor.stats.getInt(Stats.GOLD))
                         + "** more gold for a(n) **" + item.getName() + "**.");
             else if (build.size() >= 4)
-                Util.sendError(channel, "You do not have enough inventory space for a(n) **" + item.getName() + "**..");
+                Util.sendError(channel, "You do not have enough inventory space for a(n) **" + item.getName() + "**.");
             else {
                 List<String> output = new ArrayList<>();
                 actor.stats.sub(Stats.GOLD, cost);
