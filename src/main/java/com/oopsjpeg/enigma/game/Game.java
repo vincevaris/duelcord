@@ -340,7 +340,7 @@ public class Game {
             else if (!item.canUse(actor))
                 Util.sendError(channel, "**" + item.getName() + "** can't be used.");
             else if (item.getCooldown() != null && !item.getCooldown().count())
-                Util.sendError(channel, "**" + item.getName() + "** is on cooldown ");
+                Util.sendError(channel, "**" + item.getName() + "** is on cooldown for **" + item.getCooldown().getCur() + "** more turn(s).");
             else {
                 if (item.getCooldown() != null) item.getCooldown().start();
                 channel.sendMessage(Emote.USE + "**" + actor.getName() + "** used a(n) **"
