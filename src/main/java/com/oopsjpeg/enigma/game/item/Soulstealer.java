@@ -10,9 +10,9 @@ public class Soulstealer extends Item {
     public static final int COST = 1250;
     public static final Item[] BUILD = new Item[]{new BloodlustBlade(), new Hatchet()};
     public static final Effect[] EFFECTS = new Effect[]{StatsEffect.stats(new Stats()
-            .put(Stats.LIFE_STEAL, 0.25f))};
+            .put(Stats.LIFE_STEAL, 0.3f))};
     public static final Stats STATS = new Stats()
-            .put(Stats.DAMAGE, 25);
+            .put(Stats.DAMAGE, 30);
 
     @Override
     public String getName() {

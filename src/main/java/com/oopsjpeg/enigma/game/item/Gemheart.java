@@ -3,11 +3,11 @@ package com.oopsjpeg.enigma.game.item;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Item;
 
-public class Ring extends Item {
-    public static final String NAME = "Ring";
-    public static final int COST = 275;
+public class Gemheart extends Item {
+    public static final String NAME = "Gemheart";
+    public static final int COST = 375;
     public static final Stats STATS = new Stats()
-            .put(Stats.ABILITY_POWER, 10);
+            .put(Stats.MAX_HP, 40);
 
     @Override
     public String getName() {

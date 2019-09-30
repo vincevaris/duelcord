@@ -7,7 +7,7 @@ import com.oopsjpeg.enigma.game.obj.Item;
 
 public class IronScimitar extends Item {
     public static final String NAME = "Iron Scimitar";
-    public static final int COST = 1225;
+    public static final int COST = 1375;
     public static final Item[] BUILD = new Item[]{new BronzeCutlass(), new Hatchet()};
     public static final Effect[] EFFECTS = new Effect[]{StatsEffect.stats(new Stats()
             .put(Stats.CRIT_DAMAGE, 0.25f))};

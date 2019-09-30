@@ -5,7 +5,7 @@ import com.oopsjpeg.enigma.game.obj.Item;
 
 public class Hatchet extends Item {
     public static final String NAME = "Hatchet";
-    public static final int COST = 375;
+    public static final int COST = 425;
     public static final Stats STATS = new Stats()
             .put(Stats.DAMAGE, 10);
 

@@ -5,7 +5,7 @@ import com.oopsjpeg.enigma.game.obj.Item;
 
 public class Staff extends Item {
     public static final String NAME = "Staff";
-    public static final int COST = 450;
+    public static final int COST = 425;
     public static final Stats STATS = new Stats()
             .put(Stats.ABILITY_POWER, 20);
 

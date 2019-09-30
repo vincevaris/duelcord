@@ -8,7 +8,7 @@ public class BloodlustBlade extends Item {
     public static final int COST = 550;
     public static final Stats STATS = new Stats()
             .put(Stats.DAMAGE, 10)
-            .put(Stats.LIFE_STEAL, 0.1f);
+            .put(Stats.LIFE_STEAL, 0.15f);
     public static final Item[] BUILD = new Item[]{new Knife()};
 
     @Override

@@ -7,11 +7,11 @@ import com.oopsjpeg.enigma.game.obj.Item;
 
 public class SteelMallet extends Item {
     public static final String NAME = "Steel Mallet";
-    public static final int COST = 575;
+    public static final int COST = 625;
     public static final Item[] BUILD = new Item[]{new Knife(), new Crystal()};
     public static final Effect[] EFFECTS = new Effect[]{new DawnShield()};
     public static final Stats STATS = new Stats()
-            .put(Stats.DAMAGE, 6)
+            .put(Stats.DAMAGE, 8)
             .put(Stats.MAX_HP, 25);
 
     @Override
