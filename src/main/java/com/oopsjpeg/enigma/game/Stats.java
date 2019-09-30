@@ -25,7 +25,6 @@ public class Stats {
         values.put(GOLD, 0.0f);
         values.put(ENERGY, 0.0f);
         values.put(SHIELD, 0.0f);
-
         values.put(MAX_HP, 0.0f);
         values.put(DAMAGE, 0.0f);
         values.put(ABILITY_POWER, 0.0f);
