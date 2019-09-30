@@ -52,6 +52,7 @@ public class Game {
         commands.add(new PickCommand());
         commands.add(new RageCommand());
         commands.add(new RefreshCommand());
+        commands.add(new SellCommand());
         commands.add(new SlashCommand());
         commands.add(new StatsCommand());
         commands.add(new UseCommand());
@@ -330,6 +331,34 @@ public class Game {
                 channel.sendMessage(Emote.USE + "**" + actor.getName() + "** used a(n) **"
                         + item.getName() + "**.\n" + item.onUse(actor)).complete();
                 if (item.removeOnUse()) actor.data.remove(item);
+                actor.updateStats();
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public int getEnergy() {
+            return 25;
+        }
+    }
+
+    public class SellAction extends Action {
+        private final Item item;
+
+        public SellAction(Item item) {
+            this.item = item;
+        }
+
+        @Override
+        public boolean act(Member actor) {
+            if (!actor.data.contains(item))
+                Util.sendError(channel, "You don't have a(n) **" + item.getName() + "**.");
+            else {
+                channel.sendMessage(Emote.BUY + "**" + actor.getName() + "** sold a(n) **"
+                        + item.getName() + "**.\n" + item.onUse(actor)).complete();
+                actor.stats.add(Stats.GOLD, item.getCost() * 0.6f);
+                actor.data.remove(item);
                 actor.updateStats();
                 return true;
             }
