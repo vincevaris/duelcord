@@ -92,11 +92,12 @@ public class Game {
             curMember = getAlive().get(curTurn);
             if (curTurn == 0) {
                 channel.sendMessage(Emote.ATTACK + "Welcome to **" + mode.getName() + "**! ("
-                        + getPlayers().stream().map(p -> p.getUser().getName()).collect(Collectors.joining(", ")) + ")\n\n"
-                        + "[**" + curMember + ", you have first pick!**]\n"
-                        + "Check " + Enigma.getUnitsChannel().getAsMention() + " to view available units.").complete();
+                        + getPlayers().stream().map(p -> p.getUser().getName()).collect(Collectors.joining(", ")) + ")"
+                        + "\n\n[**" + curMember + ", you have first pick!**]"
+                        + "\nCheck " + Enigma.getUnitsChannel().getAsMention() + " to view available units, then pick with `>pick`.").complete();
             } else {
-                channel.sendMessage("[**" + curMember + ", you have next pick!**]").complete();
+                channel.sendMessage("[**" + curMember + ", you have next pick!**]"
+                        + "\nCheck" + Enigma.getUnitsChannel().getAsMention() + " to view available units, then pick with `>pick`.").complete();
             }
         } else if (gameState == 1) {
             output.addAll(curMember.data.stream()
@@ -131,6 +132,8 @@ public class Game {
             output.addAll(curMember.data.stream()
                     .map(e -> e.onTurnStart(curMember))
                     .collect(Collectors.toList()));
+            if (curMember.stats.get(Stats.HP) < curMember.stats.get(Stats.MAX_HP) * 0.2f)
+                output.add(Emote.WARN + curMember.getName() + "** is critically low on health.");
 
             output.removeAll(Arrays.asList(null, ""));
 

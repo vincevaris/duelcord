@@ -1,6 +1,7 @@
 package com.oopsjpeg.enigma;
 
 import com.oopsjpeg.enigma.commands.BuildCommand;
+import com.oopsjpeg.enigma.commands.PatchCommand;
 import com.oopsjpeg.enigma.commands.QueueCommand;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.GameMode;
@@ -49,11 +50,13 @@ public class Enigma {
     private static String mmChannelId;
     private static String unitsChannelId;
     private static String itemsChannelId;
+    private static String logChannelId;
 
     private static Guild guild;
     private static TextChannel mmChannel;
     private static TextChannel unitsChannel;
     private static TextChannel itemsChannel;
+    private static TextChannel logChannel;
 
     public static void main(String[] args) throws IOException, LoginException {
         File f = new File("config.ini");
@@ -89,6 +92,7 @@ public class Enigma {
     private static void buildCommands() {
         commands.clear();
         commands.add(new BuildCommand());
+        commands.add(new PatchCommand());
         commands.add(new QueueCommand());
     }
 
@@ -102,7 +106,7 @@ public class Enigma {
         games.remove(game);
         SCHEDULER.schedule(() -> {
             game.getChannel().delete().complete();
-        }, 1, TimeUnit.MINUTES);
+        }, 2, TimeUnit.MINUTES);
     }
 
     public static Player getPlayer(User user) {
@@ -195,6 +199,10 @@ public class Enigma {
                         .map(Item::getName).collect(Collectors.joining("\n")), false);
             return builder.build();
         }).forEach(b -> itemsChannel.sendMessage(b).complete());
+    }
+
+    public static TextChannel getLogChannel() {
+        return logChannel;
     }
 
     @SubscribeEvent
