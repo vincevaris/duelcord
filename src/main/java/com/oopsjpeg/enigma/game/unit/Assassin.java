@@ -11,8 +11,7 @@ import com.oopsjpeg.enigma.util.Util;
 import java.awt.*;
 
 public class Assassin extends Unit {
-    public static final float POTENCY_STACK_MIN = 0.1f;
-    public static final float POTENCY_STACK_MAX = 0.3f;
+    public static final float POTENCY_STORE = 0.2f;
     public static final int POTENCY_TURNS = 5;
     public static final float SLASH_DAMAGE = 0.3f;
     public static final float SLASH_AP = 0.2f;
@@ -20,7 +19,7 @@ public class Assassin extends Unit {
     public static final int SILENCE_TURNS = 1;
 
     public static final String NAME = "Assassin";
-    public static final String DESC = "**" + Util.percent(POTENCY_STACK_MIN) + "**-**" + Util.percent(POTENCY_STACK_MAX) + "**"
+    public static final String DESC = "**" + Util.percent(POTENCY_STORE) + "**"
             + " of damage dealt in the last turn is stored as **Potency**."
             + " This can only occur **" + POTENCY_TURNS + "** times until **Potency** is reset."
             + "\n\nUsing `>slash` deals **" + Util.percent(SLASH_DAMAGE) + "** (+" + Util.percent(SLASH_AP) + " AP) of base damage."
@@ -76,7 +75,7 @@ public class Assassin extends Unit {
     public DamageEvent onBasicAttack(DamageEvent event) {
         // Assassin potency stacking
         if (!potency.done())
-            potencyTotal += event.damage * Math.min(Assassin.POTENCY_STACK_MAX, Assassin.POTENCY_STACK_MIN + (event.game.getTurnCount() * 0.005f));
+            potencyTotal += event.damage * POTENCY_STORE;
         return event;
     }
 
