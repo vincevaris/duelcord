@@ -30,6 +30,7 @@ public class Game {
     private final List<Member> members;
     private final CommandCenter commands;
 
+    private List<Action> actions = new ArrayList<>();
     private LocalDateTime lastAction = LocalDateTime.now();
     private int notifyAfk = 0;
 
@@ -133,7 +134,7 @@ public class Game {
                     .map(e -> e.onTurnStart(curMember))
                     .collect(Collectors.toList()));
             if (curMember.stats.get(Stats.HP) < curMember.stats.get(Stats.MAX_HP) * 0.2f)
-                output.add(Emote.WARN + curMember.getName() + "** is critically low on health.");
+                output.add(Emote.WARN + "**" + curMember.getName() + "** is critically low on health.");
 
             output.removeAll(Arrays.asList(null, ""));
 
@@ -204,6 +205,14 @@ public class Game {
 
     public List<Member> getAlive() {
         return members.stream().filter(Member::isAlive).collect(Collectors.toList());
+    }
+
+    public List<Member> getDead() {
+        return members.stream().filter(m -> !m.alive).collect(Collectors.toList());
+    }
+
+    public List<Action> getActions() {
+        return actions;
     }
 
     public LocalDateTime getLastAction() {
@@ -713,6 +722,7 @@ public class Game {
             if (stats.get(Stats.ENERGY) < action.getEnergy())
                 Util.sendError(channel, "You do not have **" + action.getEnergy() + "** energy.");
             else if (action.execute(this)) {
+                Game.this.actions.add(action);
                 stats.sub(Stats.ENERGY, action.getEnergy());
                 if (stats.get(Stats.ENERGY) <= 0) nextTurn();
                 else setTopic(this);

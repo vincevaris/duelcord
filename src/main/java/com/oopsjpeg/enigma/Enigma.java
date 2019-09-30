@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
@@ -68,6 +69,7 @@ public class Enigma {
             p.setProperty("mm_channel_id", "");
             p.setProperty("units_channel_id", "");
             p.setProperty("items_channel_id", "");
+            p.setProperty("log_channel_id", "");
             p.store(fw, "Enigma config");
             System.out.println("Please setup your configuration file.");
         }
@@ -77,6 +79,7 @@ public class Enigma {
             mmChannelId = p.getProperty("mm_channel_id");
             unitsChannelId = p.getProperty("units_channel_id");
             itemsChannelId = p.getProperty("items_channel_id");
+            logChannelId = p.getProperty("log_channel_id");
 
             client = new JDABuilder(p.getProperty("token")).build();
             client.setEventManager(new AnnotatedEventManager());
@@ -101,6 +104,18 @@ public class Enigma {
     }
 
     public static void endGame(Game game) {
+        if (game.getTurnCount() > 5) {
+            Game.Member winner = game.getAlive().get(0);
+            LocalDateTime now = LocalDateTime.now();
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setColor(Color.YELLOW);
+            builder.setAuthor("Victory by " + winner.getName() + " on " + game.getMode().getName(), winner.getUser().getAvatarUrl());
+            builder.appendDescription("Opponents: " + game.getDead().stream().map(Game.Member::getName).collect(Collectors.joining(", ")));
+            builder.appendDescription("\n**" + game.getTurnCount() + "** total turns and **" + game.getActions().size() + "** total actions.");
+            builder.setFooter(now.getYear() + "/" + now.getMonthValue() + "/" + now.getDayOfMonth());
+            logChannel.sendMessage(builder.build()).complete();
+        }
+
         game.getPlayers().forEach(Player::removeGame);
         client.removeEventListener(game.getCommands());
         games.remove(game);
@@ -215,6 +230,7 @@ public class Enigma {
         mmChannel = client.getTextChannelById(Long.parseLong(mmChannelId));
         unitsChannel = client.getTextChannelById(Long.parseLong(unitsChannelId));
         itemsChannel = client.getTextChannelById(Long.parseLong(itemsChannelId));
+        logChannel = client.getTextChannelById(Long.parseLong(logChannelId));
 
         SCHEDULER.scheduleAtFixedRate(Enigma::refreshQueues, 10, 10, TimeUnit.SECONDS);
         SCHEDULER.scheduleAtFixedRate(() -> games.stream().filter(g -> g.getGameState() == 1)
