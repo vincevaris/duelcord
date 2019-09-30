@@ -39,7 +39,7 @@ public class Surmount extends Effect {
 
     @Override
     public DamageEvent onHit(DamageEvent event) {
-        if(firstAtk){
+        if (firstAtk) {
             event.damage *= power * event.target.getStats().get("max_hp");
             firstAtk = false;
         }
