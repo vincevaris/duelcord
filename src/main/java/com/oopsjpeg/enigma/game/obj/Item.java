@@ -14,6 +14,7 @@ public abstract class Item extends GameObject {
             new BronzeCutlass(),
             new Crystal(),
             new DawnHammer(),
+            new Gemheart(),
             new Hatchet(),
             new IronScimitar(),
             new Knife(),
@@ -21,7 +22,6 @@ public abstract class Item extends GameObject {
             new Potion(),
             new Ring(),
             new ShadowGauntlet(),
-            new Shatterwand(),
             new Soulstealer(),
             new Staff(),
             new SteelMallet()
