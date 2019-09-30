@@ -26,6 +26,7 @@ public abstract class Item extends GameObject {
             new Staff(),
             new SteelMallet(),
             new BlackHalberd(),
+            new ViktorsScythe()
     };
 
     public static Item[] values() {
