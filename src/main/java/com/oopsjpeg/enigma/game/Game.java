@@ -112,7 +112,7 @@ public class Game {
             curMember = getAlive().get(curTurn);
 
             curMember.stats.add(Stats.HP, curMember.perTurn.get(Stats.HP) * (1 + curMember.defend));
-            curMember.stats.add(Stats.GOLD, Math.round(curMember.perTurn.get(Stats.GOLD) + turnCount));
+            curMember.stats.add(Stats.GOLD, Math.round(125 + turnCount));
             curMember.stats.put(Stats.ENERGY, curMember.unit.getStats().get(Stats.ENERGY));
             curMember.stats.add(Stats.ENERGY, curMember.perTurn.get(Stats.ENERGY));
             curMember.stats.put(Stats.SHIELD, 0);
