@@ -4,37 +4,32 @@ import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
 
 import java.awt.*;
 
 public class Warrior extends Unit {
+    public static final int BONUS_MAX = 3;
+    public static final float BONUS_DAMAGE = 0.3f;
+    public static final float BASH_DAMAGE = 0.5f;
+
     public static final String NAME = "Warrior";
-    public static final String DESC = "Every **3rd** attack deals **30%** bonus damage."
-            + "\nUsing `>bash` destroys shields and deals **50%** of damage."
-            + "\n`>bash` counts towards bonus damage stacks, but does not proc it.";
+    public static final String DESC = "Every **" + BONUS_MAX + "rd** attack deals **" + Util.percent(BONUS_DAMAGE) + "** bonus damage."
+            + "\nUsing `>bash` destroys shields and deals **" + Util.percent(BASH_DAMAGE) + "** of base damage."
+            + "\nBash counts towards stacks of bonus damages, but does not proc it.";
     public static final Color COLOR = Color.CYAN;
     public static final Stats STATS = new Stats()
             .put(Stats.ENERGY, 125)
             .put(Stats.MAX_HP, 795)
             .put(Stats.DAMAGE, 24);
     public static final Stats PER_TURN = new Stats()
-            .put(Stats.HP, 13)
-            .put(Stats.GOLD, 75);
+            .put(Stats.HP, 13);
 
-    private int bonus = 0;
+    private Stacker bonus = new Stacker(BONUS_MAX);
     private boolean bash = false;
 
-    public int getBonus() {
-        return bonus;
-    }
-
-    public void setBonus(int bonus) {
-        this.bonus = Util.limit(bonus, 0, 3);
-    }
-
-    public int bonus() {
-        setBonus(bonus + 1);
+    public Stacker getBonus() {
         return bonus;
     }
 
@@ -79,11 +74,10 @@ public class Warrior extends Unit {
 
     @Override
     public DamageEvent onBasicAttack(DamageEvent event) {
-        if (bonus() >= 3) {
-            event.bonus += event.damage * 0.3f;
-            setBonus(0);
+        if (bonus.stack()) {
+            event.bonus += event.actor.getStats().get(Stats.DAMAGE) * 0.3f;
+            bonus.reset();
         }
-
         return event;
     }
 }

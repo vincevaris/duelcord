@@ -4,6 +4,7 @@ import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.util.Cooldown;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Util;
 
@@ -30,11 +31,10 @@ public class Gunslinger extends Unit {
             .put(Stats.MAX_HP, 750)
             .put(Stats.DAMAGE, 17);
     public static final Stats PER_TURN = new Stats()
-            .put(Stats.HP, 11)
-            .put(Stats.GOLD, 75);
+            .put(Stats.HP, 11);
 
     private boolean bonus = false;
-    private int barrage = 0;
+    private final Cooldown barrage = new Cooldown(BARRAGE_COOLDOWN);
 
     public boolean getBonus() {
         return bonus;
@@ -44,16 +44,8 @@ public class Gunslinger extends Unit {
         this.bonus = bonus;
     }
 
-    public int getBarrage() {
+    public Cooldown getBarrage() {
         return barrage;
-    }
-
-    public void setBarrage(int barrage) {
-        this.barrage = Util.limit(barrage, -1, BARRAGE_COOLDOWN);
-    }
-
-    public boolean canBarrage() {
-        return barrage <= 0;
     }
 
     @Override
@@ -69,8 +61,7 @@ public class Gunslinger extends Unit {
     @Override
     public String onTurnStart(Game.Member member) {
         setBonus(false);
-        setBarrage(getBarrage() - 1);
-        if (barrage == 0)
+        if (barrage.count() && barrage.notif())
             return Emote.INFO + "**" + member.getName() + "'s Barrage** is ready to use.";
         return "";
     }

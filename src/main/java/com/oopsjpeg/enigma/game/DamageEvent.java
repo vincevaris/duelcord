@@ -19,4 +19,8 @@ public class DamageEvent {
         this.actor = actor;
         this.target = target;
     }
+
+    public float total() {
+        return damage + bonus;
+    }
 }

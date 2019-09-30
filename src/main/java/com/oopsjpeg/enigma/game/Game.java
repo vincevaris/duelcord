@@ -21,10 +21,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Game {
@@ -71,6 +68,7 @@ public class Game {
 
         this.mode = mode;
         members = players.stream().map(Member::new).collect(Collectors.toList());
+        Collections.shuffle(members);
         nextTurn();
     }
 
@@ -84,7 +82,8 @@ public class Game {
 
         if (turnCount >= 1 && gameState == 1 && curMember.stats.get(Stats.ENERGY) > 0 && !curMember.hasData(Silence.class)) {
             curMember.defend = 1;
-            output.add(Emote.SHIELD + "**" + curMember.getName() + "** is defending!");
+            output.add(Emote.SHIELD + "**" + curMember.getName() + "** is defending (**20%** damage reduction, **"
+                    + (curMember.perTurn.getInt(Stats.HP) * 2) + "** HP/t)!");
             output.add(curMember.unit.onDefend(curMember));
         }
 
@@ -113,7 +112,7 @@ public class Game {
             curMember = getAlive().get(curTurn);
 
             curMember.stats.add(Stats.HP, curMember.perTurn.get(Stats.HP) * (1 + curMember.defend));
-            curMember.stats.add(Stats.GOLD, Math.round(curMember.perTurn.get(Stats.GOLD) + (turnCount - 1)));
+            curMember.stats.add(Stats.GOLD, Math.round(curMember.perTurn.get(Stats.GOLD) + turnCount));
             curMember.stats.put(Stats.ENERGY, curMember.unit.getStats().get(Stats.ENERGY));
             curMember.stats.add(Stats.ENERGY, curMember.perTurn.get(Stats.ENERGY));
             curMember.stats.put(Stats.SHIELD, 0);
@@ -153,14 +152,14 @@ public class Game {
                     + "** (+**" + member.perTurn.getInt(Stats.HP) + "**/t)\n"
                     + "Energy: **" + member.stats.getInt(Stats.ENERGY) + "**\n"
                     + (member.unit instanceof Warrior
-                    ? "Attack: **" + ((Warrior) member.unit).getBonus() + " / 3**\n" : "")
+                    ? "Attack: **" + ((Warrior) member.unit).getBonus().getCur() + " / 3**\n" : "")
                     + (member.unit instanceof Berserker
-                    ? "Rage: **" + ((Berserker) member.unit).getRage() + " / 5**\n" : "")
+                    ? "Rage: **" + ((Berserker) member.unit).getRage().getCur() + " / 5**\n" : "")
                     + (member.unit instanceof Duelist
-                    ? "Bonus: **" + ((Duelist) member.unit).getBonus() + " / " + Duelist.BONUS_MAX + "**\n" : "")
+                    ? "Bonus: **" + ((Duelist) member.unit).getBonus().getCur() + " / " + Duelist.BONUS_MAX + "**\n" : "")
                     + (member.unit instanceof Assassin
-                    ? "Slash: **" + ((Assassin) member.unit).getSlashCount() + " / " + Assassin.SLASH_STACK_MAX + "**\n"
-                    + "Potency: **" + Math.round(((Assassin) member.unit).getPotency()) + "**\n" : "")
+                    ? "Slash: **" + ((Assassin) member.unit).getSlash().getCur() + " / " + Assassin.SLASH_MAX + "**\n"
+                    + "Potency: **" + Math.round(((Assassin) member.unit).getPotencyTotal()) + "**\n" : "")
                     + "Items: **" + member.getItems() + "**\n").complete();
         }
     }
@@ -284,13 +283,14 @@ public class Game {
             if (actor.stats.get(Stats.GOLD) < cost)
                 Util.sendError(channel, "You need **" + (cost - actor.stats.getInt(Stats.GOLD))
                         + "** more gold for a(n) **" + item.getName() + "**.");
-            else if (build.size() >= 6)
+            else if (build.size() >= 4)
                 Util.sendError(channel, "You do not have enough inventory space for a(n) **" + item.getName() + "**..");
             else {
                 List<String> output = new ArrayList<>();
                 actor.stats.sub(Stats.GOLD, cost);
                 actor.data.add(item);
-                actor.data.removeAll(Arrays.asList(item.getBuild()));
+                for (Item i : item.getBuild())
+                    actor.data.remove(i);
                 actor.updateStats();
 
                 if (item.getStats().get(Stats.MAX_HP) > 0 && !actor.shields.contains(item)) {
@@ -361,7 +361,7 @@ public class Game {
                     Util.sendError(channel, "You can only use **Bash** once per turn.");
                 else {
                     wu.setBash(true);
-                    wu.bonus();
+                    wu.getBonus().stack();
 
                     DamageEvent event = new DamageEvent(Game.this, actor, target);
 
@@ -390,16 +390,20 @@ public class Game {
             else if (actor.hasData(Silence.class))
                 Util.sendError(channel, "You cannot **Rage** while silenced.");
             else {
-                Berserker berserk = (Berserker) actor.unit;
-                berserk.setBonus((0.04f * berserk.getRage()) + (actor.getStats().get(Stats.ABILITY_POWER) / 1000));
+                Berserker be = (Berserker) actor.unit;
+                float stack = Berserker.BONUS_DAMAGE + (actor.stats.get(Stats.ABILITY_POWER) / (Berserker.BONUS_AP * 100));
 
-                if (berserk.getRage() == 5) actor.stats.add(Stats.ENERGY, 100);
+                be.setBonus(stack * be.getRage().getCur());
+
+                if (be.getRage().getCur() == Berserker.RAGE_MAX)
+                    actor.stats.add(Stats.ENERGY, 100);
 
                 channel.sendMessage(Emote.RAGE + "**" + actor.getName() + "** has gained **"
-                        + Math.round(berserk.getBonus() * 100) + "%** bonus damage "
-                        + (berserk.getRage() == 5 ? "and **100** energy " : "") + "this turn!").complete();
+                        + Util.percent(be.getBonus()) + "** bonus damage "
+                        + (be.getRage().getCur() == Berserker.RAGE_MAX ? "and **100** energy " : "")
+                        + "this turn!").complete();
 
-                berserk.setRage(0);
+                be.getRage().reset();
 
                 return true;
             }
@@ -437,12 +441,12 @@ public class Game {
                     event = event.actor.hit(event);
                     event = event.actor.crit(event);
 
-                    if (au.slashCount() >= 4) {
-                        event.damage += au.getPotency();
+                    if (au.getSlash().stack()) {
+                        event.damage += au.getPotencyTotal();
                         event.output.add(target.buff(new Silence(actor, Assassin.SILENCE_TURNS)));
-                        au.setSlashCount(0);
-                        au.setPotencyTurn(0);
-                        au.setPotency(0);
+                        au.getSlash().reset();
+                        au.getPotency().reset();
+                        au.setPotencyTotal(0);
                     }
 
                     channel.sendMessage(actor.damage(event, Emote.KNIFE, "slashed")).complete();
@@ -473,10 +477,10 @@ public class Game {
                 Util.sendError(channel, "You cannot **Crush** while silenced.");
             else {
                 Duelist du = (Duelist) actor.unit;
-                if (!du.canCrush())
-                    Util.sendError(channel, "**Crush** is on cooldown.");
+                if (!du.getCrush().done())
+                    Util.sendError(channel, "**Crush** is on cooldown for **" + du.getCrush().getCur() + "** more turn(s).");
                 else {
-                    du.setCrush(Duelist.CRUSH_COOLDOWN);
+                    du.getCrush().start();
                     channel.sendMessage(target.buff(new Weaken(actor, Duelist.CRUSH_TURNS, Duelist.CRUSH_POWER))).complete();
                     return true;
                 }
@@ -505,10 +509,10 @@ public class Game {
                 Util.sendError(channel, "You cannot **Barrage** while silenced.");
             else {
                 Gunslinger gu = (Gunslinger) actor.unit;
-                if (!gu.canBarrage())
-                    Util.sendError(channel, "**Barrage** is on cooldown.");
+                if (!gu.getBarrage().done())
+                    Util.sendError(channel, "**Barrage** is on cooldown for **" + gu.getBarrage().getCur() + "** more turn(s).");
                 else {
-                    gu.setBarrage(Gunslinger.BARRAGE_COOLDOWN);
+                    gu.getBarrage().start();
 
                     List<String> output = new ArrayList<>();
                     for (int i = 0; i < Gunslinger.BARRAGE_SHOTS; i++)
@@ -632,10 +636,10 @@ public class Game {
             updateStats();
 
             stats.put(Stats.HP, stats.get(Stats.MAX_HP));
-            stats.put(Stats.GOLD, 300 - (perTurn.get(Stats.GOLD) * (1 - getAlive().indexOf(this))));
+            stats.put(Stats.GOLD, 175 + (100 * getAlive().indexOf(this)));
 
             if (unit instanceof Berserker)
-                ((Berserker) unit).setRage(getAlive().indexOf(this));
+                ((Berserker) unit).getRage().setCur(getAlive().indexOf(this));
         }
 
         public void updateStats() {
@@ -754,7 +758,7 @@ public class Game {
         public DamageEvent basicAttack(Member target) {
             DamageEvent event = new DamageEvent(Game.this, this, target);
             event.damage = stats.get(Stats.DAMAGE);
-            event.actor.stats.add(Stats.GOLD, Util.nextInt(15, 25) + (curTurn * 0.5f));
+            event.actor.stats.add(Stats.GOLD, Util.nextInt(20, 30) + (curTurn * 0.5f));
 
             for (GameObject o : event.actor.data) event = o.onBasicAttack(event);
             for (GameObject o : event.target.data) event = o.wasBasicAttacked(event);
@@ -781,19 +785,26 @@ public class Game {
 
             // Shield damaging
             if (event.target.stats.get(Stats.SHIELD) > 0) {
-                float shieldDmg = Util.limit(event.target.stats.get(Stats.SHIELD), 0, event.damage);
-                event.target.stats.sub(Stats.SHIELD, shieldDmg);
+                // Remove bonus damage first
+                float shdBonus = Util.limit(event.bonus, 0, event.target.stats.get(Stats.SHIELD));
+                event.bonus -= shdBonus;
+                event.target.stats.sub(Stats.SHIELD, shdBonus);
+
+                // Remove main damage after
+                if (event.target.stats.get(Stats.SHIELD) > 0) {
+                    float shdDamage = Util.limit(event.damage, 0, event.target.stats.get(Stats.SHIELD));
+                    event.damage -= shdDamage;
+                    event.target.stats.sub(Stats.SHIELD, shdDamage);
+                }
 
                 if (event.target.stats.get(Stats.SHIELD) > 0)
                     event.output.add(0, Util.damageText(event, actor, event.target.getName() + "'s Shield", emote, action));
-                else {
-                    event.damage -= shieldDmg;
+                else
                     event.output.add(0, Emote.SHIELD + "**" + actor + "** destroyed **" + event.target.getName() + "'s Shield**!");
-                }
             }
 
-            if (event.target.stats.get(Stats.SHIELD) <= 0) {
-                event.target.stats.sub(Stats.HP, event.damage + event.bonus);
+            if (event.target.stats.get(Stats.SHIELD) <= 0 && event.total() > 0) {
+                event.target.stats.sub(Stats.HP, event.total());
                 event.output.add(0, Util.damageText(event, actor, event.target.getName(), emote, action));
                 if (event.target.stats.get(Stats.HP) <= 0)
                     event.output.add(event.target.lose());

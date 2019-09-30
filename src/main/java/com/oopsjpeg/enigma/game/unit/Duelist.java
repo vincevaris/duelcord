@@ -5,7 +5,9 @@ import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.buff.Bleed;
 import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.util.Cooldown;
 import com.oopsjpeg.enigma.util.Emote;
+import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
 
 import java.awt.*;
@@ -33,54 +35,34 @@ public class Duelist extends Unit {
             .put(Stats.MAX_HP, 750)
             .put(Stats.DAMAGE, 25);
     public static final Stats PER_TURN = new Stats()
-            .put(Stats.HP, 14)
-            .put(Stats.GOLD, 75);
+            .put(Stats.HP, 14);
 
-    private int bonus = 0;
-    private int crush = 0;
+    private final Stacker bonus = new Stacker(BONUS_MAX);
+    private final Cooldown crush = new Cooldown(CRUSH_COOLDOWN);
 
-    public int getBonus() {
+    public Stacker getBonus() {
         return bonus;
     }
 
-    public void setBonus(int bonus) {
-        this.bonus = Util.limit(bonus, 0, BONUS_MAX);
-    }
-
-    public int bonus() {
-        setBonus(bonus + 1);
-        return bonus;
-    }
-
-    public int getCrush() {
+    public Cooldown getCrush() {
         return crush;
-    }
-
-    public void setCrush(int crush) {
-        this.crush = Util.limit(crush, -1, CRUSH_COOLDOWN);
-    }
-
-    public boolean canCrush() {
-        return crush <= 0;
     }
 
     @Override
     public DamageEvent onBasicAttack(DamageEvent event) {
-        if (bonus() >= BONUS_MAX) {
-            setBonus(0);
+        if (bonus.stack()) {
+            bonus.reset();
             float bonus = event.target.getStats().getInt(Stats.MAX_HP) * BONUS_DAMAGE;
             float bleed = event.actor.getStats().get(Stats.DAMAGE) * BLEED_DAMAGE;
             event.bonus += bonus;
             event.output.add(event.target.buff(new Bleed(event.actor, BLEED_TURNS, bleed)));
         }
-
         return event;
     }
 
     @Override
     public String onTurnStart(Game.Member member) {
-        setCrush(getCrush() - 1);
-        if (crush == 0)
+        if (crush.count() && crush.notif())
             return Emote.INFO + "**" + member.getName() + "'s Crush** is ready to use.";
         return "";
     }

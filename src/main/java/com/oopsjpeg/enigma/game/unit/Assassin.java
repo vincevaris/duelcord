@@ -5,6 +5,7 @@ import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Unit;
 import com.oopsjpeg.enigma.util.Emote;
+import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
 
 import java.awt.*;
@@ -15,7 +16,7 @@ public class Assassin extends Unit {
     public static final int POTENCY_TURNS = 5;
     public static final float SLASH_DAMAGE = 0.3f;
     public static final float SLASH_AP = 0.2f;
-    public static final int SLASH_STACK_MAX = 4;
+    public static final int SLASH_MAX = 4;
     public static final int SILENCE_TURNS = 1;
 
     public static final String NAME = "Assassin";
@@ -23,23 +24,21 @@ public class Assassin extends Unit {
             + " of damage dealt in the last turn is stored as **Potency**."
             + " This can only occur **" + POTENCY_TURNS + "** times until **Potency** is reset."
             + "\n\nUsing `>slash` deals **" + Util.percent(SLASH_DAMAGE) + "** (+" + Util.percent(SLASH_AP) + " AP) of base damage."
-            + " Every fourth `>slash` **silences** the target for **" + SILENCE_TURNS + "** turn(s) and deals"
+            + " Every **" + SLASH_MAX + "th** slash applies **Silence** for **" + SILENCE_TURNS + "** turn(s) and deals"
             + " bonus damage equal to the total **Potency**, resetting it as well."
-            + "\n\n`>slash` does not count towards total **Potency**.";
+            + "\n\nSlash does not count towards total **Potency**.";
     public static final Color COLOR = Color.BLUE;
     public static final Stats STATS = new Stats()
             .put(Stats.ENERGY, 125)
             .put(Stats.MAX_HP, 720)
             .put(Stats.DAMAGE, 24);
     public static final Stats PER_TURN = new Stats()
-            .put(Stats.HP, 11)
-            .put(Stats.GOLD, 75);
+            .put(Stats.HP, 11);
 
     private boolean slashed = false;
-    private int slashCount = 0;
-    private float potency = 0;
-    private float potencyNow = 0;
-    private int potencyTurn = 0;
+    private final Stacker slash = new Stacker(SLASH_MAX);
+    private final Stacker potency = new Stacker(POTENCY_TURNS);
+    private float potencyTotal = 0;
 
     public boolean getSlashed() {
         return slashed;
@@ -49,72 +48,35 @@ public class Assassin extends Unit {
         this.slashed = slashed;
     }
 
-    public int getSlashCount() {
-        return slashCount;
+    public Stacker getSlash() {
+        return slash;
     }
 
-    public void setSlashCount(int slashCount) {
-        this.slashCount = Util.limit(slashCount, 0, 4);
-    }
-
-    public int slashCount() {
-        slashCount++;
-        return slashCount;
-    }
-
-    public float getPotency() {
+    public Stacker getPotency() {
         return potency;
     }
 
-    public void setPotency(float potency) {
-        this.potency = potency;
+    public float getPotencyTotal() {
+        return potencyTotal;
     }
 
-    public void addPotency(float potency) {
-        this.potency += potency;
-    }
-
-    public float getPotencyNow() {
-        return potencyNow;
-    }
-
-    public void setPotencyNow(float potencyNow) {
-        this.potencyNow = potencyNow;
-    }
-
-    public void addPotencyNow(float potencyNow) {
-        this.potencyNow += potencyNow;
-    }
-
-    public int getPotencyTurn() {
-        return potencyTurn;
-    }
-
-    public void setPotencyTurn(int potencyTurn) {
-        this.potencyTurn = potencyTurn;
+    public void setPotencyTotal(float potencyTotal) {
+        this.potencyTotal = potencyTotal;
     }
 
     @Override
     public String onTurnEnd(Game.Member member) {
         slashed = false;
-        if (potencyNow > 0 && potencyTurn < 5) {
-            potencyNow = 0;
-            potencyTurn++;
-        }
-        if (potencyTurn == 5)
-            return Emote.KNIFE + "**" + member.getName() + "'s Potency** is at maximum capacity.";
+        if (potency.stack())
+            return Emote.KNIFE + "**" + member.getName() + "'s Potency** is at max capacity.";
         return "";
     }
 
     @Override
     public DamageEvent onBasicAttack(DamageEvent event) {
         // Assassin potency stacking
-        if (potencyTurn < Assassin.POTENCY_TURNS) {
-            float potency = event.damage * Math.min(Assassin.POTENCY_STACK_MAX, Assassin.POTENCY_STACK_MIN + (event.game.getTurnCount() * 0.005f));
-            addPotency(potency);
-            addPotencyNow(potency);
-        }
-
+        if (!potency.done())
+            potencyTotal += event.damage * Math.min(Assassin.POTENCY_STACK_MAX, Assassin.POTENCY_STACK_MIN + (event.game.getTurnCount() * 0.005f));
         return event;
     }
 
