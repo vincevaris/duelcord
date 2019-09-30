@@ -339,7 +339,10 @@ public class Game {
                 Util.sendError(channel, "You don't have a(n) **" + item.getName() + "**.");
             else if (!item.canUse(actor))
                 Util.sendError(channel, "**" + item.getName() + "** can't be used.");
+            else if (item.getCooldown() != null && !item.getCooldown().count())
+                Util.sendError(channel, "**" + item.getName() + "** is on cooldown ");
             else {
+                if (item.getCooldown() != null) item.getCooldown().start();
                 channel.sendMessage(Emote.USE + "**" + actor.getName() + "** used a(n) **"
                         + item.getName() + "**.\n" + item.onUse(actor)).complete();
                 if (item.removeOnUse()) actor.data.remove(item);

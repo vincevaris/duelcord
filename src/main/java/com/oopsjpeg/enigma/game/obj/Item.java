@@ -4,6 +4,7 @@ import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.GameObject;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.item.*;
+import com.oopsjpeg.enigma.util.Cooldown;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -69,12 +70,16 @@ public abstract class Item extends GameObject {
         return new Stats();
     }
 
+    public Cooldown getCooldown() {
+        return null;
+    }
+
     public boolean canUse(Game.Member member) {
         return false;
     }
 
     public boolean removeOnUse() {
-        return true;
+        return false;
     }
 
     public String onUse(Game.Member member) {

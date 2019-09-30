@@ -110,7 +110,7 @@ public class Enigma {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
             builder.setAuthor("Victory by " + winner.getName() + " on " + game.getMode().getName(), winner.getUser().getAvatarUrl());
-            builder.appendDescription("Opponents: " + game.getDead().stream().map(Game.Member::getName).collect(Collectors.joining(", ")));
+            builder.appendDescription("Opponent(s): " + game.getDead().stream().map(Game.Member::getName).collect(Collectors.joining(", ")));
             builder.appendDescription("\n**" + game.getTurnCount() + "** total turns and **" + game.getActions().size() + "** total actions.");
             builder.setFooter(now.getYear() + "/" + now.getMonthValue() + "/" + now.getDayOfMonth());
             logChannel.sendMessage(builder.build()).complete();
