@@ -7,7 +7,7 @@ import com.oopsjpeg.enigma.game.obj.Item;
 
 public class Soulstealer extends Item {
     public static final String NAME = "Soulstealer";
-    public static final int COST = 1250;
+    public static final int COST = 1325;
     public static final Item[] BUILD = new Item[]{new BloodlustBlade(), new Hatchet()};
     public static final Effect[] EFFECTS = new Effect[]{StatsEffect.stats(new Stats()
             .put(Stats.LIFE_STEAL, 0.3f))};
