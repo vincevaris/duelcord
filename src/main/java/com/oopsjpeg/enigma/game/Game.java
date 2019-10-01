@@ -370,9 +370,10 @@ public class Game {
             if (!actor.data.contains(item))
                 Util.sendError(channel, "You don't have a(n) **" + item.getName() + "**.");
             else {
+                int gold = Math.round(item.getCost() * 0.6f);
                 channel.sendMessage(Emote.BUY + "**" + actor.getName() + "** sold a(n) **"
-                        + item.getName() + "**.\n" + item.onUse(actor)).complete();
-                actor.stats.add(Stats.GOLD, item.getCost() * 0.6f);
+                        + item.getName() + "** for **" + gold + "** gold.").complete();
+                actor.stats.add(Stats.GOLD, gold);
                 actor.data.remove(item);
                 actor.updateStats();
                 return true;
@@ -687,6 +688,7 @@ public class Game {
         }
 
         public void updateStats() {
+            data.removeAll(getEffects());
             stats.put(Stats.MAX_HP, unit.getStats().get(Stats.MAX_HP));
             stats.put(Stats.DAMAGE, unit.getStats().get(Stats.DAMAGE));
             stats.put(Stats.ABILITY_POWER, unit.getStats().get(Stats.ABILITY_POWER));

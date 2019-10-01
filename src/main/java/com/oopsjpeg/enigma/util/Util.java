@@ -48,8 +48,7 @@ public class Util {
     }
 
     public static String percent(float x) {
-        int a = Math.round(x);
-        return (x - a > 0 ? x : a) + "%";
+        return Math.round(x * 100) + "%";
     }
 
     public static float limit(float x, float min, float max) {
