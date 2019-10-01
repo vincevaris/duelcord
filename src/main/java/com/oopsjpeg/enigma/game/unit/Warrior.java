@@ -16,7 +16,7 @@ public class Warrior extends Unit {
 
     public static final String NAME = "Warrior";
     public static final String DESC = "Every **" + BONUS_MAX + "rd** attack deals **" + Util.percent(BONUS_DAMAGE) + "** bonus damage."
-            + "\nUsing `>bash` destroys shields and deals **" + Util.percent(BASH_DAMAGE) + "** of base damage."
+            + "\nUsing `>bash` destroys shields then deals **" + Util.percent(BASH_DAMAGE) + "** of base damage."
             + "\nBash counts towards stacks of bonus damages, but does not proc it.";
     public static final Color COLOR = Color.CYAN;
     public static final Stats STATS = new Stats()
@@ -75,7 +75,7 @@ public class Warrior extends Unit {
     @Override
     public DamageEvent onBasicAttack(DamageEvent event) {
         if (bonus.stack()) {
-            event.bonus += event.actor.getStats().get(Stats.DAMAGE) * 0.3f;
+            event.bonus += event.actor.getStats().get(Stats.DAMAGE) * BONUS_DAMAGE;
             bonus.reset();
         }
         return event;

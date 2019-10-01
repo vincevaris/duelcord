@@ -410,7 +410,7 @@ public class Game {
 
                     DamageEvent event = new DamageEvent(Game.this, actor, target);
 
-                    event.damage = actor.stats.get(Stats.DAMAGE) * 0.5f;
+                    event.damage = actor.stats.get(Stats.DAMAGE) * Warrior.BASH_DAMAGE;
                     if (event.target.stats.get(Stats.SHIELD) > 0)
                         event.target.stats.put(Stats.SHIELD, 0.01f);
 
