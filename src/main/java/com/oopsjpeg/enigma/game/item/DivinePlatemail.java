@@ -1,17 +1,17 @@
 package com.oopsjpeg.enigma.game.item;
 
 import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.effect.Surmount;
+import com.oopsjpeg.enigma.game.effect.Divinity;
 import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.game.obj.Item;
 
-public class ViktorsScythe extends Item {
-    public static final String NAME = "Viktor's Scythe";
-    public static final int COST = 1275;
+public class DivinePlatemail extends Item {
+    public static final String NAME = "Divine Platemail";
+    public static final int COST = 475;
     public static final Stats STATS = new Stats()
-            .put(Stats.DAMAGE, 16);
-    public static final Effect[] EFFECTS = new Effect[]{new Surmount(0.035f)};
-    public static final Item[] BUILD = new Item[]{new BlackHalberd(), new Hatchet()};
+            .put(Stats.MAX_HP, 30);
+    public static final Effect[] EFFECTS = new Effect[]{new Divinity(0.15f)};
+    public static final Item[] BUILD = new Item[]{new Crystal()};
 
     @Override
     public String getName() {

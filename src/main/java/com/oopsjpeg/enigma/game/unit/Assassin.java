@@ -15,7 +15,7 @@ public class Assassin extends Unit {
     public static final int POTENCY_TURNS = 5;
     public static final float SLASH_DAMAGE = 0.3f;
     public static final float SLASH_AP = 0.2f;
-    public static final int SLASH_MAX = 4;
+    public static final int SLASH_MAX = 3;
     public static final int SILENCE_TURNS = 1;
 
     public static final String NAME = "Assassin";
@@ -23,7 +23,7 @@ public class Assassin extends Unit {
             + " of damage dealt in the last turn is stored as **Potency**."
             + " This can only occur **" + POTENCY_TURNS + "** times until **Potency** is reset."
             + "\n\nUsing `>slash` deals **" + Util.percent(SLASH_DAMAGE) + "** (+" + Util.percent(SLASH_AP) + " AP) of base damage."
-            + " Every **" + SLASH_MAX + "th** slash applies **Silence** for **" + SILENCE_TURNS + "** turn(s) and deals"
+            + " Every **" + SLASH_MAX + "rd** slash applies **Silence** for **" + SILENCE_TURNS + "** turn(s) and deals"
             + " bonus damage equal to the total **Potency**, resetting it as well."
             + "\n\nSlash does not count towards total **Potency**.";
     public static final Color COLOR = Color.BLUE;
