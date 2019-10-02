@@ -2,6 +2,7 @@ package com.oopsjpeg.enigma.game.effect;
 
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
+import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.util.Util;
 
@@ -37,9 +38,9 @@ public class Surmount extends Effect {
     }
 
     @Override
-    public DamageEvent onHit(DamageEvent event) {
+    public DamageEvent onBasicAttack(DamageEvent event) {
         if (firstAtk) {
-            event.damage += power * event.target.getStats().get("max_hp");
+            event.damage += power * event.target.getStats().get(Stats.MAX_HP);
             firstAtk = false;
         }
         return event;
