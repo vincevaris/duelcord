@@ -3,6 +3,7 @@ package com.oopsjpeg.enigma.game.obj;
 import com.oopsjpeg.enigma.game.GameObject;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.unit.*;
+import com.oopsjpeg.enigma.util.Util;
 
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
@@ -18,6 +19,8 @@ public abstract class Unit extends GameObject {
     }
 
     public static Unit fromName(String name) {
+        if (name.equalsIgnoreCase("random"))
+            return values()[Util.RANDOM.nextInt(values().length)];
         for (Unit u : values)
             if (name.equalsIgnoreCase(u.getName()) || (name.length() >= 3
                     && u.getName().toLowerCase().startsWith(name.toLowerCase()))) {

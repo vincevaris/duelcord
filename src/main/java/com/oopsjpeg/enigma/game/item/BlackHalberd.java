@@ -9,7 +9,7 @@ public class BlackHalberd extends Item {
     public static final String NAME = "Black Halberd";
     public static final int COST = 650;
     public static final Stats STATS = new Stats()
-            .put(Stats.DAMAGE, 6);
+            .put(Stats.DAMAGE, 8);
     public static final Effect[] EFFECTS = new Effect[]{new Surmount(0.015f)};
     public static final Item[] BUILD = new Item[]{new Knife()};
 

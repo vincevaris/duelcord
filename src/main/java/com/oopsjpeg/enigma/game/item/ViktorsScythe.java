@@ -9,7 +9,7 @@ public class ViktorsScythe extends Item {
     public static final String NAME = "Viktor's Scythe";
     public static final int COST = 1275;
     public static final Stats STATS = new Stats()
-            .put(Stats.DAMAGE, 16);
+            .put(Stats.DAMAGE, 20);
     public static final Effect[] EFFECTS = new Effect[]{new Surmount(0.035f)};
     public static final Item[] BUILD = new Item[]{new BlackHalberd(), new Hatchet()};
 

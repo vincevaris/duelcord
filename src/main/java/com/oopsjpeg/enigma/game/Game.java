@@ -84,8 +84,8 @@ public class Game {
         }
 
         if (turnCount >= 1 && gameState == 1 && curMember.stats.get(Stats.ENERGY) > 0 && !curMember.hasData(Silence.class)) {
-            curMember.defend = 1;
-            output.add(Emote.SHIELD + "**" + curMember.getUsername() + "** is defending (**20%** damage reduction, **"
+            curMember.defensive = true;
+            output.add(Emote.SHIELD + "**" + curMember.getUsername() + "** is defending (**20%** resistance, **"
                     + (curMember.perTurn.getInt(Stats.HP) * 2) + "** HP/t)!");
             output.add(curMember.unit.onDefend(curMember));
         }
@@ -115,12 +115,12 @@ public class Game {
 
             curMember = getAlive().get(curTurn);
 
-            curMember.stats.add(Stats.HP, curMember.perTurn.get(Stats.HP) * (1 + curMember.defend));
+            curMember.stats.add(Stats.HP, curMember.perTurn.get(Stats.HP) * (curMember.defensive ? 2 : 1));
             curMember.stats.add(Stats.GOLD, Math.round(125 + turnCount));
             curMember.stats.put(Stats.ENERGY, curMember.unit.getStats().get(Stats.ENERGY));
             curMember.stats.add(Stats.ENERGY, curMember.perTurn.get(Stats.ENERGY));
             curMember.stats.put(Stats.SHIELD, 0);
-            curMember.defend = 0;
+            curMember.defensive = false;
 
             if (turnCount == 0) {
                 output.add("[**" + curMember.getMention() + ", you have the first turn!**]\n"
@@ -295,7 +295,7 @@ public class Game {
                 }
 
             if (actor.stats.get(Stats.GOLD) < cost)
-                Util.sendFailure(channel, "You need **" + (cost - actor.stats.getInt(Stats.GOLD))
+                Util.sendFailure(channel, "You need **" + ((int) Math.ceil(cost - actor.stats.getInt(Stats.GOLD)))
                         + "** more gold for a(n) **" + item.getName() + "**.");
             else if (build.size() >= 4)
                 Util.sendFailure(channel, "You do not have enough inventory space for a(n) **" + item.getName() + "**.");
@@ -411,6 +411,8 @@ public class Game {
 
                     DamageEvent event = new DamageEvent(Game.this, actor, target);
 
+                    event.target.defensive = false;
+                    event.target.getStats().put(Stats.RESIST, 0);
                     event.damage = actor.stats.get(Stats.DAMAGE) * Warrior.BASH_DAMAGE;
                     if (event.target.stats.get(Stats.SHIELD) > 0)
                         event.target.stats.put(Stats.SHIELD, 0.01f);
@@ -437,21 +439,24 @@ public class Game {
                 Util.sendFailure(channel, "You cannot **Rage** while silenced.");
             else {
                 Berserker be = (Berserker) actor.unit;
-                float stack = Berserker.BONUS_DAMAGE + (actor.stats.get(Stats.ABILITY_POWER) / (Berserker.BONUS_AP * 100));
+                if (be.getRage().getCur() == 0)
+                    Util.sendFailure(channel, "You cannot **Rage** without any stacks.");
+                else {
+                    float stack = Berserker.BONUS_DAMAGE + (actor.stats.get(Stats.ABILITY_POWER) / (Berserker.BONUS_AP * 100));
 
-                be.setBonus(stack * be.getRage().getCur());
+                    be.setBonus(stack * be.getRage().getCur());
 
-                if (be.getRage().getCur() == Berserker.RAGE_MAX)
-                    actor.stats.add(Stats.ENERGY, 100);
+                    if (be.getRage().getCur() == Berserker.RAGE_MAX)
+                        actor.stats.add(Stats.ENERGY, 100);
 
-                channel.createMessage(Emote.RAGE + "**" + actor.getUsername() + "** has gained **"
-                        + Util.percent(be.getBonus()) + "** bonus damage "
-                        + (be.getRage().getCur() == Berserker.RAGE_MAX ? "and **100** energy " : "")
-                        + "this turn!").block();
+                    channel.createMessage(Emote.RAGE + "**" + actor.getUsername() + "** has gained **"
+                            + Util.percent(be.getBonus()) + "** bonus damage "
+                            + (be.getRage().getCur() == Berserker.RAGE_MAX ? "and **100** energy " : "")
+                            + "this turn!").block();
 
-                be.getRage().reset();
-
-                return true;
+                    be.getRage().reset();
+                    return true;
+                }
             }
             return false;
         }
@@ -589,7 +594,7 @@ public class Game {
         private Player player;
         private Unit unit;
         private boolean alive = true;
-        private int defend = 0;
+        private boolean defensive = false;
 
         private List<GameObject> data = new ArrayList<>();
         private List<Item> shields = new ArrayList<>();
@@ -627,12 +632,16 @@ public class Game {
             return alive;
         }
 
-        public int getDefend() {
-            return defend;
+        public void setAlive(boolean alive) {
+            this.alive = alive;
         }
 
-        public void setDefend(int defend) {
-            this.defend = defend;
+        public boolean isDefensive() {
+            return defensive;
+        }
+
+        public void setDefensive(boolean defensive) {
+            this.defensive = defensive;
         }
 
         public List<GameObject> getData() {
@@ -701,6 +710,7 @@ public class Game {
             stats.put(Stats.CRIT_CHANCE, unit.getStats().get(Stats.CRIT_CHANCE));
             stats.put(Stats.CRIT_DAMAGE, unit.getStats().get(Stats.CRIT_DAMAGE));
             stats.put(Stats.LIFE_STEAL, unit.getStats().get(Stats.LIFE_STEAL));
+            stats.put(Stats.RESIST, unit.getStats().get(Stats.RESIST));
             perTurn.put(Stats.HP, unit.getPerTurn().get(Stats.HP));
             perTurn.put(Stats.GOLD, unit.getPerTurn().get(Stats.GOLD));
             perTurn.put(Stats.ENERGY, unit.getPerTurn().get(Stats.ENERGY));
@@ -830,11 +840,9 @@ public class Game {
             for (GameObject o : event.actor.data) event = o.onDamage(event);
             for (GameObject o : event.target.data) event = o.wasDamaged(event);
 
-            // Defensive stance damage reduction
-            if (event.target.defend == 1) {
-                event.damage *= 0.8f;
-                event.bonus *= 0.8f;
-            }
+            float defend = defensive ? 0.2f : 0;
+            event.damage *= 1 - event.target.getStats().get(Stats.RESIST) - defend;
+            event.bonus *= 1 - event.target.getStats().get(Stats.RESIST) - defend;
 
             // Shield damaging
             if (event.target.stats.get(Stats.SHIELD) > 0) {

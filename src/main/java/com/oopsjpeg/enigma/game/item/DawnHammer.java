@@ -14,7 +14,7 @@ public class DawnHammer extends Item {
             .put(Stats.ENERGY, 25)), new DawnShield()};
     public static final Stats STATS = new Stats()
             .put(Stats.DAMAGE, 10)
-            .put(Stats.MAX_HP, 75);
+            .put(Stats.MAX_HP, 100);
 
     public String getName() {
         return NAME;

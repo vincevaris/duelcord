@@ -17,6 +17,7 @@ public class Stats {
     public static String CRIT_CHANCE = "crit_chance";
     public static String CRIT_DAMAGE = "crit_damage";
     public static String LIFE_STEAL = "life_steal";
+    public static String RESIST = "resist";
 
     private Map<String, Float> values = new HashMap<>();
 
@@ -31,6 +32,7 @@ public class Stats {
         values.put(CRIT_CHANCE, 0.0f);
         values.put(CRIT_DAMAGE, 0.0f);
         values.put(LIFE_STEAL, 0.0f);
+        values.put(RESIST, 0.0f);
     }
 
     public Stats(Stats other) {
@@ -93,6 +95,7 @@ public class Stats {
         values.put(DAMAGE, Math.max(0, values.get(DAMAGE)));
         values.put(ABILITY_POWER, Math.max(0, values.get(ABILITY_POWER)));
         values.put(CRIT_CHANCE, Util.limit(values.get(CRIT_CHANCE), 0, 1));
+        values.put(RESIST, Util.limit(values.get(RESIST), 0, 0.8f));
 
         return this;
     }
