@@ -488,7 +488,6 @@ public class Game {
                     if (au.getSlash().stack()) {
                         event.damage += au.getPotencyTotal();
                         event.output.add(target.buff(new Silence(actor, Assassin.SILENCE_TURNS)));
-                        au.setSlashed(false);
                         au.getSlash().reset();
                         au.getPotency().reset();
                         au.setPotencyTotal(0);
