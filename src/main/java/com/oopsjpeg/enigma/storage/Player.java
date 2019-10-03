@@ -13,6 +13,7 @@ public class Player {
     private final long id;
     private transient GameMode queueMode;
     private transient Game game;
+    private int gems;
     private int wins;
     private int losses;
 
@@ -64,6 +65,22 @@ public class Player {
 
     public void removeGame() {
         setGame(null);
+    }
+
+    public int getGems() {
+        return gems;
+    }
+
+    public void setGems(int gems) {
+        this.gems = gems;
+    }
+
+    public void addGems(int gems) {
+        this.gems =+ gems;
+    }
+
+    public void removeGems(int gems) {
+        this.gems -= gems;
     }
 
     public int getWins() {

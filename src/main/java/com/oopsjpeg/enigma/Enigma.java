@@ -175,16 +175,21 @@ public class Enigma {
     }
 
     public void endGame(Game game) {
-        if (game.getTurnCount() > 5) {
+        if (game.getTurnCount() > 7) {
             Game.Member winner = game.getAlive().get(0);
+            // Winner
             winner.getPlayer().win();
+            winner.getPlayer().addGems(Util.limit((game.getTurnCount() / 2) + Util.nextInt(30, 50), 40, 75));
             mongo.savePlayer(winner.getPlayer());
+            // Losers
             game.getDead().forEach(m -> {
                 m.getPlayer().lose();
+                m.getPlayer().addGems(Util.limit((game.getTurnCount() / 2) + Util.nextInt(0, 20), 5, 40));
                 mongo.savePlayer(m.getPlayer());
             });
-            LocalDateTime now = LocalDateTime.now();
+            // Send embed
             getLogChannel().createEmbed(e -> {
+                LocalDateTime now = LocalDateTime.now();
                 e.setColor(Color.YELLOW);
                 e.setAuthor("Victory by " + winner.getUsername() + " on " + game.getMode().getName(), null, winner.getUser().getAvatarUrl());
                 e.setDescription("Playing as **" + winner.getUnit().getName() + "**."

@@ -19,7 +19,8 @@ public class StatsCommand implements Command {
             Util.sendFailure(channel, "You do not have any stats.");
         else {
             Util.send(channel, author.getUsername() + "'s Stats", "**" + player.getWins() + "**W **"
-                    + player.getLosses() + "**L (**" + Util.percent(player.getWinRate()) + "** WR)");
+                    + player.getLosses() + "**L (**" + Util.percent(player.getWinRate()) + "** WR)"
+                    + "\nGems: **" + player.getGems() + "**");
         }
     }
 
