@@ -3,25 +3,37 @@ package com.oopsjpeg.enigma.storage;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.GameMode;
-import net.dv8tion.jda.api.entities.User;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.util.Snowflake;
 
 import java.util.List;
 
 public class Player {
     private final long id;
-    private GameMode queueMode;
-    private Game game;
+    private transient GameMode queueMode;
+    private transient Game game;
+    private int wins;
+    private int losses;
 
     public Player(long id) {
         this.id = id;
     }
 
-    public long getID() {
+    public long getId() {
         return id;
     }
 
     public User getUser() {
-        return Enigma.getClient().getUserById(id);
+        return Enigma.getInstance().getClient().getUserById(Snowflake.of(id)).block();
+    }
+
+    public Member getMember(Snowflake guildId) {
+        return getUser().asMember(guildId).block();
+    }
+
+    public String getUsername() {
+        return getUser().getUsername();
     }
 
     public GameMode getQueueMode() {
@@ -29,7 +41,7 @@ public class Player {
     }
 
     public List<Player> getQueue() {
-        return Enigma.getQueue(queueMode);
+        return Enigma.getInstance().getQueue(queueMode);
     }
 
     public void setQueue(GameMode mode) {
@@ -54,6 +66,38 @@ public class Player {
         setGame(null);
     }
 
+    public int getWins() {
+        return wins;
+    }
+
+    public void setWins(int wins) {
+        this.wins = wins;
+    }
+
+    public void win() {
+        wins++;
+    }
+
+    public int getLosses() {
+        return losses;
+    }
+
+    public void setLosses(int losses) {
+        this.losses = losses;
+    }
+
+    public void lose() {
+        losses++;
+    }
+
+    public int getTotalGames() {
+        return wins + losses;
+    }
+
+    public float getWinRate() {
+        return getTotalGames() > 0 ? (float) wins / getTotalGames() : 0;
+    }
+
     @Override
     public int hashCode() {
         return getUser().hashCode();
@@ -66,6 +110,6 @@ public class Player {
 
     @Override
     public String toString() {
-        return getUser().getName();
+        return getUser().toString();
     }
 }

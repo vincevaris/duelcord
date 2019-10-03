@@ -10,15 +10,19 @@ import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.game.obj.Item;
 import com.oopsjpeg.enigma.game.obj.Unit;
 import com.oopsjpeg.enigma.game.unit.*;
+import com.oopsjpeg.enigma.listener.CommandListener;
 import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.ChanceBag;
-import com.oopsjpeg.enigma.util.CommandCenter;
 import com.oopsjpeg.enigma.util.Emote;
+import com.oopsjpeg.enigma.util.Settings;
 import com.oopsjpeg.enigma.util.Util;
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.util.Permission;
+import discord4j.core.object.util.PermissionSet;
+import discord4j.core.object.util.Snowflake;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -28,7 +32,7 @@ public class Game {
     private final TextChannel channel;
     private final GameMode mode;
     private final List<Member> members;
-    private final CommandCenter commands;
+    private final CommandListener commands;
 
     private List<Action> actions = new ArrayList<>();
     private LocalDateTime lastAction = LocalDateTime.now();
@@ -40,9 +44,9 @@ public class Game {
     private Member curMember;
 
     public Game(Guild guild, GameMode mode, List<Player> players) {
-        channel = guild.createTextChannel("game").complete();
-        commands = new CommandCenter(Enigma.PREFIX_GAME);
+        channel = guild.createTextChannel(c -> c.setName("game")).block();
 
+        commands = new CommandListener(Enigma.getInstance().getSettings().get(Settings.GAME_PREFIX));
         commands.add(new AttackCommand());
         commands.add(new BarrageCommand());
         commands.add(new BashCommand());
@@ -57,16 +61,13 @@ public class Game {
         commands.add(new SlashCommand());
         commands.add(new StatsCommand());
         commands.add(new UseCommand());
-        Enigma.getClient().addEventListener(commands);
+        Enigma.getInstance().addListener(commands);
 
-        channel.getManager().putPermissionOverride(guild.getPublicRole(),
-                EnumSet.noneOf(Permission.class),
-                EnumSet.of(Permission.MESSAGE_READ)).complete();
-
-        for (Player player : players)
-            channel.getManager().putPermissionOverride(guild.getMember(player.getUser()),
-                    EnumSet.of(Permission.MESSAGE_READ),
-                    EnumSet.noneOf(Permission.class)).complete();
+        Snowflake roleId = guild.getEveryoneRole().block().getId();
+        channel.addRoleOverwrite(roleId, PermissionOverwrite.forRole(roleId,
+                PermissionSet.none(), PermissionSet.of(Permission.VIEW_CHANNEL))).block();
+        players.forEach(p -> channel.addMemberOverwrite(Snowflake.of(p.getId()), PermissionOverwrite.forMember(Snowflake.of(p.getId()),
+                PermissionSet.of(Permission.VIEW_CHANNEL), PermissionSet.none())).block());
 
         this.mode = mode;
         members = players.stream().map(Member::new).collect(Collectors.toList());
@@ -84,7 +85,7 @@ public class Game {
 
         if (turnCount >= 1 && gameState == 1 && curMember.stats.get(Stats.ENERGY) > 0 && !curMember.hasData(Silence.class)) {
             curMember.defend = 1;
-            output.add(Emote.SHIELD + "**" + curMember.getName() + "** is defending (**20%** damage reduction, **"
+            output.add(Emote.SHIELD + "**" + curMember.getUsername() + "** is defending (**20%** damage reduction, **"
                     + (curMember.perTurn.getInt(Stats.HP) * 2) + "** HP/t)!");
             output.add(curMember.unit.onDefend(curMember));
         }
@@ -92,13 +93,13 @@ public class Game {
         if (gameState == 0) {
             curMember = getAlive().get(curTurn);
             if (curTurn == 0) {
-                channel.sendMessage(Emote.ATTACK + "Welcome to **" + mode.getName() + "**! ("
-                        + getPlayers().stream().map(p -> p.getUser().getName()).collect(Collectors.joining(", ")) + ")"
-                        + "\n\n[**" + curMember + ", you have first pick!**]"
-                        + "\nCheck " + Enigma.getUnitsChannel().getAsMention() + " to view available units, then pick with `>pick`.").complete();
+                channel.createMessage(Emote.ATTACK + "Welcome to **" + mode.getName() + "**! ("
+                        + getPlayers().stream().map(Player::getUsername).collect(Collectors.joining(", ")) + ")"
+                        + "\n\n[**" + curMember.getMention() + ", you have first pick!**]"
+                        + "\nCheck " + Enigma.getInstance().getUnitsChannel().getMention() + " to view available units, then pick with `>pick`.").block();
             } else {
-                channel.sendMessage("[**" + curMember + ", you have next pick!**]"
-                        + "\nCheck" + Enigma.getUnitsChannel().getAsMention() + " to view available units, then pick with `>pick`.").complete();
+                channel.createMessage("[**" + curMember.getMention() + ", you have next pick!**]"
+                        + "\nCheck" + Enigma.getInstance().getUnitsChannel().getMention() + " to view available units, then pick with `>pick`.").block();
             }
         } else if (gameState == 1) {
             output.addAll(curMember.data.stream()
@@ -107,7 +108,7 @@ public class Game {
 
             curMember.getBuffs().forEach(buff -> {
                 if (buff.turn() == 0) {
-                    output.add(Emote.INFO + "**" + curMember.getName() + "'s " + buff.getName() + "** has expired.");
+                    output.add(Emote.INFO + "**" + curMember.getUsername() + "'s " + buff.getName() + "** has expired.");
                     curMember.data.remove(buff);
                 }
             });
@@ -122,11 +123,11 @@ public class Game {
             curMember.defend = 0;
 
             if (turnCount == 0) {
-                output.add("[**" + curMember + ", you have the first turn!**]\n"
+                output.add("[**" + curMember.getMention() + ", you have the first turn!**]\n"
                         + "Open the channel's description to review your statistics.\n"
-                        + "Check " + Enigma.getItemsChannel().getAsMention() + " to view purchasable items.");
+                        + "Check " + Enigma.getInstance().getItemsChannel().getMention() + " to view purchasable items.");
             } else {
-                output.add("[**" + curMember + ", it's your turn!**]\n"
+                output.add("[**" + curMember.getMention() + ", it's your turn!**]\n"
                         + "Open the channel's description to review your statistics.");
             }
 
@@ -134,11 +135,11 @@ public class Game {
                     .map(e -> e.onTurnStart(curMember))
                     .collect(Collectors.toList()));
             if (curMember.stats.get(Stats.HP) < curMember.stats.get(Stats.MAX_HP) * 0.2f)
-                output.add(Emote.WARN + "**" + curMember.getName() + "** is critically low on health.");
+                output.add(Emote.WARN + "**" + curMember.getUsername() + "** is critically low on health.");
 
             output.removeAll(Arrays.asList(null, ""));
 
-            channel.sendMessage(String.join("\n", output)).complete();
+            channel.createMessage(String.join("\n", output)).block();
 
             turnCount++;
         }
@@ -149,9 +150,9 @@ public class Game {
 
     public void setTopic(Member member) {
         if (gameState == 0) {
-            channel.getManager().setTopic(member + " is picking their unit.").complete();
+            channel.edit(c -> c.setTopic(member.getUsername() + " is picking their unit.")).block();
         } else {
-            channel.getManager().setTopic(member.unit.getName() + " " + member + " (" + turnCount + ") - \n\n"
+            channel.edit(c -> c.setTopic(member.unit.getName() + " " + member.getMention() + " (" + turnCount + ") - \n\n"
                     + "Gold: **" + member.stats.getInt(Stats.GOLD) + "**\n"
                     + "Health: **" + member.stats.getInt(Stats.HP) + " / " + member.stats.getInt(Stats.MAX_HP)
                     + "** (+**" + member.perTurn.getInt(Stats.HP) + "**/t)\n"
@@ -165,7 +166,7 @@ public class Game {
                     + (member.unit instanceof Assassin
                     ? "Slash: **" + ((Assassin) member.unit).getSlash().getCur() + " / " + Assassin.SLASH_MAX + "**\n"
                     + "Potency: **" + Math.round(((Assassin) member.unit).getPotencyTotal()) + "**\n" : "")
-                    + "Items: **" + member.getItems() + "**\n").complete();
+                    + "Items: **" + member.getItems() + "**\n")).block();
         }
     }
 
@@ -173,7 +174,7 @@ public class Game {
         return channel;
     }
 
-    public CommandCenter getCommands() {
+    public CommandListener getCommandListener() {
         return commands;
     }
 
@@ -222,10 +223,10 @@ public class Game {
     public void notifyAfk() {
         notifyAfk++;
         if (notifyAfk == 4)
-            channel.sendMessage(Emote.WARN + curMember + ", you have around **4** minutes " +
-                    "to make an action, otherwise you will **forfeit due to AFKing**.").complete();
+            channel.createMessage(Emote.WARN + curMember + ", you have around **4** minutes " +
+                    "to make an action, otherwise you will **forfeit due to AFKing**.").block();
         else if (notifyAfk >= 8)
-            channel.sendMessage(curMember.lose()).complete();
+            channel.createMessage(curMember.lose()).block();
     }
 
     public int getGameState() {
@@ -262,9 +263,9 @@ public class Game {
         @Override
         public boolean act(Member actor) {
             if (actor.hasData(Silence.class))
-                Util.sendError(channel, "You cannot attack while silenced.");
+                Util.sendFailure(channel, "You cannot attack while silenced.");
             else {
-                channel.sendMessage(actor.damage(actor.basicAttack(target), Emote.ATTACK, "damaged")).complete();
+                channel.createMessage(actor.damage(actor.basicAttack(target), Emote.ATTACK, "damaged")).block();
                 return true;
             }
             return false;
@@ -294,10 +295,10 @@ public class Game {
                 }
 
             if (actor.stats.get(Stats.GOLD) < cost)
-                Util.sendError(channel, "You need **" + (cost - actor.stats.getInt(Stats.GOLD))
+                Util.sendFailure(channel, "You need **" + (cost - actor.stats.getInt(Stats.GOLD))
                         + "** more gold for a(n) **" + item.getName() + "**.");
             else if (build.size() >= 4)
-                Util.sendError(channel, "You do not have enough inventory space for a(n) **" + item.getName() + "**.");
+                Util.sendFailure(channel, "You do not have enough inventory space for a(n) **" + item.getName() + "**.");
             else {
                 List<String> output = new ArrayList<>();
                 actor.stats.sub(Stats.GOLD, cost);
@@ -311,10 +312,10 @@ public class Game {
                     actor.shields.add(item);
                 }
 
-                output.add(0, Emote.BUY + "**" + actor.getName() + "** purchased a(n) **"
+                output.add(0, Emote.BUY + "**" + actor.getUsername() + "** purchased a(n) **"
                         + item.getName() + "** for **" + cost + "** gold.");
 
-                channel.sendMessage(String.join("\n", output)).complete();
+                channel.createMessage(String.join("\n", output)).block();
                 return true;
             }
             return false;
@@ -336,15 +337,15 @@ public class Game {
         @Override
         public boolean act(Member actor) {
             if (!actor.data.contains(item))
-                Util.sendError(channel, "You don't have a(n) **" + item.getName() + "**.");
+                Util.sendFailure(channel, "You don't have a(n) **" + item.getName() + "**.");
             else if (!item.canUse(actor))
-                Util.sendError(channel, "**" + item.getName() + "** can't be used.");
+                Util.sendFailure(channel, "**" + item.getName() + "** can't be used.");
             else if (item.getCooldown() != null && !item.getCooldown().count())
-                Util.sendError(channel, "**" + item.getName() + "** is on cooldown for **" + item.getCooldown().getCur() + "** more turn(s).");
+                Util.sendFailure(channel, "**" + item.getName() + "** is on cooldown for **" + item.getCooldown().getCur() + "** more turn(s).");
             else {
                 if (item.getCooldown() != null) item.getCooldown().start();
-                channel.sendMessage(Emote.USE + "**" + actor.getName() + "** used a(n) **"
-                        + item.getName() + "**.\n" + item.onUse(actor)).complete();
+                channel.createMessage(Emote.USE + "**" + actor.getUsername() + "** used a(n) **"
+                        + item.getName() + "**.\n" + item.onUse(actor)).block();
                 if (item.removeOnUse()) actor.data.remove(item);
                 actor.updateStats();
                 return true;
@@ -368,11 +369,11 @@ public class Game {
         @Override
         public boolean act(Member actor) {
             if (!actor.data.contains(item))
-                Util.sendError(channel, "You don't have a(n) **" + item.getName() + "**.");
+                Util.sendFailure(channel, "You don't have a(n) **" + item.getName() + "**.");
             else {
                 int gold = Math.round(item.getCost() * 0.6f);
-                channel.sendMessage(Emote.BUY + "**" + actor.getName() + "** sold a(n) **"
-                        + item.getName() + "** for **" + gold + "** gold.").complete();
+                channel.createMessage(Emote.BUY + "**" + actor.getUsername() + "** sold a(n) **"
+                        + item.getName() + "** for **" + gold + "** gold.").block();
                 actor.stats.add(Stats.GOLD, gold);
                 actor.data.remove(item);
                 actor.updateStats();
@@ -397,13 +398,13 @@ public class Game {
         @Override
         public boolean act(Member actor) {
             if (!(actor.unit instanceof Warrior))
-                Util.sendError(channel, "You are not playing **Warrior**.");
+                Util.sendFailure(channel, "You are not playing **Warrior**.");
             else if (actor.hasData(Silence.class))
-                Util.sendError(channel, "You cannot **Bash** while silenced.");
+                Util.sendFailure(channel, "You cannot **Bash** while silenced.");
             else {
                 Warrior wu = (Warrior) actor.unit;
                 if (wu.getBash())
-                    Util.sendError(channel, "You can only use **Bash** once per turn.");
+                    Util.sendFailure(channel, "You can only use **Bash** once per turn.");
                 else {
                     wu.setBash(true);
                     wu.getBonus().stack();
@@ -414,7 +415,7 @@ public class Game {
                     if (event.target.stats.get(Stats.SHIELD) > 0)
                         event.target.stats.put(Stats.SHIELD, 0.01f);
 
-                    channel.sendMessage(actor.damage(event, Emote.KNIFE, "bashed")).complete();
+                    channel.createMessage(actor.damage(event, Emote.KNIFE, "bashed")).block();
                     return true;
                 }
             }
@@ -431,9 +432,9 @@ public class Game {
         @Override
         public boolean act(Member actor) {
             if (!(actor.unit instanceof Berserker))
-                Util.sendError(channel, "You are not playing **Berserker**.");
+                Util.sendFailure(channel, "You are not playing **Berserker**.");
             else if (actor.hasData(Silence.class))
-                Util.sendError(channel, "You cannot **Rage** while silenced.");
+                Util.sendFailure(channel, "You cannot **Rage** while silenced.");
             else {
                 Berserker be = (Berserker) actor.unit;
                 float stack = Berserker.BONUS_DAMAGE + (actor.stats.get(Stats.ABILITY_POWER) / (Berserker.BONUS_AP * 100));
@@ -443,10 +444,10 @@ public class Game {
                 if (be.getRage().getCur() == Berserker.RAGE_MAX)
                     actor.stats.add(Stats.ENERGY, 100);
 
-                channel.sendMessage(Emote.RAGE + "**" + actor.getName() + "** has gained **"
+                channel.createMessage(Emote.RAGE + "**" + actor.getUsername() + "** has gained **"
                         + Util.percent(be.getBonus()) + "** bonus damage "
                         + (be.getRage().getCur() == Berserker.RAGE_MAX ? "and **100** energy " : "")
-                        + "this turn!").complete();
+                        + "this turn!").block();
 
                 be.getRage().reset();
 
@@ -471,30 +472,32 @@ public class Game {
         @Override
         public boolean act(Member actor) {
             if (!(actor.unit instanceof Assassin))
-                Util.sendError(channel, "You are not playing **Assassin**.");
+                Util.sendFailure(channel, "You are not playing **Assassin**.");
             else if (actor.hasData(Silence.class))
-                Util.sendError(channel, "You cannot **Slash** while silenced.");
+                Util.sendFailure(channel, "You cannot **Slash** while silenced.");
             else {
                 Assassin au = (Assassin) actor.unit;
                 if (au.getSlashed())
-                    Util.sendError(channel, "You can only use **Slash** once per turn.");
+                    Util.sendFailure(channel, "You can only use **Slash** once per turn.");
                 else {
                     au.setSlashed(true);
 
                     DamageEvent event = new DamageEvent(Game.this, actor, target);
                     event.damage = (actor.stats.get(Stats.DAMAGE) * Assassin.SLASH_DAMAGE) + (actor.stats.get(Stats.ABILITY_POWER) * Assassin.SLASH_AP);
-                    event = event.actor.hit(event);
-                    event = event.actor.crit(event);
 
                     if (au.getSlash().stack()) {
                         event.damage += au.getPotencyTotal();
                         event.output.add(target.buff(new Silence(actor, Assassin.SILENCE_TURNS)));
+                        au.setSlashed(false);
                         au.getSlash().reset();
                         au.getPotency().reset();
                         au.setPotencyTotal(0);
                     }
 
-                    channel.sendMessage(actor.damage(event, Emote.KNIFE, "slashed")).complete();
+                    event = event.actor.hit(event);
+                    event = event.actor.crit(event);
+
+                    channel.createMessage(actor.damage(event, Emote.KNIFE, "slashed")).block();
                     return true;
                 }
             }
@@ -517,16 +520,16 @@ public class Game {
         @Override
         public boolean act(Member actor) {
             if (!(actor.unit instanceof Duelist))
-                Util.sendError(channel, "You are not playing **Duelist**.");
+                Util.sendFailure(channel, "You are not playing **Duelist**.");
             else if (actor.hasData(Silence.class))
-                Util.sendError(channel, "You cannot **Crush** while silenced.");
+                Util.sendFailure(channel, "You cannot **Crush** while silenced.");
             else {
                 Duelist du = (Duelist) actor.unit;
                 if (!du.getCrush().done())
-                    Util.sendError(channel, "**Crush** is on cooldown for **" + du.getCrush().getCur() + "** more turn(s).");
+                    Util.sendFailure(channel, "**Crush** is on cooldown for **" + du.getCrush().getCur() + "** more turn(s).");
                 else {
                     du.getCrush().start();
-                    channel.sendMessage(target.buff(new Weaken(actor, Duelist.CRUSH_TURNS, Duelist.CRUSH_POWER))).complete();
+                    channel.createMessage(target.buff(new Weaken(actor, Duelist.CRUSH_TURNS, Duelist.CRUSH_POWER))).block();
                     return true;
                 }
             }
@@ -549,13 +552,13 @@ public class Game {
         @Override
         public boolean act(Member actor) {
             if (!(actor.unit instanceof Gunslinger))
-                Util.sendError(channel, "You are not playing **Gunslinger**.");
+                Util.sendFailure(channel, "You are not playing **Gunslinger**.");
             else if (actor.hasData(Silence.class))
-                Util.sendError(channel, "You cannot **Barrage** while silenced.");
+                Util.sendFailure(channel, "You cannot **Barrage** while silenced.");
             else {
                 Gunslinger gu = (Gunslinger) actor.unit;
                 if (!gu.getBarrage().done())
-                    Util.sendError(channel, "**Barrage** is on cooldown for **" + gu.getBarrage().getCur() + "** more turn(s).");
+                    Util.sendFailure(channel, "**Barrage** is on cooldown for **" + gu.getBarrage().getCur() + "** more turn(s).");
                 else {
                     gu.getBarrage().start();
 
@@ -568,9 +571,9 @@ public class Game {
                             actor.hit(event);
                             output.add(actor.damage(event, Emote.GUN, "shot"));
                         }
-                    output.add(0, Emote.ATTACK + "**" + actor.getName() + "** used **Barrage**!");
+                    output.add(0, Emote.ATTACK + "**" + actor.getUsername() + "** used **Barrage**!");
 
-                    channel.sendMessage(String.join("\n", output)).complete();
+                    channel.createMessage(String.join("\n", output)).block();
                     return true;
                 }
             }
@@ -613,8 +616,12 @@ public class Game {
             return player.getUser();
         }
 
-        public String getName() {
-            return getUser().getName();
+        public String getUsername() {
+            return getUser().getUsername();
+        }
+
+        public String getMention() {
+            return getUser().getMention();
         }
 
         public boolean isAlive() {
@@ -725,7 +732,7 @@ public class Game {
 
         public void act(Action action) {
             if (stats.get(Stats.ENERGY) < action.getEnergy())
-                Util.sendError(channel, "You do not have **" + action.getEnergy() + "** energy.");
+                Util.sendFailure(channel, "You do not have **" + action.getEnergy() + "** energy.");
             else if (action.execute(this)) {
                 Game.this.actions.add(action);
                 stats.sub(Stats.ENERGY, action.getEnergy());
@@ -746,18 +753,18 @@ public class Game {
                 if (buff.getPower() > oldBuff.getPower()) {
                     data.remove(oldBuff);
                     data.add(buff);
-                    return Emote.DEBUFF + "**" + buff.getSource() + "** applied **" + buff.getName() + "** for **" + buff.getTurns() + "** turn(s)!";
+                    return Emote.DEBUFF + "**" + buff.getSource().getUsername() + "** applied **" + buff.getName() + "** for **" + buff.getTurns() + "** turn(s)!";
                 }
                 return "";
             }
 
             data.add(buff);
-            return Emote.DEBUFF + "**" + buff.getSource() + "** applied **" + buff.getName() + "** for **" + buff.getTurns() + "** turn(s)!";
+            return Emote.DEBUFF + "**" + buff.getSource().getUsername() + "** applied **" + buff.getName() + "** for **" + buff.getTurns() + "** turn(s)!";
         }
 
         public String shield(float amount) {
             stats.add(Stats.SHIELD, amount);
-            return Emote.HEAL + "**" + getName() + "** shielded by **" + Math.round(amount)
+            return Emote.HEAL + "**" + getUsername() + "** shielded by **" + Math.round(amount)
                     + "**! [**" + stats.getInt(Stats.SHIELD) + "**]";
         }
 
@@ -768,7 +775,7 @@ public class Game {
         public String heal(float amount, String source) {
             amount *= 1 - (hasData(Wound.class) ? ((Wound) getData(Wound.class)).getPower() : 0);
             stats.add(Stats.HP, amount);
-            return Emote.HEAL + "**" + getName() + "** healed by **" + Math.round(amount) + "**! [**"
+            return Emote.HEAL + "**" + getUsername() + "** healed by **" + Math.round(amount) + "**! [**"
                     + stats.getInt(Stats.HP) + " / " + stats.getInt(Stats.MAX_HP) + "**]" + (source.isEmpty() ? "" : " (" + source + ")");
         }
 
@@ -817,7 +824,7 @@ public class Game {
         }
 
         public String damage(DamageEvent event, String emote, String action) {
-            return damage(event, event.actor.getName(), emote, action);
+            return damage(event, event.actor.getUsername(), emote, action);
         }
 
         public String damage(DamageEvent event, String actor, String emote, String action) {
@@ -845,14 +852,14 @@ public class Game {
                 }
 
                 if (event.target.stats.get(Stats.SHIELD) > 0)
-                    event.output.add(0, Util.damageText(event, actor, event.target.getName() + "'s Shield", emote, action));
+                    event.output.add(0, Util.damageText(event, actor, event.target.getUsername() + "'s Shield", emote, action));
                 else
-                    event.output.add(0, Emote.SHIELD + "**" + actor + "** destroyed **" + event.target.getName() + "'s Shield**!");
+                    event.output.add(0, Emote.SHIELD + "**" + actor + "** destroyed **" + event.target.getUsername() + "'s Shield**!");
             }
 
             if (event.target.stats.get(Stats.SHIELD) <= 0 && event.total() > 0) {
                 event.target.stats.sub(Stats.HP, event.total());
-                event.output.add(0, Util.damageText(event, actor, event.target.getName(), emote, action));
+                event.output.add(0, Util.damageText(event, actor, event.target.getUsername(), emote, action));
                 if (event.target.stats.get(Stats.HP) <= 0)
                     event.output.add(event.target.lose());
             }
@@ -863,13 +870,13 @@ public class Game {
         }
 
         public String win() {
-            Enigma.endGame(Game.this);
-            return Emote.TROPHY + getUser().getAsMention() + ", you have won the game!\n";
+            Enigma.getInstance().endGame(Game.this);
+            return Emote.TROPHY + getUser().getMention() + ", you have won the game!\n";
         }
 
         public String lose() {
             List<String> output = new ArrayList<>();
-            output.add(Emote.SKULL + getUser().getAsMention() + " has been slain and removed from the game!");
+            output.add(Emote.SKULL + getUser().getMention() + " has been slain and removed from the game!");
 
             alive = false;
 
@@ -884,7 +891,7 @@ public class Game {
 
         @Override
         public String toString() {
-            return getUser().getAsMention();
+            return getPlayer().toString();
         }
     }
 }

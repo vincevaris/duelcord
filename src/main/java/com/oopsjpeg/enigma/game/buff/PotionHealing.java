@@ -1,6 +1,7 @@
 package com.oopsjpeg.enigma.game.buff;
 
 import com.oopsjpeg.enigma.game.Game;
+import com.oopsjpeg.enigma.game.item.Potion;
 import com.oopsjpeg.enigma.game.obj.Buff;
 
 public class PotionHealing extends Buff {
@@ -10,7 +11,7 @@ public class PotionHealing extends Buff {
 
     @Override
     public String onTurnStart(Game.Member member) {
-        return member.heal(80, "Potion");
+        return member.heal(Potion.HEAL / Potion.TURNS, "Potion");
     }
 
     @Override

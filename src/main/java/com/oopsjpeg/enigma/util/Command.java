@@ -1,9 +1,7 @@
 package com.oopsjpeg.enigma.util;
 
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Message;
-
-import java.util.EnumSet;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.util.PermissionSet;
 
 public interface Command {
     void execute(Message message, String alias, String[] args);
@@ -14,7 +12,7 @@ public interface Command {
         return new String[0];
     }
 
-    default EnumSet<Permission> getPermissions() {
-        return EnumSet.noneOf(Permission.class);
+    default PermissionSet getPermissions() {
+        return PermissionSet.none();
     }
 }

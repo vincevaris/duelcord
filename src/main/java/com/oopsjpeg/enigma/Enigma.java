@@ -1,143 +1,147 @@
 package com.oopsjpeg.enigma;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.oopsjpeg.enigma.commands.BuildCommand;
-import com.oopsjpeg.enigma.commands.PatchCommand;
 import com.oopsjpeg.enigma.commands.QueueCommand;
+import com.oopsjpeg.enigma.commands.StatsCommand;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.GameMode;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Item;
 import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.listener.CommandListener;
+import com.oopsjpeg.enigma.listener.ReadyListener;
 import com.oopsjpeg.enigma.storage.Player;
-import com.oopsjpeg.enigma.util.CommandCenter;
-import com.oopsjpeg.enigma.util.Emote;
-import com.oopsjpeg.enigma.util.Util;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.ReadyEvent;
-import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
-import net.dv8tion.jda.api.hooks.SubscribeEvent;
+import com.oopsjpeg.enigma.util.*;
+import discord4j.core.DiscordClient;
+import discord4j.core.DiscordClientBuilder;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.util.Snowflake;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.security.auth.login.LoginException;
 import java.awt.*;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class Enigma {
-    public static final ScheduledExecutorService SCHEDULER = new ScheduledThreadPoolExecutor(2);
-    public static final String PREFIX_ALL = ".";
-    public static final String PREFIX_GAME = ">";
+    public static final Logger LOGGER = LoggerFactory.getLogger(Enigma.class);
+    public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    public static final ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() + 1);
 
-    private static JDA client;
-    private static CommandCenter commands = new CommandCenter(PREFIX_ALL);
-    private static List<Game> games = new ArrayList<>();
-    private static Map<Long, Player> players = new HashMap<>();
-    private static Map<GameMode, ArrayList<Player>> queues = new HashMap<>();
+    private static Enigma instance;
 
-    private static String guildId;
-    private static String mmChannelId;
-    private static String unitsChannelId;
-    private static String itemsChannelId;
-    private static String logChannelId;
+    private MongoManager mongo;
+    private DiscordClient client;
+    private Settings settings = new Settings(getSettingsFile());
+    private List<Listener> listeners = new ArrayList<>();
 
-    private static Guild guild;
-    private static TextChannel mmChannel;
-    private static TextChannel unitsChannel;
-    private static TextChannel itemsChannel;
-    private static TextChannel logChannel;
+    private CommandListener commands;
+    private List<Game> games = new ArrayList<>();
+    private Map<Long, Player> players = new HashMap<>();
+    private Map<GameMode, ArrayList<Player>> queues = new HashMap<>();
 
-    public static void main(String[] args) throws IOException, LoginException {
-        File f = new File("config.ini");
-        Properties p = new Properties();
+    public static Enigma getInstance() {
+        return instance;
+    }
 
-        if (!f.exists()) try (FileWriter fw = new FileWriter(f)) {
-            p.setProperty("token", "");
-            p.setProperty("guild_id", "");
-            p.setProperty("mm_channel_id", "");
-            p.setProperty("units_channel_id", "");
-            p.setProperty("items_channel_id", "");
-            p.setProperty("log_channel_id", "");
-            p.store(fw, "Enigma config");
-            System.out.println("Please setup your configuration file.");
+    public static String getSettingsFile() {
+        return "settings.ini";
+    }
+
+    public static void main(String[] args) {
+        instance = new Enigma();
+        instance.start();
+    }
+
+    private void start() {
+        try {
+            if (!new File(settings.getFile()).exists()) {
+                // Create settings if it doesn't exist
+                settings.save();
+                LOGGER.info("Created new settings. Please configure it.");
+            } else {
+                // Load settings
+                settings.load();
+                LOGGER.info("Loaded settings.");
+
+                // Create mongo manager
+                mongo = new MongoManager(settings.get(Settings.MONGO_HOST), settings.get(Settings.MONGO_DATABASE));
+                mongo.loadPlayers();
+
+                // Create discord client
+                client = new DiscordClientBuilder(settings.get(Settings.TOKEN)).build();
+
+                // Create command listener
+                commands = new CommandListener(settings.get(Settings.MAIN_PREFIX));
+
+                // Add listeners
+                addListener(new ReadyListener());
+                addListener(commands);
+
+                // Add commands
+                commands.add(new BuildCommand());
+                commands.add(new QueueCommand());
+                commands.add(new StatsCommand());
+
+                // Log in client
+                client.login().block();
+            }
+        } catch (IOException error) {
+            error.printStackTrace();
         }
-        else try (FileReader fr = new FileReader("config.ini")) {
-            p.load(fr);
-            guildId = p.getProperty("guild_id");
-            mmChannelId = p.getProperty("mm_channel_id");
-            unitsChannelId = p.getProperty("units_channel_id");
-            itemsChannelId = p.getProperty("items_channel_id");
-            logChannelId = p.getProperty("log_channel_id");
-
-            client = new JDABuilder(p.getProperty("token")).build();
-            client.setEventManager(new AnnotatedEventManager());
-            client.addEventListener(commands);
-            client.addEventListener(new Enigma());
-        }
     }
 
-    public static JDA getClient() {
-        return client;
+    public void addListener(Listener listener) {
+        listener.register(client);
+        listeners.add(listener);
+        LOGGER.info("Added new listener of class '" + listener.getClass().getName() + "'.");
     }
 
-    private static void buildCommands() {
-        commands.clear();
-        commands.add(new BuildCommand());
-        commands.add(new PatchCommand());
-        commands.add(new QueueCommand());
+    public void removeListener(Listener listener) {
+        listeners.remove(listener);
+        LOGGER.info("Removed listener of class '" + listener.getClass().getName() + "'.");
     }
 
-    public static List<Game> getGames() {
-        return games;
+    public Command getCommand(String alias) {
+        return commands.stream().filter(c -> c.getName().equalsIgnoreCase(alias) || Arrays.stream(c.getAliases()).anyMatch(a -> a.equalsIgnoreCase(alias))).findAny().orElse(null);
     }
 
-    public static void endGame(Game game) {
-        if (game.getTurnCount() > 5) {
-            Game.Member winner = game.getAlive().get(0);
-            LocalDateTime now = LocalDateTime.now();
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setColor(Color.YELLOW);
-            builder.setAuthor("Victory by " + winner.getName() + " on " + game.getMode().getName(), null, winner.getUser().getAvatarUrl());
-            builder.appendDescription("Playing as **" + winner.getUnit().getName() + "**.\n");
-            builder.appendDescription("Opponent(s): " + game.getDead().stream().map(Game.Member::getName).collect(Collectors.joining(", ")));
-            builder.appendDescription("\n**" + game.getTurnCount() + "** total turns and **" + game.getActions().size() + "** total actions.");
-            builder.setFooter(now.getYear() + "/" + now.getMonthValue() + "/" + now.getDayOfMonth());
-            logChannel.sendMessage(builder.build()).complete();
-        }
-
-        game.getPlayers().forEach(Player::removeGame);
-        client.removeEventListener(game.getCommands());
-        games.remove(game);
-        SCHEDULER.schedule(() -> {
-            game.getChannel().delete().complete();
-        }, 2, TimeUnit.MINUTES);
+    public Player getPlayer(long id) {
+        if (!players.containsKey(id)) registerPlayer(id);
+        return players.getOrDefault(id, null);
     }
 
-    public static Player getPlayer(User user) {
-        if (!players.containsKey(user.getIdLong()))
-            players.put(user.getIdLong(), new Player(user.getIdLong()));
-        return players.get(user.getIdLong());
+    public Player getPlayer(User user) {
+        return getPlayer(user.getId().asLong());
     }
 
-    public static List<Player> getQueue(GameMode mode) {
+    public boolean hasPlayer(User user) {
+        return players.containsKey(user.getId().asLong());
+    }
+
+    public Player registerPlayer(long id) {
+        players.put(id, new Player(id));
+        return getPlayer(id);
+    }
+
+    public List<Player> getQueue(GameMode mode) {
         if (!queues.containsKey(mode))
             queues.put(mode, new ArrayList<>());
         return queues.get(mode);
     }
 
-    private static void refreshQueues() {
+    public void refreshQueues() {
         // Loops queues for each game mode
         for (Map.Entry<GameMode, ArrayList<Player>> queue : queues.entrySet()) {
             GameMode mode = queue.getKey();
@@ -150,7 +154,7 @@ public class Enigma {
 
                 // Create the match
                 if (matched.size() >= mode.getSize()) {
-                    Game game = new Game(guild, mode, matched);
+                    Game game = new Game(getGuild(), mode, matched);
 
                     games.add(game);
                     matched.forEach(p -> {
@@ -160,9 +164,9 @@ public class Enigma {
                     });
                     queues.get(mode).removeAll(matched);
 
-                    mmChannel.sendMessage(Emote.INFO + "**" + mode.getName() + "** has been found for "
-                            + game.getUsers().stream().map(User::getName).collect(Collectors.joining(", ")) + "\n"
-                            + "Go to " + game.getChannel().getAsMention() + " to play the game!").complete();
+                    Util.send(getMatchmakingChannel(), "**" + mode.getName() + "** has been found for "
+                            + game.getUsers().stream().map(User::getUsername).collect(Collectors.joining(", ")),
+                            "Go to " + game.getChannel().getMention() + " to play the game!");
 
                     break;
                 }
@@ -170,71 +174,109 @@ public class Enigma {
         }
     }
 
-    public static TextChannel getUnitsChannel() {
-        return unitsChannel;
+    public void endGame(Game game) {
+        if (game.getTurnCount() > 5) {
+            Game.Member winner = game.getAlive().get(0);
+            winner.getPlayer().win();
+            mongo.savePlayer(winner.getPlayer());
+            game.getDead().forEach(m -> {
+                m.getPlayer().lose();
+                mongo.savePlayer(m.getPlayer());
+            });
+            LocalDateTime now = LocalDateTime.now();
+            getLogChannel().createEmbed(e -> {
+                e.setColor(Color.YELLOW);
+                e.setAuthor("Victory by " + winner.getUsername() + " on " + game.getMode().getName(), null, winner.getUser().getAvatarUrl());
+                e.setDescription("Playing as **" + winner.getUnit().getName() + "**."
+                        + "\nOpponent(s): " + game.getDead().stream().map(Game.Member::getUsername).collect(Collectors.joining(", "))
+                        + "\n**" + game.getTurnCount() + "** total turns and **" + game.getActions().size() + "** total actions."
+                        + "\n**" + winner.getPlayer().getWins() + "** total win(s).");
+                e.setFooter(now.getYear() + "/" + now.getMonthValue() + "/" + now.getDayOfMonth(), null);
+            }).block();
+        }
+
+        game.getPlayers().forEach(Player::removeGame);
+        listeners.remove(game.getCommandListener());
+        games.remove(game);
+        SCHEDULER.schedule(() -> game.getChannel().delete().block(), 2, TimeUnit.MINUTES);
     }
 
-    public static void buildUnitsChannel() {
+    public void buildUnitsChannel() {
         System.out.println("Building units channel.");
-        Arrays.stream(Unit.values()).map(u -> {
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setTitle(u.getName());
-            builder.setColor(u.getColor());
-            builder.appendDescription("Health: **" + u.getStats().getInt(Stats.MAX_HP) + "** (+**"
-                    + u.getPerTurn().getInt(Stats.HP) + "**/turn)\n");
-            builder.appendDescription("Damage: **" + u.getStats().getInt(Stats.DAMAGE) + "**\n");
-            builder.appendDescription("Energy: **" + u.getStats().getInt(Stats.ENERGY) + "**\n");
+        Arrays.stream(Unit.values()).forEach(u -> getUnitsChannel().createEmbed(e -> {
+            e.setTitle(u.getName());
+            e.setColor(u.getColor());
+            String desc = "Health: **" + u.getStats().getInt(Stats.MAX_HP) + "** (+**" + u.getPerTurn().getInt(Stats.HP) + "**/turn)"
+                    + "\nDamage: **" + u.getStats().getInt(Stats.DAMAGE) + "**"
+                    + "\nEnergy: **" + u.getStats().getInt(Stats.ENERGY) + "**";
             if (u.getStats().get(Stats.CRIT_CHANCE) > 0)
-                builder.appendDescription("Critical Chance: **" + Util.percent(u.getStats().get(Stats.CRIT_CHANCE)) + "**\n");
+                desc += "\nCritical Chance: **" + Util.percent(u.getStats().get(Stats.CRIT_CHANCE)) + "**";
             if (u.getStats().get(Stats.LIFE_STEAL) > 0)
-                builder.appendDescription("Life Steal: **" + Util.percent(u.getStats().get(Stats.LIFE_STEAL)) + "**\n");
-            builder.addField("Passives / Abilities", u.getDesc(), false);
-            return builder.build();
-        }).forEach(b -> unitsChannel.sendMessage(b).complete());
+                desc += "\nLife Steal: **" + Util.percent(u.getStats().get(Stats.LIFE_STEAL)) + "**";
+            e.setDescription(desc);
+            e.addField("Passives / Abilities", u.getDesc(), false);
+        }).block());
     }
 
-    public static TextChannel getItemsChannel() {
-        return itemsChannel;
-    }
-
-    public static void buildItemsChannel() {
+    public void buildItemsChannel() {
         System.out.println("Building items channel.");
-        Arrays.stream(Item.values()).sorted(Comparator.comparingInt(Item::getCost)).map(i -> {
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setTitle(i.getName() + " (" + i.getCost() + "g)");
-            builder.setColor(Color.CYAN);
-            builder.appendDescription(i.getDesc() + "\n\n");
-            builder.appendDescription(Util.formatStats(i.getStats()) + "\n");
-            builder.appendDescription(Util.formatPerTurn(i.getPerTurn()));
+        Arrays.stream(Item.values()).sorted(Comparator.comparingInt(Item::getCost)).forEach(i -> getItemsChannel().createEmbed(e -> {
+            e.setTitle(i.getName() + " (" + i.getCost() + "g)");
+            e.setColor(Color.CYAN);
+            e.setDescription(i.getDesc() + "\n\n"
+                    + "\n\n" + Util.formatStats(i.getStats())
+                    + "\n" + Util.formatPerTurn(i.getPerTurn()));
             if (i.getEffects() != null && i.getEffects().length > 0)
-                builder.addField("Unique Effects", Arrays.stream(i.getEffects())
-                        .map(e -> "**" + e.getName() + "**: " + e.getDesc())
+                e.addField("Unique Effects", Arrays.stream(i.getEffects())
+                        .map(ef -> "**" + ef.getName() + "**: " + ef.getDesc())
                         .collect(Collectors.joining("\n")), false);
             if (i.getBuild() != null && i.getBuild().length > 0)
-                builder.addField("Build", Arrays.stream(i.getBuild())
-                        .map(Item::getName).collect(Collectors.joining("\n")), false);
-            return builder.build();
-        }).forEach(b -> itemsChannel.sendMessage(b).complete());
+                e.addField("Build", Arrays.stream(i.getBuild())
+                        .map(Item::getName).collect(Collectors.joining(", ")), false);
+        }).block());
     }
 
-    public static TextChannel getLogChannel() {
-        return logChannel;
+    public Guild getGuild() {
+        return client.getGuildById(Snowflake.of(settings.get(Settings.GUILD_ID))).block();
     }
 
-    @SubscribeEvent
-    public void onReady(ReadyEvent event) {
-        buildCommands();
+    public TextChannel getMatchmakingChannel() {
+        return client.getChannelById(Snowflake.of(settings.get(Settings.MATCHMAKING_ID))).cast(TextChannel.class).block();
+    }
 
-        System.out.println("Ready.");
+    public TextChannel getUnitsChannel() {
+        return client.getChannelById(Snowflake.of(settings.get(Settings.UNITS_ID))).cast(TextChannel.class).block();
+    }
 
-        guild = client.getGuildById(Long.parseLong(guildId));
-        mmChannel = client.getTextChannelById(Long.parseLong(mmChannelId));
-        unitsChannel = client.getTextChannelById(Long.parseLong(unitsChannelId));
-        itemsChannel = client.getTextChannelById(Long.parseLong(itemsChannelId));
-        logChannel = client.getTextChannelById(Long.parseLong(logChannelId));
+    public TextChannel getItemsChannel() {
+        return client.getChannelById(Snowflake.of(settings.get(Settings.ITEMS_ID))).cast(TextChannel.class).block();
+    }
 
-        SCHEDULER.scheduleAtFixedRate(Enigma::refreshQueues, 10, 10, TimeUnit.SECONDS);
-        SCHEDULER.scheduleAtFixedRate(() -> games.stream().filter(g -> g.getGameState() == 1)
-                .forEach(Game::notifyAfk), 1, 1, TimeUnit.MINUTES);
+    public TextChannel getLogChannel() {
+        return client.getChannelById(Snowflake.of(settings.get(Settings.LOG_ID))).cast(TextChannel.class).block();
+    }
+
+    public MongoManager getMongo() {
+        return mongo;
+    }
+
+    public DiscordClient getClient() {
+        return client;
+    }
+
+    public Settings getSettings() {
+        return settings;
+    }
+
+    public List<Listener> getListeners() {
+        return listeners;
+    }
+
+    public List<Game> getGames() {
+        return games;
+    }
+
+    public Map<Long, Player> getPlayers() {
+        return players;
     }
 }

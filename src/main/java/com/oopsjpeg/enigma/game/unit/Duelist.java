@@ -63,7 +63,7 @@ public class Duelist extends Unit {
     @Override
     public String onTurnStart(Game.Member member) {
         if (crush.count() && crush.notif())
-            return Emote.INFO + "**" + member.getName() + "'s Crush** is ready to use.";
+            return Emote.INFO + "**" + member.getUsername() + "'s Crush** is ready to use.";
         return "";
     }
 

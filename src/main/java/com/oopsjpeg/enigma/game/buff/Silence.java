@@ -16,6 +16,6 @@ public class Silence extends Buff {
 
     @Override
     public String onTurnStart(Game.Member member) {
-        return Emote.SILENCE + "**" + member.getName() + "** is silenced by **" + getSource().getName() + "** this turn.";
+        return Emote.SILENCE + "**" + member.getUsername() + "** is silenced by **" + getSource().getUsername() + "** this turn.";
     }
 }

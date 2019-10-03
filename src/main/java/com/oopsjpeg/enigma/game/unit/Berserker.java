@@ -37,7 +37,7 @@ public class Berserker extends Unit {
 
     public String rage(Game.Member member) {
         if (rage.stack() && rage.notif())
-            return Emote.RAGE + "**" + member.getName() + "'s Rage** is at max capacity.";
+            return Emote.RAGE + "**" + member.getUsername() + "'s Rage** is at max capacity.";
         return "";
     }
 

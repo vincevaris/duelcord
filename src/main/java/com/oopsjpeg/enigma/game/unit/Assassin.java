@@ -67,7 +67,7 @@ public class Assassin extends Unit {
     public String onTurnEnd(Game.Member member) {
         slashed = false;
         if (potency.stack())
-            return Emote.KNIFE + "**" + member.getName() + "'s Potency** is at max capacity.";
+            return Emote.KNIFE + "**" + member.getUsername() + "'s Potency** is at max capacity.";
         return "";
     }
 
