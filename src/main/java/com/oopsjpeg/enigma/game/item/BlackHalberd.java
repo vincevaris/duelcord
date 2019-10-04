@@ -9,9 +9,10 @@ public class BlackHalberd extends Item {
     public static final String NAME = "Black Halberd";
     public static final int COST = 650;
     public static final Stats STATS = new Stats()
-            .put(Stats.DAMAGE, 8);
-    public static final Effect[] EFFECTS = new Effect[]{new Surmount(0.015f)};
-    public static final Item[] BUILD = new Item[]{new Knife()};
+            .put(Stats.DAMAGE, 8)
+            .put(Stats.MAX_HP, 45);
+    public static final Effect[] EFFECTS = new Effect[]{new Surmount(0.02f)};
+    public static final Item[] BUILD = new Item[]{new Knife(), new Crystal()};
 
     @Override
     public String getName() {

@@ -312,7 +312,7 @@ public class Game {
                 actor.updateStats();
 
                 if (item.getStats().get(Stats.MAX_HP) > 0 && !actor.shields.contains(item)) {
-                    output.add(actor.shield(item.getStats().get(Stats.MAX_HP)));
+                    output.add(actor.shield(item.getStats().get(Stats.MAX_HP) / 2));
                     actor.shields.add(item);
                 }
 

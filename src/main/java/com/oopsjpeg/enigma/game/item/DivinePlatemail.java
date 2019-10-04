@@ -9,7 +9,7 @@ public class DivinePlatemail extends Item {
     public static final String NAME = "Divine Platemail";
     public static final int COST = 475;
     public static final Stats STATS = new Stats()
-            .put(Stats.MAX_HP, 30);
+            .put(Stats.MAX_HP, 60);
     public static final Effect[] EFFECTS = new Effect[]{new Divinity(0.15f)};
     public static final Item[] BUILD = new Item[]{new Crystal()};
 

@@ -7,7 +7,7 @@ public class Crystal extends Item {
     public static final String NAME = "Crystal";
     public static final int COST = 200;
     public static final Stats STATS = new Stats()
-            .put(Stats.MAX_HP, 20);
+            .put(Stats.MAX_HP, 40);
 
     @Override
     public String getName() {

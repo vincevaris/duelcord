@@ -12,7 +12,7 @@ public class SteelMallet extends Item {
     public static final Effect[] EFFECTS = new Effect[]{new DawnShield()};
     public static final Stats STATS = new Stats()
             .put(Stats.DAMAGE, 8)
-            .put(Stats.MAX_HP, 30);
+            .put(Stats.MAX_HP, 50);
 
     @Override
     public String getName() {

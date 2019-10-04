@@ -7,7 +7,7 @@ public class Gemheart extends Item {
     public static final String NAME = "Gemheart";
     public static final int COST = 375;
     public static final Stats STATS = new Stats()
-            .put(Stats.MAX_HP, 40);
+            .put(Stats.MAX_HP, 100);
 
     @Override
     public String getName() {

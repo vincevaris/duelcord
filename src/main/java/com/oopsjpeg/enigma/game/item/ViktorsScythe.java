@@ -9,9 +9,10 @@ public class ViktorsScythe extends Item {
     public static final String NAME = "Viktor's Scythe";
     public static final int COST = 1275;
     public static final Stats STATS = new Stats()
-            .put(Stats.DAMAGE, 20);
-    public static final Effect[] EFFECTS = new Effect[]{new Surmount(0.035f)};
-    public static final Item[] BUILD = new Item[]{new BlackHalberd(), new Hatchet()};
+            .put(Stats.DAMAGE, 15)
+            .put(Stats.MAX_HP, 160);
+    public static final Effect[] EFFECTS = new Effect[]{new Surmount(0.04f)};
+    public static final Item[] BUILD = new Item[]{new BlackHalberd(), new Gemheart()};
 
     @Override
     public String getName() {
