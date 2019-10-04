@@ -16,7 +16,7 @@ public class ForfeitCommand implements Command {
 
         if (channel.equals(game.getChannel())) {
             message.delete().block();
-            channel.createMessage(m -> game.getMember(author).lose()).block();
+            channel.createMessage(game.getMember(author).lose()).block();
         }
     }
 
