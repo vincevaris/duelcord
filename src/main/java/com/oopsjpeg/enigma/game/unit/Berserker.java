@@ -90,7 +90,7 @@ public class Berserker extends Unit {
     }
 
     @Override
-    public DamageEvent wasBasicAttacked(DamageEvent event) {
+    public DamageEvent wasBasicAttack(DamageEvent event) {
         event.output.add(rage(event.target));
         return event;
     }

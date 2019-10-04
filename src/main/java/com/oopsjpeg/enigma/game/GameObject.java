@@ -17,7 +17,7 @@ public abstract class GameObject {
         return event;
     }
 
-    public DamageEvent wasDamaged(DamageEvent event) {
+    public DamageEvent wasDamage(DamageEvent event) {
         return event;
     }
 
@@ -25,7 +25,7 @@ public abstract class GameObject {
         return event;
     }
 
-    public DamageEvent wasBasicAttacked(DamageEvent event) {
+    public DamageEvent wasBasicAttack(DamageEvent event) {
         return event;
     }
 
@@ -42,6 +42,14 @@ public abstract class GameObject {
     }
 
     public DamageEvent wasCrit(DamageEvent event) {
+        return event;
+    }
+
+    public DamageEvent onAbility(DamageEvent event) {
+        return event;
+    }
+
+    public DamageEvent wasAbility(DamageEvent event) {
         return event;
     }
 

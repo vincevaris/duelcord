@@ -6,6 +6,7 @@ import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
+import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.User;
 
 import java.util.ArrayList;
@@ -13,9 +14,15 @@ import java.util.Arrays;
 
 public class CommandListener extends ArrayList<Command> implements Listener {
     private final String prefix;
+    private TextChannel limit;
 
     public CommandListener(String prefix) {
         this.prefix = prefix;
+    }
+
+    public CommandListener(String prefix, TextChannel limit) {
+        this.prefix = prefix;
+        this.limit = limit;
     }
 
     @Override
@@ -31,6 +38,7 @@ public class CommandListener extends ArrayList<Command> implements Listener {
         MessageChannel channel = message.getChannel().block();
 
         if (author != null && content != null && channel != null
+                && (limit == null || channel.equals(limit))
                 && !author.equals(client.getSelf().block())
                 && content.toLowerCase().startsWith(prefix.toLowerCase())) {
             String[] split = content.replaceFirst(prefix, "").split(" ");

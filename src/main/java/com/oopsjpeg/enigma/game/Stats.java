@@ -36,7 +36,7 @@ public class Stats {
     }
 
     public Stats(Stats other) {
-        for (String key : values.keySet())
+        for (String key : other.values.keySet())
             values.put(key, other.values.get(key));
     }
 

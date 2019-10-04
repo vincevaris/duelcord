@@ -25,7 +25,7 @@ public class Gunslinger extends Unit {
             + Util.percent(BARRAGE_DAMAGE) + "** (+" + Util.percent(BARRAGE_AP) + " AP) base damage.\n"
             + "Barrage shots can crit and apply on-hit effects.\n"
             + "Barrage can only be used once every **" + BARRAGE_COOLDOWN + "** turn(s).";
-    public static final Color COLOR = Color.ORANGE;
+    public static final Color COLOR = new Color(255, 100, 0);
     public static final Stats STATS = new Stats()
             .put(Stats.ENERGY, 125)
             .put(Stats.MAX_HP, 750)

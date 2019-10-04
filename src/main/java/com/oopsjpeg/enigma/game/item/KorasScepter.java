@@ -1,18 +1,17 @@
 package com.oopsjpeg.enigma.game.item;
 
 import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.effect.Brawn;
-import com.oopsjpeg.enigma.game.effect.Divinity;
+import com.oopsjpeg.enigma.game.effect.KorasMight;
 import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.game.obj.Item;
 
-public class CrimsonBuckler extends Item {
-    public static final String NAME = "Crimson Buckler";
-    public static final int COST = 1175;
+public class KorasScepter extends Item {
+    public static final String NAME = "Kora's Scepter";
+    public static final int COST = 650;
+    public static final Item[] BUILD = new Item[]{new Staff()};
+    public static final Effect[] EFFECTS = new Effect[]{new KorasMight(3)};
     public static final Stats STATS = new Stats()
-            .put(Stats.MAX_HP, 60);
-    public static final Effect[] EFFECTS = new Effect[]{new Divinity(0.2f), new Brawn(0.04f)};
-    public static final Item[] BUILD = new Item[]{new DivinePlatemail(), new Knife()};
+            .put(Stats.ABILITY_POWER, 25);
 
     @Override
     public String getName() {

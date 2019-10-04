@@ -76,7 +76,7 @@ public class Player {
     }
 
     public void addGems(int gems) {
-        this.gems =+ gems;
+        this.gems += gems;
     }
 
     public void removeGems(int gems) {

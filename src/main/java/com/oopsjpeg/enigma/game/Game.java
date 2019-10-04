@@ -46,7 +46,7 @@ public class Game {
     public Game(Guild guild, GameMode mode, List<Player> players) {
         channel = guild.createTextChannel(c -> c.setName("game")).block();
 
-        commands = new CommandListener(Enigma.getInstance().getSettings().get(Settings.GAME_PREFIX));
+        commands = new CommandListener(Enigma.getInstance().getSettings().get(Settings.GAME_PREFIX), channel);
         commands.add(new AttackCommand());
         commands.add(new BarrageCommand());
         commands.add(new BashCommand());
@@ -59,6 +59,7 @@ public class Game {
         commands.add(new RefreshCommand());
         commands.add(new SellCommand());
         commands.add(new SlashCommand());
+        commands.add(new FlareCommand());
         commands.add(new StatsCommand());
         commands.add(new UseCommand());
         Enigma.getInstance().addListener(commands);
@@ -166,6 +167,9 @@ public class Game {
                     + (member.unit instanceof Assassin
                     ? "Slash: **" + ((Assassin) member.unit).getSlash().getCur() + " / " + Assassin.SLASH_MAX + "**\n"
                     + "Potency: **" + Math.round(((Assassin) member.unit).getPotencyTotal()) + "**\n" : "")
+                    + (member.unit instanceof Phasebreaker
+                    ? "Phase: **" + ((Phasebreaker) member.unit).getPhase() + "**\n"
+                    + "Flare: **" + ((Phasebreaker) member.unit).getFlare().getCur() + "** / **" + Phasebreaker.FLARE_STACKS + "**\n" : "")
                     + "Items: **" + member.getItems() + "**\n")).block();
         }
     }
@@ -417,6 +421,8 @@ public class Game {
                     if (event.target.stats.get(Stats.SHIELD) > 0)
                         event.target.stats.put(Stats.SHIELD, 0.01f);
 
+                    event.actor.ability(event);
+
                     channel.createMessage(actor.damage(event, Emote.KNIFE, "bashed")).block();
                     return true;
                 }
@@ -500,6 +506,7 @@ public class Game {
 
                     event = event.actor.hit(event);
                     event = event.actor.crit(event);
+                    event = event.actor.ability(event);
 
                     channel.createMessage(actor.damage(event, Emote.KNIFE, "slashed")).block();
                     return true;
@@ -578,6 +585,36 @@ public class Game {
                     output.add(0, Emote.ATTACK + "**" + actor.getUsername() + "** used **Barrage**!");
 
                     channel.createMessage(String.join("\n", output)).block();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public int getEnergy() {
+            return 25;
+        }
+    }
+
+    public class FlareAction extends Action {
+        @Override
+        public boolean act(Member actor) {
+            if (!(actor.unit instanceof Phasebreaker))
+                Util.sendFailure(channel, "You are not playing **Phasebreaker**.");
+            else if (actor.hasData(Silence.class))
+                Util.sendFailure(channel, "You cannot use **Flare** while silenced.");
+            else {
+                Phasebreaker pb = (Phasebreaker) actor.unit;
+                if (pb.getFlared())
+                    Util.sendFailure(channel, "You already using **Flare**.");
+                else if (!pb.getFlare().done())
+                    Util.sendFailure(channel, "**Flare** is not ready yet.");
+                else {
+                    pb.getFlare().reset();
+                    pb.setFlared(true);
+                    channel.createMessage(":diamond_shape_with_a_dot_inside: **"
+                                    + actor.getUsername() + "** used **Flare** on **Phase " + pb.getPhase() + "**!").block();
                     return true;
                 }
             }
@@ -818,13 +855,19 @@ public class Game {
             return event;
         }
 
+        public DamageEvent ability(DamageEvent event) {
+            for (GameObject o : event.actor.data) event = o.onAbility(event);
+            for (GameObject o : event.target.data) event = o.wasAbility(event);
+            return event;
+        }
+
         public DamageEvent basicAttack(Member target) {
             DamageEvent event = new DamageEvent(Game.this, this, target);
             event.damage = stats.get(Stats.DAMAGE);
             event.actor.stats.add(Stats.GOLD, Util.nextInt(20, 30) + (curTurn * 0.5f));
 
             for (GameObject o : event.actor.data) event = o.onBasicAttack(event);
-            for (GameObject o : event.target.data) event = o.wasBasicAttacked(event);
+            for (GameObject o : event.target.data) event = o.wasBasicAttack(event);
 
             event = hit(event);
             event = crit(event);
@@ -838,7 +881,7 @@ public class Game {
 
         public String damage(DamageEvent event, String actor, String emote, String action) {
             for (GameObject o : event.actor.data) event = o.onDamage(event);
-            for (GameObject o : event.target.data) event = o.wasDamaged(event);
+            for (GameObject o : event.target.data) event = o.wasDamage(event);
 
             float defend = defensive ? 0.2f : 0;
             event.damage *= 1 - event.target.getStats().get(Stats.RESIST) - defend;
@@ -848,13 +891,12 @@ public class Game {
             if (event.target.stats.get(Stats.SHIELD) > 0) {
                 // Remove bonus damage first
                 float shdBonus = Util.limit(event.bonus, 0, event.target.stats.get(Stats.SHIELD));
-                event.bonus -= shdBonus;
+                float shdDamage = 0;
                 event.target.stats.sub(Stats.SHIELD, shdBonus);
 
                 // Remove main damage after
                 if (event.target.stats.get(Stats.SHIELD) > 0) {
-                    float shdDamage = Util.limit(event.damage, 0, event.target.stats.get(Stats.SHIELD));
-                    event.damage -= shdDamage;
+                    shdDamage = Util.limit(event.damage, 0, event.target.stats.get(Stats.SHIELD));
                     event.target.stats.sub(Stats.SHIELD, shdDamage);
                 }
 
@@ -862,6 +904,9 @@ public class Game {
                     event.output.add(0, Util.damageText(event, actor, event.target.getUsername() + "'s Shield", emote, action));
                 else
                     event.output.add(0, Emote.SHIELD + "**" + actor + "** destroyed **" + event.target.getUsername() + "'s Shield**!");
+
+                event.bonus -= shdBonus;
+                event.damage -= shdDamage;
             }
 
             if (event.target.stats.get(Stats.SHIELD) <= 0 && event.total() > 0) {
