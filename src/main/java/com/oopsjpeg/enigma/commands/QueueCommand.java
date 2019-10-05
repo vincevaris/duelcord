@@ -9,8 +9,6 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
 
-import java.util.List;
-
 public class QueueCommand implements Command {
     @Override
     public void execute(Message message, String alias, String[] args) {
@@ -18,18 +16,18 @@ public class QueueCommand implements Command {
         User author = message.getAuthor().orElse(null);
         Player player = Enigma.getInstance().getPlayer(author);
 
-        GameMode mode = GameMode.DUEL;
-        List<Player> queue = Enigma.getInstance().getQueue(mode);
-
         if (player.getGame() != null)
             Util.sendFailure(channel, "You're already in a match.");
-        else {
-            if (!queue.contains(player)) {
+        else if (player.getQueue() != null) {
+            player.removeQueue();
+            Util.sendFailure(channel, "You have left the queue.");
+        } else {
+            GameMode mode = args.length > 0 ? GameMode.fromName(args[0]) : GameMode.DUEL;
+            if (mode == null)
+                Util.sendFailure(channel, "Invalid game mode.");
+            else {
                 player.setQueue(mode);
                 Util.sendSuccess(channel, "**" + author.getUsername() + "** is in queue for **" + mode.getName() + "**.");
-            } else {
-                player.removeQueue();
-                Util.sendFailure(channel, "You have left the queue.");
             }
         }
     }
