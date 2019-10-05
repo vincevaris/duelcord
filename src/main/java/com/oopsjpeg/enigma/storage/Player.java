@@ -42,7 +42,7 @@ public class Player {
     }
 
     public List<Player> getQueue() {
-        return Enigma.getInstance().getQueue(queueMode);
+        return queueMode != null ? Enigma.getInstance().getQueue(queueMode) : null;
     }
 
     public void setQueue(GameMode mode) {

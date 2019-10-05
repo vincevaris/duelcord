@@ -22,16 +22,16 @@ public class Gunslinger extends Unit {
     public static final String DESC = "The first basic attack per turn always crits and deals **"
             + Util.percent(BONUS_DAMAGE) + "** (+" + Util.percent(BONUS_AP) + " AP) bonus damage.\n\n"
             + "Using `>barrage` fires **" + BARRAGE_SHOTS + "** shots that each deal **"
-            + Util.percent(BARRAGE_DAMAGE) + "** (+" + Util.percent(BARRAGE_AP) + " AP) base damage.\n"
+            + Util.percent(BARRAGE_DAMAGE) + "** base damage (+" + Util.percent(BARRAGE_AP) + " AP).\n"
             + "Barrage shots can crit and apply on-hit effects.\n"
             + "Barrage can only be used once every **" + BARRAGE_COOLDOWN + "** turn(s).";
     public static final Color COLOR = new Color(255, 100, 0);
     public static final Stats STATS = new Stats()
             .put(Stats.ENERGY, 125)
-            .put(Stats.MAX_HP, 750)
+            .put(Stats.MAX_HEALTH, 750)
             .put(Stats.DAMAGE, 17);
     public static final Stats PER_TURN = new Stats()
-            .put(Stats.HP, 11);
+            .put(Stats.HEALTH, 11);
 
     private boolean bonus = false;
     private final Cooldown barrage = new Cooldown(BARRAGE_COOLDOWN);

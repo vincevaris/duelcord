@@ -9,7 +9,8 @@ public class Potion extends Item {
     public static final int TURNS = 2;
 
     public static final String NAME = "Potion";
-    public static final String DESC = "Heals for **" + HEAL + "** health over **" + TURNS + "** turns.";
+    public static final Tree TREE = Tree.CONSUMABLES;
+    public static final String TIP = "Heals for **" + HEAL + "**.";
     public static final int COST = 50;
 
     @Override
@@ -18,8 +19,13 @@ public class Potion extends Item {
     }
 
     @Override
-    public String getDesc() {
-        return DESC;
+    public Tree getTree() {
+        return TREE;
+    }
+
+    @Override
+    public String getTip() {
+        return TIP;
     }
 
     @Override

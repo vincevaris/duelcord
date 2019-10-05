@@ -23,10 +23,10 @@ public class Berserker extends Unit {
     public static final Color COLOR = Color.RED;
     public static final Stats STATS = new Stats()
             .put(Stats.ENERGY, 100)
-            .put(Stats.MAX_HP, 780)
+            .put(Stats.MAX_HEALTH, 780)
             .put(Stats.DAMAGE, 19);
     public static final Stats PER_TURN = new Stats()
-            .put(Stats.HP, 12);
+            .put(Stats.HEALTH, 12);
 
     private final Stacker rage = new Stacker(RAGE_MAX);
     private float bonus = 0;

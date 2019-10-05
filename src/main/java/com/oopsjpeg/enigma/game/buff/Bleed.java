@@ -19,6 +19,6 @@ public class Bleed extends Buff {
     public String onTurnStart(Game.Member member) {
         DamageEvent event = new DamageEvent(member.getGame(), getSource(), member);
         event.damage = getPower();
-        return getSource().damage(event, event.actor.getUsername() + "'s Bleed", Emote.DEBUFF, "damaged");
+        return getSource().damage(event, event.actor.getUsername() + "'s Bleed", Emote.BLEED, "damaged");
     }
 }

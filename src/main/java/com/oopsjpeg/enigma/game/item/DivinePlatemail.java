@@ -7,15 +7,27 @@ import com.oopsjpeg.enigma.game.obj.Item;
 
 public class DivinePlatemail extends Item {
     public static final String NAME = "Divine Platemail";
+    public static final Tree TREE = Tree.HEALTH;
+    public static final String TIP = "Crit damage reduction.";
     public static final int COST = 475;
     public static final Stats STATS = new Stats()
-            .put(Stats.MAX_HP, 60);
+            .put(Stats.MAX_HEALTH, 60);
     public static final Effect[] EFFECTS = new Effect[]{new Divinity(0.15f)};
     public static final Item[] BUILD = new Item[]{new Crystal()};
 
     @Override
     public String getName() {
         return NAME;
+    }
+
+    @Override
+    public Tree getTree() {
+        return TREE;
+    }
+
+    @Override
+    public String getTip() {
+        return TIP;
     }
 
     @Override

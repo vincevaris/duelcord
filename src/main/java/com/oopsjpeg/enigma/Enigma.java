@@ -3,6 +3,7 @@ package com.oopsjpeg.enigma;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.oopsjpeg.enigma.commands.BuildCommand;
+import com.oopsjpeg.enigma.commands.PatchCommand;
 import com.oopsjpeg.enigma.commands.QueueCommand;
 import com.oopsjpeg.enigma.commands.StatsCommand;
 import com.oopsjpeg.enigma.game.Game;
@@ -20,6 +21,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.spec.EmbedCreateSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +34,7 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class Enigma {
@@ -91,6 +94,7 @@ public class Enigma {
 
                 // Add commands
                 commands.add(new BuildCommand());
+                commands.add(new PatchCommand());
                 commands.add(new QueueCommand());
                 commands.add(new StatsCommand());
 
@@ -211,7 +215,7 @@ public class Enigma {
         Arrays.stream(Unit.values()).forEach(u -> getUnitsChannel().createEmbed(e -> {
             e.setTitle(u.getName());
             e.setColor(u.getColor());
-            String desc = "Health: **" + u.getStats().getInt(Stats.MAX_HP) + "** (+**" + u.getPerTurn().getInt(Stats.HP) + "**/turn)"
+            String desc = "Health: **" + u.getStats().getInt(Stats.MAX_HEALTH) + "** (+**" + u.getPerTurn().getInt(Stats.HEALTH) + "**/turn)"
                     + "\nDamage: **" + u.getStats().getInt(Stats.DAMAGE) + "**"
                     + "\nEnergy: **" + u.getStats().getInt(Stats.ENERGY) + "**";
             if (u.getStats().get(Stats.CRIT_CHANCE) > 0)
@@ -223,22 +227,26 @@ public class Enigma {
         }).block());
     }
 
+    public Consumer<EmbedCreateSpec> buildItemTree(Item.Tree tree) {
+        return e -> {
+            e.setTitle(tree.getName());
+            e.setColor(tree.getColor());
+            Item.fromTree(tree).stream()
+                    .sorted(Comparator.comparingInt(Item::getCost))
+                    .forEach(i -> {
+                        String value = (i.hasTip() ? i.getTip() + "\n" : Util.formatStats(i.getStats()) + Util.formatPerTurn(i.getPerTurn()) + "\n")
+                                + (i.hasBuild() ? "_" + Arrays.stream(i.getBuild()).map(Item::getName).collect(Collectors.joining(", ")) + "_" : "");
+                        e.addField(i.getName() + " (" + i.getCost() + "g)", value, true);
+                    });
+        };
+    }
+
     public void buildItemsChannel() {
         System.out.println("Building items channel.");
-        Arrays.stream(Item.values()).sorted(Comparator.comparingInt(Item::getCost)).forEach(i -> getItemsChannel().createEmbed(e -> {
-            e.setTitle(i.getName() + " (" + i.getCost() + "g)");
-            e.setColor(Color.CYAN);
-            e.setDescription(i.getDesc() + "\n\n"
-                    + "\n\n" + Util.formatStats(i.getStats())
-                    + "\n" + Util.formatPerTurn(i.getPerTurn()));
-            if (i.getEffects() != null && i.getEffects().length > 0)
-                e.addField("Unique Effects", Arrays.stream(i.getEffects())
-                        .map(ef -> "**" + ef.getName() + "**: " + ef.getDesc())
-                        .collect(Collectors.joining("\n")), false);
-            if (i.getBuild() != null && i.getBuild().length > 0)
-                e.addField("Build", Arrays.stream(i.getBuild())
-                        .map(Item::getName).collect(Collectors.joining(", ")), false);
-        }).block());
+        getItemsChannel().createEmbed(buildItemTree(Item.Tree.CONSUMABLES)).block();
+        getItemsChannel().createEmbed(buildItemTree(Item.Tree.DAMAGE)).block();
+        getItemsChannel().createEmbed(buildItemTree(Item.Tree.HEALTH)).block();
+        getItemsChannel().createEmbed(buildItemTree(Item.Tree.ABILITY)).block();
     }
 
     public Guild getGuild() {

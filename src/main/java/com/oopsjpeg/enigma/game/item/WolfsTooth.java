@@ -7,6 +7,8 @@ import com.oopsjpeg.enigma.game.obj.Item;
 
 public class WolfsTooth extends Item {
     public static final String NAME = "Wolf's Tooth";
+    public static final Tree TREE = Tree.DAMAGE;
+    public static final String TIP = "Powerful anti-sustain.";
     public static final int COST = 1025;
     public static final Item[] BUILD = new Item[]{new BoneSpear(), new Knife()};
     public static final Effect[] EFFECTS = new Effect[]{new Wounder(0.4f)};
@@ -16,6 +18,16 @@ public class WolfsTooth extends Item {
     @Override
     public String getName() {
         return NAME;
+    }
+
+    @Override
+    public Tree getTree() {
+        return TREE;
+    }
+
+    @Override
+    public String getTip() {
+        return TIP;
     }
 
     @Override

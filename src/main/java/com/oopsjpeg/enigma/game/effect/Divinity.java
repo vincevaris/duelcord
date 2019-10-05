@@ -13,23 +13,23 @@ public class Divinity extends Effect {
     }
 
     @Override
+    public DamageEvent wasCrit(DamageEvent event) {
+        event.critMul -= power;
+        return event;
+    }
+
+    @Override
     public String getName() {
         return NAME;
     }
 
     @Override
     public String getDesc() {
-        return "Reduces damage from crits by **" + Util.percent(power) + "**.";
+        return "Reduces damage taken from crits by **" + Util.percent(power) + "**.";
     }
 
     @Override
     public float getPower() {
         return power;
-    }
-
-    @Override
-    public DamageEvent wasCrit(DamageEvent event) {
-        event.critMul -= power;
-        return event;
     }
 }

@@ -4,6 +4,8 @@ import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.util.Cooldown;
+import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
 
@@ -13,32 +15,31 @@ public class Warrior extends Unit {
     public static final int BONUS_MAX = 3;
     public static final float BONUS_DAMAGE = 0.3f;
     public static final float BASH_DAMAGE = 0.5f;
+    public static final float BASH_HP_SCALE = 0.25f;
+    public static final int BASH_COOLDOWN = 2;
 
     public static final String NAME = "Warrior";
     public static final String DESC = "Every **" + BONUS_MAX + "rd** attack deals **" + Util.percent(BONUS_DAMAGE) + "** bonus damage."
-            + "\nUsing `>bash` breaks shield and resistance then deals **" + Util.percent(BASH_DAMAGE) + "** of base damage."
-            + "\nBash counts towards stacks of bonus damages, but does not proc it.";
+            + "\n\nUsing `>bash` breaks the target's shield and resist then deals **" + Util.percent(BASH_DAMAGE) + "** base damage (+" + Util.percent(BASH_HP_SCALE) + " bonus max health)."
+            + "\n**Bash** counts towards stacks of bonus damages, but does not proc it."
+            + "\n**Bash** can only be used once every **" + BASH_COOLDOWN + "** turn(s).";
     public static final Color COLOR = Color.CYAN;
     public static final Stats STATS = new Stats()
             .put(Stats.ENERGY, 125)
-            .put(Stats.MAX_HP, 795)
-            .put(Stats.DAMAGE, 24);
+            .put(Stats.MAX_HEALTH, 795)
+            .put(Stats.DAMAGE, 23);
     public static final Stats PER_TURN = new Stats()
-            .put(Stats.HP, 13);
+            .put(Stats.HEALTH, 13);
 
     private Stacker bonus = new Stacker(BONUS_MAX);
-    private boolean bash = false;
+    private Cooldown bash = new Cooldown(BASH_COOLDOWN);
 
     public Stacker getBonus() {
         return bonus;
     }
 
-    public boolean getBash() {
+    public Cooldown getBash() {
         return bash;
-    }
-
-    public void setBash(boolean bash) {
-        this.bash = bash;
     }
 
     @Override
@@ -67,8 +68,9 @@ public class Warrior extends Unit {
     }
 
     @Override
-    public String onTurnEnd(Game.Member member) {
-        bash = false;
+    public String onTurnStart(Game.Member member) {
+        if (bash.count() && bash.notif())
+            return Emote.INFO + "**" + member.getUsername() + "'s Bash** is ready to use.";
         return "";
     }
 

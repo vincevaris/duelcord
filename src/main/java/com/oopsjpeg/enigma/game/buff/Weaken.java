@@ -18,7 +18,7 @@ public class Weaken extends Buff {
 
     @Override
     public String onTurnStart(Game.Member member) {
-        return Emote.SILENCE + "**" + member.getUsername() + "** is weakened by **" + Util.percent(getPower()) + "** from **"
+        return Emote.SILENCE + "**" + member.getUsername() + "** is weakened by **" + Util.percent(getPower()) + "** by **"
                 + getSource().getUsername() + "** this turn.";
     }
 

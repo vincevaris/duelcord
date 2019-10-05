@@ -7,6 +7,8 @@ import com.oopsjpeg.enigma.game.obj.Item;
 
 public class ShadowGauntlet extends Item {
     public static final String NAME = "Shadow Gauntlet";
+    public static final Tree TREE = Tree.ABILITY;
+    public static final String TIP = "More damage when attacking back-to-back.";
     public static final int COST = 1125;
     public static final Item[] BUILD = new Item[]{new MidnightDagger(), new Ring()};
     public static final Effect[] EFFECTS = new Effect[]{new LoveOfWar(0.2f)};
@@ -17,6 +19,16 @@ public class ShadowGauntlet extends Item {
     @Override
     public String getName() {
         return NAME;
+    }
+
+    @Override
+    public Tree getTree() {
+        return TREE;
+    }
+
+    @Override
+    public String getTip() {
+        return TIP;
     }
 
     @Override

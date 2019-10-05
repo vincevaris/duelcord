@@ -14,23 +14,23 @@ public class Brawn extends Effect {
     }
 
     @Override
+    public DamageEvent onBasicAttack(DamageEvent event) {
+        event.damage += event.actor.getStats().get(Stats.MAX_HEALTH) * power;
+        return event;
+    }
+
+    @Override
     public String getName() {
         return NAME;
     }
 
     @Override
     public String getDesc() {
-        return "Basic attacks deal bonus damage equal to **" + Util.percent(power) + "** of your max health.";
+        return "Basic attacks deal more damage equal to **" + Util.percent(power) + "** of your max health.";
     }
 
     @Override
     public float getPower() {
         return power;
-    }
-
-    @Override
-    public DamageEvent onBasicAttack(DamageEvent event) {
-        event.damage += event.actor.getStats().get(Stats.MAX_HP) * power;
-        return event;
     }
 }

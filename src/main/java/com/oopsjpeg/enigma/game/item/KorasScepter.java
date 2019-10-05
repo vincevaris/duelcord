@@ -7,6 +7,8 @@ import com.oopsjpeg.enigma.game.obj.Item;
 
 public class KorasScepter extends Item {
     public static final String NAME = "Kora's Scepter";
+    public static final String TIP = "More damage on abilities.";
+    public static final Tree TREE = Tree.ABILITY;
     public static final int COST = 650;
     public static final Item[] BUILD = new Item[]{new Staff()};
     public static final Effect[] EFFECTS = new Effect[]{new KorasMight(3)};
@@ -16,6 +18,16 @@ public class KorasScepter extends Item {
     @Override
     public String getName() {
         return NAME;
+    }
+
+    @Override
+    public Tree getTree() {
+        return TREE;
+    }
+
+    @Override
+    public String getTip() {
+        return TIP;
     }
 
     @Override

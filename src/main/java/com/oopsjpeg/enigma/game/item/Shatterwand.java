@@ -7,6 +7,8 @@ import com.oopsjpeg.enigma.game.obj.Item;
 
 public class Shatterwand extends Item {
     public static final String NAME = "Shatterwand";
+    public static final Tree TREE = Tree.ABILITY;
+    public static final String TIP = "More damage on abilities.";
     public static final int COST = 1325;
     public static final Item[] BUILD = new Item[]{new KorasScepter(), new Ring()};
     public static final Effect[] EFFECTS = new Effect[]{new KorasMight(5, 0.2f)};
@@ -16,6 +18,16 @@ public class Shatterwand extends Item {
     @Override
     public String getName() {
         return NAME;
+    }
+
+    @Override
+    public Tree getTree() {
+        return TREE;
+    }
+
+    @Override
+    public String getTip() {
+        return TIP;
     }
 
     @Override

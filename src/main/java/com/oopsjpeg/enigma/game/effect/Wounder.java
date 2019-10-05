@@ -14,23 +14,23 @@ public class Wounder extends Effect {
     }
 
     @Override
+    public DamageEvent onHit(DamageEvent event) {
+        event.output.add(event.target.buff(new Wound(event.actor, 1, power)));
+        return event;
+    }
+
+    @Override
     public String getName() {
         return NAME;
     }
 
     @Override
     public String getDesc() {
-        return "Reduces the target's healing by **" + Util.percent(power) + "**.";
+        return "Reduces the target's healing and shielding by **" + Util.percent(power) + "** on hit.";
     }
 
     @Override
     public float getPower() {
         return power;
-    }
-
-    @Override
-    public DamageEvent onHit(DamageEvent event) {
-        event.output.add(event.target.buff(new Wound(event.actor, 1, power)));
-        return event;
     }
 }

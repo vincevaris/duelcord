@@ -25,17 +25,17 @@ public class Duelist extends Unit {
     public static final String NAME = "Duelist";
     public static final String DESC = "Every **" + BONUS_MAX + "th** basic attack deals bonus damage equal to **"
             + Util.percent(BONUS_DAMAGE) + "** of the target's max health and applies **Bleed** for **"
-            + Util.percent(BLEED_DAMAGE) + "** of base damage for **" + BLEED_TURNS + "** turn(s).\n\n"
+            + Util.percent(BLEED_DAMAGE) + "** base damage for **" + BLEED_TURNS + "** turn(s).\n\n"
             + "Using `>crush` weakens the target by **" + Util.percent(CRUSH_POWER) + "** for **" + CRUSH_TURNS + "** turn(s).\n"
             + "If the target receives any other debuff while weakened, it is extended by **" + CRUSH_EXTEND + "** turn(s).\n"
             + "Crush can only be used once every **" + CRUSH_COOLDOWN + "** turn(s).";
     public static final Color COLOR = Color.MAGENTA;
     public static final Stats STATS = new Stats()
             .put(Stats.ENERGY, 125)
-            .put(Stats.MAX_HP, 750)
+            .put(Stats.MAX_HEALTH, 750)
             .put(Stats.DAMAGE, 25);
     public static final Stats PER_TURN = new Stats()
-            .put(Stats.HP, 14);
+            .put(Stats.HEALTH, 14);
 
     private final Stacker bonus = new Stacker(BONUS_MAX);
     private final Cooldown crush = new Cooldown(CRUSH_COOLDOWN);
@@ -52,7 +52,7 @@ public class Duelist extends Unit {
     public DamageEvent onBasicAttack(DamageEvent event) {
         if (bonus.stack()) {
             bonus.reset();
-            float bonus = event.target.getStats().getInt(Stats.MAX_HP) * BONUS_DAMAGE;
+            float bonus = event.target.getStats().getInt(Stats.MAX_HEALTH) * BONUS_DAMAGE;
             float bleed = event.actor.getStats().get(Stats.DAMAGE) * BLEED_DAMAGE;
             event.bonus += bonus;
             event.output.add(event.target.buff(new Bleed(event.actor, BLEED_TURNS, bleed)));

@@ -22,17 +22,17 @@ public class Assassin extends Unit {
     public static final String DESC = "**" + Util.percent(POTENCY_STORE) + "**"
             + " of damage dealt in the last turn is stored as **Potency**."
             + " This can only occur **" + POTENCY_TURNS + "** times until **Potency** is reset."
-            + "\n\nUsing `>slash` deals **" + Util.percent(SLASH_DAMAGE) + "** (+" + Util.percent(SLASH_AP) + " AP) of base damage."
+            + "\n\nUsing `>slash` deals **" + Util.percent(SLASH_DAMAGE) + "** base damage (+" + Util.percent(SLASH_AP) + " AP)."
             + " Every **" + SLASH_MAX + "rd** slash applies **Silence** for **" + SILENCE_TURNS + "** turn(s) and deals"
             + " bonus damage equal to the total **Potency**, resetting it as well."
             + "\n\nSlash does not count towards total **Potency**.";
     public static final Color COLOR = Color.BLUE;
     public static final Stats STATS = new Stats()
             .put(Stats.ENERGY, 125)
-            .put(Stats.MAX_HP, 720)
+            .put(Stats.MAX_HEALTH, 720)
             .put(Stats.DAMAGE, 24);
     public static final Stats PER_TURN = new Stats()
-            .put(Stats.HP, 11);
+            .put(Stats.HEALTH, 11);
 
     private boolean slashed = false;
     private final Stacker slash = new Stacker(SLASH_MAX);

@@ -1,5 +1,6 @@
 package com.oopsjpeg.enigma.game.effect;
 
+import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.util.Util;
@@ -32,12 +33,12 @@ public class StatsEffect extends Effect {
     }
 
     @Override
-    public Stats getStats() {
+    public Stats getStats(Game.Member member) {
         return stats;
     }
 
     @Override
-    public Stats getPerTurn() {
+    public Stats getPerTurn(Game.Member member) {
         return perTurn;
     }
 }

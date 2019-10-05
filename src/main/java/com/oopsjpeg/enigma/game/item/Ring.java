@@ -5,6 +5,7 @@ import com.oopsjpeg.enigma.game.obj.Item;
 
 public class Ring extends Item {
     public static final String NAME = "Ring";
+    public static final Tree TREE = Tree.ABILITY;
     public static final int COST = 275;
     public static final Stats STATS = new Stats()
             .put(Stats.ABILITY_POWER, 10);
@@ -12,6 +13,11 @@ public class Ring extends Item {
     @Override
     public String getName() {
         return NAME;
+    }
+
+    @Override
+    public Tree getTree() {
+        return TREE;
     }
 
     @Override

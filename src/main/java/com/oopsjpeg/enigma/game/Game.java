@@ -86,8 +86,8 @@ public class Game {
 
         if (turnCount >= 1 && gameState == 1 && curMember.stats.get(Stats.ENERGY) > 0 && !curMember.hasData(Silence.class)) {
             curMember.defensive = true;
-            output.add(Emote.SHIELD + "**" + curMember.getUsername() + "** is defending (**20%** resistance, **"
-                    + (curMember.perTurn.getInt(Stats.HP) * 2) + "** HP/t)!");
+            output.add(Emote.SHIELD + "**" + curMember.getUsername() + "** is defending (**20%** resist, **"
+                    + (curMember.perTurn.getInt(Stats.HEALTH) * 2) + "** regen)!");
             output.add(curMember.unit.onDefend(curMember));
         }
 
@@ -116,7 +116,7 @@ public class Game {
 
             curMember = getAlive().get(curTurn);
 
-            curMember.stats.add(Stats.HP, curMember.perTurn.get(Stats.HP) * (curMember.defensive ? 2 : 1));
+            curMember.stats.add(Stats.HEALTH, curMember.perTurn.get(Stats.HEALTH) * (curMember.defensive ? 2 : 1));
             curMember.stats.add(Stats.GOLD, Math.round(125 + turnCount));
             curMember.stats.put(Stats.ENERGY, curMember.unit.getStats().get(Stats.ENERGY));
             curMember.stats.add(Stats.ENERGY, curMember.perTurn.get(Stats.ENERGY));
@@ -135,7 +135,7 @@ public class Game {
             output.addAll(curMember.data.stream()
                     .map(e -> e.onTurnStart(curMember))
                     .collect(Collectors.toList()));
-            if (curMember.stats.get(Stats.HP) < curMember.stats.get(Stats.MAX_HP) * 0.2f)
+            if (curMember.stats.get(Stats.HEALTH) < curMember.stats.get(Stats.MAX_HEALTH) * 0.2f)
                 output.add(Emote.WARN + "**" + curMember.getUsername() + "** is critically low on health.");
 
             output.removeAll(Arrays.asList(null, ""));
@@ -155,8 +155,8 @@ public class Game {
         } else {
             channel.edit(c -> c.setTopic(member.unit.getName() + " " + member.getMention() + " (" + turnCount + ") - \n\n"
                     + "Gold: **" + member.stats.getInt(Stats.GOLD) + "**\n"
-                    + "Health: **" + member.stats.getInt(Stats.HP) + " / " + member.stats.getInt(Stats.MAX_HP)
-                    + "** (+**" + member.perTurn.getInt(Stats.HP) + "**/t)\n"
+                    + "Health: **" + member.stats.getInt(Stats.HEALTH) + " / " + member.stats.getInt(Stats.MAX_HEALTH)
+                    + "** (+**" + member.perTurn.getInt(Stats.HEALTH) + "**/t)\n"
                     + "Energy: **" + member.stats.getInt(Stats.ENERGY) + "**\n"
                     + (member.unit instanceof Warrior
                     ? "Attack: **" + ((Warrior) member.unit).getBonus().getCur() + " / 3**\n" : "")
@@ -169,7 +169,8 @@ public class Game {
                     + "Potency: **" + Math.round(((Assassin) member.unit).getPotencyTotal()) + "**\n" : "")
                     + (member.unit instanceof Phasebreaker
                     ? "Phase: **" + ((Phasebreaker) member.unit).getPhase() + "**\n"
-                    + "Flare: **" + ((Phasebreaker) member.unit).getFlare().getCur() + "** / **" + Phasebreaker.FLARE_STACKS + "**\n" : "")
+                    + "Flare: **" + ((Phasebreaker) member.unit).getFlare().getCur() + "** / **" + Phasebreaker.FLARE_STACKS + "**\n"
+                    + "Bonus AP: **" + ((Phasebreaker) member.unit).getBonusAp() + "**\n" : "")
                     + "Items: **" + member.getItems() + "**\n")).block();
         }
     }
@@ -311,9 +312,9 @@ public class Game {
                     actor.data.remove(i);
                 actor.updateStats();
 
-                if (item.getStats().get(Stats.MAX_HP) > 0 && !actor.shields.contains(item)) {
-                    output.add(actor.shield(item.getStats().get(Stats.MAX_HP) / 2));
-                    actor.shields.add(item);
+                if (item.getStats().get(Stats.MAX_HEALTH) > 0 && !actor.itemHeals.contains(item)) {
+                    output.add(actor.heal(item.getStats().get(Stats.MAX_HEALTH) / 2, item.getName()));
+                    actor.itemHeals.add(item);
                 }
 
                 output.add(0, Emote.BUY + "**" + actor.getUsername() + "** purchased a(n) **"
@@ -406,18 +407,19 @@ public class Game {
             else if (actor.hasData(Silence.class))
                 Util.sendFailure(channel, "You cannot **Bash** while silenced.");
             else {
-                Warrior wu = (Warrior) actor.unit;
-                if (wu.getBash())
-                    Util.sendFailure(channel, "You can only use **Bash** once per turn.");
+                Warrior wa = (Warrior) actor.unit;
+                if (!wa.getBash().done())
+                    Util.sendFailure(channel, "**Bash** is on cooldown for **" + wa.getBash().getCur() + "** more turn(s).");
                 else {
-                    wu.setBash(true);
-                    wu.getBonus().stack();
+                    wa.getBash().start();
+                    wa.getBonus().stack();
 
                     DamageEvent event = new DamageEvent(Game.this, actor, target);
 
                     event.target.defensive = false;
                     event.target.getStats().put(Stats.RESIST, 0);
-                    event.damage = actor.stats.get(Stats.DAMAGE) * Warrior.BASH_DAMAGE;
+                    float hpBonus = (actor.stats.get(Stats.MAX_HEALTH) - actor.unit.getStats().get(Stats.MAX_HEALTH)) * Warrior.BASH_HP_SCALE;
+                    event.damage = (actor.stats.get(Stats.DAMAGE) * Warrior.BASH_DAMAGE) + hpBonus;
                     if (event.target.stats.get(Stats.SHIELD) > 0)
                         event.target.stats.put(Stats.SHIELD, 0.01f);
 
@@ -623,7 +625,7 @@ public class Game {
 
         @Override
         public int getEnergy() {
-            return 25;
+            return 0;
         }
     }
 
@@ -634,7 +636,7 @@ public class Game {
         private boolean defensive = false;
 
         private List<GameObject> data = new ArrayList<>();
-        private List<Item> shields = new ArrayList<>();
+        private List<Item> itemHeals = new ArrayList<>();
 
         private ChanceBag critBag = new ChanceBag();
 
@@ -732,7 +734,7 @@ public class Game {
             data.add(unit);
             updateStats();
 
-            stats.put(Stats.HP, stats.get(Stats.MAX_HP));
+            stats.put(Stats.HEALTH, stats.get(Stats.MAX_HEALTH));
             stats.put(Stats.GOLD, 175 + (100 * getAlive().indexOf(this)));
 
             if (unit instanceof Berserker)
@@ -741,14 +743,14 @@ public class Game {
 
         public void updateStats() {
             data.removeAll(getEffects());
-            stats.put(Stats.MAX_HP, unit.getStats().get(Stats.MAX_HP));
+            stats.put(Stats.MAX_HEALTH, unit.getStats().get(Stats.MAX_HEALTH));
             stats.put(Stats.DAMAGE, unit.getStats().get(Stats.DAMAGE));
             stats.put(Stats.ABILITY_POWER, unit.getStats().get(Stats.ABILITY_POWER));
             stats.put(Stats.CRIT_CHANCE, unit.getStats().get(Stats.CRIT_CHANCE));
             stats.put(Stats.CRIT_DAMAGE, unit.getStats().get(Stats.CRIT_DAMAGE));
             stats.put(Stats.LIFE_STEAL, unit.getStats().get(Stats.LIFE_STEAL));
             stats.put(Stats.RESIST, unit.getStats().get(Stats.RESIST));
-            perTurn.put(Stats.HP, unit.getPerTurn().get(Stats.HP));
+            perTurn.put(Stats.HEALTH, unit.getPerTurn().get(Stats.HEALTH));
             perTurn.put(Stats.GOLD, unit.getPerTurn().get(Stats.GOLD));
             perTurn.put(Stats.ENERGY, unit.getPerTurn().get(Stats.ENERGY));
 
@@ -768,8 +770,8 @@ public class Game {
             }
 
             for (Effect effect : getEffects()) {
-                stats.add(effect.getStats());
-                perTurn.add(effect.getPerTurn());
+                stats.add(effect.getStats(this));
+                perTurn.add(effect.getPerTurn(this));
             }
 
             critBag.setChance(stats.get(Stats.CRIT_CHANCE));
@@ -799,16 +801,17 @@ public class Game {
                 if (buff.getPower() > oldBuff.getPower()) {
                     data.remove(oldBuff);
                     data.add(buff);
-                    return Emote.DEBUFF + "**" + buff.getSource().getUsername() + "** applied **" + buff.getName() + "** for **" + buff.getTurns() + "** turn(s)!";
+                    return Emote.BLEED + "**" + buff.getSource().getUsername() + "** applied **" + buff.getName() + "** for **" + buff.getTurns() + "** turn(s)!";
                 }
                 return "";
             }
 
             data.add(buff);
-            return Emote.DEBUFF + "**" + buff.getSource().getUsername() + "** applied **" + buff.getName() + "** for **" + buff.getTurns() + "** turn(s)!";
+            return Emote.BLEED + "**" + buff.getSource().getUsername() + "** applied **" + buff.getName() + "** for **" + buff.getTurns() + "** turn(s)!";
         }
 
         public String shield(float amount) {
+            amount *= 1 - (hasData(Wound.class) ? ((Wound) getData(Wound.class)).getPower() : 0);
             stats.add(Stats.SHIELD, amount);
             return Emote.HEAL + "**" + getUsername() + "** shielded by **" + Math.round(amount)
                     + "**! [**" + stats.getInt(Stats.SHIELD) + "**]";
@@ -820,9 +823,9 @@ public class Game {
 
         public String heal(float amount, String source) {
             amount *= 1 - (hasData(Wound.class) ? ((Wound) getData(Wound.class)).getPower() : 0);
-            stats.add(Stats.HP, amount);
+            stats.add(Stats.HEALTH, amount);
             return Emote.HEAL + "**" + getUsername() + "** healed by **" + Math.round(amount) + "**! [**"
-                    + stats.getInt(Stats.HP) + " / " + stats.getInt(Stats.MAX_HP) + "**]" + (source.isEmpty() ? "" : " (" + source + ")");
+                    + stats.getInt(Stats.HEALTH) + " / " + stats.getInt(Stats.MAX_HEALTH) + "**]" + (source.isEmpty() ? "" : " (" + source + ")");
         }
 
         public DamageEvent hit(DamageEvent event) {
@@ -910,9 +913,9 @@ public class Game {
             }
 
             if (event.target.stats.get(Stats.SHIELD) <= 0 && event.total() > 0) {
-                event.target.stats.sub(Stats.HP, event.total());
+                event.target.stats.sub(Stats.HEALTH, event.total());
                 event.output.add(0, Util.damageText(event, actor, event.target.getUsername(), emote, action));
-                if (event.target.stats.get(Stats.HP) <= 0)
+                if (event.target.stats.get(Stats.HEALTH) <= 0)
                     event.output.add(event.target.lose());
             }
 

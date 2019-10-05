@@ -8,22 +8,37 @@ import com.oopsjpeg.enigma.game.obj.Item;
 
 public class DawnHammer extends Item {
     public static final String NAME = "Dawn Hammer";
+    public static final Tree TREE = Tree.HEALTH;
+    public static final String TIP = "Shield sustain and more energy.";
     public static final int COST = 1175;
     public static final Item[] BUILD = new Item[]{new SteelMallet(), new Gemheart()};
     public static final Effect[] EFFECTS = new Effect[]{StatsEffect.perTurn(new Stats()
             .put(Stats.ENERGY, 25)), new DawnShield()};
     public static final Stats STATS = new Stats()
             .put(Stats.DAMAGE, 10)
-            .put(Stats.MAX_HP, 180);
+            .put(Stats.MAX_HEALTH, 180);
 
+    @Override
     public String getName() {
         return NAME;
     }
 
+    @Override
+    public Tree getTree() {
+        return TREE;
+    }
+
+    @Override
+    public String getTip() {
+        return TIP;
+    }
+
+    @Override
     public int getCost() {
         return COST;
     }
 
+    @Override
     public Item[] getBuild() {
         return BUILD;
     }
@@ -33,6 +48,7 @@ public class DawnHammer extends Item {
         return EFFECTS;
     }
 
+    @Override
     public Stats getStats() {
         return STATS;
     }

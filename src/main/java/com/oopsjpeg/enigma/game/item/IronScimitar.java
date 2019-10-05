@@ -7,6 +7,8 @@ import com.oopsjpeg.enigma.game.obj.Item;
 
 public class IronScimitar extends Item {
     public static final String NAME = "Iron Scimitar";
+    public static final Tree TREE = Tree.DAMAGE;
+    public static final String TIP = "More damage on crits.";
     public static final int COST = 1375;
     public static final Item[] BUILD = new Item[]{new BronzeCutlass(), new Hatchet()};
     public static final Effect[] EFFECTS = new Effect[]{StatsEffect.stats(new Stats()
@@ -18,6 +20,16 @@ public class IronScimitar extends Item {
     @Override
     public String getName() {
         return NAME;
+    }
+
+    @Override
+    public Tree getTree() {
+        return TREE;
+    }
+
+    @Override
+    public String getTip() {
+        return TIP;
     }
 
     @Override

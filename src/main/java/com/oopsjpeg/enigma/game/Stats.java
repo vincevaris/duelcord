@@ -6,12 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Stats {
-    public static String HP = "hp";
+    public static String HEALTH = "health";
     public static String GOLD = "gold";
     public static String ENERGY = "energy";
     public static String SHIELD = "shield";
 
-    public static String MAX_HP = "max_hp";
+    public static String MAX_HEALTH = "max_health";
     public static String DAMAGE = "damage";
     public static String ABILITY_POWER = "ability_power";
     public static String CRIT_CHANCE = "crit_chance";
@@ -22,11 +22,12 @@ public class Stats {
     private Map<String, Float> values = new HashMap<>();
 
     public Stats() {
-        values.put(HP, 0.0f);
+        values.put(HEALTH, 0.0f);
         values.put(GOLD, 0.0f);
         values.put(ENERGY, 0.0f);
         values.put(SHIELD, 0.0f);
-        values.put(MAX_HP, 0.0f);
+
+        values.put(MAX_HEALTH, 0.0f);
         values.put(DAMAGE, 0.0f);
         values.put(ABILITY_POWER, 0.0f);
         values.put(CRIT_CHANCE, 0.0f);
@@ -86,9 +87,9 @@ public class Stats {
     }
 
     public Stats clean() {
-        values.put(MAX_HP, Math.max(0, values.get(MAX_HP)));
+        values.put(MAX_HEALTH, Math.max(0, values.get(MAX_HEALTH)));
 
-        values.put(HP, Util.limit(values.get(HP), 0, values.get(MAX_HP)));
+        values.put(HEALTH, Util.limit(values.get(HEALTH), 0, values.get(MAX_HEALTH)));
         values.put(ENERGY, Math.max(0, values.get(ENERGY)));
         values.put(SHIELD, Math.max(0, values.get(SHIELD)));
 

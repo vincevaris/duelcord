@@ -31,8 +31,8 @@ public class Util {
 
     public static String formatStats(Stats stats) {
         List<String> output = new ArrayList<>();
-        if (stats.get(Stats.MAX_HP) > 0)
-            output.add("Max Health: +**" + stats.getInt(Stats.MAX_HP) + "**");
+        if (stats.get(Stats.MAX_HEALTH) > 0)
+            output.add("Max Health: +**" + stats.getInt(Stats.MAX_HEALTH) + "**");
         if (stats.get(Stats.DAMAGE) > 0)
             output.add("Damage: +**" + stats.getInt(Stats.DAMAGE) + "**");
         if (stats.get(Stats.ABILITY_POWER) > 0)
@@ -48,8 +48,8 @@ public class Util {
 
     public static String formatPerTurn(Stats perTurn) {
         List<String> output = new ArrayList<>();
-        if (perTurn.get(Stats.HP) > 0)
-            output.add("Health/turn: +**" + perTurn.getInt(Stats.HP) + "**");
+        if (perTurn.get(Stats.HEALTH) > 0)
+            output.add("Health/turn: +**" + perTurn.getInt(Stats.HEALTH) + "**");
         if (perTurn.get(Stats.ENERGY) > 0)
             output.add("Energy/turn: +**" + perTurn.getInt(Stats.ENERGY) + "**");
         if (perTurn.get(Stats.GOLD) > 0)
@@ -72,8 +72,8 @@ public class Util {
     public static String damageText(DamageEvent event, String attacker, String victim, String emote, String action) {
         return emote + "**" + attacker + "** " + action + " **" + victim + "** by **" + Math.round(event.damage)
                 + "**" + (event.bonus > 0 ? " (+" + Math.round(event.bonus) + ")" : "") + "!" + (event.crit ? " **CRIT**!" : "")
-                + (event.miss ? " **MISS**!" : "") + " [**" + event.target.getStats().getInt(Stats.HP)
-                + " / " + event.target.getStats().getInt(Stats.MAX_HP) + "**]";
+                + (event.miss ? " **MISS**!" : "") + " [**" + event.target.getStats().getInt(Stats.HEALTH)
+                + " / " + event.target.getStats().getInt(Stats.MAX_HEALTH) + "**]";
     }
 
     public static String timeDiff(LocalDateTime date1, LocalDateTime date2) {

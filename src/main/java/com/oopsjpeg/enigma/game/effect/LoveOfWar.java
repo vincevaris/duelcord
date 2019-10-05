@@ -9,19 +9,35 @@ public class LoveOfWar extends Effect {
     public static final String NAME = "Love of War";
     private final float power;
 
-    private int attack = 0;
+    private int stack = 0;
 
     public LoveOfWar(float power) {
         this.power = power;
     }
 
-    public int attack() {
-        attack++;
-        return attack;
+    public int stack() {
+        setStack(getStack() + 1);
+        return stack;
     }
 
-    public void setAttack(int attack) {
-        this.attack = attack;
+    public int getStack() {
+        return stack;
+    }
+
+    public void setStack(int stack) {
+        this.stack = stack;
+    }
+
+    @Override
+    public String onTurnEnd(Game.Member member) {
+        setStack(0);
+        return "";
+    }
+
+    @Override
+    public DamageEvent onHit(DamageEvent event) {
+        event.damage *= 1 + ((stack() - 1) * power);
+        return event;
     }
 
     @Override
@@ -31,23 +47,11 @@ public class LoveOfWar extends Effect {
 
     @Override
     public String getDesc() {
-        return "Each attack increases damage dealt by **" + Util.percent(power) + "** for that turn.";
+        return "Increases damage dealt by **" + Util.percent(power) + "** for the rest of the turn on hit.";
     }
 
     @Override
     public float getPower() {
         return power;
-    }
-
-    @Override
-    public String onTurnEnd(Game.Member member) {
-        attack = 0;
-        return "";
-    }
-
-    @Override
-    public DamageEvent onHit(DamageEvent event) {
-        event.damage *= 1 + ((attack() - 1) * power);
-        return event;
     }
 }

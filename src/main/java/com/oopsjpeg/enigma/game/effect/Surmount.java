@@ -10,10 +10,25 @@ public class Surmount extends Effect {
     public static final String NAME = "Surmount";
     private final float power;
 
-    private boolean firstAtk = true;
+    private boolean bonus = false;
 
     public Surmount(float power) {
         this.power = power;
+    }
+
+    @Override
+    public String onTurnEnd(Game.Member member) {
+        bonus = false;
+        return "";
+    }
+
+    @Override
+    public DamageEvent onBasicAttack(DamageEvent event) {
+        if (!bonus) {
+            event.bonus += event.target.getStats().get(Stats.MAX_HEALTH) * power;
+            bonus = true;
+        }
+        return event;
     }
 
     @Override
@@ -23,26 +38,11 @@ public class Surmount extends Effect {
 
     @Override
     public String getDesc() {
-        return "The first basic attack in a turn deals **" + Util.percent(power) + "** of the target's max health as bonus damage.";
+        return "The first basic attack per turn deals bonus damage equal to **" + Util.percent(power) + "** of the target's max health.";
     }
 
     @Override
     public float getPower() {
         return power;
-    }
-
-    @Override
-    public String onTurnEnd(Game.Member member) {
-        firstAtk = true;
-        return "";
-    }
-
-    @Override
-    public DamageEvent onBasicAttack(DamageEvent event) {
-        if (firstAtk) {
-            event.damage += power * event.target.getStats().get(Stats.MAX_HP);
-            firstAtk = false;
-        }
-        return event;
     }
 }

@@ -12,7 +12,7 @@ import java.awt.*;
 public class Phasebreaker extends Unit {
     public static final int FLARE_STACKS = 3;
     public static final float PASSIVE_AP = 0.3f;
-    public static final int PHASE_1_AP = 8;
+    public static final int PHASE_1_AP = 7;
     public static final float PHASE_2_SHIELD = 0.6f;
     public static final int PHASE_2_AP = 10;
 
@@ -22,14 +22,14 @@ public class Phasebreaker extends Unit {
             + "\nBasic attacks build **Flare**. At **" + FLARE_STACKS + "** stacks, using `>flare` grants special effects for a single turn based on **Phase**:"
             + "\n**1**. Basic attacks permanently increase ability power by **" + PHASE_1_AP + "** and grant double **Flare**."
             + "\n**2**. Attacks shield for **" + Util.percent(PHASE_2_SHIELD) + "** (+1% per " + PHASE_2_AP + " AP) of damage."
-            + "\n**3**. Passive AP damage is doubled and attacks ignore resistance.";
+            + "\n**3**. Passive AP damage is doubled and attacks ignore resist.";
     public static final Color COLOR = new Color(0, 255, 191);
     public static final Stats STATS = new Stats()
-            .put(Stats.ENERGY, 150)
-            .put(Stats.MAX_HP, 750)
-            .put(Stats.DAMAGE, 18);
+            .put(Stats.ENERGY, 125)
+            .put(Stats.MAX_HEALTH, 750)
+            .put(Stats.DAMAGE, 20);
     public static final Stats PER_TURN = new Stats()
-            .put(Stats.HP, 12);
+            .put(Stats.HEALTH, 12);
 
     private int phase = 0;
     private Stacker flare = new Stacker(FLARE_STACKS);
@@ -98,7 +98,7 @@ public class Phasebreaker extends Unit {
                     event.output.add(event.actor.shield(event.total() * (PHASE_2_SHIELD + ap)));
                     break;
                 case 3:
-                    // Ignore resistance
+                    // Ignore resist
                     float ignore = 1 + event.target.getStats().get(Stats.RESIST) + (event.target.isDefensive() ? 0.2f : 0);
                     event.damage *= ignore;
                     event.bonus *= ignore;

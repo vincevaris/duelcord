@@ -7,6 +7,8 @@ import com.oopsjpeg.enigma.game.obj.Item;
 
 public class Soulstealer extends Item {
     public static final String NAME = "Soulstealer";
+    public static final Tree TREE = Tree.DAMAGE;
+    public static final String TIP = "Massive heal sustain.";
     public static final int COST = 1325;
     public static final Item[] BUILD = new Item[]{new BloodlustBlade(), new Hatchet()};
     public static final Effect[] EFFECTS = new Effect[]{StatsEffect.stats(new Stats()
@@ -17,6 +19,16 @@ public class Soulstealer extends Item {
     @Override
     public String getName() {
         return NAME;
+    }
+
+    @Override
+    public Tree getTree() {
+        return TREE;
+    }
+
+    @Override
+    public String getTip() {
+        return TIP;
     }
 
     @Override

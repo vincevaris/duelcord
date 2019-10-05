@@ -7,16 +7,28 @@ import com.oopsjpeg.enigma.game.obj.Item;
 
 public class ViktorsScythe extends Item {
     public static final String NAME = "Viktor's Scythe";
+    public static final String TIP = "Strong damage against tanks.";
+    public static final Tree TREE = Tree.DAMAGE;
     public static final int COST = 1275;
     public static final Stats STATS = new Stats()
-            .put(Stats.DAMAGE, 15)
-            .put(Stats.MAX_HP, 160);
+            .put(Stats.DAMAGE, 20)
+            .put(Stats.MAX_HEALTH, 90);
     public static final Effect[] EFFECTS = new Effect[]{new Surmount(0.04f)};
-    public static final Item[] BUILD = new Item[]{new BlackHalberd(), new Gemheart()};
+    public static final Item[] BUILD = new Item[]{new BlackHalberd(), new Hatchet()};
 
     @Override
     public String getName() {
         return NAME;
+    }
+
+    @Override
+    public Tree getTree() {
+        return TREE;
+    }
+
+    @Override
+    public String getTip() {
+        return TIP;
     }
 
     @Override

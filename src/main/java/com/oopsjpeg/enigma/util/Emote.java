@@ -16,11 +16,12 @@ public class Emote {
 
     public static final String GUN = ":gun: ";
     public static final String KNIFE = ":knife: ";
-    public static final String DEBUFF = ":syringe: ";
+    public static final String BLEED = ":syringe: ";
     public static final String WOUND = ":cupid: ";
     public static final String SILENCE = ":eight_pointed_black_star: ";
 
     // Custom emotes
     public static final String HEAL = "<:enigmaHeal:629158098681987072> ";
     public static final String RAGE = "<:enigmaRage:629168653438418950> ";
+    // public static final String BASH = "";
 }
