@@ -23,7 +23,9 @@ public class PickCommand implements Command {
             if (game.getGameState() == 1)
                 Util.sendFailure(channel, "You cannot pick a unit after the game has started.");
             else {
-                Unit unit = Unit.fromName(String.join(" ", args));
+                String name = String.join(" ", args);
+                Unit unit = name.equalsIgnoreCase("random") ? Unit.values()[Util.RANDOM.nextInt(Unit.values().length)]
+                        : Unit.fromName(String.join(" ", args));
                 if (unit == null)
                     Util.sendFailure(channel, "Invalid unit.");
                 else {
