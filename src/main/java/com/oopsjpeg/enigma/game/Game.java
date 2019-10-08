@@ -285,9 +285,8 @@ public class Game {
                     build.remove(i);
                 }
 
-            if (actor.stats.get(Stats.GOLD) < cost)
-                Util.sendFailure(channel, "You need **" + ((int) Math.ceil(cost - actor.stats.getInt(Stats.GOLD)))
-                        + "** more gold for a(n) **" + item.getName() + "**.");
+            if (actor.stats.getInt(Stats.GOLD) < cost)
+                Util.sendFailure(channel, "You need **" + (cost - actor.stats.getInt(Stats.GOLD)) + "** more gold for a(n) **" + item.getName() + "**.");
             else if (build.size() >= 4)
                 Util.sendFailure(channel, "You do not have enough inventory space for a(n) **" + item.getName() + "**.");
             else {
