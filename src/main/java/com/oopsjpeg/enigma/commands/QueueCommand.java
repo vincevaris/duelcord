@@ -16,7 +16,9 @@ public class QueueCommand implements Command {
         User author = message.getAuthor().orElse(null);
         Player player = Enigma.getInstance().getPlayer(author);
 
-        if (player.getGame() != null)
+        if (!channel.equals(Enigma.getInstance().getMatchmakingChannel()))
+            Util.sendFailure(channel, "You must be in " + Enigma.getInstance().getMatchmakingChannel().getMention() + " to queue for games.");
+        else if (player.getGame() != null)
             Util.sendFailure(channel, "You're already in a match.");
         else if (player.getQueue() != null) {
             player.removeQueue();
