@@ -3,7 +3,9 @@ package com.oopsjpeg.enigma.game.unit;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
+import com.oopsjpeg.enigma.game.GameAction;
 import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.buff.Silence;
 import com.oopsjpeg.enigma.game.obj.Unit;
 import com.oopsjpeg.enigma.util.Command;
 import com.oopsjpeg.enigma.util.Stacker;
@@ -153,13 +155,40 @@ public class Phasebreaker extends Unit {
                 if (game.getGameState() == 0)
                     Util.sendFailure(channel, "You cannot use **Flare** until the game has started.");
                 else
-                    member.act(game.new FlareAction());
+                    member.act(new FlareAction());
             }
         }
 
         @Override
         public String getName() {
             return "flare";
+        }
+    }
+
+    public class FlareAction implements GameAction {
+        @Override
+        public boolean act(Game.Member actor) {
+            if (actor.hasData(Silence.class))
+                Util.sendFailure(actor.getGame().getChannel(), "You cannot use **Flare** while silenced.");
+            else {
+                if (getFlared())
+                    Util.sendFailure(actor.getGame().getChannel(), "You already using **Flare**.");
+                else if (!getFlare().done())
+                    Util.sendFailure(actor.getGame().getChannel(), "**Flare** is not ready yet.");
+                else {
+                    getFlare().reset();
+                    setFlared(true);
+                    actor.getGame().getChannel().createMessage(":diamond_shape_with_a_dot_inside: **"
+                            + actor.getUsername() + "** used **Flare** on **Phase " + getPhase() + "**!").block();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public int getEnergy() {
+            return 0;
         }
     }
 }

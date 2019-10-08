@@ -3,7 +3,9 @@ package com.oopsjpeg.enigma.game.unit;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
+import com.oopsjpeg.enigma.game.GameAction;
 import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.buff.Silence;
 import com.oopsjpeg.enigma.game.obj.Unit;
 import com.oopsjpeg.enigma.util.Command;
 import com.oopsjpeg.enigma.util.Emote;
@@ -125,7 +127,7 @@ public class Assassin extends Unit {
                     if (target == null)
                         Util.sendFailure(channel, "There is no one to use **Slash** on.");
                     else
-                        member.act(game.new SlashAction(target));
+                        member.act(new SlashAction(target));
                 }
             }
         }
@@ -133,6 +135,51 @@ public class Assassin extends Unit {
         @Override
         public String getName() {
             return "slash";
+        }
+    }
+
+    public class SlashAction implements GameAction {
+        private final Game.Member target;
+
+        public SlashAction(Game.Member target) {
+            this.target = target;
+        }
+
+        @Override
+        public boolean act(Game.Member actor) {
+            if (actor.hasData(Silence.class))
+                Util.sendFailure(actor.getGame().getChannel(), "You cannot **Slash** while silenced.");
+            else {
+                if (getSlashed())
+                    Util.sendFailure(actor.getGame().getChannel(), "You can only use **Slash** once per turn.");
+                else {
+                    setSlashed(true);
+
+                    DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
+                    event.damage = (actor.getStats().get(Stats.DAMAGE) * Assassin.SLASH_DAMAGE) + (actor.getStats().get(Stats.ABILITY_POWER) * Assassin.SLASH_AP);
+
+                    if (getSlash().stack()) {
+                        event.damage += getPotencyTotal();
+                        event.output.add(target.buff(new Silence(actor, Assassin.SILENCE_TURNS)));
+                        getSlash().reset();
+                        getPotency().reset();
+                        setPotencyTotal(0);
+                    }
+
+                    event = event.actor.hit(event);
+                    event = event.actor.crit(event);
+                    event = event.actor.ability(event);
+
+                    actor.getGame().getChannel().createMessage(actor.damage(event, Emote.KNIFE, "slashed")).block();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public int getEnergy() {
+            return 25;
         }
     }
 }

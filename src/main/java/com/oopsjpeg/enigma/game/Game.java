@@ -34,9 +34,9 @@ public class Game {
     private final List<Member> members;
     private final CommandListener commands;
 
-    private List<Action> actions = new ArrayList<>();
+    private List<GameAction> actions = new ArrayList<>();
     private LocalDateTime lastAction = LocalDateTime.now();
-    private int notifyAfk = 0;
+    private int afkNotifier = 0;
 
     private int gameState = 0;
     private int turnCount = 0;
@@ -211,7 +211,7 @@ public class Game {
         return members.stream().filter(m -> !m.alive).collect(Collectors.toList());
     }
 
-    public List<Action> getActions() {
+    public List<GameAction> getActions() {
         return actions;
     }
 
@@ -219,12 +219,24 @@ public class Game {
         return lastAction;
     }
 
+    public void setLastAction(LocalDateTime lastAction) {
+        this.lastAction = lastAction;
+    }
+
+    public int getAfkNotifier() {
+        return afkNotifier;
+    }
+
+    public void setAfkNotifier(int afkNotifier) {
+        this.afkNotifier = afkNotifier;
+    }
+
     public void notifyAfk() {
-        notifyAfk++;
-        if (notifyAfk == 4)
+        afkNotifier++;
+        if (afkNotifier == 4)
             channel.createMessage(Emote.WARN + curMember + ", you have around **4** minutes " +
                     "to make an action, otherwise you will **forfeit due to AFKing**.").block();
-        else if (notifyAfk >= 8)
+        else if (afkNotifier >= 8)
             channel.createMessage(curMember.lose()).block();
     }
 
@@ -236,19 +248,7 @@ public class Game {
         return turnCount;
     }
 
-    public abstract class Action {
-        public boolean execute(Member actor) {
-            lastAction = LocalDateTime.now();
-            notifyAfk = 0;
-            return act(actor);
-        }
-
-        public abstract boolean act(Member actor);
-
-        public abstract int getEnergy();
-    }
-
-    public class AttackAction extends Action {
+    public class AttackAction implements GameAction {
         private final Member target;
 
         public AttackAction(Member target) {
@@ -276,7 +276,7 @@ public class Game {
         }
     }
 
-    public class BuyAction extends Action {
+    public class BuyAction implements GameAction {
         private final Item item;
 
         public BuyAction(Item item) {
@@ -326,7 +326,7 @@ public class Game {
         }
     }
 
-    public class UseAction extends Action {
+    public class UseAction implements GameAction {
         private final Item item;
 
         public UseAction(Item item) {
@@ -358,7 +358,7 @@ public class Game {
         }
     }
 
-    public class SellAction extends Action {
+    public class SellAction implements GameAction {
         private final Item item;
 
         public SellAction(Item item) {
@@ -384,242 +384,6 @@ public class Game {
         @Override
         public int getEnergy() {
             return 25;
-        }
-    }
-
-    public class BashAction extends Action {
-        private final Member target;
-
-        public BashAction(Member target) {
-            this.target = target;
-        }
-
-        @Override
-        public boolean act(Member actor) {
-            if (!(actor.unit instanceof Warrior))
-                Util.sendFailure(channel, "You are not playing **Warrior**.");
-            else if (actor.hasData(Silence.class))
-                Util.sendFailure(channel, "You cannot **Bash** while silenced.");
-            else {
-                Warrior wa = (Warrior) actor.unit;
-                if (!wa.getBash().done())
-                    Util.sendFailure(channel, "**Bash** is on cooldown for **" + wa.getBash().getCur() + "** more turn(s).");
-                else {
-                    wa.getBash().start();
-                    wa.getBonus().stack();
-
-                    DamageEvent event = new DamageEvent(Game.this, actor, target);
-
-                    event.target.defensive = false;
-                    event.target.getStats().put(Stats.RESIST, 0);
-                    float hpBonus = (actor.stats.get(Stats.MAX_HEALTH) - actor.unit.getStats().get(Stats.MAX_HEALTH)) * Warrior.BASH_HP_SCALE;
-                    event.damage = (actor.stats.get(Stats.DAMAGE) * Warrior.BASH_DAMAGE) + hpBonus;
-                    if (event.target.stats.get(Stats.SHIELD) > 0)
-                        event.target.stats.put(Stats.SHIELD, 0.01f);
-
-                    event.actor.ability(event);
-
-                    channel.createMessage(actor.damage(event, Emote.KNIFE, "bashed")).block();
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public int getEnergy() {
-            return 25;
-        }
-    }
-
-    public class RageAction extends Action {
-        @Override
-        public boolean act(Member actor) {
-            if (!(actor.unit instanceof Berserker))
-                Util.sendFailure(channel, "You are not playing **Berserker**.");
-            else if (actor.hasData(Silence.class))
-                Util.sendFailure(channel, "You cannot **Rage** while silenced.");
-            else {
-                Berserker be = (Berserker) actor.unit;
-                if (be.getRage().getCur() == 0)
-                    Util.sendFailure(channel, "You cannot **Rage** without any stacks.");
-                else {
-                    float stack = Berserker.BONUS_DAMAGE + (actor.stats.get(Stats.ABILITY_POWER) / (Berserker.BONUS_AP * 100));
-
-                    be.setBonus(stack * be.getRage().getCur());
-
-                    if (be.getRage().getCur() == Berserker.RAGE_MAX)
-                        actor.stats.add(Stats.ENERGY, 100);
-
-                    channel.createMessage(Emote.RAGE + "**" + actor.getUsername() + "** has gained **"
-                            + Util.percent(be.getBonus()) + "** bonus damage "
-                            + (be.getRage().getCur() == Berserker.RAGE_MAX ? "and **100** energy " : "")
-                            + "this turn!").block();
-
-                    be.getRage().reset();
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public int getEnergy() {
-            return 0;
-        }
-    }
-
-    public class SlashAction extends Action {
-        private final Member target;
-
-        public SlashAction(Member target) {
-            this.target = target;
-        }
-
-        @Override
-        public boolean act(Member actor) {
-            if (!(actor.unit instanceof Assassin))
-                Util.sendFailure(channel, "You are not playing **Assassin**.");
-            else if (actor.hasData(Silence.class))
-                Util.sendFailure(channel, "You cannot **Slash** while silenced.");
-            else {
-                Assassin au = (Assassin) actor.unit;
-                if (au.getSlashed())
-                    Util.sendFailure(channel, "You can only use **Slash** once per turn.");
-                else {
-                    au.setSlashed(true);
-
-                    DamageEvent event = new DamageEvent(Game.this, actor, target);
-                    event.damage = (actor.stats.get(Stats.DAMAGE) * Assassin.SLASH_DAMAGE) + (actor.stats.get(Stats.ABILITY_POWER) * Assassin.SLASH_AP);
-
-                    if (au.getSlash().stack()) {
-                        event.damage += au.getPotencyTotal();
-                        event.output.add(target.buff(new Silence(actor, Assassin.SILENCE_TURNS)));
-                        au.getSlash().reset();
-                        au.getPotency().reset();
-                        au.setPotencyTotal(0);
-                    }
-
-                    event = event.actor.hit(event);
-                    event = event.actor.crit(event);
-                    event = event.actor.ability(event);
-
-                    channel.createMessage(actor.damage(event, Emote.KNIFE, "slashed")).block();
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public int getEnergy() {
-            return 25;
-        }
-    }
-
-    public class CrushAction extends Action {
-        private final Member target;
-
-        public CrushAction(Member target) {
-            this.target = target;
-        }
-
-        @Override
-        public boolean act(Member actor) {
-            if (!(actor.unit instanceof Duelist))
-                Util.sendFailure(channel, "You are not playing **Duelist**.");
-            else if (actor.hasData(Silence.class))
-                Util.sendFailure(channel, "You cannot **Crush** while silenced.");
-            else {
-                Duelist du = (Duelist) actor.unit;
-                if (!du.getCrush().done())
-                    Util.sendFailure(channel, "**Crush** is on cooldown for **" + du.getCrush().getCur() + "** more turn(s).");
-                else {
-                    du.getCrush().start();
-                    channel.createMessage(target.buff(new Weaken(actor, Duelist.CRUSH_TURNS, Duelist.CRUSH_POWER))).block();
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public int getEnergy() {
-            return 25;
-        }
-    }
-
-    public class BarrageAction extends Action {
-        private final Member target;
-
-        public BarrageAction(Member target) {
-            this.target = target;
-        }
-
-        @Override
-        public boolean act(Member actor) {
-            if (!(actor.unit instanceof Gunslinger))
-                Util.sendFailure(channel, "You are not playing **Gunslinger**.");
-            else if (actor.hasData(Silence.class))
-                Util.sendFailure(channel, "You cannot **Barrage** while silenced.");
-            else {
-                Gunslinger gu = (Gunslinger) actor.unit;
-                if (!gu.getBarrage().done())
-                    Util.sendFailure(channel, "**Barrage** is on cooldown for **" + gu.getBarrage().getCur() + "** more turn(s).");
-                else {
-                    gu.getBarrage().start();
-
-                    List<String> output = new ArrayList<>();
-                    for (int i = 0; i < Gunslinger.BARRAGE_SHOTS; i++)
-                        if (target.isAlive()) {
-                            DamageEvent event = new DamageEvent(Game.this, actor, target);
-                            event.damage = (actor.stats.get(Stats.DAMAGE) * Gunslinger.BARRAGE_DAMAGE) + (actor.stats.get(Stats.ABILITY_POWER) * Gunslinger.BARRAGE_AP);
-                            actor.crit(event);
-                            actor.hit(event);
-                            output.add(actor.damage(event, Emote.GUN, "shot"));
-                        }
-                    output.add(0, Emote.ATTACK + "**" + actor.getUsername() + "** used **Barrage**!");
-
-                    channel.createMessage(String.join("\n", output)).block();
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public int getEnergy() {
-            return 25;
-        }
-    }
-
-    public class FlareAction extends Action {
-        @Override
-        public boolean act(Member actor) {
-            if (!(actor.unit instanceof Phasebreaker))
-                Util.sendFailure(channel, "You are not playing **Phasebreaker**.");
-            else if (actor.hasData(Silence.class))
-                Util.sendFailure(channel, "You cannot use **Flare** while silenced.");
-            else {
-                Phasebreaker pb = (Phasebreaker) actor.unit;
-                if (pb.getFlared())
-                    Util.sendFailure(channel, "You already using **Flare**.");
-                else if (!pb.getFlare().done())
-                    Util.sendFailure(channel, "**Flare** is not ready yet.");
-                else {
-                    pb.getFlare().reset();
-                    pb.setFlared(true);
-                    channel.createMessage(":diamond_shape_with_a_dot_inside: **"
-                                    + actor.getUsername() + "** used **Flare** on **Phase " + pb.getPhase() + "**!").block();
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public int getEnergy() {
-            return 0;
         }
     }
 
@@ -774,7 +538,7 @@ public class Game {
             critBag.setInfluence(0.5f);
         }
 
-        public void act(Action action) {
+        public void act(GameAction action) {
             if (stats.get(Stats.ENERGY) < action.getEnergy())
                 Util.sendFailure(channel, "You do not have **" + action.getEnergy() + "** energy.");
             else if (action.execute(this)) {

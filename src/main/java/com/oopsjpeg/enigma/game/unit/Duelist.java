@@ -3,8 +3,11 @@ package com.oopsjpeg.enigma.game.unit;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
+import com.oopsjpeg.enigma.game.GameAction;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.buff.Bleed;
+import com.oopsjpeg.enigma.game.buff.Silence;
+import com.oopsjpeg.enigma.game.buff.Weaken;
 import com.oopsjpeg.enigma.game.obj.Unit;
 import com.oopsjpeg.enigma.util.*;
 import discord4j.core.object.entity.Message;
@@ -109,7 +112,7 @@ public class Duelist extends Unit {
                     if (target == null)
                         Util.sendFailure(channel, "There is no one to use **Crush** on.");
                     else
-                        member.act(game.new CrushAction(target));
+                        member.act(new CrushAction(target));
                 }
             }
         }
@@ -117,6 +120,35 @@ public class Duelist extends Unit {
         @Override
         public String getName() {
             return "crush";
+        }
+    }
+
+    public class CrushAction implements GameAction {
+        private final Game.Member target;
+
+        public CrushAction(Game.Member target) {
+            this.target = target;
+        }
+
+        @Override
+        public boolean act(Game.Member actor) {
+            if (actor.hasData(Silence.class))
+                Util.sendFailure(actor.getGame().getChannel(), "You cannot **Crush** while silenced.");
+            else {
+                if (!getCrush().done())
+                    Util.sendFailure(actor.getGame().getChannel(), "**Crush** is on cooldown for **" + getCrush().getCur() + "** more turn(s).");
+                else {
+                    getCrush().start();
+                    actor.getGame().getChannel().createMessage(target.buff(new Weaken(actor, Duelist.CRUSH_TURNS, Duelist.CRUSH_POWER))).block();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public int getEnergy() {
+            return 25;
         }
     }
 }

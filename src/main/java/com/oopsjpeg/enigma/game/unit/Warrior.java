@@ -3,7 +3,9 @@ package com.oopsjpeg.enigma.game.unit;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
+import com.oopsjpeg.enigma.game.GameAction;
 import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.buff.Silence;
 import com.oopsjpeg.enigma.game.obj.Unit;
 import com.oopsjpeg.enigma.util.*;
 import discord4j.core.object.entity.Message;
@@ -100,7 +102,7 @@ public class Warrior extends Unit {
                     if (target == null)
                         Util.sendFailure(channel, "There is no one to use **Bash** on.");
                     else
-                        member.act(game.new BashAction(target));
+                        member.act(new BashAction(target));
                 }
             }
         }
@@ -111,4 +113,45 @@ public class Warrior extends Unit {
         }
     }
 
+    public class BashAction implements GameAction {
+        private final Game.Member target;
+
+        public BashAction(Game.Member target) {
+            this.target = target;
+        }
+
+        @Override
+        public boolean act(Game.Member actor) {
+            if (actor.hasData(Silence.class))
+                Util.sendFailure(actor.getGame().getChannel(), "You cannot **Bash** while silenced.");
+            else {
+                if (!getBash().done())
+                    Util.sendFailure(actor.getGame().getChannel(), "**Bash** is on cooldown for **" + getBash().getCur() + "** more turn(s).");
+                else {
+                    getBash().start();
+                    getBonus().stack();
+
+                    DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
+
+                    event.target.setDefensive(false);
+                    event.target.getStats().put(Stats.RESIST, 0);
+                    float hpBonus = (actor.getStats().get(Stats.MAX_HEALTH) - actor.getUnit().getStats().get(Stats.MAX_HEALTH)) * Warrior.BASH_HP_SCALE;
+                    event.damage = (actor.getStats().get(Stats.DAMAGE) * Warrior.BASH_DAMAGE) + hpBonus;
+                    if (event.target.getStats().get(Stats.SHIELD) > 0)
+                        event.target.getStats().put(Stats.SHIELD, 0.01f);
+
+                    event.actor.ability(event);
+
+                    actor.getGame().getChannel().createMessage(actor.damage(event, Emote.KNIFE, "bashed")).block();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public int getEnergy() {
+            return 25;
+        }
+    }
 }

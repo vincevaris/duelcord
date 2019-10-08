@@ -3,7 +3,9 @@ package com.oopsjpeg.enigma.game.unit;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
+import com.oopsjpeg.enigma.game.GameAction;
 import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.buff.Silence;
 import com.oopsjpeg.enigma.game.obj.Unit;
 import com.oopsjpeg.enigma.util.Command;
 import com.oopsjpeg.enigma.util.Emote;
@@ -115,13 +117,47 @@ public class Berserker extends Unit {
                 if (game.getGameState() == 0)
                     Util.sendFailure(channel, "You cannot use **Rage** until the game has started.");
                 else
-                    member.act(game.new RageAction());
+                    member.act(new RageAction());
             }
         }
 
         @Override
         public String getName() {
             return "rage";
+        }
+    }
+
+    public class RageAction implements GameAction {
+        @Override
+        public boolean act(Game.Member actor) {
+            if (actor.hasData(Silence.class))
+                Util.sendFailure(actor.getGame().getChannel(), "You cannot **Rage** while silenced.");
+            else {
+                if (getRage().getCur() == 0)
+                    Util.sendFailure(actor.getGame().getChannel(), "You cannot **Rage** without any stacks.");
+                else {
+                    float stack = Berserker.BONUS_DAMAGE + (actor.getStats().get(Stats.ABILITY_POWER) / (Berserker.BONUS_AP * 100));
+
+                    setBonus(stack * getRage().getCur());
+
+                    if (getRage().getCur() == Berserker.RAGE_MAX)
+                        actor.getStats().add(Stats.ENERGY, 100);
+
+                    actor.getGame().getChannel().createMessage(Emote.RAGE + "**" + actor.getUsername() + "** has gained **"
+                            + Util.percent(getBonus()) + "** bonus damage "
+                            + (getRage().getCur() == Berserker.RAGE_MAX ? "and **100** energy " : "")
+                            + "this turn!").block();
+
+                    getRage().reset();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public int getEnergy() {
+            return 0;
         }
     }
 }
