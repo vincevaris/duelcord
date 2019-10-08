@@ -191,6 +191,11 @@ public class Game {
         return curMember;
     }
 
+    public Member getRandomTarget(Member exclude) {
+        List<Member> targets = getAlive().stream().filter(m -> !m.equals(exclude)).collect(Collectors.toList());
+        return targets.get(Util.RANDOM.nextInt(targets.size()));
+    }
+
     public List<Member> getMembers() {
         return members;
     }

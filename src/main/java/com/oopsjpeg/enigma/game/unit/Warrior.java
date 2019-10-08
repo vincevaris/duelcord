@@ -95,11 +95,7 @@ public class Warrior extends Unit {
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
-                Game.Member target = game.getAlive().stream().filter(m -> !m.equals(member)).findAny().orElse(null);
-                if (target == null)
-                    Util.sendFailure(channel, "There is no one to use **Bash** on.");
-                else
-                    member.act(new BashAction(target));
+                member.act(new BashAction(game.getRandomTarget(member)));
             }
         }
 

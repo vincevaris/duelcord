@@ -105,11 +105,7 @@ public class Duelist extends Unit {
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
-                Game.Member target = game.getAlive().stream().filter(m -> !m.equals(member)).findAny().orElse(null);
-                if (target == null)
-                    Util.sendFailure(channel, "There is no one to use **Crush** on.");
-                else
-                    member.act(new CrushAction(target));
+                member.act(new CrushAction(game.getRandomTarget(member)));
             }
         }
 

@@ -120,11 +120,7 @@ public class Assassin extends Unit {
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
-                Game.Member target = game.getAlive().stream().filter(m -> !m.equals(member)).findAny().orElse(null);
-                if (target == null)
-                    Util.sendFailure(channel, "There is no one to use **Slash** on.");
-                else
-                    member.act(new SlashAction(target));
+                member.act(new SlashAction(game.getRandomTarget(member)));
             }
         }
 

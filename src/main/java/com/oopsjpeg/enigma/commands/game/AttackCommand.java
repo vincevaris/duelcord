@@ -21,11 +21,7 @@ public class AttackCommand implements Command {
             if (game.getGameState() == 0)
                 Util.sendFailure(channel, "You cannot attack until the game has started.");
             else {
-                Game.Member target = game.getAlive().stream().filter(m -> !m.equals(member)).findAny().orElse(null);
-                if (target == null)
-                    Util.sendFailure(channel, "There is no one to attack.");
-                else
-                    member.act(game.new AttackAction(target));
+                member.act(game.new AttackAction(game.getRandomTarget(member)));
             }
         }
     }
