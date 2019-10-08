@@ -15,7 +15,7 @@ public class Brawn extends Effect {
 
     @Override
     public DamageEvent onBasicAttack(DamageEvent event) {
-        event.damage += event.actor.getStats().get(Stats.MAX_HEALTH) * power;
+        event.damage += (event.actor.getStats().get(Stats.MAX_HEALTH) - event.actor.getUnit().getStats().get(Stats.MAX_HEALTH)) * power;
         return event;
     }
 
@@ -26,7 +26,7 @@ public class Brawn extends Effect {
 
     @Override
     public String getDesc() {
-        return "Basic attacks deal more damage equal to **" + Util.percent(power) + "** of your max health.";
+        return "Basic attacks deal more damage equal to **" + Util.percent(power) + "** of your bonus max health.";
     }
 
     @Override

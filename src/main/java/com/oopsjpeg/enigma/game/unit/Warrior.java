@@ -65,13 +65,13 @@ public class Warrior extends Unit {
         return new Stats()
                 .put(Stats.ENERGY, 125)
                 .put(Stats.MAX_HEALTH, 795)
-                .put(Stats.DAMAGE, 23);
+                .put(Stats.DAMAGE, 22);
     }
 
     @Override
     public Stats getPerTurn() {
         return new Stats()
-                .put(Stats.HEALTH, 13);
+                .put(Stats.HEALTH, 12);
     }
 
     @Override
@@ -132,8 +132,8 @@ public class Warrior extends Unit {
 
                     event.target.setDefensive(false);
                     event.target.getStats().put(Stats.RESIST, 0);
-                    float hpBonus = (actor.getStats().get(Stats.MAX_HEALTH) - actor.getUnit().getStats().get(Stats.MAX_HEALTH)) * Warrior.BASH_HP_SCALE;
-                    event.damage = (actor.getStats().get(Stats.DAMAGE) * Warrior.BASH_DAMAGE) + hpBonus;
+                    event.damage = (actor.getStats().get(Stats.DAMAGE) * Warrior.BASH_DAMAGE);
+                    event.bonus = (actor.getStats().get(Stats.MAX_HEALTH) - actor.getUnit().getStats().get(Stats.MAX_HEALTH)) * Warrior.BASH_HP_SCALE;
                     if (event.target.getStats().get(Stats.SHIELD) > 0)
                         event.target.getStats().put(Stats.SHIELD, 0.01f);
 

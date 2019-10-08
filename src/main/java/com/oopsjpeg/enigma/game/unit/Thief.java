@@ -15,19 +15,6 @@ public class Thief extends Unit {
     public static final float CRIT_REDUCE = 0.2f;
     public static final float CRIT_INCREASE = 0.2f;
 
-    public static final String NAME = "Thief";
-    public static final String DESC = "The first crit per turn steals gold equal to **" + Util.percent(STEAL_AMOUNT) + "** base damage (+" + Util.percent(STEAL_AP) + " AP)."
-            + "\nCrit damage is reduced by **" + Util.percent(CRIT_REDUCE) + "**, however, subsequent crits in a turn deal increasing damage.";
-    public static final Color COLOR = Color.YELLOW;
-    public static final Stats STATS = new Stats()
-            .put(Stats.ENERGY, 150)
-            .put(Stats.MAX_HEALTH, 735)
-            .put(Stats.DAMAGE, 20)
-            .put(Stats.CRIT_CHANCE, 0.2f)
-            .put(Stats.CRIT_DAMAGE, -1 * CRIT_REDUCE);
-    public static final Stats PER_TURN = new Stats()
-            .put(Stats.HEALTH, 8);
-
     private int critAmount = 0;
 
     public int getCritAmount() {
@@ -57,27 +44,34 @@ public class Thief extends Unit {
 
     @Override
     public String getName() {
-        return NAME;
+        return "Thief";
     }
 
     @Override
     public String getDescription() {
-        return DESC;
+        return "The first crit per turn steals gold equal to **" + Util.percent(STEAL_AMOUNT) + "** base damage (+" + Util.percent(STEAL_AP) + " AP)."
+                + "\nCrit damage is reduced by **" + Util.percent(CRIT_REDUCE) + "**, however, subsequent crits in a turn deal increasing damage.";
     }
 
     @Override
     public Color getColor() {
-        return COLOR;
+        return Color.YELLOW;
     }
 
     @Override
     public Stats getStats() {
-        return STATS;
+        return new Stats()
+                .put(Stats.ENERGY, 150)
+                .put(Stats.MAX_HEALTH, 735)
+                .put(Stats.DAMAGE, 20)
+                .put(Stats.CRIT_CHANCE, 0.2f)
+                .put(Stats.CRIT_DAMAGE, -1 * CRIT_REDUCE);
     }
 
     @Override
     public Stats getPerTurn() {
-        return PER_TURN;
+        return new Stats()
+                .put(Stats.HEALTH, 8);
     }
 
     @Override

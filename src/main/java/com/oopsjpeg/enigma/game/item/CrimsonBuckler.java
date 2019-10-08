@@ -13,7 +13,7 @@ public class CrimsonBuckler extends Item {
     public static final int COST = 1175;
     public static final Stats STATS = new Stats()
             .put(Stats.MAX_HEALTH, 200);
-    public static final Effect[] EFFECTS = new Effect[]{new Divinity(0.2f), new Brawn(0.04f)};
+    public static final Effect[] EFFECTS = new Effect[]{new Divinity(0.2f), new Brawn(0.15f)};
     public static final Item[] BUILD = new Item[]{new DivinePlatemail(), new Gemheart()};
 
     @Override

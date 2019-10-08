@@ -96,7 +96,7 @@ public class Gunslinger extends Unit {
     @Override
     public Stats getPerTurn() {
         return new Stats()
-                .put(Stats.HEALTH, 11);
+                .put(Stats.HEALTH, 12);
     }
 
     public class BarrageCommand implements Command {

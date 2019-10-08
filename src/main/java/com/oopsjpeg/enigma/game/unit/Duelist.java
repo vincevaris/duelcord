@@ -97,7 +97,7 @@ public class Duelist extends Unit {
     @Override
     public Stats getPerTurn() {
         return new Stats()
-                .put(Stats.HEALTH, 14);
+                .put(Stats.HEALTH, 10);
     }
 
     public class CrushCommand implements Command {
