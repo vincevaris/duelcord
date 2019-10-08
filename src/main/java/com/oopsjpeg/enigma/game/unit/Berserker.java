@@ -114,10 +114,7 @@ public class Berserker extends Unit {
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
-                if (game.getGameState() == 0)
-                    Util.sendFailure(channel, "You cannot use **Rage** until the game has started.");
-                else
-                    member.act(new RageAction());
+                member.act(new RageAction());
             }
         }
 

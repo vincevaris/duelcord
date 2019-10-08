@@ -152,10 +152,7 @@ public class Phasebreaker extends Unit {
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
-                if (game.getGameState() == 0)
-                    Util.sendFailure(channel, "You cannot use **Flare** until the game has started.");
-                else
-                    member.act(new FlareAction());
+                member.act(new FlareAction());
             }
         }
 
