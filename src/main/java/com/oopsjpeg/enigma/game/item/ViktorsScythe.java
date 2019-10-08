@@ -13,7 +13,7 @@ public class ViktorsScythe extends Item {
     public static final Stats STATS = new Stats()
             .put(Stats.DAMAGE, 20)
             .put(Stats.MAX_HEALTH, 90);
-    public static final Effect[] EFFECTS = new Effect[]{new Surmount(0.04f)};
+    public static final Effect[] EFFECTS = new Effect[]{new Surmount(0.15f, 10)};
     public static final Item[] BUILD = new Item[]{new BlackHalberd(), new Hatchet()};
 
     @Override

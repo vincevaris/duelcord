@@ -13,7 +13,7 @@ public class BlackHalberd extends Item {
     public static final Stats STATS = new Stats()
             .put(Stats.DAMAGE, 8)
             .put(Stats.MAX_HEALTH, 45);
-    public static final Effect[] EFFECTS = new Effect[]{new Surmount(0.02f)};
+    public static final Effect[] EFFECTS = new Effect[]{new Surmount(0.06f, 4)};
     public static final Item[] BUILD = new Item[]{new Knife(), new Crystal()};
 
     @Override

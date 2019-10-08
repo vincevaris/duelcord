@@ -9,11 +9,13 @@ import com.oopsjpeg.enigma.util.Util;
 public class Surmount extends Effect {
     public static final String NAME = "Surmount";
     private final float power;
+    private final float flat;
 
     private boolean bonus = false;
 
-    public Surmount(float power) {
+    public Surmount(float power, float flat) {
         this.power = power;
+        this.flat = flat;
     }
 
     @Override
@@ -25,7 +27,7 @@ public class Surmount extends Effect {
     @Override
     public DamageEvent onBasicAttack(DamageEvent event) {
         if (!bonus) {
-            event.bonus += event.target.getStats().get(Stats.MAX_HEALTH) * power;
+            event.bonus += flat + ((event.target.getStats().get(Stats.MAX_HEALTH) - event.target.getUnit().getStats().get(Stats.MAX_HEALTH)) * power);
             bonus = true;
         }
         return event;
@@ -38,11 +40,15 @@ public class Surmount extends Effect {
 
     @Override
     public String getDesc() {
-        return "The first basic attack per turn deals bonus damage equal to **" + Util.percent(power) + "** of the target's max health.";
+        return "The first basic attack per turn deals bonus damage equal to **" + flat + "** + **" + Util.percent(power) + "** of the target's bonus max health.";
     }
 
     @Override
     public float getPower() {
         return power;
+    }
+
+    public float getFlat() {
+        return flat;
     }
 }
