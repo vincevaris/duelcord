@@ -111,7 +111,7 @@ public class Game {
             curMember = getAlive().get(curTurn);
 
             curMember.stats.add(Stats.HEALTH, curMember.perTurn.get(Stats.HEALTH) * (curMember.defensive ? 2 : 1));
-            curMember.stats.add(Stats.GOLD, Math.round(125 + turnCount));
+            curMember.stats.add(Stats.GOLD, mode.handleGold(125 + turnCount));
             curMember.stats.put(Stats.ENERGY, curMember.unit.getStats().get(Stats.ENERGY));
             curMember.stats.add(Stats.ENERGY, curMember.perTurn.get(Stats.ENERGY));
             curMember.stats.put(Stats.SHIELD, 0);
@@ -484,7 +484,7 @@ public class Game {
             updateStats();
 
             stats.put(Stats.HEALTH, stats.get(Stats.MAX_HEALTH));
-            stats.put(Stats.GOLD, 175 + (100 * getAlive().indexOf(this)));
+            stats.put(Stats.GOLD, mode.handleGold(175 + (100 * getAlive().indexOf(this))));
 
             getCommandListener().addAll(Arrays.asList(unit.getCommands()));
 
@@ -618,7 +618,7 @@ public class Game {
         public DamageEvent basicAttack(Member target) {
             DamageEvent event = new DamageEvent(Game.this, this, target);
             event.damage = stats.get(Stats.DAMAGE);
-            event.actor.stats.add(Stats.GOLD, Util.nextInt(20, 30) + (curTurn * 0.5f));
+            event.actor.stats.add(Stats.GOLD, mode.handleGold(Math.round(Util.nextInt(20, 30) + (curTurn * 0.5f))));
 
             for (GameObject o : event.actor.data) event = o.onBasicAttack(event);
             for (GameObject o : event.target.data) event = o.wasBasicAttack(event);
@@ -637,7 +637,9 @@ public class Game {
             for (GameObject o : event.actor.data) event = o.onDamage(event);
             for (GameObject o : event.target.data) event = o.wasDamage(event);
 
-            float defend = defensive ? 0.2f : 0;
+            event = mode.handleDamage(event);
+
+            float defend = event.target.defensive ? 0.2f : 0;
             event.damage *= 1 - event.target.getStats().get(Stats.RESIST) - defend;
             event.bonus *= 1 - event.target.getStats().get(Stats.RESIST) - defend;
 

@@ -179,7 +179,7 @@ public class Enigma {
     }
 
     public void endGame(Game game) {
-        if (game.getTurnCount() > 7) {
+        if (game.getTurnCount() > 7 && game.getMode().isRanked()) {
             Game.Member winner = game.getAlive().get(0);
             // Winner
             winner.getPlayer().win();
