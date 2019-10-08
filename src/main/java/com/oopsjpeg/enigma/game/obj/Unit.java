@@ -44,6 +44,10 @@ public abstract class Unit extends GameObject {
         return new Command[0];
     }
 
+    public String[] getTopic() {
+        return new String[0];
+    }
+
     public abstract Color getColor();
 
     public abstract Stats getStats();

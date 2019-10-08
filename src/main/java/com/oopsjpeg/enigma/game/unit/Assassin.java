@@ -92,6 +92,12 @@ public class Assassin extends Unit {
     }
 
     @Override
+    public String[] getTopic() {
+        return new String[]{"Slash: **" + getSlash().getCur() + " / " + Assassin.SLASH_MAX + "**",
+                "Potency: **" + Math.round(getPotencyTotal()) + "**"};
+    }
+
+    @Override
     public Color getColor() {
         return Color.BLUE;
     }

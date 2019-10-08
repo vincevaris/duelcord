@@ -123,6 +123,13 @@ public class Phasebreaker extends Unit {
     }
 
     @Override
+    public String[] getTopic() {
+        return new String[]{"Phase: **" + getPhase() + "**",
+                "Flare: **" + getFlare().getCur() + "** / **" + Phasebreaker.FLARE_STACKS + "**",
+                "Bonus AP: **" + getBonusAp() + "**"};
+    }
+
+    @Override
     public Color getColor() {
         return new Color(0, 255, 191);
     }

@@ -51,6 +51,11 @@ public class Warrior extends Unit {
     }
 
     @Override
+    public String[] getTopic() {
+        return new String[]{"Attack: **" + getBonus().getCur() + " / 3**"};
+    }
+
+    @Override
     public Color getColor() {
         return Color.CYAN;
     }

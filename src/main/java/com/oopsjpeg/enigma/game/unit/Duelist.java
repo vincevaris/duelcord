@@ -77,6 +77,11 @@ public class Duelist extends Unit {
     }
 
     @Override
+    public String[] getTopic() {
+        return new String[]{"Bonus: **" + getBonus().getCur() + " / " + Duelist.BONUS_MAX + "**"};
+    }
+
+    @Override
     public Color getColor() {
         return Color.MAGENTA;
     }

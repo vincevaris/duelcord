@@ -65,6 +65,11 @@ public class Berserker extends Unit {
     }
 
     @Override
+    public String[] getTopic() {
+        return new String[]{"Rage: **" + getRage().getCur() + " / 5**"};
+    }
+
+    @Override
     public Color getColor() {
         return Color.RED;
     }

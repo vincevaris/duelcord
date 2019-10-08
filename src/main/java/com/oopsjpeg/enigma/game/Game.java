@@ -147,25 +147,12 @@ public class Game {
         if (gameState == 0) {
             channel.edit(c -> c.setTopic(member.getUsername() + " is picking their unit.")).block();
         } else {
-            channel.edit(c -> c.setTopic(member.unit.getName() + " " + member.getMention() + " (" + turnCount + ") - \n\n"
-                    + "Gold: **" + member.stats.getInt(Stats.GOLD) + "**\n"
-                    + "Health: **" + member.stats.getInt(Stats.HEALTH) + " / " + member.stats.getInt(Stats.MAX_HEALTH)
-                    + "** (+**" + member.perTurn.getInt(Stats.HEALTH) + "**/t)\n"
-                    + "Energy: **" + member.stats.getInt(Stats.ENERGY) + "**\n"
-                    + (member.unit instanceof Warrior
-                    ? "Attack: **" + ((Warrior) member.unit).getBonus().getCur() + " / 3**\n" : "")
-                    + (member.unit instanceof Berserker
-                    ? "Rage: **" + ((Berserker) member.unit).getRage().getCur() + " / 5**\n" : "")
-                    + (member.unit instanceof Duelist
-                    ? "Bonus: **" + ((Duelist) member.unit).getBonus().getCur() + " / " + Duelist.BONUS_MAX + "**\n" : "")
-                    + (member.unit instanceof Assassin
-                    ? "Slash: **" + ((Assassin) member.unit).getSlash().getCur() + " / " + Assassin.SLASH_MAX + "**\n"
-                    + "Potency: **" + Math.round(((Assassin) member.unit).getPotencyTotal()) + "**\n" : "")
-                    + (member.unit instanceof Phasebreaker
-                    ? "Phase: **" + ((Phasebreaker) member.unit).getPhase() + "**\n"
-                    + "Flare: **" + ((Phasebreaker) member.unit).getFlare().getCur() + "** / **" + Phasebreaker.FLARE_STACKS + "**\n"
-                    + "Bonus AP: **" + ((Phasebreaker) member.unit).getBonusAp() + "**\n" : "")
-                    + "Items: **" + member.getItems() + "**\n")).block();
+            channel.edit(c -> c.setTopic(member.unit.getName() + " " + member.getMention() + " (" + turnCount + ") -"
+                    + "\n\nGold: **" + member.stats.getInt(Stats.GOLD) + "**"
+                    + "\nHealth: **" + member.stats.getInt(Stats.HEALTH) + " / " + member.stats.getInt(Stats.MAX_HEALTH) + "** (+**" + member.perTurn.getInt(Stats.HEALTH) + "**/t)"
+                    + "\nEnergy: **" + member.stats.getInt(Stats.ENERGY) + "**"
+                    + "\n" + String.join("\n", member.unit.getTopic())
+                    + "\nItems: **" + member.getItems() + "**")).block();
         }
     }
 
