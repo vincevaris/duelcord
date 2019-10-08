@@ -48,18 +48,12 @@ public class Game {
 
         commands = new CommandListener(Enigma.getInstance().getSettings().get(Settings.GAME_PREFIX), channel);
         commands.add(new AttackCommand());
-        commands.add(new BarrageCommand());
-        commands.add(new BashCommand());
         commands.add(new BuyCommand());
-        commands.add(new CrushCommand());
         commands.add(new EndCommand());
         commands.add(new ForfeitCommand());
         commands.add(new PickCommand());
-        commands.add(new RageCommand());
         commands.add(new RefreshCommand());
         commands.add(new SellCommand());
-        commands.add(new SlashCommand());
-        commands.add(new FlareCommand());
         commands.add(new StatsCommand());
         commands.add(new UseCommand());
         Enigma.getInstance().addListener(commands);
@@ -736,6 +730,8 @@ public class Game {
 
             stats.put(Stats.HEALTH, stats.get(Stats.MAX_HEALTH));
             stats.put(Stats.GOLD, 175 + (100 * getAlive().indexOf(this)));
+
+            getCommandListener().addAll(Arrays.asList(unit.getCommands()));
 
             if (unit instanceof Berserker)
                 ((Berserker) unit).getRage().setCur(getAlive().indexOf(this));

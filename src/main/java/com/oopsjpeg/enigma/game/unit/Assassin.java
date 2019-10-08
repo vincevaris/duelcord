@@ -1,12 +1,17 @@
 package com.oopsjpeg.enigma.game.unit;
 
+import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.util.Command;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.MessageChannel;
+import discord4j.core.object.entity.User;
 
 import java.awt.*;
 
@@ -17,22 +22,6 @@ public class Assassin extends Unit {
     public static final float SLASH_AP = 0.2f;
     public static final int SLASH_MAX = 3;
     public static final int SILENCE_TURNS = 1;
-
-    public static final String NAME = "Assassin";
-    public static final String DESC = "**" + Util.percent(POTENCY_STORE) + "**"
-            + " of damage dealt in the last turn is stored as **Potency**."
-            + " This can only occur **" + POTENCY_TURNS + "** times until **Potency** is reset."
-            + "\n\nUsing `>slash` deals **" + Util.percent(SLASH_DAMAGE) + "** base damage (+" + Util.percent(SLASH_AP) + " AP)."
-            + " Every **" + SLASH_MAX + "rd** slash applies **Silence** for **" + SILENCE_TURNS + "** turn(s) and deals"
-            + " bonus damage equal to the total **Potency**, resetting it as well."
-            + "\n\nSlash does not count towards total **Potency**.";
-    public static final Color COLOR = Color.BLUE;
-    public static final Stats STATS = new Stats()
-            .put(Stats.ENERGY, 125)
-            .put(Stats.MAX_HEALTH, 720)
-            .put(Stats.DAMAGE, 24);
-    public static final Stats PER_TURN = new Stats()
-            .put(Stats.HEALTH, 11);
 
     private boolean slashed = false;
     private final Stacker slash = new Stacker(SLASH_MAX);
@@ -81,26 +70,69 @@ public class Assassin extends Unit {
 
     @Override
     public String getName() {
-        return NAME;
+        return "Assassin";
     }
 
     @Override
-    public String getDesc() {
-        return DESC;
+    public String getDescription() {
+        return "**" + Util.percent(POTENCY_STORE) + "**"
+                + " of damage dealt in the last turn is stored as **Potency**."
+                + " This can only occur **" + POTENCY_TURNS + "** times until **Potency** is reset."
+                + "\n\nUsing `>slash` deals **" + Util.percent(SLASH_DAMAGE) + "** base damage (+" + Util.percent(SLASH_AP) + " AP)."
+                + " Every **" + SLASH_MAX + "rd** slash applies **Silence** for **" + SILENCE_TURNS + "** turn(s) and deals"
+                + " bonus damage equal to the total **Potency**, resetting it as well."
+                + "\n\nSlash does not count towards total **Potency**.";
+    }
+
+    @Override
+    public Command[] getCommands() {
+        return new Command[]{new SlashCommand()};
     }
 
     @Override
     public Color getColor() {
-        return COLOR;
+        return Color.BLUE;
     }
 
     @Override
     public Stats getStats() {
-        return STATS;
+        return new Stats()
+                .put(Stats.ENERGY, 125)
+                .put(Stats.MAX_HEALTH, 720)
+                .put(Stats.DAMAGE, 24);
     }
 
     @Override
     public Stats getPerTurn() {
-        return PER_TURN;
+        return new Stats()
+                .put(Stats.HEALTH, 11);
+    }
+
+    public class SlashCommand implements Command {
+        @Override
+        public void execute(Message message, String alias, String[] args) {
+            User author = message.getAuthor().orElse(null);
+            MessageChannel channel = message.getChannel().block();
+            Game game = Enigma.getInstance().getPlayer(author).getGame();
+            Game.Member member = game.getMember(author);
+
+            if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
+                message.delete().block();
+                if (game.getGameState() == 0)
+                    Util.sendFailure(channel, "You cannot use **Slash** until the game has started.");
+                else {
+                    Game.Member target = game.getAlive().stream().filter(m -> !m.equals(member)).findAny().orElse(null);
+                    if (target == null)
+                        Util.sendFailure(channel, "There is no one to use **Slash** on.");
+                    else
+                        member.act(game.new SlashAction(target));
+                }
+            }
+        }
+
+        @Override
+        public String getName() {
+            return "slash";
+        }
     }
 }

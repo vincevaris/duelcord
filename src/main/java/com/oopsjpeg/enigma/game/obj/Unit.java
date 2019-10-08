@@ -3,6 +3,7 @@ package com.oopsjpeg.enigma.game.obj;
 import com.oopsjpeg.enigma.game.GameObject;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.unit.*;
+import com.oopsjpeg.enigma.util.Command;
 import com.oopsjpeg.enigma.util.Util;
 
 import java.awt.*;
@@ -37,7 +38,11 @@ public abstract class Unit extends GameObject {
 
     public abstract String getName();
 
-    public abstract String getDesc();
+    public abstract String getDescription();
+
+    public Command[] getCommands() {
+        return new Command[0];
+    }
 
     public abstract Color getColor();
 

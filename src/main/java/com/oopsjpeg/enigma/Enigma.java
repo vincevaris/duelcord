@@ -223,7 +223,7 @@ public class Enigma {
             if (u.getStats().get(Stats.LIFE_STEAL) > 0)
                 desc += "\nLife Steal: **" + Util.percent(u.getStats().get(Stats.LIFE_STEAL)) + "**";
             e.setDescription(desc);
-            e.addField("Passives / Abilities", u.getDesc(), false);
+            e.addField("Passives / Abilities", u.getDescription(), false);
         }).block());
     }
 

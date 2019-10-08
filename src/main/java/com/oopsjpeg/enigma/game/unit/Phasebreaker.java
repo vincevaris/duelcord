@@ -1,11 +1,16 @@
 package com.oopsjpeg.enigma.game.unit;
 
+import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.util.Command;
 import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.MessageChannel;
+import discord4j.core.object.entity.User;
 
 import java.awt.*;
 
@@ -15,21 +20,6 @@ public class Phasebreaker extends Unit {
     public static final int PHASE_1_AP = 7;
     public static final float PHASE_2_SHIELD = 0.6f;
     public static final int PHASE_2_AP = 10;
-
-    public static final String NAME = "Phasebreaker";
-    public static final String DESC = "Basic attacks deal **" + Util.percent(PASSIVE_AP) + " AP** bonus damage."
-            + "\n\nEvery turn, **Phase** goes up by **1**, resetting after **3**."
-            + "\nBasic attacks build **Flare**. At **" + FLARE_STACKS + "** stacks, using `>flare` grants special effects for a single turn based on **Phase**:"
-            + "\n**1**. Basic attacks permanently increase ability power by **" + PHASE_1_AP + "** and grant double **Flare**."
-            + "\n**2**. Attacks shield for **" + Util.percent(PHASE_2_SHIELD) + "** (+1% per " + PHASE_2_AP + " AP) of damage."
-            + "\n**3**. Passive AP damage is doubled and attacks ignore resist.";
-    public static final Color COLOR = new Color(0, 255, 191);
-    public static final Stats STATS = new Stats()
-            .put(Stats.ENERGY, 125)
-            .put(Stats.MAX_HEALTH, 750)
-            .put(Stats.DAMAGE, 20);
-    public static final Stats PER_TURN = new Stats()
-            .put(Stats.HEALTH, 12);
 
     private int phase = 0;
     private Stacker flare = new Stacker(FLARE_STACKS);
@@ -112,28 +102,64 @@ public class Phasebreaker extends Unit {
 
     @Override
     public String getName() {
-        return NAME;
+        return "Phasebreaker";
     }
 
     @Override
-    public String getDesc() {
-        return DESC;
+    public String getDescription() {
+        return "Basic attacks deal **" + Util.percent(PASSIVE_AP) + " AP** bonus damage."
+                + "\n\nEvery turn, **Phase** goes up by **1**, resetting after **3**."
+                + "\nBasic attacks build **Flare**. At **" + FLARE_STACKS + "** stacks, using `>flare` grants special effects for a single turn based on **Phase**:"
+                + "\n**1**. Basic attacks permanently increase ability power by **" + PHASE_1_AP + "** and grant double **Flare**."
+                + "\n**2**. Attacks shield for **" + Util.percent(PHASE_2_SHIELD) + "** (+1% per " + PHASE_2_AP + " AP) of damage."
+                + "\n**3**. Passive AP damage is doubled and attacks ignore resist.";
+    }
+
+    @Override
+    public Command[] getCommands() {
+        return new Command[]{new FlareCommand()};
     }
 
     @Override
     public Color getColor() {
-        return COLOR;
+        return new Color(0, 255, 191);
     }
 
     @Override
     public Stats getStats() {
-        Stats stats = new Stats(STATS);
-        stats.add(Stats.ABILITY_POWER, bonusAp);
-        return stats;
+        return new Stats()
+                .put(Stats.ENERGY, 125)
+                .put(Stats.MAX_HEALTH, 750)
+                .put(Stats.DAMAGE, 20)
+                .put(Stats.ABILITY_POWER, bonusAp);
     }
 
     @Override
     public Stats getPerTurn() {
-        return PER_TURN;
+        return new Stats()
+                .put(Stats.HEALTH, 12);
+    }
+
+    public class FlareCommand implements Command {
+        @Override
+        public void execute(Message message, String alias, String[] args) {
+            User author = message.getAuthor().orElse(null);
+            MessageChannel channel = message.getChannel().block();
+            Game game = Enigma.getInstance().getPlayer(author).getGame();
+            Game.Member member = game.getMember(author);
+
+            if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
+                message.delete().block();
+                if (game.getGameState() == 0)
+                    Util.sendFailure(channel, "You cannot use **Flare** until the game has started.");
+                else
+                    member.act(game.new FlareAction());
+            }
+        }
+
+        @Override
+        public String getName() {
+            return "flare";
+        }
     }
 }
