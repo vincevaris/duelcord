@@ -75,13 +75,13 @@ public class Stats {
     }
 
     public Stats add(Stats other) {
-        for (String key : values.keySet())
+        for (String key : other.values.keySet())
             values.put(key, values.get(key) + other.values.get(key));
         return this;
     }
 
     public Stats sub(Stats other) {
-        for (String key : values.keySet())
+        for (String key : other.values.keySet())
             values.put(key, values.get(key) - other.values.get(key));
         return this;
     }
