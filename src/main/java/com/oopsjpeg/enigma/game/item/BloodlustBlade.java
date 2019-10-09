@@ -6,7 +6,6 @@ import com.oopsjpeg.enigma.game.obj.Item;
 public class BloodlustBlade extends Item {
     public static final String NAME = "Bloodlust Blade";
     public static final Tree TREE = Tree.DAMAGE;
-    public static final String TIP = "Heal sustain.";
     public static final int COST = 550;
     public static final Stats STATS = new Stats()
             .put(Stats.DAMAGE, 10)
@@ -21,11 +20,6 @@ public class BloodlustBlade extends Item {
     @Override
     public Tree getTree() {
         return TREE;
-    }
-
-    @Override
-    public String getTip() {
-        return TIP;
     }
 
     @Override

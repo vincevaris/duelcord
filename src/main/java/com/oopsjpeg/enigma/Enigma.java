@@ -229,13 +229,14 @@ public class Enigma {
 
     public Consumer<EmbedCreateSpec> buildItemTree(Item.Tree tree) {
         return e -> {
-            e.setTitle(tree.getName());
+            e.setTitle("**" + tree.getName() + "**");
             e.setColor(tree.getColor());
             Item.fromTree(tree).stream()
                     .sorted(Comparator.comparingInt(Item::getCost))
                     .forEach(i -> {
-                        String value = (i.hasTip() ? i.getTip() + "\n" : Util.formatStats(i.getStats()) + Util.formatPerTurn(i.getPerTurn()) + "\n")
-                                + (i.hasBuild() ? "_" + Arrays.stream(i.getBuild()).map(Item::getName).collect(Collectors.joining(", ")) + "_" : "");
+                        String value = (i.hasTip() ? "_" + i.getTip() + "_\n" : "")
+                                + Util.formatStats(i.getStats()) + Util.formatPerTurn(i.getPerTurn()) + "\n"
+                                + (i.hasBuild() ? "[_" + Arrays.stream(i.getBuild()).map(Item::getName).collect(Collectors.joining(", ")) + "_]" : "");
                         e.addField(i.getName() + " (" + i.getCost() + "g)", value, true);
                     });
         };
