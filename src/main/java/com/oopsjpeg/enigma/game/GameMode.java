@@ -17,8 +17,8 @@ public enum GameMode {
                 List<Game.Member> members = new ArrayList<>(game.getMembers());
                 members.sort(Comparator.comparing(m -> m.getStats().get(Stats.HEALTH)));
                 if (members.get(0).equals(event.actor)) {
-                    event.damage *= 15f;
-                    event.bonus *= 15f;
+                    event.damage *= 1.5f;
+                    event.bonus *= 1.5f;
                 }
             }
             return event;
