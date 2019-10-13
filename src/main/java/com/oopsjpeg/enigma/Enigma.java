@@ -213,7 +213,7 @@ public class Enigma {
     public void buildUnitsChannel() {
         System.out.println("Building units channel.");
         Arrays.stream(Unit.values()).forEach(u -> getUnitsChannel().createEmbed(e -> {
-            e.setTitle(u.getName());
+            e.setTitle("**" + u.getName() + "**");
             e.setColor(u.getColor());
             String desc = "Health: **" + u.getStats().getInt(Stats.MAX_HEALTH) + "** (+**" + u.getPerTurn().getInt(Stats.HEALTH) + "**/turn)"
                     + "\nDamage: **" + u.getStats().getInt(Stats.DAMAGE) + "**"
