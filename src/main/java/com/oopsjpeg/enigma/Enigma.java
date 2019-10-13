@@ -198,8 +198,8 @@ public class Enigma {
                 e.setAuthor("Victory by " + winner.getUsername() + " on " + game.getMode().getName(), null, winner.getUser().getAvatarUrl());
                 e.setDescription("Playing as **" + winner.getUnit().getName() + "**."
                         + "\nOpponent(s): " + game.getDead().stream().map(Game.Member::getUsername).collect(Collectors.joining(", "))
-                        + "\n**" + game.getTurnCount() + "** total turns and **" + game.getActions().size() + "** total actions."
-                        + "\n**" + winner.getPlayer().getWins() + "** total win(s).");
+                        + "\n**" + game.getTurnCount() + "** turns and **" + game.getActions().size() + "** actions."
+                        + "\n**" + winner.getPlayer().getWins() + "** wins and **" + winner.getPlayer().getLosses() + "** losses.");
                 e.setFooter(now.getYear() + "/" + now.getMonthValue() + "/" + now.getDayOfMonth(), null);
             }).block();
         }
