@@ -99,7 +99,7 @@ public class Assassin extends Unit {
 
     @Override
     public Color getColor() {
-        return Color.BLUE;
+        return new Color(0, 69, 255);
     }
 
     @Override
