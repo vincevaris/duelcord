@@ -100,7 +100,12 @@ public class Warrior extends Unit {
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
-                member.act(new BashAction(game.getRandomTarget(member)));
+                if (member.hasData(Silence.class))
+                    Util.sendFailure(channel, "You cannot **Bash** while silenced.");
+                else if (!getBash().done())
+                    Util.sendFailure(channel, "**Bash** is on cooldown for **" + getBash().getCur() + "** more turn(s).");
+                else
+                    member.act(new BashAction(game.getRandomTarget(member)));
             }
         }
 
@@ -118,32 +123,22 @@ public class Warrior extends Unit {
         }
 
         @Override
-        public boolean act(Game.Member actor) {
-            if (actor.hasData(Silence.class))
-                Util.sendFailure(actor.getGame().getChannel(), "You cannot **Bash** while silenced.");
-            else {
-                if (!getBash().done())
-                    Util.sendFailure(actor.getGame().getChannel(), "**Bash** is on cooldown for **" + getBash().getCur() + "** more turn(s).");
-                else {
-                    getBash().start();
-                    getBonus().stack();
+        public String act(Game.Member actor) {
+            getBash().start();
+            getBonus().stack();
 
-                    DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
+            DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
 
-                    event.target.setDefensive(false);
-                    event.target.getStats().put(Stats.RESIST, 0);
-                    event.damage = (actor.getStats().get(Stats.DAMAGE) * Warrior.BASH_DAMAGE);
-                    event.bonus = (actor.getStats().get(Stats.MAX_HEALTH) - actor.getUnit().getStats().get(Stats.MAX_HEALTH)) * Warrior.BASH_HP_SCALE;
-                    if (event.target.getStats().get(Stats.SHIELD) > 0)
-                        event.target.getStats().put(Stats.SHIELD, 0.01f);
+            event.target.setDefensive(false);
+            event.target.getStats().put(Stats.RESIST, 0);
+            event.damage = (actor.getStats().get(Stats.DAMAGE) * Warrior.BASH_DAMAGE);
+            event.bonus = (actor.getStats().get(Stats.MAX_HEALTH) - actor.getUnit().getStats().get(Stats.MAX_HEALTH)) * Warrior.BASH_HP_SCALE;
+            if (event.target.getStats().get(Stats.SHIELD) > 0)
+                event.target.getStats().put(Stats.SHIELD, 0.01f);
 
-                    event.actor.ability(event);
+            event.actor.ability(event);
 
-                    actor.getGame().getChannel().createMessage(actor.damage(event, Emote.KNIFE, "bashed")).block();
-                    return true;
-                }
-            }
-            return false;
+            return actor.damage(event, Emote.KNIFE, "Bash");
         }
 
         @Override

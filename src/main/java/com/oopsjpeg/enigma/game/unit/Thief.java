@@ -37,7 +37,7 @@ public class Thief extends Unit {
             int steal = (int) Math.min((event.actor.getStats().get(Stats.DAMAGE) * STEAL_AMOUNT) + (event.actor.getStats().get(Stats.ABILITY_POWER) * STEAL_AP), event.target.getStats().getInt(Stats.GOLD));
             event.actor.getStats().add(Stats.GOLD, steal);
             event.target.getStats().sub(Stats.GOLD, steal);
-            event.output.add(Emote.BUY + "**" + getName() + "** stole **" + steal + "** gold!");
+            event.output.add(Emote.BUY + "**" + event.actor.getUsername() + "** stole **" + steal + "** gold!");
         }
         return event;
     }

@@ -126,7 +126,12 @@ public class Assassin extends Unit {
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
-                member.act(new SlashAction(game.getRandomTarget(member)));
+                if (member.hasData(Silence.class))
+                    Util.sendFailure(channel, "You cannot **Slash** while silenced.");
+                else if (getSlashed())
+                    Util.sendFailure(channel, "You can only use **Slash** once per turn.");
+                else
+                   member.act(new SlashAction(game.getRandomTarget(member)));
             }
         }
 
@@ -144,35 +149,25 @@ public class Assassin extends Unit {
         }
 
         @Override
-        public boolean act(Game.Member actor) {
-            if (actor.hasData(Silence.class))
-                Util.sendFailure(actor.getGame().getChannel(), "You cannot **Slash** while silenced.");
-            else {
-                if (getSlashed())
-                    Util.sendFailure(actor.getGame().getChannel(), "You can only use **Slash** once per turn.");
-                else {
-                    setSlashed(true);
+        public String act(Game.Member actor) {
+            setSlashed(true);
 
-                    DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
-                    event.damage = (actor.getStats().get(Stats.DAMAGE) * Assassin.SLASH_DAMAGE) + (actor.getStats().get(Stats.ABILITY_POWER) * Assassin.SLASH_AP);
+            DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
+            event.damage = (actor.getStats().get(Stats.DAMAGE) * Assassin.SLASH_DAMAGE) + (actor.getStats().get(Stats.ABILITY_POWER) * Assassin.SLASH_AP);
 
-                    if (getSlash().stack()) {
-                        event.damage += getPotencyTotal();
-                        event.output.add(target.buff(new Silence(actor, Assassin.SILENCE_TURNS)));
-                        getSlash().reset();
-                        getPotency().reset();
-                        setPotencyTotal(0);
-                    }
-
-                    event = event.actor.hit(event);
-                    event = event.actor.crit(event);
-                    event = event.actor.ability(event);
-
-                    actor.getGame().getChannel().createMessage(actor.damage(event, Emote.KNIFE, "slashed")).block();
-                    return true;
-                }
+            if (getSlash().stack()) {
+                event.damage += getPotencyTotal();
+                event.output.add(target.buff(new Silence(actor, Assassin.SILENCE_TURNS)));
+                getSlash().reset();
+                getPotency().reset();
+                setPotencyTotal(0);
             }
-            return false;
+
+            event = event.actor.hit(event);
+            event = event.actor.crit(event);
+            event = event.actor.ability(event);
+
+            return actor.damage(event, Emote.KNIFE, "Slash");
         }
 
         @Override

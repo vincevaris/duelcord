@@ -9,10 +9,8 @@ import java.awt.*;
 import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Random;
-import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -43,7 +41,7 @@ public class Util {
             output.add("Critical Damage: +**" + Util.percent(stats.get(Stats.CRIT_DAMAGE)) + "**");
         if (stats.get(Stats.LIFE_STEAL) > 0)
             output.add("Life Steal: **" + Util.percent(stats.get(Stats.LIFE_STEAL)) + "**");
-        return String.join("\n", output);
+        return Util.joinNonEmpty(output);
     }
 
     public static String formatPerTurn(Stats perTurn) {
@@ -54,7 +52,7 @@ public class Util {
             output.add("Energy/turn: +**" + perTurn.getInt(Stats.ENERGY) + "**");
         if (perTurn.get(Stats.GOLD) > 0)
             output.add("Gold/turn: +**" + perTurn.getInt(Stats.GOLD) + "**");
-        return String.join("\n", output);
+        return Util.joinNonEmpty(output);
     }
 
     public static String percent(float x) {
@@ -69,11 +67,16 @@ public class Util {
         return (int) Math.ceil(limit((float) x, (float) min, (float) max));
     }
 
-    public static String damageText(DamageEvent event, String attacker, String victim, String emote, String action) {
-        return emote + "**" + attacker + "** " + action + " **" + victim + "** by **" + Math.round(event.damage)
+    public static String damageText(DamageEvent event, String attacker, String victim, String emote) {
+        return damageText(event, attacker, victim, emote, "");
+    }
+
+    public static String damageText(DamageEvent event, String attacker, String victim, String emote, String source) {
+        return emote + "**" + attacker + "** damaged **" + victim + "** by **" + Math.round(event.damage)
                 + "**" + (event.bonus > 0 ? " (+" + Math.round(event.bonus) + ")" : "") + "!" + (event.crit ? " **CRIT**!" : "")
                 + (event.miss ? " **MISS**!" : "") + " [**" + event.target.getStats().getInt(Stats.HEALTH)
-                + " / " + event.target.getStats().getInt(Stats.MAX_HEALTH) + "**]";
+                + " / " + event.target.getStats().getInt(Stats.MAX_HEALTH) + "**]"
+                + (!source.isEmpty() ? " (" + source + ")" : "");
     }
 
     public static String timeDiff(LocalDateTime date1, LocalDateTime date2) {
@@ -92,6 +95,15 @@ public class Util {
         if (duration.getSeconds() > 0) stack.push(duration.getSeconds() + "s");
 
         return stack.stream().limit(3).collect(Collectors.joining(" "));
+    }
+
+    public static String joinNonEmpty(Collection<String> output) {
+        output.removeAll(Arrays.asList("", null));
+        return String.join("\n", output);
+    }
+
+    public static String joinNonEmpty(String... output) {
+        return joinNonEmpty(new ArrayList<>(Arrays.asList(output)));
     }
 
     public static String comma(int value) {

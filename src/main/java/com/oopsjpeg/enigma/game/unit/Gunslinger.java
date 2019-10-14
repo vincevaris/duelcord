@@ -109,7 +109,12 @@ public class Gunslinger extends Unit {
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
-                member.act(new BarrageAction(game.getRandomTarget(member)));
+                if (member.hasData(Silence.class))
+                    Util.sendFailure(channel, "You cannot **Barrage** while silenced.");
+                else if (!getBarrage().done())
+                    Util.sendFailure(channel, "**Barrage** is on cooldown for **" + getBarrage().getCur() + "** more turn(s).");
+                else
+                    member.act(new BarrageAction(game.getRandomTarget(member)));
             }
         }
 
@@ -127,31 +132,21 @@ public class Gunslinger extends Unit {
         }
 
         @Override
-        public boolean act(Game.Member actor) {
-            if (actor.hasData(Silence.class))
-                Util.sendFailure(actor.getGame().getChannel(), "You cannot **Barrage** while silenced.");
-            else {
-                if (!getBarrage().done())
-                    Util.sendFailure(actor.getGame().getChannel(), "**Barrage** is on cooldown for **" + getBarrage().getCur() + "** more turn(s).");
-                else {
-                    getBarrage().start();
+        public String act(Game.Member actor) {
+            getBarrage().start();
 
-                    List<String> output = new ArrayList<>();
-                    for (int i = 0; i < Gunslinger.BARRAGE_SHOTS; i++)
-                        if (target.isAlive()) {
-                            DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
-                            event.damage = (actor.getStats().get(Stats.DAMAGE) * Gunslinger.BARRAGE_DAMAGE) + (actor.getStats().get(Stats.ABILITY_POWER) * Gunslinger.BARRAGE_AP);
-                            actor.crit(event);
-                            actor.hit(event);
-                            output.add(actor.damage(event, Emote.GUN, "shot"));
-                        }
-                    output.add(0, Emote.ATTACK + "**" + actor.getUsername() + "** used **Barrage**!");
-
-                    actor.getGame().getChannel().createMessage(String.join("\n", output)).block();
-                    return true;
+            List<String> output = new ArrayList<>();
+            for (int i = 0; i < Gunslinger.BARRAGE_SHOTS; i++)
+                if (target.isAlive()) {
+                    DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
+                    event.damage = (actor.getStats().get(Stats.DAMAGE) * Gunslinger.BARRAGE_DAMAGE) + (actor.getStats().get(Stats.ABILITY_POWER) * Gunslinger.BARRAGE_AP);
+                    actor.crit(event);
+                    actor.hit(event);
+                    output.add(actor.damage(event, Emote.GUN, "Barrage"));
                 }
-            }
-            return false;
+            output.add(0, Emote.USE + "**" + actor.getUsername() + "** used **Barrage**!");
+
+            return Util.joinNonEmpty(output);
         }
 
         @Override

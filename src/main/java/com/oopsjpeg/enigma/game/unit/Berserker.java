@@ -119,7 +119,12 @@ public class Berserker extends Unit {
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
-                member.act(new RageAction());
+                if (member.hasData(Silence.class))
+                    Util.sendFailure(channel, "You cannot **Rage** while silenced.");
+                else if (getRage().getCur() == 0)
+                    Util.sendFailure(channel, "You cannot **Rage** without any stacks.");
+                else
+                    member.act(new RageAction());
             }
         }
 
@@ -131,30 +136,18 @@ public class Berserker extends Unit {
 
     public class RageAction implements GameAction {
         @Override
-        public boolean act(Game.Member actor) {
-            if (actor.hasData(Silence.class))
-                Util.sendFailure(actor.getGame().getChannel(), "You cannot **Rage** while silenced.");
-            else {
-                if (getRage().getCur() == 0)
-                    Util.sendFailure(actor.getGame().getChannel(), "You cannot **Rage** without any stacks.");
-                else {
-                    float stack = Berserker.BONUS_DAMAGE + (actor.getStats().get(Stats.ABILITY_POWER) / (Berserker.BONUS_AP * 100));
+        public String act(Game.Member actor) {
+            float stack = Berserker.BONUS_DAMAGE + (actor.getStats().get(Stats.ABILITY_POWER) / (Berserker.BONUS_AP * 100));
 
-                    setBonus(stack * getRage().getCur());
+            setBonus(stack * getRage().getCur());
 
-                    if (getRage().getCur() == Berserker.RAGE_MAX)
-                        actor.getStats().add(Stats.ENERGY, 100);
+            if (getRage().getCur() == Berserker.RAGE_MAX)
+                actor.getStats().add(Stats.ENERGY, 100);
 
-                    actor.getGame().getChannel().createMessage(Emote.RAGE + "**" + actor.getUsername() + "** has gained **"
-                            + Util.percent(getBonus()) + "** bonus damage "
-                            + (getRage().getCur() == Berserker.RAGE_MAX ? "and **100** energy " : "")
-                            + "this turn!").block();
+            getRage().reset();
 
-                    getRage().reset();
-                    return true;
-                }
-            }
-            return false;
+            return Emote.RAGE + "**" + actor.getUsername() + "** has gained **" + Util.percent(getBonus()) + "** bonus damage "
+                    + (getRage().getCur() == Berserker.RAGE_MAX ? "and **100** energy " : "") + "this turn!";
         }
 
         @Override

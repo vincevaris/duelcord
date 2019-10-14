@@ -110,7 +110,12 @@ public class Duelist extends Unit {
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
-                member.act(new CrushAction(game.getRandomTarget(member)));
+                if (member.hasData(Silence.class))
+                    Util.sendFailure(channel, "You cannot **Crush** while silenced.");
+                else if (!getCrush().done())
+                    Util.sendFailure(channel, "**Crush** is on cooldown for **" + getCrush().getCur() + "** more turn(s).");
+                else
+                    member.act(new CrushAction(game.getRandomTarget(member)));
             }
         }
 
@@ -128,19 +133,10 @@ public class Duelist extends Unit {
         }
 
         @Override
-        public boolean act(Game.Member actor) {
-            if (actor.hasData(Silence.class))
-                Util.sendFailure(actor.getGame().getChannel(), "You cannot **Crush** while silenced.");
-            else {
-                if (!getCrush().done())
-                    Util.sendFailure(actor.getGame().getChannel(), "**Crush** is on cooldown for **" + getCrush().getCur() + "** more turn(s).");
-                else {
-                    getCrush().start();
-                    actor.getGame().getChannel().createMessage(target.buff(new Weaken(actor, Duelist.CRUSH_TURNS, Duelist.CRUSH_POWER))).block();
-                    return true;
-                }
-            }
-            return false;
+        public String act(Game.Member actor) {
+            getCrush().start();
+            return Util.joinNonEmpty(Emote.USE + "**" + actor.getUsername() + "** used **Crush**!**",
+                    target.buff(new Weaken(actor, Duelist.CRUSH_TURNS, Duelist.CRUSH_POWER)));
         }
 
         @Override

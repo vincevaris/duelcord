@@ -13,7 +13,7 @@ public abstract class Unit extends GameObject {
     private static final Unit[] values = {
             new Berserker(), new Thief(), new Warrior(),
             new Duelist(), new Gunslinger(), new Assassin(),
-            new Phasebreaker()
+            new Phasebreaker(), new Blademaster()
     };
 
     public static Unit[] values() {

@@ -1,7 +1,7 @@
 package com.oopsjpeg.enigma.game;
 
 import com.oopsjpeg.enigma.Enigma;
-import com.oopsjpeg.enigma.commands.game.*;
+import com.oopsjpeg.enigma.game.commands.*;
 import com.oopsjpeg.enigma.game.buff.Silence;
 import com.oopsjpeg.enigma.game.buff.Weaken;
 import com.oopsjpeg.enigma.game.buff.Wound;
@@ -78,12 +78,8 @@ public class Game {
             if (gameState == 0) gameState = 1;
         }
 
-        if (turnCount >= 1 && gameState == 1 && curMember.stats.get(Stats.ENERGY) > 0 && !curMember.hasData(Silence.class)) {
-            curMember.defensive = true;
-            output.add(Emote.SHIELD + "**" + curMember.getUsername() + "** is defending (**20%** resist, **"
-                    + (curMember.perTurn.getInt(Stats.HEALTH) * 2) + "** regen)!");
-            output.add(curMember.unit.onDefend(curMember));
-        }
+        if (turnCount >= 1 && gameState == 1 && curMember.stats.get(Stats.ENERGY) > 0 && !curMember.hasData(Silence.class))
+            output.add(curMember.defend());
 
         if (gameState == 0) {
             curMember = getAlive().get(curTurn);
@@ -134,7 +130,7 @@ public class Game {
 
             output.removeAll(Arrays.asList(null, ""));
 
-            channel.createMessage(String.join("\n", output)).block();
+            channel.createMessage(Util.joinNonEmpty(output)).block();
 
             turnCount++;
         }
@@ -151,7 +147,7 @@ public class Game {
                     + "\n\nGold: **" + member.stats.getInt(Stats.GOLD) + "**"
                     + "\nHealth: **" + member.stats.getInt(Stats.HEALTH) + " / " + member.stats.getInt(Stats.MAX_HEALTH) + "** (+**" + member.perTurn.getInt(Stats.HEALTH) + "**/t)"
                     + "\nEnergy: **" + member.stats.getInt(Stats.ENERGY) + "**"
-                    + "\n" + String.join("\n", member.unit.getTopic())
+                    + "\n" + Util.joinNonEmpty(member.unit.getTopic())
                     + "\nItems: **" + member.getItems() + "**")).block();
         }
     }
@@ -252,14 +248,8 @@ public class Game {
         }
 
         @Override
-        public boolean act(Member actor) {
-            if (actor.hasData(Silence.class))
-                Util.sendFailure(channel, "You cannot attack while silenced.");
-            else {
-                channel.createMessage(actor.damage(actor.basicAttack(target), Emote.ATTACK, "damaged")).block();
-                return true;
-            }
-            return false;
+        public String act(Member actor) {
+            return actor.damage(actor.basicAttack(target), Emote.ATTACK);
         }
 
         @Override
@@ -270,45 +260,31 @@ public class Game {
 
     public class BuyAction implements GameAction {
         private final Item item;
+        private final int cost;
 
-        public BuyAction(Item item) {
+        public BuyAction(Item item, int cost) {
             this.item = item;
+            this.cost = cost;
         }
 
         @Override
-        public boolean act(Member actor) {
-            int cost = item.getCost();
-            List<Item> build = actor.getItems();
+        public String act(Member actor) {
+            List<String> output = new ArrayList<>();
+            actor.stats.sub(Stats.GOLD, cost);
+            actor.data.add(item);
             for (Item i : item.getBuild())
-                if (build.contains(i)) {
-                    cost -= i.getCost();
-                    build.remove(i);
-                }
+                actor.data.remove(i);
+            actor.updateStats();
 
-            if (actor.stats.getInt(Stats.GOLD) < cost)
-                Util.sendFailure(channel, "You need **" + (cost - actor.stats.getInt(Stats.GOLD)) + "** more gold for a(n) **" + item.getName() + "**.");
-            else if (build.size() >= 4)
-                Util.sendFailure(channel, "You do not have enough inventory space for a(n) **" + item.getName() + "**.");
-            else {
-                List<String> output = new ArrayList<>();
-                actor.stats.sub(Stats.GOLD, cost);
-                actor.data.add(item);
-                for (Item i : item.getBuild())
-                    actor.data.remove(i);
-                actor.updateStats();
-
-                if (item.getStats().get(Stats.MAX_HEALTH) > 0 && !actor.itemHeals.contains(item)) {
-                    output.add(actor.heal(item.getStats().get(Stats.MAX_HEALTH) / 2, item.getName()));
-                    actor.itemHeals.add(item);
-                }
-
-                output.add(0, Emote.BUY + "**" + actor.getUsername() + "** purchased a(n) **"
-                        + item.getName() + "** for **" + cost + "** gold.");
-
-                channel.createMessage(String.join("\n", output)).block();
-                return true;
+            if (item.getStats().get(Stats.MAX_HEALTH) > 0 && !actor.itemHeals.contains(item)) {
+                output.add(actor.heal(item.getStats().get(Stats.MAX_HEALTH) / 2, item.getName()));
+                actor.itemHeals.add(item);
             }
-            return false;
+
+            output.add(0, Emote.BUY + "**" + actor.getUsername() + "** purchased a(n) **"
+                    + item.getName() + "** for **" + cost + "** gold.");
+
+            return Util.joinNonEmpty(output);
         }
 
         @Override
@@ -325,22 +301,12 @@ public class Game {
         }
 
         @Override
-        public boolean act(Member actor) {
-            if (!actor.data.contains(item))
-                Util.sendFailure(channel, "You don't have a(n) **" + item.getName() + "**.");
-            else if (!item.canUse(actor))
-                Util.sendFailure(channel, "**" + item.getName() + "** can't be used.");
-            else if (item.getCooldown() != null && !item.getCooldown().count())
-                Util.sendFailure(channel, "**" + item.getName() + "** is on cooldown for **" + item.getCooldown().getCur() + "** more turn(s).");
-            else {
-                if (item.getCooldown() != null) item.getCooldown().start();
-                channel.createMessage(Emote.USE + "**" + actor.getUsername() + "** used a(n) **"
-                        + item.getName() + "**.\n" + item.onUse(actor)).block();
-                if (item.removeOnUse()) actor.data.remove(item);
-                actor.updateStats();
-                return true;
-            }
-            return false;
+        public String act(Member actor) {
+            if (item.getCooldown() != null) item.getCooldown().start();
+            String output = Emote.USE + "**" + actor.getUsername() + "** used a(n) **" + item.getName() + "**.\n" + item.onUse(actor);
+            if (item.removeOnUse()) actor.data.remove(item);
+            actor.updateStats();
+            return output;
         }
 
         @Override
@@ -357,19 +323,13 @@ public class Game {
         }
 
         @Override
-        public boolean act(Member actor) {
-            if (!actor.data.contains(item))
-                Util.sendFailure(channel, "You don't have a(n) **" + item.getName() + "**.");
-            else {
-                int gold = Math.round(item.getCost() * 0.6f);
-                channel.createMessage(Emote.BUY + "**" + actor.getUsername() + "** sold a(n) **"
-                        + item.getName() + "** for **" + gold + "** gold.").block();
-                actor.stats.add(Stats.GOLD, gold);
-                actor.data.remove(item);
-                actor.updateStats();
-                return true;
-            }
-            return false;
+        public String act(Member actor) {
+            int gold = Math.round(item.getCost() * 0.6f);
+            String output = Emote.BUY + "**" + actor.getUsername() + "** sold a(n) **" + item.getName() + "** for **" + gold + "** gold.";
+            actor.stats.add(Stats.GOLD, gold);
+            actor.data.remove(item);
+            actor.updateStats();
+            return output;
         }
 
         @Override
@@ -394,6 +354,18 @@ public class Game {
 
         public Member(Player player) {
             this.player = player;
+        }
+
+        public Member(Member other) {
+            this.player = other.player;
+            this.unit = other.unit;
+            this.alive = other.alive;
+            this.defensive = other.defensive;
+            this.data = other.data;
+            this.itemHeals = other.itemHeals;
+            this.critBag = other.critBag;
+            this.stats = other.stats;
+            this.perTurn = other.perTurn;
         }
 
         public Game getGame() {
@@ -532,7 +504,8 @@ public class Game {
         public void act(GameAction action) {
             if (stats.get(Stats.ENERGY) < action.getEnergy())
                 Util.sendFailure(channel, "You do not have **" + action.getEnergy() + "** energy.");
-            else if (action.execute(this)) {
+            else {
+                channel.createMessage(action.execute(this)).block();
                 Game.this.actions.add(action);
                 stats.sub(Stats.ENERGY, action.getEnergy());
                 if (stats.get(Stats.ENERGY) <= 0) nextTurn();
@@ -579,13 +552,22 @@ public class Game {
                     + stats.getInt(Stats.HEALTH) + " / " + stats.getInt(Stats.MAX_HEALTH) + "**]" + (source.isEmpty() ? "" : " (" + source + ")");
         }
 
+        public String defend() {
+            if (!defensive) {
+                defensive = true;
+                return Util.joinNonEmpty(Emote.SHIELD + "**" + curMember.getUsername() + "** is defending (**20%** resist, **"
+                        + (curMember.perTurn.getInt(Stats.HEALTH) * 2) + "** regen)!", curMember.unit.onDefend(curMember));
+            }
+            return "";
+        }
+
         public DamageEvent hit(DamageEvent event) {
             for (GameObject o : event.actor.data) event = o.onHit(event);
             for (GameObject o : event.target.data) event = o.wasHit(event);
 
             // Life steal healing
             if (stats.get(Stats.LIFE_STEAL) > 0)
-                event.output.add(heal(Math.round(stats.get(Stats.LIFE_STEAL) * event.damage)));
+                event.heal += stats.get(Stats.LIFE_STEAL) * event.damage;
 
             return event;
         }
@@ -629,15 +611,18 @@ public class Game {
             return event;
         }
 
-        public String damage(DamageEvent event, String emote, String action) {
-            return damage(event, event.actor.getUsername(), emote, action);
+        public String damage(DamageEvent event, String emote) {
+            return damage(event, emote, "");
         }
 
-        public String damage(DamageEvent event, String actor, String emote, String action) {
+        public String damage(DamageEvent event, String emote, String source) {
             for (GameObject o : event.actor.data) event = o.onDamage(event);
             for (GameObject o : event.target.data) event = o.wasDamage(event);
 
             event = mode.handleDamage(event);
+
+            if (event.heal > 0) event.output.add(heal(event.heal));
+            if (event.shield > 0) event.output.add(shield(event.shield));
 
             float defend = event.target.defensive ? 0.2f : 0;
             event.damage *= 1 - event.target.getStats().get(Stats.RESIST) - defend;
@@ -657,9 +642,9 @@ public class Game {
                 }
 
                 if (event.target.stats.get(Stats.SHIELD) > 0)
-                    event.output.add(0, Util.damageText(event, actor, event.target.getUsername() + "'s Shield", emote, action));
+                    event.output.add(0, Util.damageText(event, event.actor.getUsername(), event.target.getUsername() + "'s Shield", emote, source));
                 else
-                    event.output.add(0, Emote.SHIELD + "**" + actor + "** destroyed **" + event.target.getUsername() + "'s Shield**!");
+                    event.output.add(0, Emote.SHIELD + "**" + event.actor.getUsername() + "** destroyed **" + event.target.getUsername() + "'s Shield**!");
 
                 event.bonus -= shdBonus;
                 event.damage -= shdDamage;
@@ -667,14 +652,12 @@ public class Game {
 
             if (event.target.stats.get(Stats.SHIELD) <= 0 && event.total() > 0) {
                 event.target.stats.sub(Stats.HEALTH, event.total());
-                event.output.add(0, Util.damageText(event, actor, event.target.getUsername(), emote, action));
+                event.output.add(0, Util.damageText(event, event.actor.getUsername(), event.target.getUsername(), emote, source));
                 if (event.target.stats.get(Stats.HEALTH) <= 0)
                     event.output.add(event.target.lose());
             }
 
-            event.output.removeAll(Arrays.asList(null, ""));
-
-            return String.join("\n", event.output);
+            return Util.joinNonEmpty(event.output);
         }
 
         public String win() {
@@ -694,7 +677,7 @@ public class Game {
             } else if (curMember.equals(this))
                 nextTurn();
 
-            return String.join("\n", output);
+            return Util.joinNonEmpty(output);
         }
 
         @Override
