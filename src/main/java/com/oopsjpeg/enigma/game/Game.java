@@ -222,7 +222,7 @@ public class Game {
     public void notifyAfk() {
         afkNotifier++;
         if (afkNotifier == 4)
-            channel.createMessage(Emote.WARN + curMember + ", you have around **4** minutes " +
+            channel.createMessage(Emote.WARN + curMember.getUsername() + ", you have around **4** minutes " +
                     "to make an action, otherwise you will **forfeit due to AFKing**.").block();
         else if (afkNotifier >= 8)
             channel.createMessage(curMember.lose()).block();
