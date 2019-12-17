@@ -11,7 +11,7 @@ public class Shatterwand extends Item {
     public static final String TIP = "More damage on abilities.";
     public static final int COST = 1325;
     public static final Item[] BUILD = new Item[]{new KorasScepter(), new Ring()};
-    public static final Effect[] EFFECTS = new Effect[]{new KorasMight(5, 0.2f)};
+    public static final Effect[] EFFECTS = new Effect[]{new KorasMight(12, 0.25f)};
     public static final Stats STATS = new Stats()
             .put(Stats.ABILITY_POWER, 50);
 

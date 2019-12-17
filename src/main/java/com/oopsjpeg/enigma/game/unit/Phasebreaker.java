@@ -114,7 +114,7 @@ public class Phasebreaker extends Unit {
                 + "\nBasic attacks build **Flare**. At **" + FLARE_STACKS + "** stacks, using `>flare` grants special effects for a single turn based on **Phase**:"
                 + "\n**1**. Basic attacks permanently increase ability power by **" + PHASE_1_AP + "** and grant double **Flare**."
                 + "\n**2**. Attacks shield for **" + Util.percent(PHASE_2_SHIELD) + "** (+1% per " + PHASE_2_AP + " AP) of damage."
-                + "\n**3**. Passive AP damage is doubled and attacks ignore resist.";
+                + "\n**3**. Passive damage is doubled and attacks ignore resist.";
     }
 
     @Override

@@ -3,10 +3,12 @@ package com.oopsjpeg.enigma.storage;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.GameMode;
+import com.oopsjpeg.enigma.game.obj.Unit;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Player {
@@ -16,6 +18,7 @@ public class Player {
     private int gems;
     private int wins;
     private int losses;
+    private List<UnitData> unitDatas;
 
     public Player(long id) {
         this.id = id;
@@ -115,6 +118,22 @@ public class Player {
         return getTotalGames() > 0 ? (float) wins / getTotalGames() : 0;
     }
 
+    public List<UnitData> getUnitDatas() {
+        if (unitDatas == null)
+            unitDatas = new ArrayList<>();
+        return unitDatas;
+    }
+
+    public UnitData getUnitData(String unitName) {
+        return getUnitDatas().stream()
+                .filter(ud -> ud.unitName.equalsIgnoreCase(unitName))
+                .findAny().orElseGet(() -> {
+                    UnitData data = new UnitData(unitName);
+                    getUnitDatas().add(data);
+                    return data;
+                });
+    }
+
     @Override
     public int hashCode() {
         return getUser().hashCode();
@@ -128,5 +147,38 @@ public class Player {
     @Override
     public String toString() {
         return getUser().toString();
+    }
+
+    public static class UnitData {
+        private String unitName;
+        private int points;
+
+        public UnitData(String unitName) {
+            this.unitName = unitName;
+        }
+
+        public Unit getUnit() {
+            return Unit.fromName(unitName);
+        }
+
+        public String getUnitName() {
+            return unitName;
+        }
+
+        public void setUnitName(String unitName) {
+            this.unitName = unitName;
+        }
+
+        public int getPoints() {
+            return points;
+        }
+
+        public void setPoints(int points) {
+            this.points = Math.max(0, points);
+        }
+
+        public void addPoints(int points) {
+            setPoints(getPoints() + points);
+        }
     }
 }

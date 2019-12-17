@@ -17,11 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Blademaster extends Unit {
-    public static final int GEMBLADE_MAX = 6;
+    public static final int GEMBLADE_MAX = 5;
     public static final float GEMBLADE_DAMAGE = 0.02f;
-    public static final int GEMBLADE_AD_SCALE = 12;
+    public static final int GEMBLADE_AD_SCALE = 15;
     public static final int GEMBLADE_ENERGY = 50;
-    public static final float GEMBLADE_HEAL = 0.1f;
+    public static final float GEMBLADE_HEAL = 0.08f;
     public static final float REFLECT_DAMAGE = 0.15f;
     public static final float REFLECT_SCALE = 0.05F;
     public static final int REFLECT_COOLDOWN = 3;
@@ -124,7 +124,7 @@ public class Blademaster extends Unit {
     @Override
     public Stats getStats() {
         return new Stats()
-                .put(Stats.MAX_HEALTH, 735)
+                .put(Stats.MAX_HEALTH, 725)
                 .put(Stats.DAMAGE, 20)
                 .put(Stats.ENERGY, 125);
     }

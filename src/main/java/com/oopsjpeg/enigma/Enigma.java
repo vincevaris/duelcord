@@ -184,11 +184,13 @@ public class Enigma {
             // Winner
             winner.getPlayer().win();
             winner.getPlayer().addGems(Util.limit((game.getTurnCount() / 2) + Util.nextInt(30, 50), 40, 75));
+            winner.getPlayer().getUnitData(winner.getUnit().getName()).addPoints(Util.nextInt(300, 400));
             mongo.savePlayer(winner.getPlayer());
             // Losers
             game.getDead().forEach(m -> {
                 m.getPlayer().lose();
                 m.getPlayer().addGems(Util.limit((game.getTurnCount() / 2) + Util.nextInt(0, 20), 5, 40));
+                m.getPlayer().getUnitData(m.getUnit().getName()).addPoints(Util.nextInt(80, 120));
                 mongo.savePlayer(m.getPlayer());
             });
             // Send embed
