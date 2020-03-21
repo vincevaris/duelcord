@@ -46,7 +46,7 @@ public class LoveOfWar extends Effect {
     }
 
     @Override
-    public String getDesc() {
+    public String getDescription() {
         return "Increases damage dealt by **" + Util.percent(power) + "** for the rest of the turn on hit.";
     }
 

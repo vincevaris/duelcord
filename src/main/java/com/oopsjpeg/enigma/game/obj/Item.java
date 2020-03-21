@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 public abstract class Item extends GameObject {
     private static final Item[] values = {
-            new StarlitBlaster(),
             new BloodlustBlade(),
             new BoneSpear(),
             new BronzeCutlass(),
@@ -87,10 +86,6 @@ public abstract class Item extends GameObject {
     }
 
     public Stats getStats() {
-        return new Stats();
-    }
-
-    public Stats getPerTurn() {
         return new Stats();
     }
 

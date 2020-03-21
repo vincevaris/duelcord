@@ -20,10 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Gunslinger extends Unit {
-    public static final float BONUS_DAMAGE = 0.2f;
+    public static final float BONUS_DAMAGE = 0.25f;
     public static final float BONUS_AP = 1.2f;
     public static final int BARRAGE_SHOTS = 4;
-    public static final float BARRAGE_DAMAGE = 0.2f;
+    public static final int BARRAGE_DAMAGE = 6;
     public static final float BARRAGE_AP = 0.3f;
     public static final int BARRAGE_COOLDOWN = 3;
 
@@ -70,7 +70,7 @@ public class Gunslinger extends Unit {
         return "The first basic attack per turn always crits and deals **"
                 + Util.percent(BONUS_DAMAGE) + "** (+" + Util.percent(BONUS_AP) + " AP) bonus damage.\n\n"
                 + "Using `>barrage` fires **" + BARRAGE_SHOTS + "** shots that each deal **"
-                + Util.percent(BARRAGE_DAMAGE) + "** base damage (+" + Util.percent(BARRAGE_AP) + " AP).\n"
+                + BARRAGE_DAMAGE + "** (+" + Util.percent(BARRAGE_AP) + " AP) damage.\n"
                 + "Barrage shots can crit and apply on-hit effects.\n"
                 + "Barrage can only be used once every **" + BARRAGE_COOLDOWN + "** turn(s).";
     }
@@ -90,13 +90,8 @@ public class Gunslinger extends Unit {
         return new Stats()
                 .put(Stats.ENERGY, 125)
                 .put(Stats.MAX_HEALTH, 750)
-                .put(Stats.DAMAGE, 17);
-    }
-
-    @Override
-    public Stats getPerTurn() {
-        return new Stats()
-                .put(Stats.HEALTH, 12);
+                .put(Stats.DAMAGE, 17)
+                .put(Stats.HEALTH_PER_TURN, 12);
     }
 
     public class BarrageCommand implements Command {
@@ -139,7 +134,7 @@ public class Gunslinger extends Unit {
             for (int i = 0; i < Gunslinger.BARRAGE_SHOTS; i++)
                 if (target.isAlive()) {
                     DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
-                    event.damage = (actor.getStats().get(Stats.DAMAGE) * Gunslinger.BARRAGE_DAMAGE) + (actor.getStats().get(Stats.ABILITY_POWER) * Gunslinger.BARRAGE_AP);
+                    event.damage = Gunslinger.BARRAGE_DAMAGE + (actor.getStats().get(Stats.ABILITY_POWER) * Gunslinger.BARRAGE_AP);
                     actor.crit(event);
                     actor.hit(event);
                     output.add(actor.damage(event, Emote.GUN, "Barrage"));

@@ -11,9 +11,9 @@ public class BlackHalberd extends Item {
     public static final String TIP = "More damage against tanks.";
     public static final int COST = 650;
     public static final Stats STATS = new Stats()
-            .put(Stats.DAMAGE, 8)
-            .put(Stats.MAX_HEALTH, 45);
-    public static final Effect[] EFFECTS = new Effect[]{new Surmount(0.06f, 4)};
+            .put(Stats.DAMAGE, 7)
+            .put(Stats.MAX_HEALTH, 60);
+    public static final Effect[] EFFECTS = new Effect[]{new Surmount(0.1f, 6)};
     public static final Item[] BUILD = new Item[]{new Knife(), new Crystal()};
 
     @Override

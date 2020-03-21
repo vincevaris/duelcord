@@ -12,8 +12,9 @@ public class DawnHammer extends Item {
     public static final String TIP = "Unused energy shields you.\nMore energy.";
     public static final int COST = 1275;
     public static final Item[] BUILD = new Item[]{new SteelMallet(), new Gemheart()};
-    public static final Effect[] EFFECTS = new Effect[]{StatsEffect.perTurn(new Stats()
-            .put(Stats.ENERGY, 25)), new DawnShield(100)};
+    public static final Effect[] EFFECTS = new Effect[]{
+            new StatsEffect(new Stats().put(Stats.ENERGY, 25)),
+            new DawnShield(100)};
     public static final Stats STATS = new Stats()
             .put(Stats.DAMAGE, 10)
             .put(Stats.MAX_HEALTH, 180);

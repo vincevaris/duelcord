@@ -217,7 +217,7 @@ public class Enigma {
         Arrays.stream(Unit.values()).forEach(u -> getUnitsChannel().createEmbed(e -> {
             e.setTitle("**" + u.getName() + "**");
             e.setColor(u.getColor());
-            String desc = "Health: **" + u.getStats().getInt(Stats.MAX_HEALTH) + "** (+**" + u.getPerTurn().getInt(Stats.HEALTH) + "**/turn)"
+            String desc = "Health: **" + u.getStats().getInt(Stats.MAX_HEALTH) + "** (+**" + u.getStats().getInt(Stats.HEALTH_PER_TURN) + "**/turn)"
                     + "\nDamage: **" + u.getStats().getInt(Stats.DAMAGE) + "**"
                     + "\nEnergy: **" + u.getStats().getInt(Stats.ENERGY) + "**";
             if (u.getStats().get(Stats.CRIT_CHANCE) > 0)
@@ -237,7 +237,7 @@ public class Enigma {
                     .sorted(Comparator.comparingInt(Item::getCost))
                     .forEach(i -> {
                         String value = (i.hasTip() ? "_" + i.getTip() + "_\n" : "")
-                                + Util.formatStats(i.getStats()) + Util.formatPerTurn(i.getPerTurn()) + "\n"
+                                + Util.formatStats(i.getStats()) + "\n"
                                 + (i.hasBuild() ? "[_" + Arrays.stream(i.getBuild()).map(Item::getName).collect(Collectors.joining(", ")) + "_]" : "");
                         e.addField(i.getName() + " (" + i.getCost() + "g)", value, true);
                     });

@@ -9,11 +9,11 @@ public class ViktorsScythe extends Item {
     public static final String NAME = "Viktor's Scythe";
     public static final String TIP = "Strong damage against tanks.";
     public static final Tree TREE = Tree.DAMAGE;
-    public static final int COST = 1275;
+    public static final int COST = 1425;
     public static final Stats STATS = new Stats()
-            .put(Stats.DAMAGE, 20)
-            .put(Stats.MAX_HEALTH, 90);
-    public static final Effect[] EFFECTS = new Effect[]{new Surmount(0.15f, 10)};
+            .put(Stats.DAMAGE, 25)
+            .put(Stats.MAX_HEALTH, 100);
+    public static final Effect[] EFFECTS = new Effect[]{new Surmount(0.2f, 12)};
     public static final Item[] BUILD = new Item[]{new BlackHalberd(), new Hatchet()};
 
     @Override

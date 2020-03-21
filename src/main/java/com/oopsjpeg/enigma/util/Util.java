@@ -41,17 +41,12 @@ public class Util {
             output.add("Critical Damage: +**" + Util.percent(stats.get(Stats.CRIT_DAMAGE)) + "**");
         if (stats.get(Stats.LIFE_STEAL) > 0)
             output.add("Life Steal: **" + Util.percent(stats.get(Stats.LIFE_STEAL)) + "**");
-        return Util.joinNonEmpty(output);
-    }
-
-    public static String formatPerTurn(Stats perTurn) {
-        List<String> output = new ArrayList<>();
-        if (perTurn.get(Stats.HEALTH) > 0)
-            output.add("Health/turn: +**" + perTurn.getInt(Stats.HEALTH) + "**");
-        if (perTurn.get(Stats.ENERGY) > 0)
-            output.add("Energy/turn: +**" + perTurn.getInt(Stats.ENERGY) + "**");
-        if (perTurn.get(Stats.GOLD) > 0)
-            output.add("Gold/turn: +**" + perTurn.getInt(Stats.GOLD) + "**");
+        if (stats.get(Stats.HEALTH_PER_TURN) > 0)
+            output.add("Health/turn: +**" + stats.getInt(Stats.HEALTH_PER_TURN) + "**");
+        if (stats.get(Stats.GOLD_PER_TURN) > 0)
+            output.add("Gold/turn: +**" + stats.getInt(Stats.GOLD_PER_TURN) + "**");
+        if (stats.get(Stats.ENERGY_PER_TURN) > 0)
+            output.add("Energy/turn: +**" + stats.getInt(Stats.ENERGY_PER_TURN) + "**");
         return Util.joinNonEmpty(output);
     }
 

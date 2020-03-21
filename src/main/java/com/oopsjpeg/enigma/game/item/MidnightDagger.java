@@ -9,11 +9,11 @@ public class MidnightDagger extends Item {
     public static final String NAME = "Midnight Dagger";
     public static final String TIP = "More damage attacking back-to-back.";
     public static final Tree TREE = Tree.DAMAGE;
-    public static final int COST = 475;
+    public static final int COST = 450;
     public static final Item[] BUILD = new Item[]{new Knife()};
-    public static final Effect[] EFFECTS = new Effect[]{new LoveOfWar(0.12f)};
+    public static final Effect[] EFFECTS = new Effect[]{new LoveOfWar(0.08f)};
     public static final Stats STATS = new Stats()
-            .put(Stats.DAMAGE, 6);
+            .put(Stats.DAMAGE, 5);
 
     @Override
     public String getName() {

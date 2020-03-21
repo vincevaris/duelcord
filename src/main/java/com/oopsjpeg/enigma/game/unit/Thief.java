@@ -11,7 +11,6 @@ import java.awt.*;
 
 public class Thief extends Unit {
     public static final float STEAL_AMOUNT = 0.3f;
-    public static final float STEAL_AP = 0.6f;
     public static final float CRIT_REDUCE = 0.2f;
     public static final float CRIT_INCREASE = 0.2f;
 
@@ -34,7 +33,7 @@ public class Thief extends Unit {
     public DamageEvent onCrit(DamageEvent event) {
         event.critMul += getCritAmount() * CRIT_INCREASE;
         if (crit() == 1) {
-            int steal = (int) Math.min((event.actor.getStats().get(Stats.DAMAGE) * STEAL_AMOUNT) + (event.actor.getStats().get(Stats.ABILITY_POWER) * STEAL_AP), event.target.getStats().getInt(Stats.GOLD));
+            int steal = (int) Math.min((event.actor.getStats().get(Stats.DAMAGE) * STEAL_AMOUNT) + (event.actor.getStats().get(Stats.ABILITY_POWER)), event.target.getStats().getInt(Stats.GOLD));
             event.actor.getStats().add(Stats.GOLD, steal);
             event.target.getStats().sub(Stats.GOLD, steal);
             event.output.add(Emote.BUY + "**" + event.actor.getUsername() + "** stole **" + steal + "** gold!");
@@ -49,7 +48,7 @@ public class Thief extends Unit {
 
     @Override
     public String getDescription() {
-        return "The first crit per turn steals gold equal to **" + Util.percent(STEAL_AMOUNT) + "** base damage (+" + Util.percent(STEAL_AP) + " AP)."
+        return "The first crit per turn steals gold equal to **" + Util.percent(STEAL_AMOUNT) + "** base damage."
                 + "\nCrit damage is reduced by **" + Util.percent(CRIT_REDUCE) + "**, however, subsequent crits in a turn deal increasing damage.";
     }
 
@@ -64,14 +63,9 @@ public class Thief extends Unit {
                 .put(Stats.ENERGY, 150)
                 .put(Stats.MAX_HEALTH, 735)
                 .put(Stats.DAMAGE, 20)
-                .put(Stats.CRIT_CHANCE, 0.2f)
-                .put(Stats.CRIT_DAMAGE, -1 * CRIT_REDUCE);
-    }
-
-    @Override
-    public Stats getPerTurn() {
-        return new Stats()
-                .put(Stats.HEALTH, 8);
+                .put(Stats.CRIT_CHANCE, 0.25f)
+                .put(Stats.CRIT_DAMAGE, -1 * CRIT_REDUCE)
+                .put(Stats.HEALTH_PER_TURN, 8);
     }
 
     @Override

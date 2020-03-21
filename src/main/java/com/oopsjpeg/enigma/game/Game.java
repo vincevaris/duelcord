@@ -106,10 +106,11 @@ public class Game {
 
             curMember = getAlive().get(curTurn);
 
-            curMember.stats.add(Stats.HEALTH, curMember.perTurn.get(Stats.HEALTH) * (curMember.defensive ? 2 : 1));
+            curMember.stats.add(Stats.HEALTH, curMember.stats.get(Stats.HEALTH_PER_TURN) * (curMember.defensive ? 2 : 1));
+            curMember.stats.add(Stats.GOLD, curMember.stats.get(Stats.GOLD_PER_TURN));
             curMember.stats.add(Stats.GOLD, mode.handleGold(125 + turnCount));
-            curMember.stats.put(Stats.ENERGY, curMember.unit.getStats().get(Stats.ENERGY));
-            curMember.stats.add(Stats.ENERGY, curMember.perTurn.get(Stats.ENERGY));
+            curMember.stats.put(Stats.ENERGY, curMember.stats.get(Stats.ENERGY));
+            curMember.stats.add(Stats.ENERGY, curMember.stats.get(Stats.ENERGY_PER_TURN));
             curMember.stats.put(Stats.SHIELD, 0);
             curMember.defensive = false;
 
@@ -145,7 +146,7 @@ public class Game {
         } else {
             channel.edit(c -> c.setTopic(member.unit.getName() + " " + member.getMention() + " (" + turnCount + ") -"
                     + "\n\nGold: **" + member.stats.getInt(Stats.GOLD) + "**"
-                    + "\nHealth: **" + member.stats.getInt(Stats.HEALTH) + " / " + member.stats.getInt(Stats.MAX_HEALTH) + "** (+**" + member.perTurn.getInt(Stats.HEALTH) + "**/t)"
+                    + "\nHealth: **" + member.stats.getInt(Stats.HEALTH) + " / " + member.stats.getInt(Stats.MAX_HEALTH) + "** (+**" + member.stats.getInt(Stats.HEALTH_PER_TURN) + "**/t)"
                     + "\nEnergy: **" + member.stats.getInt(Stats.ENERGY) + "**"
                     + "\n" + Util.joinNonEmpty(member.unit.getTopic())
                     + "\nItems: **" + member.getItems() + "**")).block();
@@ -350,7 +351,6 @@ public class Game {
         private ChanceBag critBag = new ChanceBag();
 
         private Stats stats = new Stats();
-        private Stats perTurn = new Stats();
 
         public Member(Player player) {
             this.player = player;
@@ -365,7 +365,6 @@ public class Game {
             this.itemHeals = other.itemHeals;
             this.critBag = other.critBag;
             this.stats = other.stats;
-            this.perTurn = other.perTurn;
         }
 
         public Game getGame() {
@@ -408,20 +407,16 @@ public class Game {
             return data;
         }
 
-        public GameObject getData(Class clazz) {
+        public GameObject getData(Class<?> clazz) {
             return data.stream().filter(o -> o.getClass().equals(clazz)).findAny().orElse(null);
         }
 
-        public boolean hasData(Class clazz) {
+        public boolean hasData(Class<?> clazz) {
             return getData(clazz) != null;
         }
 
         public Stats getStats() {
             return stats;
-        }
-
-        public Stats getPerTurn() {
-            return perTurn;
         }
 
         public List<Item> getItems() {
@@ -473,13 +468,12 @@ public class Game {
             stats.put(Stats.CRIT_DAMAGE, unit.getStats().get(Stats.CRIT_DAMAGE));
             stats.put(Stats.LIFE_STEAL, unit.getStats().get(Stats.LIFE_STEAL));
             stats.put(Stats.RESIST, unit.getStats().get(Stats.RESIST));
-            perTurn.put(Stats.HEALTH, unit.getPerTurn().get(Stats.HEALTH));
-            perTurn.put(Stats.GOLD, unit.getPerTurn().get(Stats.GOLD));
-            perTurn.put(Stats.ENERGY, unit.getPerTurn().get(Stats.ENERGY));
+            stats.put(Stats.HEALTH_PER_TURN, unit.getStats().get(Stats.HEALTH_PER_TURN));
+            stats.put(Stats.GOLD_PER_TURN, unit.getStats().get(Stats.GOLD_PER_TURN));
+            stats.put(Stats.ENERGY_PER_TURN, unit.getStats().get(Stats.ENERGY_PER_TURN));
 
             for (Item item : getItems()) {
                 stats.add(item.getStats());
-                perTurn.add(item.getPerTurn());
                 for (Effect effect : item.getEffects()) {
                     if (!data.contains(effect)) data.add(effect);
                     else {
@@ -492,10 +486,7 @@ public class Game {
                 }
             }
 
-            for (Effect effect : getEffects()) {
-                stats.add(effect.getStats(this));
-                perTurn.add(effect.getPerTurn(this));
-            }
+            for (Effect effect : getEffects()) stats.add(effect.getStats(this));
 
             critBag.setChance(stats.get(Stats.CRIT_CHANCE));
             critBag.setInfluence(0.5f);
@@ -556,7 +547,7 @@ public class Game {
             if (!defensive) {
                 defensive = true;
                 return Util.joinNonEmpty(Emote.SHIELD + "**" + curMember.getUsername() + "** is defending (**20%** resist, **"
-                        + (curMember.perTurn.getInt(Stats.HEALTH) * 2) + "** regen)!", curMember.unit.onDefend(curMember));
+                        + (curMember.stats.getInt(Stats.HEALTH_PER_TURN) * 2) + "** regen)!", curMember.unit.onDefend(curMember));
             }
             return "";
         }

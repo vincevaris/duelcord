@@ -18,10 +18,10 @@ import discord4j.core.object.entity.User;
 import java.awt.*;
 
 public class Assassin extends Unit {
-    public static final float POTENCY_STORE = 0.2f;
+    public static final float POTENCY_STORE = 0.25f;
     public static final int POTENCY_TURNS = 5;
-    public static final float SLASH_DAMAGE = 0.3f;
-    public static final float SLASH_AP = 0.2f;
+    public static final float SLASH_DAMAGE = 0.25f;
+    public static final float SLASH_AP = 0.5f;
     public static final int SLASH_MAX = 3;
     public static final int SILENCE_TURNS = 1;
 
@@ -107,13 +107,8 @@ public class Assassin extends Unit {
         return new Stats()
                 .put(Stats.ENERGY, 125)
                 .put(Stats.MAX_HEALTH, 720)
-                .put(Stats.DAMAGE, 24);
-    }
-
-    @Override
-    public Stats getPerTurn() {
-        return new Stats()
-                .put(Stats.HEALTH, 11);
+                .put(Stats.DAMAGE, 24)
+                .put(Stats.HEALTH_PER_TURN, 11);
     }
 
     public class SlashCommand implements Command {

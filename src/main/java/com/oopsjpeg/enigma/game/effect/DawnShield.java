@@ -24,7 +24,7 @@ public class DawnShield extends Effect {
     }
 
     @Override
-    public String getDesc() {
+    public String getDescription() {
         return "Unused energy after a turn shields for the same amount, up to **" + Math.round(power) + "**.";
     }
 

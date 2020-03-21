@@ -6,10 +6,10 @@ import com.oopsjpeg.enigma.game.obj.Item;
 public class BronzeCutlass extends Item {
     public static final String NAME = "Bronze Cutlass";
     public static final Tree TREE = Tree.DAMAGE;
-    public static final int COST = 575;
+    public static final int COST = 600;
     public static final Stats STATS = new Stats()
-            .put(Stats.DAMAGE, 12)
-            .put(Stats.CRIT_CHANCE, 0.2f);
+            .put(Stats.DAMAGE, 8)
+            .put(Stats.CRIT_CHANCE, 0.25f);
     public static final Item[] BUILD = new Item[]{new Knife()};
 
     @Override

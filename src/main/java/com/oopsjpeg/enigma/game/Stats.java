@@ -19,21 +19,13 @@ public class Stats {
     public static String LIFE_STEAL = "life_steal";
     public static String RESIST = "resist";
 
+    public static String GOLD_PER_TURN = "gold_per_turn";
+    public static String HEALTH_PER_TURN = "health_per_turn";
+    public static String ENERGY_PER_TURN = "energy_per_turn";
+
     private Map<String, Float> values = new HashMap<>();
 
     public Stats() {
-        values.put(HEALTH, 0.0f);
-        values.put(GOLD, 0.0f);
-        values.put(ENERGY, 0.0f);
-        values.put(SHIELD, 0.0f);
-
-        values.put(MAX_HEALTH, 0.0f);
-        values.put(DAMAGE, 0.0f);
-        values.put(ABILITY_POWER, 0.0f);
-        values.put(CRIT_CHANCE, 0.0f);
-        values.put(CRIT_DAMAGE, 0.0f);
-        values.put(LIFE_STEAL, 0.0f);
-        values.put(RESIST, 0.0f);
     }
 
     public Stats(Stats other) {
@@ -97,6 +89,10 @@ public class Stats {
         values.put(ABILITY_POWER, Math.max(0, values.get(ABILITY_POWER)));
         values.put(CRIT_CHANCE, Util.limit(values.get(CRIT_CHANCE), 0, 1));
         values.put(RESIST, Util.limit(values.get(RESIST), 0, 0.8f));
+
+        values.put(GOLD_PER_TURN, Math.max(values.get(GOLD_PER_TURN), 0));
+        values.put(HEALTH_PER_TURN, Math.max(values.get(HEALTH_PER_TURN), 0));
+        values.put(ENERGY_PER_TURN, Math.max(values.get(ENERGY_PER_TURN), 0));
 
         return this;
     }

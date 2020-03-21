@@ -19,8 +19,8 @@ import java.awt.*;
 
 public class Berserker extends Unit {
     public static final int RAGE_MAX = 5;
-    public static final float BONUS_DAMAGE = 0.04f;
-    public static final int BONUS_AP = 10;
+    public static final float BONUS_DAMAGE = 0.05f;
+    public static final int BONUS_AP = 8;
     public static final int BONUS_ENERGY = 100;
 
     public static final Stats PER_TURN = new Stats()
@@ -79,13 +79,8 @@ public class Berserker extends Unit {
         return new Stats()
                 .put(Stats.ENERGY, 100)
                 .put(Stats.MAX_HEALTH, 780)
-                .put(Stats.DAMAGE, 19);
-    }
-
-    @Override
-    public Stats getPerTurn() {
-        return new Stats()
-                .put(Stats.HEALTH, 12);
+                .put(Stats.DAMAGE, 19)
+                .put(Stats.HEALTH_PER_TURN, 12);
     }
 
     @Override

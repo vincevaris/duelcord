@@ -52,8 +52,6 @@ public abstract class Unit extends GameObject {
 
     public abstract Stats getStats();
 
-    public abstract Stats getPerTurn();
-
     @Override
     public String toString() {
         return getName();

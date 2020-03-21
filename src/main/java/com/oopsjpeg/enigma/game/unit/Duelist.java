@@ -18,8 +18,8 @@ import java.awt.*;
 
 public class Duelist extends Unit {
     public static final int BONUS_MAX = 4;
-    public static final float BONUS_DAMAGE = 0.02f;
-    public static final float BLEED_DAMAGE = 0.5f;
+    public static final float BONUS_DAMAGE = 0.03f;
+    public static final float BLEED_DAMAGE = 0.4f;
     public static final int BLEED_TURNS = 2;
     public static final float CRUSH_POWER = 0.2f;
     public static final int CRUSH_TURNS = 1;
@@ -91,13 +91,8 @@ public class Duelist extends Unit {
         return new Stats()
                 .put(Stats.ENERGY, 125)
                 .put(Stats.MAX_HEALTH, 750)
-                .put(Stats.DAMAGE, 25);
-    }
-
-    @Override
-    public Stats getPerTurn() {
-        return new Stats()
-                .put(Stats.HEALTH, 10);
+                .put(Stats.DAMAGE, 21)
+                .put(Stats.HEALTH_PER_TURN, 10);
     }
 
     public class CrushCommand implements Command {

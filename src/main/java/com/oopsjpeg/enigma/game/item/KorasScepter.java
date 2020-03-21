@@ -9,11 +9,11 @@ public class KorasScepter extends Item {
     public static final String NAME = "Kora's Scepter";
     public static final String TIP = "More damage on abilities.";
     public static final Tree TREE = Tree.ABILITY;
-    public static final int COST = 650;
+    public static final int COST = 700;
     public static final Item[] BUILD = new Item[]{new Staff()};
     public static final Effect[] EFFECTS = new Effect[]{new KorasMight(6)};
     public static final Stats STATS = new Stats()
-            .put(Stats.ABILITY_POWER, 25);
+            .put(Stats.ABILITY_POWER, 30);
 
     @Override
     public String getName() {

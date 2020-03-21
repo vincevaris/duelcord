@@ -31,7 +31,7 @@ public class KorasMight extends Effect {
     }
 
     @Override
-    public String getDesc() {
+    public String getDescription() {
         return "Abilities do **" + Math.round(power) + "** " + (ap > 0 ? "(+" + Util.percent(ap) + " AP) " : "") + "more damage.";
     }
 

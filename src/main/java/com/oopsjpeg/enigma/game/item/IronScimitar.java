@@ -9,13 +9,13 @@ public class IronScimitar extends Item {
     public static final String NAME = "Iron Scimitar";
     public static final Tree TREE = Tree.DAMAGE;
     public static final String TIP = "More damage on crits.";
-    public static final int COST = 1375;
+    public static final int COST = 1350;
     public static final Item[] BUILD = new Item[]{new BronzeCutlass(), new Hatchet()};
-    public static final Effect[] EFFECTS = new Effect[]{StatsEffect.stats(new Stats()
-            .put(Stats.CRIT_DAMAGE, 0.25f))};
+    public static final Effect[] EFFECTS = new Effect[]{
+            new StatsEffect(new Stats().put(Stats.CRIT_DAMAGE, 0.2f))};
     public static final Stats STATS = new Stats()
             .put(Stats.DAMAGE, 25)
-            .put(Stats.CRIT_CHANCE, 0.4f);
+            .put(Stats.CRIT_CHANCE, 0.5f);
 
     @Override
     public String getName() {

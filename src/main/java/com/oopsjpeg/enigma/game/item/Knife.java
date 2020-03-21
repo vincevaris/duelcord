@@ -8,7 +8,7 @@ public class Knife extends Item {
     public static final Tree TREE = Tree.DAMAGE;
     public static final int COST = 250;
     public static final Stats STATS = new Stats()
-            .put(Stats.DAMAGE, 6);
+            .put(Stats.DAMAGE, 5);
 
     @Override
     public String getName() {

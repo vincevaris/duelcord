@@ -16,9 +16,9 @@ import java.awt.*;
 
 public class Warrior extends Unit {
     public static final int BONUS_MAX = 3;
-    public static final float BONUS_DAMAGE = 0.3f;
-    public static final float BASH_DAMAGE = 0.5f;
-    public static final float BASH_HP_SCALE = 0.25f;
+    public static final float BONUS_DAMAGE = 0.25f;
+    public static final float BASH_DAMAGE = 0.25f;
+    public static final float BASH_HP_SCALE = 0.3f;
     public static final int BASH_COOLDOWN = 2;
 
     private Stacker bonus = new Stacker(BONUS_MAX);
@@ -65,13 +65,8 @@ public class Warrior extends Unit {
         return new Stats()
                 .put(Stats.ENERGY, 125)
                 .put(Stats.MAX_HEALTH, 795)
-                .put(Stats.DAMAGE, 22);
-    }
-
-    @Override
-    public Stats getPerTurn() {
-        return new Stats()
-                .put(Stats.HEALTH, 12);
+                .put(Stats.DAMAGE, 22)
+                .put(Stats.HEALTH_PER_TURN, 12);
     }
 
     @Override

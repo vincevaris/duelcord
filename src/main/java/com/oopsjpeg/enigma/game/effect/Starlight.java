@@ -19,7 +19,7 @@ public class Starlight extends Effect {
     }
 
     @Override
-    public String getDesc() {
+    public String getDescription() {
         return "Ability power is increased by **" + Util.percent(power) + "**.";
     }
 

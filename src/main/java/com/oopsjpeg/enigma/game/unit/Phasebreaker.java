@@ -18,10 +18,10 @@ import java.awt.*;
 
 public class Phasebreaker extends Unit {
     public static final int FLARE_STACKS = 3;
-    public static final float PASSIVE_AP = 0.3f;
+    public static final float PASSIVE_AP = 0.4f;
     public static final int PHASE_1_AP = 7;
-    public static final float PHASE_2_SHIELD = 0.6f;
-    public static final int PHASE_2_AP = 10;
+    public static final float PHASE_2_SHIELD = 0.5f;
+    public static final int PHASE_2_AP = 8;
 
     private int phase = 0;
     private Stacker flare = new Stacker(FLARE_STACKS);
@@ -65,6 +65,12 @@ public class Phasebreaker extends Unit {
         flared = false;
         phase++;
         if (phase > 3) phase = 1;
+        return "";
+    }
+
+    @Override
+    public String onDefend(Game.Member member) {
+        flare.stack();
         return "";
     }
 
@@ -140,13 +146,8 @@ public class Phasebreaker extends Unit {
                 .put(Stats.ENERGY, 125)
                 .put(Stats.MAX_HEALTH, 750)
                 .put(Stats.DAMAGE, 20)
-                .put(Stats.ABILITY_POWER, bonusAp);
-    }
-
-    @Override
-    public Stats getPerTurn() {
-        return new Stats()
-                .put(Stats.HEALTH, 12);
+                .put(Stats.ABILITY_POWER, bonusAp)
+                .put(Stats.HEALTH_PER_TURN, 12);
     }
 
     public class FlareCommand implements Command {

@@ -126,13 +126,8 @@ public class Blademaster extends Unit {
         return new Stats()
                 .put(Stats.MAX_HEALTH, 725)
                 .put(Stats.DAMAGE, 20)
-                .put(Stats.ENERGY, 125);
-    }
-
-    @Override
-    public Stats getPerTurn() {
-        return new Stats()
-                .put(Stats.HEALTH, 10);
+                .put(Stats.ENERGY, 125)
+                .put(Stats.HEALTH_PER_TURN, 10);
     }
 
     public class ReflectCommand implements Command {

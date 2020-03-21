@@ -24,7 +24,7 @@ public class Divinity extends Effect {
     }
 
     @Override
-    public String getDesc() {
+    public String getDescription() {
         return "Reduces damage taken from crits by **" + Util.percent(power) + "**.";
     }
 

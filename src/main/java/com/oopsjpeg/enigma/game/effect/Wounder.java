@@ -25,7 +25,7 @@ public class Wounder extends Effect {
     }
 
     @Override
-    public String getDesc() {
+    public String getDescription() {
         return "Reduces the target's healing and shielding by **" + Util.percent(power) + "** on hit.";
     }
 

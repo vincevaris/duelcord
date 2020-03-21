@@ -39,7 +39,7 @@ public class Surmount extends Effect {
     }
 
     @Override
-    public String getDesc() {
+    public String getDescription() {
         return "The first basic attack per turn deals bonus damage equal to **" + flat + "** + **" + Util.percent(power) + "** of the target's bonus max health.";
     }
 
