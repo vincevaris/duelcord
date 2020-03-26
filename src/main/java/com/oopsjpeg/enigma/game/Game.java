@@ -90,7 +90,7 @@ public class Game {
                         + "\nCheck " + Enigma.getInstance().getUnitsChannel().getMention() + " to view available units, then pick with `>pick`.").block();
             } else {
                 channel.createMessage("[**" + curMember.getMention() + ", you have next pick!**]"
-                        + "\nCheck" + Enigma.getInstance().getUnitsChannel().getMention() + " to view available units, then pick with `>pick`.").block();
+                        + "\nCheck " + Enigma.getInstance().getUnitsChannel().getMention() + " to view available units, then pick with `>pick`.").block();
             }
         } else if (gameState == 1) {
             output.addAll(curMember.data.stream()
@@ -109,7 +109,7 @@ public class Game {
             curMember.stats.add(Stats.HEALTH, curMember.stats.get(Stats.HEALTH_PER_TURN) * (curMember.defensive ? 2 : 1));
             curMember.stats.add(Stats.GOLD, curMember.stats.get(Stats.GOLD_PER_TURN));
             curMember.stats.add(Stats.GOLD, mode.handleGold(125 + turnCount));
-            curMember.stats.put(Stats.ENERGY, curMember.stats.get(Stats.ENERGY));
+            curMember.stats.put(Stats.ENERGY, curMember.getUnit().getStats().get(Stats.ENERGY));
             curMember.stats.add(Stats.ENERGY, curMember.stats.get(Stats.ENERGY_PER_TURN));
             curMember.stats.put(Stats.SHIELD, 0);
             curMember.defensive = false;

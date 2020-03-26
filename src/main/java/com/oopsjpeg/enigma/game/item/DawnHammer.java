@@ -13,7 +13,7 @@ public class DawnHammer extends Item {
     public static final int COST = 1275;
     public static final Item[] BUILD = new Item[]{new SteelMallet(), new Gemheart()};
     public static final Effect[] EFFECTS = new Effect[]{
-            new StatsEffect(new Stats().put(Stats.ENERGY, 25)),
+            new StatsEffect(new Stats().put(Stats.ENERGY_PER_TURN, 25)),
             new DawnShield(100)};
     public static final Stats STATS = new Stats()
             .put(Stats.DAMAGE, 10)

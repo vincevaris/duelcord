@@ -26,6 +26,22 @@ public class Stats {
     private Map<String, Float> values = new HashMap<>();
 
     public Stats() {
+        put(HEALTH, 0.0f);
+        put(GOLD, 0.0f);
+        put(ENERGY, 0.0f);
+        put(SHIELD, 0.0f);
+
+        put(MAX_HEALTH, 0.0f);
+        put(DAMAGE, 0.0f);
+        put(ABILITY_POWER, 0.0f);
+        put(CRIT_CHANCE, 0.0f);
+        put(CRIT_DAMAGE, 0.0f);
+        put(LIFE_STEAL, 0.0f);
+        put(RESIST, 0.0f);
+
+        put(GOLD_PER_TURN, 0.0f);
+        put(HEALTH_PER_TURN, 0.0f);
+        put(ENERGY_PER_TURN, 0.0f);
     }
 
     public Stats(Stats other) {
@@ -79,20 +95,20 @@ public class Stats {
     }
 
     public Stats clean() {
-        values.put(MAX_HEALTH, Math.max(0, values.get(MAX_HEALTH)));
+        put(MAX_HEALTH, Math.max(0, values.get(MAX_HEALTH)));
 
-        values.put(HEALTH, Util.limit(values.get(HEALTH), 0, values.get(MAX_HEALTH)));
-        values.put(ENERGY, Math.max(0, values.get(ENERGY)));
-        values.put(SHIELD, Math.max(0, values.get(SHIELD)));
+        put(HEALTH, Util.limit(values.get(HEALTH), 0, values.get(MAX_HEALTH)));
+        put(ENERGY, Math.max(0, values.get(ENERGY)));
+        put(SHIELD, Math.max(0, values.get(SHIELD)));
 
-        values.put(DAMAGE, Math.max(0, values.get(DAMAGE)));
-        values.put(ABILITY_POWER, Math.max(0, values.get(ABILITY_POWER)));
-        values.put(CRIT_CHANCE, Util.limit(values.get(CRIT_CHANCE), 0, 1));
-        values.put(RESIST, Util.limit(values.get(RESIST), 0, 0.8f));
+        put(DAMAGE, Math.max(0, values.get(DAMAGE)));
+        put(ABILITY_POWER, Math.max(0, values.get(ABILITY_POWER)));
+        put(CRIT_CHANCE, Util.limit(values.get(CRIT_CHANCE), 0, 1));
+        put(RESIST, Util.limit(values.get(RESIST), 0, 0.8f));
 
-        values.put(GOLD_PER_TURN, Math.max(values.get(GOLD_PER_TURN), 0));
-        values.put(HEALTH_PER_TURN, Math.max(values.get(HEALTH_PER_TURN), 0));
-        values.put(ENERGY_PER_TURN, Math.max(values.get(ENERGY_PER_TURN), 0));
+        put(GOLD_PER_TURN, Math.max(values.get(GOLD_PER_TURN), 0));
+        put(HEALTH_PER_TURN, Math.max(values.get(HEALTH_PER_TURN), 0));
+        put(ENERGY_PER_TURN, Math.max(values.get(ENERGY_PER_TURN), 0));
 
         return this;
     }
