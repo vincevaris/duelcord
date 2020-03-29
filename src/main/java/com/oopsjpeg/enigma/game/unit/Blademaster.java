@@ -1,5 +1,6 @@
 package com.oopsjpeg.enigma.game.unit;
 
+import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
@@ -7,23 +8,23 @@ import com.oopsjpeg.enigma.game.GameAction;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.buff.Silence;
 import com.oopsjpeg.enigma.game.obj.Unit;
-import com.oopsjpeg.enigma.util.*;
+import com.oopsjpeg.enigma.util.Cooldown;
+import com.oopsjpeg.enigma.util.Emote;
+import com.oopsjpeg.enigma.util.Stacker;
+import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Blademaster extends Unit {
     public static final int GEMBLADE_MAX = 5;
     public static final float GEMBLADE_DAMAGE = 0.02f;
     public static final int GEMBLADE_AD_SCALE = 15;
     public static final int GEMBLADE_ENERGY = 50;
-    public static final float GEMBLADE_HEAL = 0.08f;
     public static final float REFLECT_DAMAGE = 0.15f;
-    public static final float REFLECT_SCALE = 0.05F;
+    public static final float REFLECT_SCALE = 0.05f;
     public static final int REFLECT_COOLDOWN = 3;
 
     public static final int NONE = 0;
@@ -39,21 +40,19 @@ public class Blademaster extends Unit {
     }
 
     @Override
-    public DamageEvent onBasicAttack(DamageEvent event) {
+    public DamageEvent basicAttackOut(DamageEvent event) {
         float scale = GEMBLADE_DAMAGE + (event.actor.getStats().get(Stats.DAMAGE) / (GEMBLADE_AD_SCALE * 100));
         float bonus = event.damage * (gemblade.getCur() * scale);
         event.bonus += bonus;
 
-        if (gemblade.stack() && gemblade.done()) {
-            event.heal += Math.max(1, bonus * GEMBLADE_HEAL);
-            if (gemblade.notif()) event.output.add(notif(event.actor));
-        }
+        if (gemblade.stack() && gemblade.done() && gemblade.notif())
+            event.output.add(notif(event.actor));
 
         return event;
     }
 
     @Override
-    public DamageEvent wasDamage(DamageEvent event) {
+    public DamageEvent basicAttackIn(DamageEvent event) {
         if (reflectState == REFLECTING) {
             Game.Member swapActor = event.game.new Member(event.target);
             Game.Member swapTarget = event.game.new Member(event.actor);
@@ -100,7 +99,7 @@ public class Blademaster extends Unit {
     @Override
     public String getDescription() {
         return "Basic attacks stack **Gemblade** up to **" + GEMBLADE_MAX + "** times, dealing **" + Util.percent(GEMBLADE_DAMAGE) + "** (+1% per " + GEMBLADE_AD_SCALE + " bonus AD) more damage each stack."
-                + " At max stacks, **Gemblade** grants **" + GEMBLADE_ENERGY + "** bonus energy and heals for **" + Util.percent(GEMBLADE_HEAL) + "** of the bonus damage."
+                + " At max stacks, **Gemblade** grants **" + GEMBLADE_ENERGY + "** bonus energy."
                 + "\n\n`>reflect` completely reflects the next attack, deals **" + Util.percent(REFLECT_DAMAGE) + "** (+" + Util.percent(REFLECT_SCALE) + " per **Gemblade** stack) bonus base damage, and resets **Gemblade**."
                 + "\n**Reflect** expires if it is not proc’d before the next turn."
                 + "\n**Reflect** can only be used once every **" + REFLECT_COOLDOWN + "** turns.";
@@ -152,8 +151,8 @@ public class Blademaster extends Unit {
         }
 
         @Override
-        public String getName() {
-            return "reflect";
+        public String[] getAliases() {
+            return new String[]{"reflect"};
         }
     }
 

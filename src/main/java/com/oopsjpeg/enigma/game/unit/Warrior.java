@@ -1,5 +1,6 @@
 package com.oopsjpeg.enigma.game.unit;
 
+import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
@@ -7,7 +8,10 @@ import com.oopsjpeg.enigma.game.GameAction;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.buff.Silence;
 import com.oopsjpeg.enigma.game.obj.Unit;
-import com.oopsjpeg.enigma.util.*;
+import com.oopsjpeg.enigma.util.Cooldown;
+import com.oopsjpeg.enigma.util.Emote;
+import com.oopsjpeg.enigma.util.Stacker;
+import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
@@ -77,7 +81,7 @@ public class Warrior extends Unit {
     }
 
     @Override
-    public DamageEvent onBasicAttack(DamageEvent event) {
+    public DamageEvent basicAttackOut(DamageEvent event) {
         if (bonus.stack()) {
             event.bonus += event.actor.getStats().get(Stats.DAMAGE) * BONUS_DAMAGE;
             bonus.reset();
@@ -105,8 +109,8 @@ public class Warrior extends Unit {
         }
 
         @Override
-        public String getName() {
-            return "bash";
+        public String[] getAliases() {
+            return new String[]{"bash"};
         }
     }
 

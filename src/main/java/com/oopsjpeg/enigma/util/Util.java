@@ -2,6 +2,7 @@ package com.oopsjpeg.enigma.util;
 
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.obj.Effect;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 
@@ -9,8 +10,8 @@ import java.awt.*;
 import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -48,6 +49,12 @@ public class Util {
         if (stats.get(Stats.ENERGY_PER_TURN) > 0)
             output.add("Energy/turn: +**" + stats.getInt(Stats.ENERGY_PER_TURN) + "**");
         return Util.joinNonEmpty(output);
+    }
+
+    public static String formatEffects(Effect[] effects) {
+        return Arrays.stream(effects)
+                .map(e -> "**" + e.getName() + "**: " + e.getDescription())
+                .collect(Collectors.joining("\n"));
     }
 
     public static String percent(float x) {

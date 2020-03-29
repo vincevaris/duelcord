@@ -1,5 +1,6 @@
 package com.oopsjpeg.enigma.util;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -31,15 +32,15 @@ public class Settings {
         DEFAULTS.put(LOG_ID, "log_id");
     }
 
-    private final String file;
+    private final File file;
     private final Properties properties = new Properties();
 
-    public Settings(String file) {
+    public Settings(File file) {
         this.file = file;
         properties.putAll(DEFAULTS);
     }
 
-    public String getFile() {
+    public File getFile() {
         return file;
     }
 

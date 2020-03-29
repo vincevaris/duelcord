@@ -1,5 +1,6 @@
 package com.oopsjpeg.enigma.game.unit;
 
+import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
@@ -7,7 +8,6 @@ import com.oopsjpeg.enigma.game.GameAction;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.buff.Silence;
 import com.oopsjpeg.enigma.game.obj.Unit;
-import com.oopsjpeg.enigma.util.Command;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
@@ -90,7 +90,7 @@ public class Berserker extends Unit {
     }
 
     @Override
-    public DamageEvent onBasicAttack(DamageEvent event) {
+    public DamageEvent basicAttackOut(DamageEvent event) {
         if (bonus > 0)
             event.damage *= 1 + bonus;
         else
@@ -99,7 +99,7 @@ public class Berserker extends Unit {
     }
 
     @Override
-    public DamageEvent wasBasicAttack(DamageEvent event) {
+    public DamageEvent basicAttackIn(DamageEvent event) {
         event.output.add(rage(event.target));
         return event;
     }
@@ -124,8 +124,8 @@ public class Berserker extends Unit {
         }
 
         @Override
-        public String getName() {
-            return "rage";
+        public String[] getAliases() {
+            return new String[]{"rage"};
         }
     }
 

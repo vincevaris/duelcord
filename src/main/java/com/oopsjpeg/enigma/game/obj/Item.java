@@ -33,9 +33,7 @@ public abstract class Item extends GameObject {
             new Soulstealer(),
             new Staff(),
             new SteelMallet(),
-            new WolfsTooth(),
-            new BlackHalberd(),
-            new ViktorsScythe()
+            new WolfsTooth()
     };
 
     public static Item[] values() {

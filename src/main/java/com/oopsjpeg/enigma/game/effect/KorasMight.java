@@ -20,7 +20,7 @@ public class KorasMight extends Effect {
     }
 
     @Override
-    public DamageEvent onAbility(DamageEvent event) {
+    public DamageEvent abilityOut(DamageEvent event) {
         event.bonus += power + (event.actor.getStats().get(Stats.ABILITY_POWER) * ap);
         return event;
     }

@@ -8,7 +8,7 @@ import com.oopsjpeg.enigma.game.obj.Item;
 public class IronScimitar extends Item {
     public static final String NAME = "Iron Scimitar";
     public static final Tree TREE = Tree.DAMAGE;
-    public static final String TIP = "More damage on crits.";
+    public static final String TIP = "more damage on crits";
     public static final int COST = 1350;
     public static final Item[] BUILD = new Item[]{new BronzeCutlass(), new Hatchet()};
     public static final Effect[] EFFECTS = new Effect[]{

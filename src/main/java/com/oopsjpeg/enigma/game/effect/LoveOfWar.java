@@ -35,7 +35,7 @@ public class LoveOfWar extends Effect {
     }
 
     @Override
-    public DamageEvent onHit(DamageEvent event) {
+    public DamageEvent hitOut(DamageEvent event) {
         event.damage *= 1 + ((stack() - 1) * power);
         return event;
     }

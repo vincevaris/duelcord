@@ -1,5 +1,6 @@
 package com.oopsjpeg.enigma.game.unit;
 
+import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
@@ -7,7 +8,6 @@ import com.oopsjpeg.enigma.game.GameAction;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.buff.Silence;
 import com.oopsjpeg.enigma.game.obj.Unit;
-import com.oopsjpeg.enigma.util.Command;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
@@ -63,7 +63,7 @@ public class Assassin extends Unit {
     }
 
     @Override
-    public DamageEvent onBasicAttack(DamageEvent event) {
+    public DamageEvent basicAttackOut(DamageEvent event) {
         // Assassin potency stacking
         if (!potency.done())
             potencyTotal += event.damage * POTENCY_STORE;
@@ -131,8 +131,8 @@ public class Assassin extends Unit {
         }
 
         @Override
-        public String getName() {
-            return "slash";
+        public String[] getAliases() {
+            return new String[]{"slash"};
         }
     }
 
@@ -153,6 +153,7 @@ public class Assassin extends Unit {
             if (getSlash().stack()) {
                 event.damage += getPotencyTotal();
                 event.output.add(target.buff(new Silence(actor, Assassin.SILENCE_TURNS)));
+                setSlashed(false);
                 getSlash().reset();
                 getPotency().reset();
                 setPotencyTotal(0);

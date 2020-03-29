@@ -1,5 +1,6 @@
 package com.oopsjpeg.enigma.game.unit;
 
+import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Game;
@@ -9,7 +10,10 @@ import com.oopsjpeg.enigma.game.buff.Bleed;
 import com.oopsjpeg.enigma.game.buff.Silence;
 import com.oopsjpeg.enigma.game.buff.Weaken;
 import com.oopsjpeg.enigma.game.obj.Unit;
-import com.oopsjpeg.enigma.util.*;
+import com.oopsjpeg.enigma.util.Cooldown;
+import com.oopsjpeg.enigma.util.Emote;
+import com.oopsjpeg.enigma.util.Stacker;
+import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
@@ -38,7 +42,7 @@ public class Duelist extends Unit {
     }
 
     @Override
-    public DamageEvent onBasicAttack(DamageEvent event) {
+    public DamageEvent basicAttackOut(DamageEvent event) {
         if (bonus.stack()) {
             bonus.reset();
             float bonus = event.target.getStats().getInt(Stats.MAX_HEALTH) * BONUS_DAMAGE;
@@ -115,8 +119,8 @@ public class Duelist extends Unit {
         }
 
         @Override
-        public String getName() {
-            return "crush";
+        public String[] getAliases() {
+            return new String[]{"crush"};
         }
     }
 
@@ -130,7 +134,7 @@ public class Duelist extends Unit {
         @Override
         public String act(Game.Member actor) {
             getCrush().start();
-            return Util.joinNonEmpty(Emote.USE + "**" + actor.getUsername() + "** used **Crush**!**",
+            return Util.joinNonEmpty(Emote.USE + "**" + actor.getUsername() + "** used **Crush**!",
                     target.buff(new Weaken(actor, Duelist.CRUSH_TURNS, Duelist.CRUSH_POWER)));
         }
 

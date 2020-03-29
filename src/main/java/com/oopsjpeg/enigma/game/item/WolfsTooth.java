@@ -1,52 +1,45 @@
 package com.oopsjpeg.enigma.game.item;
 
 import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.effect.CrushingBlow;
 import com.oopsjpeg.enigma.game.effect.Wounder;
 import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.game.obj.Item;
 
 public class WolfsTooth extends Item {
-    public static final String NAME = "Wolf's Tooth";
-    public static final Tree TREE = Tree.DAMAGE;
-    public static final String TIP = "Powerful anti-sustain.";
-    public static final int COST = 1025;
-    public static final Item[] BUILD = new Item[]{new BoneSpear(), new Knife()};
-    public static final Effect[] EFFECTS = new Effect[]{new Wounder(0.4f)};
-    public static final Stats STATS = new Stats()
-            .put(Stats.DAMAGE, 15);
-
     @Override
     public String getName() {
-        return NAME;
+        return "Wolf's Tooth";
     }
 
     @Override
     public Tree getTree() {
-        return TREE;
+        return Tree.DAMAGE;
     }
 
     @Override
     public String getTip() {
-        return TIP;
+        return "anti-healing + weaken";
     }
 
     @Override
     public int getCost() {
-        return COST;
+        return 1025;
     }
 
     @Override
     public Item[] getBuild() {
-        return BUILD;
+        return new Item[]{new BoneSpear(), new Knife()};
     }
 
     @Override
     public Effect[] getEffects() {
-        return EFFECTS;
+        return new Effect[]{new Wounder(0.4f), new CrushingBlow(0.1f, 3)};
     }
 
     @Override
     public Stats getStats() {
-        return STATS;
+        return new Stats()
+                .put(Stats.DAMAGE, 15);
     }
 }

@@ -30,7 +30,7 @@ public class Thief extends Unit {
     }
 
     @Override
-    public DamageEvent onCrit(DamageEvent event) {
+    public DamageEvent critOut(DamageEvent event) {
         event.critMul += getCritAmount() * CRIT_INCREASE;
         if (crit() == 1) {
             int steal = (int) Math.min((event.actor.getStats().get(Stats.DAMAGE) * STEAL_AMOUNT) + (event.actor.getStats().get(Stats.ABILITY_POWER)), event.target.getStats().getInt(Stats.GOLD));

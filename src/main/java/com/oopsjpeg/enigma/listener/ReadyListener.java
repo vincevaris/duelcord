@@ -1,21 +1,36 @@
 package com.oopsjpeg.enigma.listener;
 
 import com.oopsjpeg.enigma.Enigma;
-import com.oopsjpeg.enigma.util.Listener;
 import com.oopsjpeg.enigma.game.Game;
+import com.oopsjpeg.enigma.util.Listener;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 
 import java.util.concurrent.TimeUnit;
 
 public class ReadyListener implements Listener {
+    private final Enigma instance;
+
+    public ReadyListener(Enigma instance) {
+        this.instance = instance;
+    }
+
     @Override
     public void register(DiscordClient client) {
         client.getEventDispatcher().on(ReadyEvent.class).subscribe(this::onReady);
 
-        Enigma.SCHEDULER.scheduleAtFixedRate(() -> Enigma.getInstance().refreshQueues(), 10, 10, TimeUnit.SECONDS);
-        Enigma.SCHEDULER.scheduleAtFixedRate(() -> Enigma.getInstance().getGames().stream().filter(g -> g.getGameState() == 1)
+        instance.getMongo().loadPlayers();
+
+        Enigma.SCHEDULER.scheduleAtFixedRate(instance::refreshQueues, 10, 10, TimeUnit.SECONDS);
+        Enigma.SCHEDULER.scheduleAtFixedRate(() -> instance.getGames().stream()
+                .filter(g -> g.getGameState() == 1)
                 .forEach(Game::notifyAfk), 1, 1, TimeUnit.MINUTES);
+
+    }
+
+    @Override
+    public Enigma getInstance() {
+        return instance;
     }
 
     public void onReady(ReadyEvent event) {

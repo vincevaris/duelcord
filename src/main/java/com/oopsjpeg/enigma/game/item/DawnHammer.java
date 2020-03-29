@@ -9,15 +9,15 @@ import com.oopsjpeg.enigma.game.obj.Item;
 public class DawnHammer extends Item {
     public static final String NAME = "Dawn Hammer";
     public static final Tree TREE = Tree.HEALTH;
-    public static final String TIP = "Unused energy shields you.\nMore energy.";
+    public static final String TIP = "shields + 25 energy";
     public static final int COST = 1275;
     public static final Item[] BUILD = new Item[]{new SteelMallet(), new Gemheart()};
     public static final Effect[] EFFECTS = new Effect[]{
-            new StatsEffect(new Stats().put(Stats.ENERGY_PER_TURN, 75)),
+            new StatsEffect(new Stats().put(Stats.ENERGY_PER_TURN, 25)),
             new DawnShield(100)};
     public static final Stats STATS = new Stats()
-            .put(Stats.DAMAGE, 10)
-            .put(Stats.MAX_HEALTH, 180);
+            .put(Stats.ABILITY_POWER, 25)
+            .put(Stats.MAX_HEALTH, 140);
 
     @Override
     public String getName() {

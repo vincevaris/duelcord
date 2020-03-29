@@ -1,6 +1,7 @@
 package com.oopsjpeg.enigma.listener;
 
-import com.oopsjpeg.enigma.util.Command;
+import com.oopsjpeg.enigma.Command;
+import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.util.Listener;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -9,25 +10,34 @@ import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.User;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 
-public class CommandListener extends ArrayList<Command> implements Listener {
+public class CommandListener implements Listener {
+    private final Enigma instance;
     private final String prefix;
+    private final LinkedList<Command> commands;
     private TextChannel limit;
 
-    public CommandListener(String prefix) {
+    public CommandListener(Enigma instance, String prefix, Command[] commands) {
+        this.instance = instance;
         this.prefix = prefix;
+        this.commands = new LinkedList<>(Arrays.asList(commands));
     }
 
-    public CommandListener(String prefix, TextChannel limit) {
-        this.prefix = prefix;
+    public CommandListener(Enigma instance, String prefix, Command[] commands, TextChannel limit) {
+        this(instance, prefix, commands);
         this.limit = limit;
     }
 
     @Override
     public void register(DiscordClient client) {
         client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(this::onMessage);
+    }
+
+    @Override
+    public Enigma getInstance() {
+        return instance;
     }
 
     private void onMessage(MessageCreateEvent event) {
@@ -44,16 +54,21 @@ public class CommandListener extends ArrayList<Command> implements Listener {
             String[] split = content.replaceFirst(prefix, "").split(" ");
             String alias = split[0];
             String[] args = Arrays.copyOfRange(split, 1, split.length);
-            Command command = get(alias);
+            Command command = Command.get(commands, author, alias);
 
             if (command != null) command.execute(message, alias, args);
         }
     }
 
-    public Command get(String alias) {
-        return stream()
-                .filter(c -> c.getName().equalsIgnoreCase(alias)
-                        || Arrays.stream(c.getAliases()).anyMatch(a -> a.equalsIgnoreCase(alias)))
-                .findAny().orElse(null);
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public LinkedList<Command> getCommands() {
+        return commands;
+    }
+
+    public TextChannel getLimit() {
+        return limit;
     }
 }

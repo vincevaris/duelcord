@@ -14,7 +14,7 @@ public class Wounder extends Effect {
     }
 
     @Override
-    public DamageEvent onHit(DamageEvent event) {
+    public DamageEvent hitOut(DamageEvent event) {
         event.output.add(event.target.buff(new Wound(event.actor, 1, power)));
         return event;
     }

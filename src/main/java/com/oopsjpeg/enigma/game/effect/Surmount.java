@@ -25,7 +25,7 @@ public class Surmount extends Effect {
     }
 
     @Override
-    public DamageEvent onBasicAttack(DamageEvent event) {
+    public DamageEvent basicAttackOut(DamageEvent event) {
         if (!bonus) {
             event.bonus += flat + ((event.target.getStats().get(Stats.MAX_HEALTH) - event.target.getUnit().getStats().get(Stats.MAX_HEALTH)) * power);
             bonus = true;

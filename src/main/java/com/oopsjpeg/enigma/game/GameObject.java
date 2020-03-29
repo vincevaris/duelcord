@@ -13,43 +13,43 @@ public abstract class GameObject {
         return "";
     }
 
-    public DamageEvent onDamage(DamageEvent event) {
+    public DamageEvent damageOut(DamageEvent event) {
         return event;
     }
 
-    public DamageEvent wasDamage(DamageEvent event) {
+    public DamageEvent damageIn(DamageEvent event) {
         return event;
     }
 
-    public DamageEvent onBasicAttack(DamageEvent event) {
+    public DamageEvent basicAttackOut(DamageEvent event) {
         return event;
     }
 
-    public DamageEvent wasBasicAttack(DamageEvent event) {
+    public DamageEvent basicAttackIn(DamageEvent event) {
         return event;
     }
 
-    public DamageEvent onHit(DamageEvent event) {
+    public DamageEvent hitOut(DamageEvent event) {
         return event;
     }
 
-    public DamageEvent wasHit(DamageEvent event) {
+    public DamageEvent hitIn(DamageEvent event) {
         return event;
     }
 
-    public DamageEvent onCrit(DamageEvent event) {
+    public DamageEvent critOut(DamageEvent event) {
         return event;
     }
 
-    public DamageEvent wasCrit(DamageEvent event) {
+    public DamageEvent critIn(DamageEvent event) {
         return event;
     }
 
-    public DamageEvent onAbility(DamageEvent event) {
+    public DamageEvent abilityOut(DamageEvent event) {
         return event;
     }
 
-    public DamageEvent wasAbility(DamageEvent event) {
+    public DamageEvent abilityIn(DamageEvent event) {
         return event;
     }
 

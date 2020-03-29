@@ -2,10 +2,6 @@ package com.oopsjpeg.enigma;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.oopsjpeg.enigma.commands.BuildCommand;
-import com.oopsjpeg.enigma.commands.PatchCommand;
-import com.oopsjpeg.enigma.commands.QueueCommand;
-import com.oopsjpeg.enigma.commands.StatsCommand;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.GameMode;
 import com.oopsjpeg.enigma.game.Stats;
@@ -14,7 +10,10 @@ import com.oopsjpeg.enigma.game.obj.Unit;
 import com.oopsjpeg.enigma.listener.CommandListener;
 import com.oopsjpeg.enigma.listener.ReadyListener;
 import com.oopsjpeg.enigma.storage.Player;
-import com.oopsjpeg.enigma.util.*;
+import com.oopsjpeg.enigma.util.Listener;
+import com.oopsjpeg.enigma.util.MongoManager;
+import com.oopsjpeg.enigma.util.Settings;
+import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.object.entity.Guild;
@@ -47,19 +46,19 @@ public class Enigma {
     private MongoManager mongo;
     private DiscordClient client;
     private Settings settings = new Settings(getSettingsFile());
-    private List<Listener> listeners = new ArrayList<>();
+    private ArrayList<Listener> listeners = new ArrayList<>();
 
     private CommandListener commands;
-    private List<Game> games = new ArrayList<>();
-    private Map<Long, Player> players = new HashMap<>();
-    private Map<GameMode, ArrayList<Player>> queues = new HashMap<>();
+    private LinkedList<Game> games = new LinkedList<>();
+    private HashMap<Long, Player> players = new HashMap<>();
+    private HashMap<GameMode, LinkedList<Player>> queues = new HashMap<>();
 
     public static Enigma getInstance() {
         return instance;
     }
 
-    public static String getSettingsFile() {
-        return "settings.ini";
+    public static File getSettingsFile() {
+        return new File("enigma.properties");
     }
 
     public static void main(String[] args) {
@@ -69,7 +68,7 @@ public class Enigma {
 
     private void start() {
         try {
-            if (!new File(settings.getFile()).exists()) {
+            if (!settings.getFile().exists()) {
                 // Create settings if it doesn't exist
                 settings.save();
                 LOGGER.info("Created new settings. Please configure it.");
@@ -80,23 +79,16 @@ public class Enigma {
 
                 // Create mongo manager
                 mongo = new MongoManager(settings.get(Settings.MONGO_HOST), settings.get(Settings.MONGO_DATABASE));
-                mongo.loadPlayers();
 
                 // Create discord client
                 client = new DiscordClientBuilder(settings.get(Settings.TOKEN)).build();
 
                 // Create command listener
-                commands = new CommandListener(settings.get(Settings.MAIN_PREFIX));
+                commands = new CommandListener(this, settings.get(Settings.MAIN_PREFIX), GeneralCommand.values());
 
                 // Add listeners
-                addListener(new ReadyListener());
+                addListener(new ReadyListener(this));
                 addListener(commands);
-
-                // Add commands
-                commands.add(new BuildCommand());
-                commands.add(new PatchCommand());
-                commands.add(new QueueCommand());
-                commands.add(new StatsCommand());
 
                 // Log in client
                 client.login().block();
@@ -106,10 +98,14 @@ public class Enigma {
         }
     }
 
+    public CommandListener getCommands() {
+        return commands;
+    }
+
     public void addListener(Listener listener) {
         listener.register(client);
         listeners.add(listener);
-        LOGGER.info("Added new listener of class '" + listener.getClass().getName() + "'.");
+        LOGGER.info("Added listener of class '" + listener.getClass().getName() + "'.");
     }
 
     public void removeListener(Listener listener) {
@@ -117,13 +113,10 @@ public class Enigma {
         LOGGER.info("Removed listener of class '" + listener.getClass().getName() + "'.");
     }
 
-    public Command getCommand(String alias) {
-        return commands.stream().filter(c -> c.getName().equalsIgnoreCase(alias) || Arrays.stream(c.getAliases()).anyMatch(a -> a.equalsIgnoreCase(alias))).findAny().orElse(null);
-    }
-
     public Player getPlayer(long id) {
-        if (!players.containsKey(id)) registerPlayer(id);
-        return players.getOrDefault(id, null);
+        if (!players.containsKey(id))
+            players.put(id, new Player(id));
+        return players.get(id);
     }
 
     public Player getPlayer(User user) {
@@ -134,22 +127,17 @@ public class Enigma {
         return players.containsKey(user.getId().asLong());
     }
 
-    public Player registerPlayer(long id) {
-        players.put(id, new Player(id));
-        return getPlayer(id);
-    }
-
-    public List<Player> getQueue(GameMode mode) {
+    public LinkedList<Player> getQueue(GameMode mode) {
         if (!queues.containsKey(mode))
-            queues.put(mode, new ArrayList<>());
+            queues.put(mode, new LinkedList<>());
         return queues.get(mode);
     }
 
     public void refreshQueues() {
         // Loops queues for each game mode
-        for (Map.Entry<GameMode, ArrayList<Player>> queue : queues.entrySet()) {
+        for (Map.Entry<GameMode, LinkedList<Player>> queue : queues.entrySet()) {
             GameMode mode = queue.getKey();
-            ArrayList<Player> players = queue.getValue();
+            LinkedList<Player> players = queue.getValue();
             ArrayList<Player> matched = new ArrayList<>();
 
             // Find players for a match
@@ -158,7 +146,7 @@ public class Enigma {
 
                 // Create the match
                 if (matched.size() >= mode.getSize()) {
-                    Game game = new Game(getGuild(), mode, matched);
+                    Game game = new Game(this, mode, matched);
 
                     games.add(game);
                     matched.forEach(p -> {
@@ -170,7 +158,7 @@ public class Enigma {
 
                     Util.send(getMatchmakingChannel(), "**" + mode.getName() + "** has been found for "
                             + game.getUsers().stream().map(User::getUsername).collect(Collectors.joining(", ")),
-                            "Go to " + game.getChannel().getMention() + " to play the game!");
+                            "Go to " + game.getChannel().getMention() + " to play the match!");
 
                     break;
                 }
@@ -183,14 +171,14 @@ public class Enigma {
             Game.Member winner = game.getAlive().get(0);
             // Winner
             winner.getPlayer().win();
-            winner.getPlayer().addGems(Util.limit((game.getTurnCount() / 2) + Util.nextInt(30, 50), 40, 75));
-            winner.getPlayer().getUnitData(winner.getUnit().getName()).addPoints(Util.nextInt(300, 400));
+            winner.getPlayer().addGems(Util.limit((game.getTurnCount() / 2) + Util.nextInt(20, 40), 10, 80));
+            winner.getPlayer().getUnitData(winner.getUnit().getName()).addPoints(Util.nextInt(160, 200));
             mongo.savePlayer(winner.getPlayer());
             // Losers
             game.getDead().forEach(m -> {
                 m.getPlayer().lose();
-                m.getPlayer().addGems(Util.limit((game.getTurnCount() / 2) + Util.nextInt(0, 20), 5, 40));
-                m.getPlayer().getUnitData(m.getUnit().getName()).addPoints(Util.nextInt(80, 120));
+                m.getPlayer().addGems(Util.limit((game.getTurnCount() / 2) + Util.nextInt(0, 10), 5, 40));
+                m.getPlayer().getUnitData(m.getUnit().getName()).addPoints(Util.nextInt(80, 100));
                 mongo.savePlayer(m.getPlayer());
             });
             // Send embed

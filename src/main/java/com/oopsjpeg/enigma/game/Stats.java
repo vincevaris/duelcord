@@ -44,9 +44,10 @@ public class Stats {
         put(ENERGY_PER_TURN, 0.0f);
     }
 
-    public Stats(Stats other) {
+    public Stats put(Stats other) {
         for (String key : other.values.keySet())
             values.put(key, other.values.get(key));
+        return this;
     }
 
     public Stats put(String key, float value) {

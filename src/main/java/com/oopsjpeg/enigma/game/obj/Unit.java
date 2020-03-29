@@ -1,9 +1,9 @@
 package com.oopsjpeg.enigma.game.obj;
 
+import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.game.GameObject;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.unit.*;
-import com.oopsjpeg.enigma.util.Command;
 import com.oopsjpeg.enigma.util.Util;
 
 import java.awt.*;

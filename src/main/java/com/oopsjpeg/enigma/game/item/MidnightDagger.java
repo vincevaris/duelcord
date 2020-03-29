@@ -7,7 +7,7 @@ import com.oopsjpeg.enigma.game.obj.Item;
 
 public class MidnightDagger extends Item {
     public static final String NAME = "Midnight Dagger";
-    public static final String TIP = "More damage attacking back-to-back.";
+    public static final String TIP = "stacking basic attack damage";
     public static final Tree TREE = Tree.DAMAGE;
     public static final int COST = 450;
     public static final Item[] BUILD = new Item[]{new Knife()};

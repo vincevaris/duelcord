@@ -8,13 +8,13 @@ import com.oopsjpeg.enigma.game.obj.Item;
 public class SteelMallet extends Item {
     public static final String NAME = "Steel Mallet";
     public static final Tree TREE = Tree.HEALTH;
-    public static final String TIP = "Unused energy shields you.";
+    public static final String TIP = "shields";
     public static final int COST = 625;
-    public static final Item[] BUILD = new Item[]{new Knife(), new Crystal()};
-    public static final Effect[] EFFECTS = new Effect[]{new DawnShield(25)};
+    public static final Item[] BUILD = new Item[]{new Ring(), new Crystal()};
+    public static final Effect[] EFFECTS = new Effect[]{new DawnShield(50)};
     public static final Stats STATS = new Stats()
-            .put(Stats.DAMAGE, 8)
-            .put(Stats.MAX_HEALTH, 50);
+            .put(Stats.ABILITY_POWER, 15)
+            .put(Stats.MAX_HEALTH, 60);
 
     @Override
     public String getName() {

@@ -13,8 +13,8 @@ public class Divinity extends Effect {
     }
 
     @Override
-    public DamageEvent wasCrit(DamageEvent event) {
-        event.critMul -= power;
+    public DamageEvent abilityIn(DamageEvent event) {
+        event.damage *= 1 - power;
         return event;
     }
 
@@ -25,7 +25,7 @@ public class Divinity extends Effect {
 
     @Override
     public String getDescription() {
-        return "Reduces damage taken from crits by **" + Util.percent(power) + "**.";
+        return "Reduces damage taken from abilities by **" + Util.percent(power) + "**.";
     }
 
     @Override

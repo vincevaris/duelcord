@@ -5,12 +5,12 @@ import com.oopsjpeg.enigma.game.buff.PotionHealing;
 import com.oopsjpeg.enigma.game.obj.Item;
 
 public class Potion extends Item {
-    public static final int HEAL = 120;
+    public static final float HEAL = 120;
     public static final int TURNS = 2;
 
     public static final String NAME = "Potion";
     public static final Tree TREE = Tree.CONSUMABLES;
-    public static final String TIP = "Heals for **" + HEAL + "**.";
+    public static final String TIP = "heals for **" + Math.round(HEAL) + "**.";
     public static final int COST = 50;
 
     @Override

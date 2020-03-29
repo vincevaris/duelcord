@@ -9,12 +9,12 @@ import com.oopsjpeg.enigma.game.obj.Item;
 public class CrimsonBuckler extends Item {
     public static final String NAME = "Crimson Buckler";
     public static final Tree TREE = Tree.HEALTH;
-    public static final String TIP = "Crit damage reduction.\nMore damage based on your max health.";
-    public static final int COST = 1175;
+    public static final String TIP = "damage based on max health";
+    public static final int COST = 1100;
     public static final Stats STATS = new Stats()
-            .put(Stats.MAX_HEALTH, 200);
-    public static final Effect[] EFFECTS = new Effect[]{new Divinity(0.2f), new Brawn(0.15f)};
-    public static final Item[] BUILD = new Item[]{new DivinePlatemail(), new Gemheart()};
+            .put(Stats.MAX_HEALTH, 100);
+    public static final Effect[] EFFECTS = new Effect[]{new Divinity(0.4f), new Brawn(0.1f)};
+    public static final Item[] BUILD = new Item[]{new DivinePlatemail(), new Knife()};
 
     @Override
     public String getName() {

@@ -8,7 +8,7 @@ import com.oopsjpeg.enigma.game.obj.Item;
 public class DivinePlatemail extends Item {
     public static final String NAME = "Divine Platemail";
     public static final Tree TREE = Tree.HEALTH;
-    public static final String TIP = "Crit damage reduction.";
+    public static final String TIP = "less damage from abilities";
     public static final int COST = 475;
     public static final Stats STATS = new Stats()
             .put(Stats.MAX_HEALTH, 60);
