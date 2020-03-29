@@ -354,7 +354,7 @@ public class Game {
         private List<GameObject> data = new ArrayList<>();
         private List<Item> itemHeals = new ArrayList<>();
 
-        private ChanceBag critBag = new ChanceBag();
+        private ChanceBag critBag = new ChanceBag(0, 0.5f);
 
         private Stats stats = new Stats();
 
@@ -483,23 +483,20 @@ public class Game {
 
             for (Item item : getItems()) {
                 stats.add(item.getStats());
-                for (Effect effect : item.getEffects()) {
+                for (Effect effect : item.getEffects())
                     if (!data.contains(effect))
                         data.add(effect);
                     else {
-                        Effect oldEffect = (Effect) data.get(data.indexOf(effect));
-                        if (effect.getPower() > oldEffect.getPower()) {
-                            data.remove(oldEffect);
-                            data.add(effect);
-                        }
+                        Effect oldEffect = (Effect) getData(effect.getClass());
+                        if (effect.getPower() > oldEffect.getPower())
+                            data.set(data.indexOf(oldEffect), effect);
                     }
-                }
             }
 
-            for (Effect effect : getEffects()) stats.add(effect.getStats(this));
+            for (Effect effect : getEffects())
+                stats.add(effect.getStats(this));
 
             critBag.setChance(stats.get(Stats.CRIT_CHANCE));
-            critBag.setInfluence(0.5f);
         }
 
         public void act(GameAction action) {
