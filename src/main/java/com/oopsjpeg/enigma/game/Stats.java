@@ -55,12 +55,16 @@ public class Stats {
             case HEALTH_PER_TURN:
             case ENERGY_PER_TURN:
                 value = Math.max(0, value);
+                break;
             case HEALTH:
                 value = Util.limit(value, 0, values.get(MAX_HEALTH));
+                break;
             case CRIT_CHANCE:
                 value = Util.limit(value, 0, 1);
+                break;
             case RESIST:
                 value = Util.limit(value, 0, 0.8f);
+                break;
         }
         values.put(key, value);
         return this;
