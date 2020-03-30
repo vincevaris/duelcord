@@ -10,12 +10,14 @@ import discord4j.core.object.util.Snowflake;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Player {
     @Getter private final long id;
     private transient GameMode queueMode;
+    @Getter @Setter private transient Instant queueTime;
     @Getter @Setter private transient Game game;
     @Getter @Setter private int gems;
     @Getter @Setter private int wins;
@@ -50,7 +52,12 @@ public class Player {
         if (queueMode == mode) return;
         if (queueMode != null) getQueue().remove(this);
         queueMode = mode;
+        queueTime = Instant.now();
         if (queueMode != null) getQueue().add(this);
+    }
+
+    public boolean isInQueue() {
+        return queueMode != null;
     }
 
     public void removeQueue() {
