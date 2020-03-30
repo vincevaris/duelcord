@@ -65,7 +65,7 @@ public class Assassin extends Unit {
     @Override
     public DamageEvent basicAttackOut(DamageEvent event) {
         // Assassin potency stacking
-        if (!potency.done())
+        if (!potency.isDone())
             potencyTotal += event.damage * POTENCY_STORE;
         return event;
     }
@@ -93,7 +93,7 @@ public class Assassin extends Unit {
 
     @Override
     public String[] getTopic() {
-        return new String[]{"Slash: **" + getSlash().getCur() + " / " + Assassin.SLASH_MAX + "**",
+        return new String[]{"Slash: **" + getSlash().getCurrent() + " / " + Assassin.SLASH_MAX + "**",
                 "Potency: **" + Math.round(getPotencyTotal()) + "**"};
     }
 

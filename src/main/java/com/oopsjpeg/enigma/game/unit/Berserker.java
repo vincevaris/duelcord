@@ -34,7 +34,7 @@ public class Berserker extends Unit {
     }
 
     public String rage(Game.Member member) {
-        if (rage.stack() && rage.notif())
+        if (rage.stack() && rage.tryNotify())
             return Emote.RAGE + "**" + member.getUsername() + "'s Rage** is at max capacity.";
         return "";
     }
@@ -66,7 +66,7 @@ public class Berserker extends Unit {
 
     @Override
     public String[] getTopic() {
-        return new String[]{"Rage: **" + getRage().getCur() + " / 5**"};
+        return new String[]{"Rage: **" + getRage().getCurrent() + " / 5**"};
     }
 
     @Override
@@ -116,7 +116,7 @@ public class Berserker extends Unit {
                 message.delete().block();
                 if (member.hasData(Silence.class))
                     Util.sendFailure(channel, "You cannot **Rage** while silenced.");
-                else if (getRage().getCur() == 0)
+                else if (getRage().getCurrent() == 0)
                     Util.sendFailure(channel, "You cannot **Rage** without any stacks.");
                 else
                     member.act(new RageAction());
@@ -134,15 +134,15 @@ public class Berserker extends Unit {
         public String act(Game.Member actor) {
             float stack = Berserker.BONUS_DAMAGE + (actor.getStats().get(Stats.ABILITY_POWER) / (Berserker.BONUS_AP * 100));
 
-            setBonus(stack * getRage().getCur());
+            setBonus(stack * getRage().getCurrent());
 
-            if (getRage().getCur() == Berserker.RAGE_MAX)
+            if (getRage().getCurrent() == Berserker.RAGE_MAX)
                 actor.getStats().add(Stats.ENERGY, 100);
 
             getRage().reset();
 
             return Emote.RAGE + "**" + actor.getUsername() + "** has gained **" + Util.percent(getBonus()) + "** bonus damage "
-                    + (getRage().getCur() == Berserker.RAGE_MAX ? "and **100** energy " : "") + "this turn!";
+                    + (getRage().getCurrent() == Berserker.RAGE_MAX ? "and **100** energy " : "") + "this turn!";
         }
 
         @Override

@@ -13,6 +13,7 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Permission;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.spec.EmbedCreateSpec;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -124,14 +125,9 @@ public enum GeneralCommand implements Command {
         }
     };
 
-    private final String[] aliases;
+    @Getter private final String[] aliases;
 
     GeneralCommand(String... aliases) {
         this.aliases = aliases;
-    }
-
-    @Override
-    public String[] getAliases() {
-        return aliases;
     }
 }

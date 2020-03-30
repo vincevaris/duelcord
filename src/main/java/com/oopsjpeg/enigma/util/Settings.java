@@ -1,5 +1,7 @@
 package com.oopsjpeg.enigma.util;
 
+import lombok.Getter;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -32,16 +34,12 @@ public class Settings {
         DEFAULTS.put(LOG_ID, "log_id");
     }
 
-    private final File file;
+    @Getter private final File file;
     private final Properties properties = new Properties();
 
     public Settings(File file) {
         this.file = file;
         properties.putAll(DEFAULTS);
-    }
-
-    public File getFile() {
-        return file;
     }
 
     public void load() throws IOException {

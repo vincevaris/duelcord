@@ -12,19 +12,19 @@ import org.bson.Document;
 import java.util.function.Consumer;
 
 public class MongoManager extends MongoClient {
-    private MongoCollection<Document> players;
+    private String database;
 
     public MongoManager(String host, String database) {
         super(host);
-        players = getDatabase(database).getCollection("players");
+        this.database = database;
     }
 
     public MongoCollection<Document> getPlayers() {
-        return players;
+        return getDatabase(database).getCollection("players");
     }
 
     public void loadPlayers() {
-        players.find().forEach((Consumer<Document>) this::loadPlayer);
+        getPlayers().find().forEach((Consumer<Document>) this::loadPlayer);
     }
 
     public void savePlayers() {
@@ -36,6 +36,6 @@ public class MongoManager extends MongoClient {
     }
 
     public void savePlayer(Player p) {
-        players.replaceOne(Filters.eq(p.getId()), Document.parse(Enigma.GSON.toJson(p)), new ReplaceOptions().upsert(true));
+        getPlayers().replaceOne(Filters.eq(p.getId()), Document.parse(Enigma.GSON.toJson(p)), new ReplaceOptions().upsert(true));
     }
 }

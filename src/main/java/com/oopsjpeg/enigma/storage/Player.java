@@ -7,25 +7,23 @@ import com.oopsjpeg.enigma.game.obj.Unit;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Player {
-    private final long id;
+    @Getter private final long id;
     private transient GameMode queueMode;
-    private transient Game game;
-    private int gems;
-    private int wins;
-    private int losses;
+    @Getter @Setter private transient Game game;
+    @Getter @Setter private int gems;
+    @Getter @Setter private int wins;
+    @Getter @Setter private int losses;
     private List<UnitData> unitDatas;
 
     public Player(long id) {
         this.id = id;
-    }
-
-    public long getId() {
-        return id;
     }
 
     public User getUser() {
@@ -49,6 +47,7 @@ public class Player {
     }
 
     public void setQueue(GameMode mode) {
+        if (queueMode == mode) return;
         if (queueMode != null) getQueue().remove(this);
         queueMode = mode;
         if (queueMode != null) getQueue().add(this);
@@ -58,24 +57,8 @@ public class Player {
         setQueue(null);
     }
 
-    public Game getGame() {
-        return game;
-    }
-
-    public void setGame(Game game) {
-        this.game = game;
-    }
-
     public void removeGame() {
         setGame(null);
-    }
-
-    public int getGems() {
-        return gems;
-    }
-
-    public void setGems(int gems) {
-        this.gems = gems;
     }
 
     public void addGems(int gems) {
@@ -86,24 +69,8 @@ public class Player {
         this.gems -= gems;
     }
 
-    public int getWins() {
-        return wins;
-    }
-
-    public void setWins(int wins) {
-        this.wins = wins;
-    }
-
     public void win() {
         wins++;
-    }
-
-    public int getLosses() {
-        return losses;
-    }
-
-    public void setLosses(int losses) {
-        this.losses = losses;
     }
 
     public void lose() {
@@ -140,13 +107,8 @@ public class Player {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return obj instanceof Player && ((Player) obj).id == id;
-    }
-
-    @Override
-    public String toString() {
-        return getUser().toString();
+    public boolean equals(Object o) {
+        return (o instanceof Player && ((Player) o).id == id) || o.equals(getUser());
     }
 
     public static class UnitData {

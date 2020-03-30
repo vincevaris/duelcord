@@ -1,7 +1,14 @@
 package com.oopsjpeg.enigma.game;
 
-import java.util.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+
+@RequiredArgsConstructor
 public enum GameMode {
     DUEL("Duel", 2, true),
     CHAOS("Chaos", 3, false) {
@@ -25,33 +32,15 @@ public enum GameMode {
         }
     };
 
-    private final String name;
-    private final int size;
-    private boolean ranked;
-
-    GameMode(String name, int size, boolean ranked) {
-        this.name = name;
-        this.size = size;
-        this.ranked = ranked;
-    }
+    @Getter private final String name;
+    @Getter private final int size;
+    @Getter private final boolean ranked;
 
     public static GameMode fromName(String name) {
         return Arrays.stream(values())
                 .filter(g -> name.equalsIgnoreCase(g.getName()) || (name.length() >= 3
                         && g.getName().toLowerCase().startsWith(name.toLowerCase())))
                 .findAny().orElse(null);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getSize() {
-        return size;
-    }
-
-    public boolean isRanked() {
-        return ranked;
     }
 
     public int handleGold(int gold) {

@@ -2,15 +2,15 @@ package com.oopsjpeg.enigma.game;
 
 public abstract class GameObject {
     public String onTurnStart(Game.Member member) {
-        return "";
+        return null;
     }
 
     public String onTurnEnd(Game.Member member) {
-        return "";
+        return null;
     }
 
     public String onDefend(Game.Member member) {
-        return "";
+        return null;
     }
 
     public DamageEvent damageOut(DamageEvent event) {

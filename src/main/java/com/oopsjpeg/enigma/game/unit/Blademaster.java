@@ -42,10 +42,10 @@ public class Blademaster extends Unit {
     @Override
     public DamageEvent basicAttackOut(DamageEvent event) {
         float scale = GEMBLADE_DAMAGE + (event.actor.getStats().get(Stats.DAMAGE) / (GEMBLADE_AD_SCALE * 100));
-        float bonus = event.damage * (gemblade.getCur() * scale);
+        float bonus = event.damage * (gemblade.getCurrent() * scale);
         event.bonus += bonus;
 
-        if (gemblade.stack() && gemblade.done() && gemblade.notif())
+        if (gemblade.stack() && gemblade.isDone() && gemblade.tryNotify())
             event.output.add(notif(event.actor));
 
         return event;
@@ -60,7 +60,7 @@ public class Blademaster extends Unit {
             event.actor = swapActor;
             event.target = swapTarget;
 
-            event.bonus += event.actor.getStats().get(Stats.DAMAGE) * (REFLECT_DAMAGE + (gemblade.getCur() * REFLECT_SCALE));
+            event.bonus += event.actor.getStats().get(Stats.DAMAGE) * (REFLECT_DAMAGE + (gemblade.getCurrent() * REFLECT_SCALE));
 
             event.output.add(Emote.KNIFE + "**" + event.actor.getUsername() + "** reflected the attack!");
 
@@ -76,10 +76,10 @@ public class Blademaster extends Unit {
             gemblade.reset();
         }
 
-        if (gemblade.done())
+        if (gemblade.isDone())
             member.getStats().add(Stats.ENERGY, GEMBLADE_ENERGY);
 
-        if (reflect.count() && reflect.notif())
+        if (reflect.count() && reflect.tryNotify())
             return Emote.INFO + "**" + member.getUsername() + "'s Reflect** is ready to use.";
         return "";
     }
@@ -112,7 +112,7 @@ public class Blademaster extends Unit {
 
     @Override
     public String[] getTopic() {
-        return new String[]{"Gemblade: **" + gemblade.getCur() + " / " + GEMBLADE_MAX + "**"};
+        return new String[]{"Gemblade: **" + gemblade.getCurrent() + " / " + GEMBLADE_MAX + "**"};
     }
 
     @Override
@@ -143,8 +143,8 @@ public class Blademaster extends Unit {
                     Util.sendFailure(channel, "You cannot **Reflect** while silenced.");
                 else if (reflectState == REFLECTING)
                     Util.sendFailure(channel, "You are already reflecting.");
-                else if (!reflect.done())
-                    Util.sendFailure(channel, "**Reflect** is on cooldown for **" + reflect.getCur() + "** more turn(s).");
+                else if (!reflect.isDone())
+                    Util.sendFailure(channel, "**Reflect** is on cooldown for **" + reflect.getCurrent() + "** more turn(s).");
                 else
                     member.act(new ReflectAction());
             }

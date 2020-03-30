@@ -56,7 +56,7 @@ public class Warrior extends Unit {
 
     @Override
     public String[] getTopic() {
-        return new String[]{"Attack: **" + getBonus().getCur() + " / 3**"};
+        return new String[]{"Attack: **" + getBonus().getCurrent() + " / 3**"};
     }
 
     @Override
@@ -75,7 +75,7 @@ public class Warrior extends Unit {
 
     @Override
     public String onTurnStart(Game.Member member) {
-        if (bash.count() && bash.notif())
+        if (bash.count() && bash.tryNotify())
             return Emote.INFO + "**" + member.getUsername() + "'s Bash** is ready to use.";
         return "";
     }
@@ -101,8 +101,8 @@ public class Warrior extends Unit {
                 message.delete().block();
                 if (member.hasData(Silence.class))
                     Util.sendFailure(channel, "You cannot **Bash** while silenced.");
-                else if (!getBash().done())
-                    Util.sendFailure(channel, "**Bash** is on cooldown for **" + getBash().getCur() + "** more turn(s).");
+                else if (!getBash().isDone())
+                    Util.sendFailure(channel, "**Bash** is on cooldown for **" + getBash().getCurrent() + "** more turn(s).");
                 else
                     member.act(new BashAction(game.getRandomTarget(member)));
             }

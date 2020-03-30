@@ -1,47 +1,32 @@
 package com.oopsjpeg.enigma.util;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class Cooldown implements Notifier {
-    private final int duration;
-    private int cur = 0;
-    private boolean notif = false;
+    @Getter @Setter private int duration;
+    @Getter private int current = 0;
+    @Getter @Setter private boolean notified = false;
 
     public Cooldown(int duration) {
         this.duration = duration;
     }
 
     public void start() {
-        setCur(getDuration());
-        setNotif(false);
+        setCurrent(getDuration());
+        setNotified(false);
     }
 
     public boolean count() {
-        setCur(getCur() - 1);
-        return done();
+        setCurrent(getCurrent() - 1);
+        return isDone();
     }
 
-    public boolean done() {
-        return getCur() == 0;
+    public boolean isDone() {
+        return getCurrent() == 0;
     }
 
-    public int getDuration() {
-        return duration;
-    }
-
-    public int getCur() {
-        return cur;
-    }
-
-    public void setCur(int cur) {
-        this.cur = Util.limit(cur, 0, duration);
-    }
-
-    @Override
-    public boolean getNotif() {
-        return notif;
-    }
-
-    @Override
-    public void setNotif(boolean notif) {
-        this.notif = notif;
+    public void setCurrent(int current) {
+        this.current = Util.limit(current, 0, duration);
     }
 }

@@ -10,6 +10,7 @@ import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
+import lombok.Getter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -214,7 +215,7 @@ public enum GameCommand implements Command {
                     else if (!item.canUse(member))
                         Util.sendFailure(channel, "**" + item.getName() + "** can't be used.");
                     else if (item.getCooldown() != null && !item.getCooldown().count())
-                        Util.sendFailure(channel, "**" + item.getName() + "** is on cooldown for **" + item.getCooldown().getCur() + "** more turn(s).");
+                        Util.sendFailure(channel, "**" + item.getName() + "** is on cooldown for **" + item.getCooldown().getCurrent() + "** more turn(s).");
                     else
                         member.act(game.new UseAction(item));
                 }
@@ -222,14 +223,9 @@ public enum GameCommand implements Command {
         }
     };
 
-    private final String[] aliases;
+    @Getter private final String[] aliases;
 
     GameCommand(String... aliases) {
         this.aliases = aliases;
-    }
-
-    @Override
-    public String[] getAliases() {
-        return aliases;
     }
 }

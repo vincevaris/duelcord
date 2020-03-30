@@ -131,7 +131,7 @@ public class Phasebreaker extends Unit {
     @Override
     public String[] getTopic() {
         return new String[]{"Phase: **" + getPhase() + "**",
-                "Flare: **" + getFlare().getCur() + "** / **" + Phasebreaker.FLARE_STACKS + "**",
+                "Flare: **" + getFlare().getCurrent() + "** / **" + Phasebreaker.FLARE_STACKS + "**",
                 "Bonus AP: **" + getBonusAp() + "**"};
     }
 
@@ -164,7 +164,7 @@ public class Phasebreaker extends Unit {
                     Util.sendFailure(channel, "You cannot use **Flare** while silenced.");
                 else if (getFlared())
                     Util.sendFailure(channel, "You already using **Flare**.");
-                else if (!getFlare().done())
+                else if (!getFlare().isDone())
                     Util.sendFailure(channel, "**Flare** is not ready yet.");
                 else
                     member.act(new FlareAction());

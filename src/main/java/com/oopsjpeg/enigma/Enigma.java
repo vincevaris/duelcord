@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 
 public class Enigma {
     public static final Logger LOGGER = LoggerFactory.getLogger(Enigma.class);
-    public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    public static final Gson GSON = new GsonBuilder().create();
     public static final ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() + 1);
 
     @Getter private static Enigma instance;

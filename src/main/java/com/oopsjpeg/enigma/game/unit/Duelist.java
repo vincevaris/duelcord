@@ -55,7 +55,7 @@ public class Duelist extends Unit {
 
     @Override
     public String onTurnStart(Game.Member member) {
-        if (crush.count() && crush.notif())
+        if (crush.count() && crush.tryNotify())
             return Emote.INFO + "**" + member.getUsername() + "'s Crush** is ready to use.";
         return "";
     }
@@ -82,7 +82,7 @@ public class Duelist extends Unit {
 
     @Override
     public String[] getTopic() {
-        return new String[]{"Bonus: **" + getBonus().getCur() + " / " + Duelist.BONUS_MAX + "**"};
+        return new String[]{"Bonus: **" + getBonus().getCurrent() + " / " + Duelist.BONUS_MAX + "**"};
     }
 
     @Override
@@ -111,8 +111,8 @@ public class Duelist extends Unit {
                 message.delete().block();
                 if (member.hasData(Silence.class))
                     Util.sendFailure(channel, "You cannot **Crush** while silenced.");
-                else if (!getCrush().done())
-                    Util.sendFailure(channel, "**Crush** is on cooldown for **" + getCrush().getCur() + "** more turn(s).");
+                else if (!getCrush().isDone())
+                    Util.sendFailure(channel, "**Crush** is on cooldown for **" + getCrush().getCurrent() + "** more turn(s).");
                 else
                     member.act(new CrushAction(game.getRandomTarget(member)));
             }

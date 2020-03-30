@@ -23,6 +23,8 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Permission;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,19 +38,19 @@ import static com.oopsjpeg.enigma.game.Stats.*;
 public class Game {
     public static final int PICKING = 0;
     public static final int PLAYING = 1;
-    private final Enigma instance;
-    private final TextChannel channel;
-    private final GameMode mode;
-    private final List<Member> members;
-    private final CommandListener commands;
+    @Getter private final Enigma instance;
+    @Getter private final TextChannel channel;
+    @Getter private final GameMode mode;
+    @Getter private final List<Member> members;
+    @Getter private final CommandListener commandListener;
 
-    private List<GameAction> actions = new ArrayList<>();
-    private LocalDateTime lastAction = LocalDateTime.now();
-    private int afkNotifier = 0;
+    @Getter @Setter private List<GameAction> actions = new ArrayList<>();
+    @Getter @Setter private LocalDateTime lastAction = LocalDateTime.now();
+    @Getter @Setter private int afkNotifier = 0;
 
-    private int gameState = PICKING;
-    private int turnCount = 0;
-    private int turnIndex = -1;
+    @Getter @Setter private int gameState = PICKING;
+    @Getter @Setter private int turnCount = 0;
+    @Getter @Setter private int turnIndex = -1;
 
     public Game(Enigma instance, GameMode mode, List<Player> players) {
         this.instance = instance;
@@ -62,10 +64,10 @@ public class Game {
         players.forEach(p -> channel.addMemberOverwrite(Snowflake.of(p.getId()), PermissionOverwrite.forMember(Snowflake.of(p.getId()),
                 PermissionSet.of(Permission.VIEW_CHANNEL), PermissionSet.none())).block());
 
-        commands = new CommandListener(instance,
+        commandListener = new CommandListener(instance,
                 instance.getSettings().get(Settings.GAME_PREFIX),
                 GameCommand.values(), channel);
-        instance.addListener(commands);
+        instance.addListener(commandListener);
 
         members = players.stream().map(Member::new).collect(Collectors.toList());
         Collections.shuffle(members);
@@ -108,7 +110,7 @@ public class Game {
             }
             output.add("[**" + getCurrentMember().getMention() + ", pick your unit!**]");
             output.add("Check " + instance.getUnitsChannel().getMention() + " to view units, then pick with one with `"
-                    + commands.getPrefix() + GameCommand.PICK.getAliases()[0] + "`.");
+                    + commandListener.getPrefix() + GameCommand.PICK.getAliases()[0] + "`.");
         } else if (gameState == PLAYING) {
             Member member = getCurrentMember();
             member.heal(member.stats.get(HEALTH_PER_TURN) * (member.defensive ? 2 : 1), null, false);
@@ -159,18 +161,6 @@ public class Game {
         return channel.getGuild().block();
     }
 
-    public TextChannel getChannel() {
-        return channel;
-    }
-
-    public CommandListener getCommandListener() {
-        return commands;
-    }
-
-    public GameMode getMode() {
-        return mode;
-    }
-
     public Member getMember(User user) {
         return members.stream()
                 .filter(m -> m.getUser().equals(user))
@@ -184,10 +174,6 @@ public class Game {
     public Member getRandomTarget(Member exclude) {
         List<Member> targets = getAlive().stream().filter(m -> !m.equals(exclude)).collect(Collectors.toList());
         return targets.get(Util.RANDOM.nextInt(targets.size()));
-    }
-
-    public List<Member> getMembers() {
-        return members;
     }
 
     public List<User> getUsers() {
@@ -206,26 +192,6 @@ public class Game {
         return members.stream().filter(m -> !m.alive).collect(Collectors.toList());
     }
 
-    public List<GameAction> getActions() {
-        return actions;
-    }
-
-    public LocalDateTime getLastAction() {
-        return lastAction;
-    }
-
-    public void setLastAction(LocalDateTime lastAction) {
-        this.lastAction = lastAction;
-    }
-
-    public int getAfkNotifier() {
-        return afkNotifier;
-    }
-
-    public void setAfkNotifier(int afkNotifier) {
-        this.afkNotifier = afkNotifier;
-    }
-
     public void notifyAfk() {
         afkNotifier++;
         if (afkNotifier == 4)
@@ -233,14 +199,6 @@ public class Game {
                     "to make an action, otherwise you will **forfeit due to AFKing**.").block();
         else if (afkNotifier >= 8)
             channel.createMessage(getCurrentMember().lose()).block();
-    }
-
-    public int getGameState() {
-        return gameState;
-    }
-
-    public int getTurnCount() {
-        return turnCount;
     }
 
     public class AttackAction implements GameAction {
@@ -459,10 +417,10 @@ public class Game {
             stats.put(HEALTH, stats.get(MAX_HEALTH));
             stats.put(GOLD, mode.handleGold(175 + (100 * getAlive().indexOf(this))));
 
-            getCommandListener().getCommands().addAll(Arrays.asList(unit.getCommands()));
+            commandListener.getCommands().addAll(Arrays.asList(unit.getCommands()));
 
             if (unit instanceof Berserker)
-                ((Berserker) unit).getRage().setCur(getAlive().indexOf(this));
+                ((Berserker) unit).getRage().setCurrent(getAlive().indexOf(this));
         }
 
         public boolean hasUnit() {
@@ -473,16 +431,16 @@ public class Game {
             data.removeAll(getEffects());
 
             float health = unit.getStats().get(HEALTH);
-            int gold = unit.getStats().getInt(GOLD);
-            int energy = unit.getStats().getInt(ENERGY);
+            float gold = unit.getStats().get(GOLD);
+            float energy = unit.getStats().get(ENERGY);
 
-            stats.put(unit.getStats());
+            stats.putAll(unit.getStats());
             stats.put(HEALTH, health);
             stats.put(GOLD, gold);
             stats.put(ENERGY, energy);
 
             for (Item item : getItems()) {
-                stats.add(item.getStats());
+                stats.addAll(item.getStats());
                 for (Effect effect : item.getEffects())
                     if (!data.contains(effect))
                         data.add(effect);
@@ -494,7 +452,7 @@ public class Game {
             }
 
             for (Effect effect : getEffects())
-                stats.add(effect.getStats(this));
+                stats.addAll(effect.getStats(this));
 
             critBag.setChance(stats.get(Stats.CRIT_CHANCE));
         }

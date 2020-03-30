@@ -55,7 +55,7 @@ public class Gunslinger extends Unit {
     @Override
     public String onTurnStart(Game.Member member) {
         setBonus(false);
-        if (barrage.count() && barrage.notif())
+        if (barrage.count() && barrage.tryNotify())
             return Emote.INFO + "**" + member.getUsername() + "'s Barrage** is ready to use.";
         return "";
     }
@@ -106,8 +106,8 @@ public class Gunslinger extends Unit {
                 message.delete().block();
                 if (member.hasData(Silence.class))
                     Util.sendFailure(channel, "You cannot **Barrage** while silenced.");
-                else if (!getBarrage().done())
-                    Util.sendFailure(channel, "**Barrage** is on cooldown for **" + getBarrage().getCur() + "** more turn(s).");
+                else if (!getBarrage().isDone())
+                    Util.sendFailure(channel, "**Barrage** is on cooldown for **" + getBarrage().getCurrent() + "** more turn(s).");
                 else
                     member.act(new BarrageAction(game.getRandomTarget(member)));
             }

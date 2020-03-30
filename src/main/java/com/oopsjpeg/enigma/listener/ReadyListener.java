@@ -5,15 +5,14 @@ import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.util.Listener;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.util.concurrent.TimeUnit;
 
+@RequiredArgsConstructor
 public class ReadyListener implements Listener {
-    private final Enigma instance;
-
-    public ReadyListener(Enigma instance) {
-        this.instance = instance;
-    }
+    @Getter private final Enigma instance;
 
     @Override
     public void register(DiscordClient client) {
@@ -26,11 +25,6 @@ public class ReadyListener implements Listener {
                 .filter(g -> g.getGameState() == 1)
                 .forEach(Game::notifyAfk), 1, 1, TimeUnit.MINUTES);
 
-    }
-
-    @Override
-    public Enigma getInstance() {
-        return instance;
     }
 
     public void onReady(ReadyEvent event) {
