@@ -168,6 +168,8 @@ public class GameMember {
             Buff oldBuff = (Buff) getData(buff.getClass());
             if (buff.getPower() > oldBuff.getPower())
                 data.remove(oldBuff);
+            else
+                return null;
         }
 
         data.add(buff);
