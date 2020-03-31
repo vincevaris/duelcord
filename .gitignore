@@ -3,4 +3,4 @@
 target/
 out/
 enigma.properties
-config.ini
+dependency-reduced-pom.xml
