@@ -17,11 +17,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Gunslinger extends Unit {
-    public static final float BONUS_DAMAGE = 0.25f;
-    public static final float BONUS_AP = 1.2f;
+    public static final float BONUS_AP = 1.25f;
     public static final int BARRAGE_SHOTS = 4;
-    public static final int BARRAGE_DAMAGE = 6;
-    public static final float BARRAGE_AP = 0.3f;
+    public static final int BARRAGE_DAMAGE = 5;
+    public static final float BARRAGE_AP = 0.25f;
     public static final int BARRAGE_COOLDOWN = 3;
     private final Cooldown barrage = new Cooldown(BARRAGE_COOLDOWN);
     private boolean bonus = false;
@@ -43,7 +42,7 @@ public class Gunslinger extends Unit {
         if (!getBonus()) {
             setBonus(true);
             event.crit = true;
-            event.bonus += (event.damage * BONUS_DAMAGE) + (event.actor.getStats().get(Stats.ABILITY_POWER) * BONUS_AP);
+            event.bonus += event.actor.getStats().get(Stats.ABILITY_POWER) * BONUS_AP;
         }
         return event;
     }
@@ -63,8 +62,7 @@ public class Gunslinger extends Unit {
 
     @Override
     public String getDescription() {
-        return "The first basic attack per turn always crits and deals **"
-                + Util.percent(BONUS_DAMAGE) + "** (+" + Util.percent(BONUS_AP) + " AP) bonus damage.\n\n"
+        return "The first basic attack per turn always crits and deals **" + Util.percent(BONUS_AP) + " AP** bonus damage.\n\n"
                 + "Using `>barrage` fires **" + BARRAGE_SHOTS + "** shots that each deal **"
                 + BARRAGE_DAMAGE + "** (+" + Util.percent(BARRAGE_AP) + " AP) damage.\n"
                 + "Barrage shots can crit and apply on-hit effects.\n"
