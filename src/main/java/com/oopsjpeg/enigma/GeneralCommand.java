@@ -94,7 +94,7 @@ public enum GeneralCommand implements Command {
                 Util.sendFailure(channel, "You do not have any stats.");
             else {
                 channel.createEmbed(e -> {
-                    e.setAuthor(author.getUsername() + "'s Stats", null, author.getAvatarUrl());
+                    e.setAuthor(author.getUsername() + "'s Stats (" + Math.round(player.getRankedPoints()) + " RP)", null, author.getAvatarUrl());
                     e.setDescription("**" + player.getWins() + "**W **" + player.getLosses() + "**L (**" + Util.percent(player.getWinRate()) + "** WR)"
                             + "\nGems: **" + player.getGems() + "**");
                     player.getUnitDatas().stream()

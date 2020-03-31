@@ -86,6 +86,7 @@ public class Bloodreaper extends Unit {
 
     @Override
     public String onTurnStart(GameMember member) {
+        reap.reset();
         if (member.getStats().get(Stats.SHIELD) > 0)
             return member.heal(member.getStats().get(Stats.SHIELD) * SHIELD_HEAL, "Lifeforce");
         return "";

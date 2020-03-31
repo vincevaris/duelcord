@@ -161,13 +161,13 @@ public class Enigma {
         if (game.getTurnCount() > 7 && game.getMode().isRanked()) {
             GameMember winner = game.getAlive().get(0);
             // Winner
-            winner.getPlayer().win();
+            winner.getPlayer().win(game.getRandomTarget(winner).getPlayer().getRankedPoints());
             winner.getPlayer().addGems(Util.limit((game.getTurnCount() / 2) + Util.nextInt(20, 40), 10, 80));
             winner.getPlayer().getUnitData(winner.getUnit().getName()).addPoints(Util.nextInt(160, 200));
             mongo.savePlayer(winner.getPlayer());
             // Losers
             game.getDead().forEach(m -> {
-                m.getPlayer().lose();
+                m.getPlayer().lose(winner.getPlayer().getRankedPoints());
                 m.getPlayer().addGems(Util.limit((game.getTurnCount() / 2) + Util.nextInt(0, 10), 5, 40));
                 m.getPlayer().getUnitData(m.getUnit().getName()).addPoints(Util.nextInt(80, 100));
                 mongo.savePlayer(m.getPlayer());

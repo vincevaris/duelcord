@@ -4,6 +4,7 @@ import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.GameMode;
 import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
@@ -22,6 +23,7 @@ public class Player {
     @Getter @Setter private int gems;
     @Getter @Setter private int wins;
     @Getter @Setter private int losses;
+    private float rankedPoints;
     private List<UnitData> unitDatas;
 
     public Player(long id) {
@@ -84,6 +86,18 @@ public class Player {
         losses++;
     }
 
+    public void win(float loserRp) {
+        float average = (rankedPoints + loserRp) / 2;
+        float weight = rankedPoints / average;
+        rankedPoints += Util.limit(weight * 100, 50, 125);
+    }
+
+    public void lose(float winnerRp) {
+        float average = (rankedPoints + winnerRp) / 2;
+        float weight = rankedPoints / average;
+        rankedPoints -= Util.limit(weight * 100, 50, 125);
+    }
+
     public int getTotalGames() {
         return wins + losses;
     }
@@ -106,6 +120,16 @@ public class Player {
                     getUnitDatas().add(data);
                     return data;
                 });
+    }
+
+    public float getRankedPoints() {
+        if (rankedPoints == 0)
+            rankedPoints = 1000;
+        return rankedPoints;
+    }
+
+    public void setRankedPoints(int rankedPoints) {
+        this.rankedPoints = Math.max(1, rankedPoints);
     }
 
     @Override
