@@ -10,7 +10,7 @@ public class DawnHammer extends Item {
     public static final String NAME = "Dawn Hammer";
     public static final Tree TREE = Tree.HEALTH;
     public static final String TIP = "shields + 25 energy";
-    public static final int COST = 1275;
+    public static final int COST = 1225;
     public static final Item[] BUILD = new Item[]{new SteelMallet(), new Gemheart()};
     public static final Effect[] EFFECTS = new Effect[]{
             new StatsEffect(new Stats().put(Stats.ENERGY_PER_TURN, 25)),

@@ -9,7 +9,7 @@ public class DivinePlatemail extends Item {
     public static final String NAME = "Divine Platemail";
     public static final Tree TREE = Tree.HEALTH;
     public static final String TIP = "less damage from abilities";
-    public static final int COST = 475;
+    public static final int COST = 425;
     public static final Stats STATS = new Stats()
             .put(Stats.MAX_HEALTH, 60);
     public static final Effect[] EFFECTS = new Effect[]{new Divinity(0.15f)};

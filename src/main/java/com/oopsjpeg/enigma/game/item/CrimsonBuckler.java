@@ -10,7 +10,7 @@ public class CrimsonBuckler extends Item {
     public static final String NAME = "Crimson Buckler";
     public static final Tree TREE = Tree.HEALTH;
     public static final String TIP = "damage based on max health";
-    public static final int COST = 1100;
+    public static final int COST = 1050;
     public static final Stats STATS = new Stats()
             .put(Stats.MAX_HEALTH, 100);
     public static final Effect[] EFFECTS = new Effect[]{new Divinity(0.4f), new Brawn(0.1f)};
