@@ -109,7 +109,6 @@ public class Game {
             member.getStats().add(GOLD, member.getStats().get(GOLD_PER_TURN));
             member.getStats().put(ENERGY, member.getUnit().getStats().get(ENERGY));
             member.getStats().add(ENERGY, member.getStats().get(ENERGY_PER_TURN));
-            member.getStats().put(SHIELD, 0);
             member.setDefensive(false);
 
             turnCount++;
@@ -122,6 +121,8 @@ public class Game {
             // Low health warning
             if (member.getStats().get(HEALTH) < member.getStats().get(MAX_HEALTH) * 0.2f)
                 output.add(Emote.WARN + "**" + member.getUsername() + "** is critically low on health.");
+
+            member.getStats().put(SHIELD, 0);
         }
 
         channel.createMessage(Util.joinNonEmpty(output)).block();

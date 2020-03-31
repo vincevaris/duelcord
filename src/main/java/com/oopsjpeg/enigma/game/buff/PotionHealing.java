@@ -6,7 +6,7 @@ import com.oopsjpeg.enigma.game.obj.Buff;
 
 public class PotionHealing extends Buff {
     public PotionHealing(GameMember source, int turns) {
-        super(source, turns);
+        super(source, false, turns);
     }
 
     @Override

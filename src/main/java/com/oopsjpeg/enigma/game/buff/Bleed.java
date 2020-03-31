@@ -7,7 +7,7 @@ import com.oopsjpeg.enigma.util.Emote;
 
 public class Bleed extends Buff {
     public Bleed(GameMember source, int turns, float power) {
-        super(source, turns, power);
+        super(source, true, turns, power);
     }
 
     @Override

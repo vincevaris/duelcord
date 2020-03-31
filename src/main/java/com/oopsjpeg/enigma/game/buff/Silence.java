@@ -6,7 +6,7 @@ import com.oopsjpeg.enigma.util.Emote;
 
 public class Silence extends Buff {
     public Silence(GameMember source, int turns) {
-        super(source, turns);
+        super(source, true, turns);
     }
 
     @Override

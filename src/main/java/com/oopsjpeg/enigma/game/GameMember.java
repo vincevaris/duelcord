@@ -330,6 +330,10 @@ public class GameMember {
         return Util.joinNonEmpty(output);
     }
 
+    public float getBonusHealth() {
+        return stats.get(MAX_HEALTH) - unit.getStats().get(MAX_HEALTH);
+    }
+
     @Override
     public String toString() {
         return getPlayer().toString();

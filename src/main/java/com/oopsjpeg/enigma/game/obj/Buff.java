@@ -2,31 +2,20 @@ package com.oopsjpeg.enigma.game.obj;
 
 import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.GameObject;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
+@AllArgsConstructor
 public abstract class Buff extends GameObject {
-    private final GameMember source;
-    private int turns;
-    private float power = 0;
+    @Getter private final GameMember source;
+    @Getter private final boolean debuff;
+    @Getter @Setter private int turns;
+    @Getter private float power = 0;
 
-    public Buff(GameMember source, int turns) {
+    public Buff(GameMember source, boolean debuff, int turns) {
         this.source = source;
-        this.turns = turns;
-    }
-
-    public Buff(GameMember source, int turns, float power) {
-        this(source, turns);
-        this.power = power;
-    }
-
-    public GameMember getSource() {
-        return source;
-    }
-
-    public int getTurns() {
-        return turns;
-    }
-
-    public void setTurns(int turns) {
+        this.debuff = debuff;
         this.turns = turns;
     }
 
@@ -36,10 +25,6 @@ public abstract class Buff extends GameObject {
     }
 
     public abstract String getName();
-
-    public float getPower() {
-        return power;
-    }
 
     @Override
     public String toString() {

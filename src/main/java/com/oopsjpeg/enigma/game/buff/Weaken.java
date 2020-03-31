@@ -8,7 +8,7 @@ import com.oopsjpeg.enigma.util.Util;
 
 public class Weaken extends Buff {
     public Weaken(GameMember source, int turns, float power) {
-        super(source, turns, power);
+        super(source, true, turns, power);
     }
 
     @Override

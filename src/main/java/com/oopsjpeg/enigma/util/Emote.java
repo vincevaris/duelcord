@@ -19,6 +19,8 @@ public class Emote {
     public static final String BLEED = ":syringe: ";
     public static final String WOUND = ":cupid: ";
     public static final String SILENCE = ":eight_pointed_black_star: ";
+    public static final String ENERGY = ":sparkle: ";
+    public static final String BUFF = ":eight_spoked_asterisk: ";
 
     // Custom emotes
     public static final String HEAL = "<:enigmaHeal:629158098681987072> ";
