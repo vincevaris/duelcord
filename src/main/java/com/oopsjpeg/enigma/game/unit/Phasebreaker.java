@@ -142,9 +142,9 @@ public class Phasebreaker extends Unit {
         return new Stats()
                 .put(Stats.ENERGY, 125)
                 .put(Stats.MAX_HEALTH, 750)
-                .put(Stats.DAMAGE, 20)
+                .put(Stats.DAMAGE, 18)
                 .put(Stats.ABILITY_POWER, bonusAp)
-                .put(Stats.HEALTH_PER_TURN, 12);
+                .put(Stats.HEALTH_PER_TURN, 10);
     }
 
     public class FlareCommand implements Command {

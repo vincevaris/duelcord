@@ -61,8 +61,8 @@ public class Thief extends Unit {
     public Stats getStats() {
         return new Stats()
                 .put(Stats.ENERGY, 150)
-                .put(Stats.MAX_HEALTH, 735)
-                .put(Stats.DAMAGE, 20)
+                .put(Stats.MAX_HEALTH, 740)
+                .put(Stats.DAMAGE, 22)
                 .put(Stats.CRIT_CHANCE, 0.25f)
                 .put(Stats.CRIT_DAMAGE, -1 * CRIT_REDUCE)
                 .put(Stats.HEALTH_PER_TURN, 8);

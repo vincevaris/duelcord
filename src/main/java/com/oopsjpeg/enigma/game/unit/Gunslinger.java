@@ -84,7 +84,7 @@ public class Gunslinger extends Unit {
         return new Stats()
                 .put(Stats.ENERGY, 125)
                 .put(Stats.MAX_HEALTH, 750)
-                .put(Stats.DAMAGE, 17)
+                .put(Stats.DAMAGE, 19)
                 .put(Stats.HEALTH_PER_TURN, 12);
     }
 
