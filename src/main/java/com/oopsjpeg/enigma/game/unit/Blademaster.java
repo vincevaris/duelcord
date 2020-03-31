@@ -2,10 +2,7 @@ package com.oopsjpeg.enigma.game.unit;
 
 import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
-import com.oopsjpeg.enigma.game.DamageEvent;
-import com.oopsjpeg.enigma.game.Game;
-import com.oopsjpeg.enigma.game.GameAction;
-import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.*;
 import com.oopsjpeg.enigma.game.buff.Silence;
 import com.oopsjpeg.enigma.game.obj.Unit;
 import com.oopsjpeg.enigma.util.Cooldown;
@@ -35,7 +32,7 @@ public class Blademaster extends Unit {
     private final Cooldown reflect = new Cooldown(REFLECT_COOLDOWN);
     private int reflectState = 0;
 
-    public String notif(Game.Member member) {
+    public String notif(GameMember member) {
         return Emote.INFO + "**" + member.getUsername() + "'s Gemblade** is at max capacity.";
     }
 
@@ -54,8 +51,8 @@ public class Blademaster extends Unit {
     @Override
     public DamageEvent basicAttackIn(DamageEvent event) {
         if (reflectState == REFLECTING) {
-            Game.Member swapActor = event.game.new Member(event.target);
-            Game.Member swapTarget = event.game.new Member(event.actor);
+            GameMember swapActor = new GameMember(event.target);
+            GameMember swapTarget = new GameMember(event.actor);
 
             event.actor = swapActor;
             event.target = swapTarget;
@@ -70,7 +67,7 @@ public class Blademaster extends Unit {
     }
 
     @Override
-    public String onTurnStart(Game.Member member) {
+    public String onTurnStart(GameMember member) {
         if (reflectState != NONE) {
             reflectState = NONE;
             gemblade.reset();
@@ -81,14 +78,14 @@ public class Blademaster extends Unit {
 
         if (reflect.count() && reflect.tryNotify())
             return Emote.INFO + "**" + member.getUsername() + "'s Reflect** is ready to use.";
-        return "";
+        return null;
     }
 
     @Override
-    public String onTurnEnd(Game.Member member) {
+    public String onTurnEnd(GameMember member) {
         if (reflectState == REFLECTING)
             return Emote.WARN + "**" + member.getUsername() + "** is **reflecting** the next attack.";
-        return "";
+        return null;
     }
 
     @Override
@@ -135,7 +132,7 @@ public class Blademaster extends Unit {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
-            Game.Member member = game.getMember(author);
+            GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
@@ -158,7 +155,7 @@ public class Blademaster extends Unit {
 
     public class ReflectAction implements GameAction {
         @Override
-        public String act(Game.Member actor) {
+        public String act(GameMember actor) {
             reflect.start();
             reflectState = REFLECTING;
 

@@ -1,7 +1,7 @@
 package com.oopsjpeg.enigma.game.effect;
 
 import com.oopsjpeg.enigma.game.DamageEvent;
-import com.oopsjpeg.enigma.game.Game;
+import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.util.Util;
 
@@ -29,9 +29,9 @@ public class LoveOfWar extends Effect {
     }
 
     @Override
-    public String onTurnEnd(Game.Member member) {
+    public String onTurnEnd(GameMember member) {
         setStack(0);
-        return "";
+        return null;
     }
 
     @Override

@@ -2,6 +2,10 @@ package com.oopsjpeg.enigma.game;
 
 import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
+import com.oopsjpeg.enigma.game.action.AttackAction;
+import com.oopsjpeg.enigma.game.action.BuyAction;
+import com.oopsjpeg.enigma.game.action.SellAction;
+import com.oopsjpeg.enigma.game.action.UseAction;
 import com.oopsjpeg.enigma.game.buff.Silence;
 import com.oopsjpeg.enigma.game.obj.Item;
 import com.oopsjpeg.enigma.game.obj.Unit;
@@ -13,7 +17,6 @@ import discord4j.core.object.entity.User;
 import lombok.Getter;
 
 import java.util.Arrays;
-import java.util.List;
 
 public enum GameCommand implements Command {
     ATTACK("attack") {
@@ -22,7 +25,7 @@ public enum GameCommand implements Command {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
-            Game.Member member = game.getMember(author);
+            GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
@@ -31,7 +34,7 @@ public enum GameCommand implements Command {
                 else if (member.hasData(Silence.class))
                     Util.sendFailure(channel, "You cannot attack while silenced.");
                 else
-                    member.act(game.new AttackAction(game.getRandomTarget(member)));
+                    member.act(new AttackAction(game.getRandomTarget(member)));
             }
         }
     },
@@ -41,7 +44,7 @@ public enum GameCommand implements Command {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
-            Game.Member member = game.getMember(author);
+            GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
@@ -52,20 +55,14 @@ public enum GameCommand implements Command {
                     if (item == null)
                         Util.sendFailure(channel, "Invalid item. Please try again.");
                     else {
-                        int cost = item.getCost();
-                        List<Item> build = member.getItems();
-                        for (Item i : item.getBuild())
-                            if (build.contains(i)) {
-                                cost -= i.getCost();
-                                build.remove(i);
-                            }
+                        Build build = item.build(member.getItems());
 
-                        if (member.getStats().getInt(Stats.GOLD) < cost)
-                            Util.sendFailure(channel, "You need **" + (cost - member.getStats().getInt(Stats.GOLD)) + "** more gold for a(n) **" + item.getName() + "**.");
-                        else if (build.size() >= 4)
+                        if (member.getStats().getInt(Stats.GOLD) < build.getCost())
+                            Util.sendFailure(channel, "You need **" + (build.getCost() - member.getStats().getInt(Stats.GOLD)) + "** more gold for a(n) **" + item.getName() + "**.");
+                        else if (build.getPostData().size() >= 4)
                             Util.sendFailure(channel, "You do not have enough inventory space for a(n) **" + item.getName() + "**.");
                         else
-                            member.act(game.new BuyAction(item, cost));
+                            member.act(new BuyAction(build));
                     }
                 }
             }
@@ -77,7 +74,7 @@ public enum GameCommand implements Command {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
-            Game.Member member = game.getMember(author);
+            GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel())) {
                 message.delete().block();
@@ -87,13 +84,19 @@ public enum GameCommand implements Command {
                     Util.send(channel, game.getTopic(game.getRandomTarget(member)));
                 else {
                     Item item = Item.fromName(String.join(" ", args));
-                    if (item == null)
-                        Util.sendFailure(channel, "Invalid item name.");
-                    else
-                        Util.send(channel, item.getName() + " (" + item.getCost() + "g)", Util.joinNonEmpty(
+                    if (item != null) {
+                        Build build = item.build(member.getItems());
+                        Util.send(channel, item.getName() + " (" + build.getCost() + "g)", Util.joinNonEmpty(
+                                item.hasBuild() ? "*Build: " + Arrays.toString(item.getBuild()) + "*\n" : null,
                                 Util.formatStats(item.getStats()),
-                                Arrays.toString(item.getBuild()),
                                 Util.formatEffects(item.getEffects())));
+                    } else {
+                        Unit unit = Unit.fromName(String.join(" ", args));
+                        if (unit != null)
+                            channel.createEmbed(Util.formatUnit(unit)).block();
+                        else
+                            Util.sendFailure(channel, "Invalid item/unit name.");
+                    }
                 }
             }
         }
@@ -104,7 +107,7 @@ public enum GameCommand implements Command {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
-            Game.Member member = game.getMember(author);
+            GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
@@ -134,7 +137,7 @@ public enum GameCommand implements Command {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
-            Game.Member member = game.getMember(author);
+            GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
@@ -176,7 +179,7 @@ public enum GameCommand implements Command {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
-            Game.Member member = game.getMember(author);
+            GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
@@ -189,7 +192,7 @@ public enum GameCommand implements Command {
                     else if (!member.getData().contains(item))
                         Util.sendFailure(channel, "You don't have a(n) **" + item.getName() + "**.");
                     else
-                        member.act(game.new SellAction(item));
+                        member.act(new SellAction(item));
                 }
             }
         }
@@ -200,7 +203,7 @@ public enum GameCommand implements Command {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
-            Game.Member member = game.getMember(author);
+            GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
@@ -217,7 +220,7 @@ public enum GameCommand implements Command {
                     else if (item.getCooldown() != null && !item.getCooldown().count())
                         Util.sendFailure(channel, "**" + item.getName() + "** is on cooldown for **" + item.getCooldown().getCurrent() + "** more turn(s).");
                     else
-                        member.act(game.new UseAction(item));
+                        member.act(new UseAction(item));
                 }
             }
         }

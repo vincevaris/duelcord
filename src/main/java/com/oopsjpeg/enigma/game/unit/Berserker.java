@@ -2,10 +2,7 @@ package com.oopsjpeg.enigma.game.unit;
 
 import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
-import com.oopsjpeg.enigma.game.DamageEvent;
-import com.oopsjpeg.enigma.game.Game;
-import com.oopsjpeg.enigma.game.GameAction;
-import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.*;
 import com.oopsjpeg.enigma.game.buff.Silence;
 import com.oopsjpeg.enigma.game.obj.Unit;
 import com.oopsjpeg.enigma.util.Emote;
@@ -33,10 +30,10 @@ public class Berserker extends Unit {
         return rage;
     }
 
-    public String rage(Game.Member member) {
+    public String rage(GameMember member) {
         if (rage.stack() && rage.tryNotify())
             return Emote.RAGE + "**" + member.getUsername() + "'s Rage** is at max capacity.";
-        return "";
+        return null;
     }
 
     public float getBonus() {
@@ -84,9 +81,9 @@ public class Berserker extends Unit {
     }
 
     @Override
-    public String onTurnEnd(Game.Member member) {
+    public String onTurnEnd(GameMember member) {
         bonus = 0;
-        return "";
+        return null;
     }
 
     @Override
@@ -110,7 +107,7 @@ public class Berserker extends Unit {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
-            Game.Member member = game.getMember(author);
+            GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
@@ -131,7 +128,7 @@ public class Berserker extends Unit {
 
     public class RageAction implements GameAction {
         @Override
-        public String act(Game.Member actor) {
+        public String act(GameMember actor) {
             float stack = Berserker.BONUS_DAMAGE + (actor.getStats().get(Stats.ABILITY_POWER) / (Berserker.BONUS_AP * 100));
 
             setBonus(stack * getRage().getCurrent());

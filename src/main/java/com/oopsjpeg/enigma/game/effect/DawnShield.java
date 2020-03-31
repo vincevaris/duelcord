@@ -1,6 +1,6 @@
 package com.oopsjpeg.enigma.game.effect;
 
-import com.oopsjpeg.enigma.game.Game;
+import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Effect;
 
@@ -12,7 +12,7 @@ public class DawnShield extends Effect {
     }
 
     @Override
-    public String onDefend(Game.Member member) {
+    public String onDefend(GameMember member) {
         return member.shield(Math.min(power, member.getStats().get(Stats.ENERGY)));
     }
 

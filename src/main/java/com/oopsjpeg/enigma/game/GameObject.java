@@ -1,15 +1,15 @@
 package com.oopsjpeg.enigma.game;
 
 public abstract class GameObject {
-    public String onTurnStart(Game.Member member) {
+    public String onTurnStart(GameMember member) {
         return null;
     }
 
-    public String onTurnEnd(Game.Member member) {
+    public String onTurnEnd(GameMember member) {
         return null;
     }
 
-    public String onDefend(Game.Member member) {
+    public String onDefend(GameMember member) {
         return null;
     }
 

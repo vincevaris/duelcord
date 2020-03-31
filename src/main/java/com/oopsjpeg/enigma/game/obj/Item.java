@@ -1,13 +1,16 @@
 package com.oopsjpeg.enigma.game.obj;
 
-import com.oopsjpeg.enigma.game.Game;
+import com.oopsjpeg.enigma.game.Build;
+import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.GameObject;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.item.*;
 import com.oopsjpeg.enigma.util.Cooldown;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,7 +46,7 @@ public abstract class Item extends GameObject {
     public static Item fromName(String name) {
         return Arrays.stream(values())
                 .filter(i -> name.equalsIgnoreCase(i.getName()) || (name.length() >= 3
-                    && i.getName().toLowerCase().startsWith(name.toLowerCase())))
+                        && i.getName().toLowerCase().startsWith(name.toLowerCase())))
                 .findAny().orElse(null);
     }
 
@@ -58,18 +61,39 @@ public abstract class Item extends GameObject {
     public abstract Tree getTree();
 
     public String getTip() {
-        return "";
+        return null;
     }
 
     public boolean hasTip() {
-        return !getTip().isEmpty();
+        return getTip() != null;
     }
 
     public String getDescription() {
-        return "";
+        return null;
     }
 
     public abstract int getCost();
+
+    public Build build(Collection<Item> items) {
+        int reduction = 0;
+        ArrayList<Item> postData = new ArrayList<>(items);
+
+        // If item has build, calculate reductions
+        for (Item item : getBuild()) {
+            if (postData.contains(item)) {
+                // Reduce directly
+                reduction += item.getCost();
+                postData.remove(item);
+            } else if (item.hasBuild()) {
+                // Find a reduction in the build
+                Build build = item.build(postData);
+                reduction += build.getReduction();
+                postData = build.getPostData();
+            }
+        }
+
+        return new Build(this, reduction, postData);
+    }
 
     public Item[] getBuild() {
         return new Item[0];
@@ -91,7 +115,7 @@ public abstract class Item extends GameObject {
         return null;
     }
 
-    public boolean canUse(Game.Member member) {
+    public boolean canUse(GameMember member) {
         return false;
     }
 
@@ -99,8 +123,8 @@ public abstract class Item extends GameObject {
         return false;
     }
 
-    public String onUse(Game.Member member) {
-        return "";
+    public String onUse(GameMember member) {
+        return null;
     }
 
     @Override

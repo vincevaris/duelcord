@@ -99,6 +99,7 @@ public class Stats {
     }
 
     public Stats putAll(Stats other) {
+        values.clear();
         other.values.keySet().forEach(k -> put(k, other.values.get(k)));
         return this;
     }

@@ -2,10 +2,7 @@ package com.oopsjpeg.enigma.game.unit;
 
 import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
-import com.oopsjpeg.enigma.game.DamageEvent;
-import com.oopsjpeg.enigma.game.Game;
-import com.oopsjpeg.enigma.game.GameAction;
-import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.*;
 import com.oopsjpeg.enigma.game.buff.Silence;
 import com.oopsjpeg.enigma.game.obj.Unit;
 import com.oopsjpeg.enigma.util.Emote;
@@ -24,10 +21,9 @@ public class Assassin extends Unit {
     public static final float SLASH_AP = 0.5f;
     public static final int SLASH_MAX = 3;
     public static final int SILENCE_TURNS = 1;
-
-    private boolean slashed = false;
     private final Stacker slash = new Stacker(SLASH_MAX);
     private final Stacker potency = new Stacker(POTENCY_TURNS);
+    private boolean slashed = false;
     private float potencyTotal = 0;
 
     public boolean getSlashed() {
@@ -55,11 +51,11 @@ public class Assassin extends Unit {
     }
 
     @Override
-    public String onTurnEnd(Game.Member member) {
+    public String onTurnEnd(GameMember member) {
         slashed = false;
         if (potency.stack())
             return Emote.KNIFE + "**" + member.getUsername() + "'s Potency** is at max capacity.";
-        return "";
+        return null;
     }
 
     @Override
@@ -117,7 +113,7 @@ public class Assassin extends Unit {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
-            Game.Member member = game.getMember(author);
+            GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
@@ -126,7 +122,7 @@ public class Assassin extends Unit {
                 else if (getSlashed())
                     Util.sendFailure(channel, "You can only use **Slash** once per turn.");
                 else
-                   member.act(new SlashAction(game.getRandomTarget(member)));
+                    member.act(new SlashAction(game.getRandomTarget(member)));
             }
         }
 
@@ -137,14 +133,14 @@ public class Assassin extends Unit {
     }
 
     public class SlashAction implements GameAction {
-        private final Game.Member target;
+        private final GameMember target;
 
-        public SlashAction(Game.Member target) {
+        public SlashAction(GameMember target) {
             this.target = target;
         }
 
         @Override
-        public String act(Game.Member actor) {
+        public String act(GameMember actor) {
             setSlashed(true);
 
             DamageEvent event = new DamageEvent(actor.getGame(), actor, target);

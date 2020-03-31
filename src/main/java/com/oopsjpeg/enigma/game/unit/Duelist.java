@@ -2,10 +2,7 @@ package com.oopsjpeg.enigma.game.unit;
 
 import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
-import com.oopsjpeg.enigma.game.DamageEvent;
-import com.oopsjpeg.enigma.game.Game;
-import com.oopsjpeg.enigma.game.GameAction;
-import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.*;
 import com.oopsjpeg.enigma.game.buff.Bleed;
 import com.oopsjpeg.enigma.game.buff.Silence;
 import com.oopsjpeg.enigma.game.buff.Weaken;
@@ -54,10 +51,10 @@ public class Duelist extends Unit {
     }
 
     @Override
-    public String onTurnStart(Game.Member member) {
+    public String onTurnStart(GameMember member) {
         if (crush.count() && crush.tryNotify())
             return Emote.INFO + "**" + member.getUsername() + "'s Crush** is ready to use.";
-        return "";
+        return null;
     }
 
     @Override
@@ -105,7 +102,7 @@ public class Duelist extends Unit {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
-            Game.Member member = game.getMember(author);
+            GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
@@ -125,14 +122,14 @@ public class Duelist extends Unit {
     }
 
     public class CrushAction implements GameAction {
-        private final Game.Member target;
+        private final GameMember target;
 
-        public CrushAction(Game.Member target) {
+        public CrushAction(GameMember target) {
             this.target = target;
         }
 
         @Override
-        public String act(Game.Member actor) {
+        public String act(GameMember actor) {
             getCrush().start();
             return Util.joinNonEmpty(Emote.USE + "**" + actor.getUsername() + "** used **Crush**!",
                     target.buff(new Weaken(actor, Duelist.CRUSH_TURNS, Duelist.CRUSH_POWER)));

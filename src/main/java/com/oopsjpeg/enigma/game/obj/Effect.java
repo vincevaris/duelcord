@@ -1,6 +1,6 @@
 package com.oopsjpeg.enigma.game.obj;
 
-import com.oopsjpeg.enigma.game.Game;
+import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.GameObject;
 import com.oopsjpeg.enigma.game.Stats;
 
@@ -13,7 +13,7 @@ public abstract class Effect extends GameObject {
         return 0;
     }
 
-    public Stats getStats(Game.Member member) {
+    public Stats getStats(GameMember member) {
         return new Stats();
     }
 

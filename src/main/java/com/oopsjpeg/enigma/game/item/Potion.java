@@ -1,6 +1,6 @@
 package com.oopsjpeg.enigma.game.item;
 
-import com.oopsjpeg.enigma.game.Game;
+import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.buff.PotionHealing;
 import com.oopsjpeg.enigma.game.obj.Item;
 
@@ -34,7 +34,7 @@ public class Potion extends Item {
     }
 
     @Override
-    public boolean canUse(Game.Member member) {
+    public boolean canUse(GameMember member) {
         return !member.hasData(PotionHealing.class);
     }
 
@@ -44,7 +44,7 @@ public class Potion extends Item {
     }
 
     @Override
-    public String onUse(Game.Member member) {
+    public String onUse(GameMember member) {
         member.getData().add(new PotionHealing(member, TURNS));
         return member.heal(HEAL / TURNS, "Potion");
     }

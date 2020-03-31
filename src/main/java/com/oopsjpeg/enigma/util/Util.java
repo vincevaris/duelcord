@@ -3,6 +3,7 @@ package com.oopsjpeg.enigma.util;
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Effect;
+import com.oopsjpeg.enigma.game.obj.Unit;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 
@@ -15,6 +16,8 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static com.oopsjpeg.enigma.game.Stats.*;
+
 public class Util {
     public static final Random RANDOM = new Random();
     public static final Color COLOR_SUCCESS = new Color(119, 178, 85);
@@ -26,6 +29,24 @@ public class Util {
 
     public static float nextFloat(float min, float max) {
         return min + RANDOM.nextFloat() * (max - min);
+    }
+
+    public static Consumer<EmbedCreateSpec> formatUnit(Unit unit) {
+        return embed -> {
+            embed.setTitle(unit.getName());
+            embed.setColor(unit.getColor());
+            List<String> desc = new ArrayList<>();
+            Stats stats = unit.getStats();
+            desc.add("Health: **" + stats.getInt(MAX_HEALTH) + "** (+**" + stats.getInt(HEALTH_PER_TURN) + "**/turn)");
+            desc.add("Damage: **" + stats.getInt(DAMAGE) + "**");
+            desc.add("Energy: **" + stats.getInt(ENERGY) + "**");
+            if (stats.get(CRIT_CHANCE) > 0)
+                desc.add("Critical Chance: **" + Util.percent(stats.get(CRIT_CHANCE)) + "**");
+            if (stats.get(LIFE_STEAL) > 0)
+                desc.add("Life Steal: **" + Util.percent(stats.get(LIFE_STEAL)) + "**");
+            embed.setDescription(String.join("\n", desc));
+            embed.addField("Passives / Abilities", unit.getDescription(), false);
+        };
     }
 
     public static String formatStats(Stats stats) {

@@ -3,6 +3,7 @@ package com.oopsjpeg.enigma;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.oopsjpeg.enigma.game.Game;
+import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.GameMode;
 import com.oopsjpeg.enigma.listener.CommandListener;
 import com.oopsjpeg.enigma.listener.ReadyListener;
@@ -147,7 +148,7 @@ public class Enigma {
                     queues.get(mode).removeAll(matched);
 
                     Util.send(getMatchmakingChannel(), "**" + mode.getName() + "** has been found for "
-                            + game.getUsers().stream().map(User::getUsername).collect(Collectors.joining(", ")),
+                                    + game.getUsers().stream().map(User::getUsername).collect(Collectors.joining(", ")),
                             "Go to " + game.getChannel().getMention() + " to play the match!");
 
                     break;
@@ -158,7 +159,7 @@ public class Enigma {
 
     public void endGame(Game game) {
         if (game.getTurnCount() > 7 && game.getMode().isRanked()) {
-            Game.Member winner = game.getAlive().get(0);
+            GameMember winner = game.getAlive().get(0);
             // Winner
             winner.getPlayer().win();
             winner.getPlayer().addGems(Util.limit((game.getTurnCount() / 2) + Util.nextInt(20, 40), 10, 80));
@@ -177,7 +178,7 @@ public class Enigma {
                 e.setColor(Color.YELLOW);
                 e.setAuthor("Victory by " + winner.getUsername() + " on " + game.getMode().getName(), null, winner.getUser().getAvatarUrl());
                 e.setDescription("Playing as **" + winner.getUnit().getName() + "**."
-                        + "\nOpponent(s): " + game.getDead().stream().map(Game.Member::getUsername).collect(Collectors.joining(", "))
+                        + "\nOpponent(s): " + game.getDead().stream().map(GameMember::getUsername).collect(Collectors.joining(", "))
                         + "\n**" + game.getTurnCount() + "** turns and **" + game.getActions().size() + "** actions."
                         + "\n**" + winner.getPlayer().getWins() + "** wins and **" + winner.getPlayer().getLosses() + "** losses.");
                 e.setFooter(now.getYear() + "/" + now.getMonthValue() + "/" + now.getDayOfMonth(), null);

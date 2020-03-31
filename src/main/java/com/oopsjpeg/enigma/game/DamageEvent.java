@@ -5,8 +5,8 @@ import java.util.List;
 
 public class DamageEvent {
     public final Game game;
-    public Game.Member actor;
-    public Game.Member target;
+    public GameMember actor;
+    public GameMember target;
     public List<String> output = new ArrayList<>();
     public float damage;
     public float bonus;
@@ -16,7 +16,7 @@ public class DamageEvent {
     public float heal;
     public float shield;
 
-    public DamageEvent(Game game, Game.Member actor, Game.Member target) {
+    public DamageEvent(Game game, GameMember actor, GameMember target) {
         this.game = game;
         this.actor = actor;
         this.target = target;

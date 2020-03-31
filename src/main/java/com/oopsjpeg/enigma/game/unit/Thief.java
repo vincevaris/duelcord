@@ -1,7 +1,7 @@
 package com.oopsjpeg.enigma.game.unit;
 
 import com.oopsjpeg.enigma.game.DamageEvent;
-import com.oopsjpeg.enigma.game.Game;
+import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Unit;
 import com.oopsjpeg.enigma.util.Emote;
@@ -69,8 +69,8 @@ public class Thief extends Unit {
     }
 
     @Override
-    public String onTurnEnd(Game.Member member) {
+    public String onTurnEnd(GameMember member) {
         critAmount = 0;
-        return "";
+        return null;
     }
 }

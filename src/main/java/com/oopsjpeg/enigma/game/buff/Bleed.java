@@ -1,12 +1,12 @@
 package com.oopsjpeg.enigma.game.buff;
 
 import com.oopsjpeg.enigma.game.DamageEvent;
-import com.oopsjpeg.enigma.game.Game;
+import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.obj.Buff;
 import com.oopsjpeg.enigma.util.Emote;
 
 public class Bleed extends Buff {
-    public Bleed(Game.Member source, int turns, float power) {
+    public Bleed(GameMember source, int turns, float power) {
         super(source, turns, power);
     }
 
@@ -16,7 +16,7 @@ public class Bleed extends Buff {
     }
 
     @Override
-    public String onTurnStart(Game.Member member) {
+    public String onTurnStart(GameMember member) {
         DamageEvent event = new DamageEvent(member.getGame(), getSource(), member);
         event.damage = getPower();
         return getSource().damage(event, Emote.BLEED, "Bleed");

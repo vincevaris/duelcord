@@ -2,10 +2,7 @@ package com.oopsjpeg.enigma.game.unit;
 
 import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
-import com.oopsjpeg.enigma.game.DamageEvent;
-import com.oopsjpeg.enigma.game.Game;
-import com.oopsjpeg.enigma.game.GameAction;
-import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.*;
 import com.oopsjpeg.enigma.game.buff.Silence;
 import com.oopsjpeg.enigma.game.obj.Unit;
 import com.oopsjpeg.enigma.util.Cooldown;
@@ -26,9 +23,8 @@ public class Gunslinger extends Unit {
     public static final int BARRAGE_DAMAGE = 6;
     public static final float BARRAGE_AP = 0.3f;
     public static final int BARRAGE_COOLDOWN = 3;
-
-    private boolean bonus = false;
     private final Cooldown barrage = new Cooldown(BARRAGE_COOLDOWN);
+    private boolean bonus = false;
 
     public boolean getBonus() {
         return bonus;
@@ -53,11 +49,11 @@ public class Gunslinger extends Unit {
     }
 
     @Override
-    public String onTurnStart(Game.Member member) {
+    public String onTurnStart(GameMember member) {
         setBonus(false);
         if (barrage.count() && barrage.tryNotify())
             return Emote.INFO + "**" + member.getUsername() + "'s Barrage** is ready to use.";
-        return "";
+        return null;
     }
 
     @Override
@@ -100,7 +96,7 @@ public class Gunslinger extends Unit {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
-            Game.Member member = game.getMember(author);
+            GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
@@ -120,14 +116,14 @@ public class Gunslinger extends Unit {
     }
 
     public class BarrageAction implements GameAction {
-        private final Game.Member target;
+        private final GameMember target;
 
-        public BarrageAction(Game.Member target) {
+        public BarrageAction(GameMember target) {
             this.target = target;
         }
 
         @Override
-        public String act(Game.Member actor) {
+        public String act(GameMember actor) {
             getBarrage().start();
 
             List<String> output = new ArrayList<>();

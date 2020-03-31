@@ -1,24 +1,24 @@
 package com.oopsjpeg.enigma.game.obj;
 
-import com.oopsjpeg.enigma.game.Game;
+import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.GameObject;
 
 public abstract class Buff extends GameObject {
-    private final Game.Member source;
+    private final GameMember source;
     private int turns;
     private float power = 0;
 
-    public Buff(Game.Member source, int turns) {
+    public Buff(GameMember source, int turns) {
         this.source = source;
         this.turns = turns;
     }
 
-    public Buff(Game.Member source, int turns, float power) {
+    public Buff(GameMember source, int turns, float power) {
         this(source, turns);
         this.power = power;
     }
 
-    public Game.Member getSource() {
+    public GameMember getSource() {
         return source;
     }
 

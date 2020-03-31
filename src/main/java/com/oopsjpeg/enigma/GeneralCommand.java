@@ -1,7 +1,6 @@
 package com.oopsjpeg.enigma;
 
 import com.oopsjpeg.enigma.game.GameMode;
-import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Item;
 import com.oopsjpeg.enigma.game.obj.Unit;
 import com.oopsjpeg.enigma.storage.Player;
@@ -15,14 +14,10 @@ import discord4j.core.object.util.PermissionSet;
 import discord4j.core.spec.EmbedCreateSpec;
 import lombok.Getter;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import static com.oopsjpeg.enigma.game.Stats.*;
 
 public enum GeneralCommand implements Command {
     BUILD("build") {
@@ -38,23 +33,8 @@ public enum GeneralCommand implements Command {
             } else if (args[0].equalsIgnoreCase("units")) {
                 TextChannel channel = Enigma.getInstance().getUnitsChannel();
                 channel.bulkDelete(c -> channel.getMessagesAfter(channel.getId()));
-                for (Unit unit : Unit.values()) {
-                    channel.createEmbed(embed -> {
-                        embed.setTitle(unit.getName());
-                        embed.setColor(unit.getColor());
-                        List<String> desc = new ArrayList<>();
-                        Stats stats = unit.getStats();
-                        desc.add("Health: **" + stats.getInt(MAX_HEALTH) + "** (+**" + stats.getInt(HEALTH_PER_TURN) + "**/turn)");
-                        desc.add("Damage: **" + stats.getInt(DAMAGE) + "**");
-                        desc.add("Energy: **" + stats.getInt(ENERGY) + "**");
-                        if (stats.get(CRIT_CHANCE) > 0)
-                            desc.add("Critical Chance: **" + Util.percent(stats.get(CRIT_CHANCE)) + "**");
-                        if (stats.get(LIFE_STEAL) > 0)
-                            desc.add("Life Steal: **" + Util.percent(stats.get(LIFE_STEAL)) + "**");
-                        embed.setDescription(String.join("\n", desc));
-                        embed.addField("Passives / Abilities", unit.getDescription(), false);
-                    }).block();
-                }
+                for (Unit unit : Unit.values())
+                    channel.createEmbed(Util.formatUnit(unit)).block();
             }
         }
 

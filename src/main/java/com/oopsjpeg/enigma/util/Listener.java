@@ -5,5 +5,6 @@ import discord4j.core.DiscordClient;
 
 public interface Listener {
     void register(DiscordClient client);
+
     Enigma getInstance();
 }
