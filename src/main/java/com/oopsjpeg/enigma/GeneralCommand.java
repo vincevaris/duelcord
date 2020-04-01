@@ -25,14 +25,12 @@ public enum GeneralCommand implements Command {
         public void execute(Message message, String alias, String[] args) {
             if (args[0].equalsIgnoreCase("items")) {
                 TextChannel channel = Enigma.getInstance().getItemsChannel();
-                channel.bulkDelete(c -> channel.getMessagesAfter(channel.getId()));
                 channel.createEmbed(buildItemTree(Item.Tree.CONSUMABLES)).block();
                 channel.createEmbed(buildItemTree(Item.Tree.DAMAGE)).block();
                 channel.createEmbed(buildItemTree(Item.Tree.HEALTH)).block();
                 channel.createEmbed(buildItemTree(Item.Tree.ABILITY)).block();
             } else if (args[0].equalsIgnoreCase("units")) {
                 TextChannel channel = Enigma.getInstance().getUnitsChannel();
-                channel.bulkDelete(c -> channel.getMessagesAfter(channel.getId()));
                 for (Unit unit : Unit.values())
                     channel.createEmbed(Util.formatUnit(unit)).block();
             }
