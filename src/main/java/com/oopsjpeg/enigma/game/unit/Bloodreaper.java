@@ -28,7 +28,7 @@ public class Bloodreaper extends Unit {
     public static final float SHIELD_HEAL = 0.3f;
     public static final int REAP_DAMAGE = 15;
     public static final float REAP_DAMAGE_AP_RATIO = 0.6f;
-    public static final float REAP_HEAL = 0.4f;
+    public static final float REAP_HEAL = 0.3f;
     public static final float REAP_WOUND = 0.6f;
     public static final int REAP_USES = 2;
     public static final int ENDURE_ENERGY = 25;
@@ -64,7 +64,7 @@ public class Bloodreaper extends Unit {
         return new Stats()
                 .put(Stats.MAX_HEALTH, 720)
                 .put(Stats.HEALTH_PER_TURN, 10)
-                .put(Stats.DAMAGE, 10)
+                .put(Stats.DAMAGE, 14)
                 .put(Stats.ENERGY, 125);
     }
 
@@ -87,9 +87,12 @@ public class Bloodreaper extends Unit {
     @Override
     public String onTurnStart(GameMember member) {
         reap.reset();
+        ArrayList<String> output = new ArrayList<>();
+        if (endure.count() && endure.tryNotify())
+            output.add(Emote.INFO + "**" + member.getUsername() + "**'s Endure is ready to use.");
         if (member.getStats().get(Stats.SHIELD) > 0)
-            return member.heal(member.getStats().get(Stats.SHIELD) * SHIELD_HEAL, "Lifeforce");
-        return "";
+            output.add(member.heal(member.getStats().get(Stats.SHIELD) * SHIELD_HEAL, "Lifeforce"));
+        return String.join("\n", output);
     }
 
     private class ReapCommand implements Command {
@@ -162,7 +165,7 @@ public class Bloodreaper extends Unit {
 
         @Override
         public int getEnergy() {
-            return 25;
+            return 50;
         }
     }
 
