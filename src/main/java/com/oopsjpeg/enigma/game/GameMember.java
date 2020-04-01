@@ -66,6 +66,14 @@ public class GameMember {
         return getUser().getMention();
     }
 
+    public Player.UnitData getUnitData() {
+        return getPlayer().getUnitData(unit.getName());
+    }
+
+    public float getRankedPoints() {
+        return getPlayer().getRankedPoints();
+    }
+
     public GameObject getData(Class<?> clazz) {
         return data.stream().filter(o -> o.getClass().equals(clazz)).findAny().orElse(null);
     }
@@ -322,7 +330,7 @@ public class GameMember {
         alive = false;
 
         if (game.getAlive().size() == 1) {
-            game.setGameState(2);
+            game.setGameState(Game.FINISHED);
             output.add(game.getAlive().get(0).win());
         } else if (game.getCurrentMember().equals(this))
             game.nextTurn();

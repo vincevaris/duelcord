@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 public interface GameAction {
     default String execute(GameMember actor) {
         actor.getGame().setLastAction(LocalDateTime.now());
-        actor.getGame().setAfkNotifier(0);
+        actor.getGame().getAfkTimer().reset();
         return act(actor);
     }
 

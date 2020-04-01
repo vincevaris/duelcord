@@ -6,6 +6,7 @@ import com.oopsjpeg.enigma.listener.CommandListener;
 import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Settings;
+import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
@@ -29,15 +30,16 @@ import static com.oopsjpeg.enigma.game.Stats.*;
 public class Game {
     public static final int PICKING = 0;
     public static final int PLAYING = 1;
+    public static final int FINISHED = 2;
     @Getter private final Enigma instance;
     @Getter private final TextChannel channel;
     @Getter private final GameMode mode;
     @Getter private final List<GameMember> members;
     @Getter private final CommandListener commandListener;
+    @Getter private final Stacker afkTimer = new Stacker(10);
 
     @Getter @Setter private List<GameAction> actions = new ArrayList<>();
     @Getter @Setter private LocalDateTime lastAction = LocalDateTime.now();
-    @Getter @Setter private int afkNotifier = 0;
 
     @Getter @Setter private int gameState = PICKING;
     @Getter @Setter private int turnCount = 0;
@@ -184,12 +186,7 @@ public class Game {
         return members.stream().filter(m -> !m.isAlive()).collect(Collectors.toList());
     }
 
-    public void notifyAfk() {
-        afkNotifier++;
-        if (afkNotifier == 4)
-            channel.createMessage(Emote.WARN + getCurrentMember().getMention() + ", you have around **4** minutes " +
-                    "to make an action, otherwise you will **forfeit due to AFKing**.").block();
-        else if (afkNotifier >= 8)
-            channel.createMessage(getCurrentMember().lose()).block();
+    public GameMember getWinner() {
+        return gameState == FINISHED ? getAlive().get(0) : null;
     }
 }

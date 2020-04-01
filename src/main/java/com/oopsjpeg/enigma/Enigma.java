@@ -26,10 +26,8 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.List;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -159,28 +157,34 @@ public class Enigma {
 
     public void endGame(Game game) {
         if (game.getTurnCount() > 7 && game.getMode().isRanked()) {
-            GameMember winner = game.getAlive().get(0);
+            GameMember winner = game.getWinner();
+            List<GameMember> losers = game.getDead();
+
             // Winner
-            winner.getPlayer().win(game.getRandomTarget(winner).getPlayer().getRankedPoints());
-            winner.getPlayer().addGems(Util.limit((game.getTurnCount() / 2) + Util.nextInt(20, 40), 10, 80));
+            winner.getPlayer().win(losers.get(0).getRankedPoints());
+            winner.getPlayer().addGems(Util.nextInt(25, 40));
             winner.getPlayer().getUnitData(winner.getUnit().getName()).addPoints(Util.nextInt(160, 200));
             mongo.savePlayer(winner.getPlayer());
+
             // Losers
-            game.getDead().forEach(m -> {
-                m.getPlayer().lose(winner.getPlayer().getRankedPoints());
-                m.getPlayer().addGems(Util.limit((game.getTurnCount() / 2) + Util.nextInt(0, 10), 5, 40));
-                m.getPlayer().getUnitData(m.getUnit().getName()).addPoints(Util.nextInt(80, 100));
-                mongo.savePlayer(m.getPlayer());
-            });
+            for (GameMember loser : losers) {
+                loser.getPlayer().lose(winner.getRankedPoints());
+                loser.getPlayer().addGems(Util.nextInt(10, 20));
+                loser.getPlayer().getUnitData(loser.getUnit().getName()).addPoints(Util.nextInt(80, 100));
+                mongo.savePlayer(loser.getPlayer());
+            }
+
             // Send embed
             getLogChannel().createEmbed(e -> {
                 LocalDateTime now = LocalDateTime.now();
                 e.setColor(Color.YELLOW);
                 e.setAuthor("Victory by " + winner.getUsername() + " on " + game.getMode().getName(), null, winner.getUser().getAvatarUrl());
-                e.setDescription("Playing as **" + winner.getUnit().getName() + "**."
-                        + "\nOpponent(s): " + game.getDead().stream().map(GameMember::getUsername).collect(Collectors.joining(", "))
+                e.setDescription("Playing as **" + winner.getUnit().getName() + "** (" + winner.getUnitData().getPoints() + " pts)"
+                        + "\n**" + winner.getPlayer().getWins() + "** wins and **" + winner.getPlayer().getLosses() + "** losses."
                         + "\n**" + game.getTurnCount() + "** turns and **" + game.getActions().size() + "** actions."
-                        + "\n**" + winner.getPlayer().getWins() + "** wins and **" + winner.getPlayer().getLosses() + "** losses.");
+                        + "\nOpponent(s): " + game.getDead().stream()
+                        .map(loser -> loser.getUsername() + " (" + loser.getUnit().getName() + ")")
+                        .collect(Collectors.joining(", ")));
                 e.setFooter(now.getYear() + "/" + now.getMonthValue() + "/" + now.getDayOfMonth(), null);
             }).block();
         }
@@ -188,6 +192,7 @@ public class Enigma {
         game.getPlayers().forEach(Player::removeGame);
         listeners.remove(game.getCommandListener());
         games.remove(game);
+
         SCHEDULER.schedule(() -> game.getChannel().delete().block(), 2, TimeUnit.MINUTES);
     }
 
