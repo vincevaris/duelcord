@@ -30,6 +30,10 @@ public abstract class Buff extends GameObject {
         return power != 0;
     }
 
+    public String getFormattedPower() {
+        return String.valueOf(Math.round(getPower()));
+    }
+
     @Override
     public String toString() {
         return getName();

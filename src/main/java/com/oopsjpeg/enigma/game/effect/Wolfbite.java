@@ -38,7 +38,7 @@ public class Wolfbite extends Effect {
 
     @Override
     public String[] getTopic() {
-        return new String[]{"Wolfbite: **" + stack + "** / " + attacks};
+        return new String[]{"Wolfbite: **" + stack + " / " + attacks + "**"};
     }
 
     @Override

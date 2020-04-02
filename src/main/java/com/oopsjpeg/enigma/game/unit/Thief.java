@@ -56,7 +56,7 @@ public class Thief extends Unit {
 
     @Override
     public String[] getTopic() {
-        return new String[]{"Crit: " + (1 + (critAmount * CRIT_INCREASE)) + "x", "Gold Stolen: " + goldStolen};
+        return new String[]{"Crit: **" + (1 + (critAmount * CRIT_INCREASE)) + "x**", "Gold Stolen: **" + goldStolen + "**"};
     }
 
     @Override

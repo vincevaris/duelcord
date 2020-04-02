@@ -23,6 +23,11 @@ public class Weaken extends Buff {
     }
 
     @Override
+    public String getFormattedPower() {
+        return Util.percent(getPower());
+    }
+
+    @Override
     public DamageEvent damageOut(DamageEvent event) {
         event.damage *= 1 - (getPower() / 2);
         event.bonus *= 1 - (getPower() / 2);

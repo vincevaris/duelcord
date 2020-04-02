@@ -129,7 +129,7 @@ public class Phasebreaker extends Unit {
     @Override
     public String[] getTopic() {
         return new String[]{"Phase: **" + getPhase() + "**",
-                (flared ? "Flaring!" : "Flare: **" + getFlare().getCurrent() + "** / **" + Phasebreaker.FLARE_STACKS + "**"),
+                (flared ? "Flaring!" : "Flare: **" + getFlare().getCurrent() + " / " + Phasebreaker.FLARE_STACKS + "**"),
                 "Bonus AP: **" + getBonusAp() + "**"};
     }
 

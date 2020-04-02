@@ -20,4 +20,9 @@ public class Wound extends Buff {
         return Emote.WOUND + "**" + member.getUsername() + "** is wounded by **" + Util.percent(getPower()) + "** by **"
                 + getSource().getUsername() + "** this turn.";
     }
+
+    @Override
+    public String getFormattedPower() {
+        return Util.percent(getPower());
+    }
 }

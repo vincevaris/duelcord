@@ -182,7 +182,7 @@ public class GameMember {
 
         data.add(buff);
         return Emote.BLEED + "**" + buff.getSource().getUsername() + "** applied **" + buff.getName() + "** "
-                + (buff.hasPower() ? "by **" + buff.getPower() + "** " : "")
+                + (buff.hasPower() ? "by **" + buff.getFormattedPower() + "** " : "")
                 + "for **" + buff.getTurns() + "** turn(s)!";
     }
 

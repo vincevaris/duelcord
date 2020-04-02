@@ -20,10 +20,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.oopsjpeg.enigma.game.Stats.*;
@@ -149,9 +146,9 @@ public class Game {
             output.add("Items: **" + member.getItems() + "**");
 
             // Add unit topic
-            output.addAll(Arrays.asList(member.getUnit().getTopic()));
+            Arrays.stream(member.getUnit().getTopic()).filter(Objects::nonNull).forEach(output::add);
             // Add effect topics
-            member.getEffects().stream().map(Effect::getTopic).flatMap(Arrays::stream).forEach(output::add);
+            member.getEffects().stream().map(Effect::getTopic).filter(Objects::nonNull).flatMap(Arrays::stream).forEach(output::add);
 
             return Util.joinNonEmpty(",\n", output);
         }

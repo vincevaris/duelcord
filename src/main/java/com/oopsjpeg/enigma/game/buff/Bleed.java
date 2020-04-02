@@ -4,6 +4,7 @@ import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.obj.Buff;
 import com.oopsjpeg.enigma.util.Emote;
+import com.oopsjpeg.enigma.util.Util;
 
 public class Bleed extends Buff {
     public Bleed(GameMember source, int turns, float power) {
@@ -20,5 +21,10 @@ public class Bleed extends Buff {
         DamageEvent event = new DamageEvent(member.getGame(), getSource(), member);
         event.damage = getPower();
         return getSource().damage(event, Emote.BLEED, "Bleed");
+    }
+
+    @Override
+    public String getFormattedPower() {
+        return Util.percent(getPower());
     }
 }
