@@ -42,7 +42,7 @@ public class Warrior extends Unit {
     public String getDescription() {
         return "Every **" + BONUS_MAX + "rd** attack deals **" + Util.percent(BONUS_DAMAGE) + "** bonus damage."
                 + "\n\nUsing `>bash` breaks the target's shield and resist then deals **" + Util.percent(BASH_DAMAGE) + "** base damage (+" + Util.percent(BASH_HP_SCALE) + " bonus max health)."
-                + "\n**Bash** counts towards stacks of bonus damages, but does not proc it."
+                + "\n**Bash** counts towards stacks of bonus damage, but does not proc it."
                 + "\n**Bash** can only be used once every **" + BASH_COOLDOWN + "** turn(s).";
     }
 
