@@ -340,6 +340,10 @@ public class GameMember {
         return Util.joinNonEmpty(output);
     }
 
+    public float getBonusDamage() {
+        return stats.get(DAMAGE) - unit.getStats().get(DAMAGE);
+    }
+
     public float getBonusHealth() {
         return stats.get(MAX_HEALTH) - unit.getStats().get(MAX_HEALTH);
     }
