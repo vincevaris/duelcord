@@ -26,7 +26,7 @@ public class Brawn extends Effect {
 
     @Override
     public String getDescription() {
-        return "Basic attacks do more damage equal to **" + Util.percent(power) + "** of bonus max health.";
+        return "Basic attacks do bonus damage equal to **" + Util.percent(power) + "** of bonus max health.";
     }
 
     @Override

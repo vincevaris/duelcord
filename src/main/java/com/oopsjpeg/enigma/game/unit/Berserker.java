@@ -52,7 +52,7 @@ public class Berserker extends Unit {
     @Override
     public String getDescription() {
         return "Basic attacking or being basic attacked builds up to **" + RAGE_MAX + "** stacks of **Rage**."
-                + "\nUsing `>rage` consumes stacks to increase damage dealt for a single turn (**" + Util.percent(BONUS_DAMAGE) + "** (+1% per " + BONUS_AP + " AP) per stack)."
+                + "\nUsing `>rage` consumes stacks to increase damage dealt for one turn (**" + Util.percent(BONUS_DAMAGE) + "** (+1% per " + BONUS_AP + " AP) per stack)."
                 + "\nAt maximum stacks, Rage grants **" + BONUS_ENERGY + "** bonus energy.";
     }
 
@@ -87,7 +87,7 @@ public class Berserker extends Unit {
     }
 
     @Override
-    public DamageEvent basicAttackOut(DamageEvent event) {
+    public DamageEvent damageOut(DamageEvent event) {
         if (bonus > 0)
             event.damage *= 1 + bonus;
         else
@@ -138,7 +138,7 @@ public class Berserker extends Unit {
 
             getRage().reset();
 
-            return Emote.RAGE + "**" + actor.getUsername() + "** has gained **" + Util.percent(getBonus()) + "** bonus damage "
+            return Emote.RAGE + "**" + actor.getUsername() + "** has gained **" + Util.percent(getBonus()) + "** more damage "
                     + (getRage().getCurrent() == Berserker.RAGE_MAX ? "and **100** energy " : "") + "this turn!";
         }
 

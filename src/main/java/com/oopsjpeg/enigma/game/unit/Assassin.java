@@ -76,7 +76,7 @@ public class Assassin extends Unit {
         return "**" + Util.percent(POTENCY_STORE) + "**"
                 + " of damage dealt in the last turn is stored as **Potency**."
                 + " This can only occur **" + POTENCY_TURNS + "** times until **Potency** is reset."
-                + "\n\nUsing `>slash` deals **" + Util.percent(SLASH_DAMAGE) + "** base damage (+" + Util.percent(SLASH_AP) + " AP)."
+                + "\n\nUsing `>slash` deals **" + Util.percent(SLASH_DAMAGE) + "** AD (+" + Util.percent(SLASH_AP) + " AP) damage."
                 + " Every **" + SLASH_MAX + "rd** slash applies **Silence** for **" + SILENCE_TURNS + "** turn(s) and deals"
                 + " bonus damage equal to the total **Potency**, resetting it as well."
                 + "\n\nSlash does not count towards total **Potency**.";
