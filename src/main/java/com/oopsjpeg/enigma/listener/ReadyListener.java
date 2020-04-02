@@ -58,7 +58,7 @@ public class ReadyListener implements Listener {
                         .filter(p -> p.getTotalGames() > 3 && p.getRankedPoints() != 1000)
                         .sorted(Comparator.comparingDouble(Player::getRankedPoints).reversed())
                         .limit(10)
-                        .map(p -> place.incrementAndGet() + ". **" + p.getUsername() + "**#" + p.getUser().getDiscriminator() + " (" + p.getRankedPoints() + " pts)")
+                        .map(p -> place.incrementAndGet() + ". **" + p.getUsername() + "**#" + p.getUser().getDiscriminator() + " (" + p.getRankedPoints() + " RP)")
                         .collect(Collectors.joining("\n")));
 
                 e.setFooter("Updates every 10 minutes.", null);

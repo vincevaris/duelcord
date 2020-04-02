@@ -92,12 +92,14 @@ public enum GeneralCommand implements Command {
                 Util.sendFailure(channel, "You do not have any stats.");
             else {
                 channel.createEmbed(e -> {
-                    e.setAuthor(author.getUsername() + "'s Stats (" + Math.round(player.getRankedPoints()) + " pts)", null, author.getAvatarUrl());
+                    e.setAuthor(author.getUsername() + " (" + Math.round(player.getRankedPoints()) + " RP)", null, author.getAvatarUrl());
                     e.setDescription("**" + player.getWins() + "**W **" + player.getLosses() + "**L (**" + Util.percent(player.getWinRate()) + "** WR)"
                             + "\nGems: **" + player.getGems() + "**");
-                    player.getUnitDatas().stream()
-                            .min(Comparator.comparingInt(Player.UnitData::getPoints))
-                            .ifPresent(best -> e.addField("Top Units", best.getUnitName() + " (" + best.getPoints() + " pts)", true));
+                    e.addField("Top Units", player.getUnitDatas().stream()
+                            .sorted(Comparator.comparingInt(Player.UnitData::getPoints).reversed())
+                            .limit(3)
+                            .map(data -> data.getUnitName() + " (" + data.getPoints() + " pts)")
+                            .collect(Collectors.joining("\n")), true);
                 }).block();
             }
         }
