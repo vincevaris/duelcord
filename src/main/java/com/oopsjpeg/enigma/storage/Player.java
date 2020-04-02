@@ -23,7 +23,7 @@ public class Player {
     private transient GameMode queueMode;
     @Getter @Setter private transient Instant queueTime;
     @Getter @Setter private transient Game game;
-    @Getter private transient long spectateId = -1;
+    @Getter private transient long spectateId;
     @Getter @Setter private int gems;
     @Getter @Setter private int wins;
     @Getter @Setter private int losses;
@@ -79,7 +79,7 @@ public class Player {
     }
 
     public void setSpectateId(long spectateId) {
-        if (this.spectateId != -1) {
+        if (isSpectating()) {
             Player player = Enigma.getInstance().getPlayer(spectateId);
             Snowflake id = Snowflake.of(this.id);
             player.getGame().getChannel().addMemberOverwrite(id, PermissionOverwrite.forMember(id,
@@ -89,7 +89,7 @@ public class Player {
 
         this.spectateId = spectateId;
 
-        if (this.spectateId != -1) {
+        if (isSpectating()) {
             Player player = Enigma.getInstance().getPlayer(spectateId);
             Snowflake id = Snowflake.of(this.id);
             player.getGame().getChannel().addMemberOverwrite(id, PermissionOverwrite.forMember(id,
@@ -99,7 +99,11 @@ public class Player {
     }
 
     public boolean isSpectating() {
-        return spectateId != -1;
+        return spectateId != 0;
+    }
+
+    public void removeSpectate() {
+        spectateId = 0;
     }
 
     public void addGems(int gems) {

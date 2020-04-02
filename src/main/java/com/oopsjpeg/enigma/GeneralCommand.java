@@ -76,7 +76,7 @@ public enum GeneralCommand implements Command {
                     Util.sendFailure(channel, "Invalid game mode.");
                 else {
                     if (player.isSpectating())
-                        player.setSpectateId(-1);
+                        player.removeSpectate();
                     player.setQueue(mode);
                     Util.sendSuccess(channel, "**" + author.getUsername() + "** is in queue for **" + mode.getName() + "**.");
                 }
@@ -117,7 +117,7 @@ public enum GeneralCommand implements Command {
             Player player = Enigma.getInstance().getPlayer(author);
 
             if (player.isSpectating()) {
-                player.setSpectateId(-1);
+                player.removeSpectate();
                 Util.sendFailure(channel, "You have stopped spectating.");
             } else if (player.isInGame()) {
                 Util.sendFailure(channel, "You can't spectate while in a match.");
