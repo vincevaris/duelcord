@@ -149,7 +149,6 @@ public class Assassin extends Unit {
             if (getSlash().stack()) {
                 event.damage += getPotencyTotal();
                 event.output.add(target.buff(new Silence(actor, Assassin.SILENCE_TURNS)));
-                setSlashed(false);
                 getSlash().reset();
                 getPotency().reset();
                 setPotencyTotal(0);
