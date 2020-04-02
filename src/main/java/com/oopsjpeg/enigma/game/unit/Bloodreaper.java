@@ -30,12 +30,15 @@ public class Bloodreaper extends Unit {
     public static final float REAP_DAMAGE_AP_RATIO = 0.6f;
     public static final float REAP_HEAL = 0.3f;
     public static final float REAP_WOUND = 0.6f;
+    public static final int REAP_WOUND_USES = 4;
     public static final int REAP_USES = 2;
     public static final int ENDURE_ENERGY = 25;
     public static final int ENDURE_COOLDOWN = 3;
 
     @Getter private final Stacker reap = new Stacker(REAP_USES);
+    @Getter public static final Stacker wound = new Stacker(REAP_WOUND_USES);
     @Getter private final Cooldown endure = new Cooldown(ENDURE_COOLDOWN);
+
     @Getter @Setter private float soul = 0;
 
     @Override
@@ -47,7 +50,8 @@ public class Bloodreaper extends Unit {
     public String getDescription() {
         return "**" + Util.percent(SOUL_RATIO) + "** of damage received is stored as **Soul**, up to **" + SOUL_MAX + "** (+" + Util.percent(SOUL_MAX_HP_RATIO) + " bonus health)."
                 + "\nUnbroken shields heal by **" + Util.percent(SHIELD_HEAL) + "** of their value."
-                + "\n\n`>reap` deals **" + REAP_DAMAGE + "** (+" + Util.percent(REAP_DAMAGE_AP_RATIO) + " AP) damage, heals by **" + Util.percent(REAP_HEAL) + "**, and applies Wound for **" + Util.percent(REAP_WOUND) + "**."
+                + "\n\n`>reap` deals **" + REAP_DAMAGE + "** (+" + Util.percent(REAP_DAMAGE_AP_RATIO) + " AP) damage and heals by **" + Util.percent(REAP_HEAL) + "**."
+                + "\nEvery **" + REAP_WOUND_USES + "** uses, Reap applies Wound by **" + Util.percent(REAP_WOUND) + "** for **1** turn."
                 + "\nReap can be used **" + REAP_USES + "** time(s) per turn."
                 + "\n\n`>endure` resets **Soul**, shielding equal to its amount."
                 + "\nAdditionally, it removes all de-buffs and restores **" + ENDURE_ENERGY + "** energy,"
@@ -152,11 +156,16 @@ public class Bloodreaper extends Unit {
         @Override
         public String act(GameMember actor) {
             reap.stack();
+            wound.stack();
 
             DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
             event.damage = REAP_DAMAGE + (actor.getStats().get(Stats.ABILITY_POWER) * REAP_DAMAGE_AP_RATIO);
             event.output.add(actor.heal(event.damage * REAP_HEAL, "Reap"));
-            event.output.add(target.buff(new Wound(actor, 1, REAP_WOUND)));
+
+            if (wound.isDone()) {
+                wound.reset();
+                event.output.add(target.buff(new Wound(actor, 1, REAP_WOUND)));
+            }
 
             event = actor.ability(event);
 
