@@ -15,6 +15,7 @@ public class Thief extends Unit {
     public static final float CRIT_INCREASE = 0.2f;
 
     private int critAmount = 0;
+    private int goldStolen = 0;
 
     public int getCritAmount() {
         return critAmount;
@@ -34,6 +35,7 @@ public class Thief extends Unit {
         event.critMul += getCritAmount() * CRIT_INCREASE;
         if (crit() == 1) {
             int steal = (int) Math.min((event.actor.getStats().get(Stats.DAMAGE) * STEAL_AMOUNT) + (event.actor.getStats().get(Stats.ABILITY_POWER)), event.target.getStats().getInt(Stats.GOLD));
+            goldStolen += steal;
             event.actor.getStats().add(Stats.GOLD, steal);
             event.target.getStats().sub(Stats.GOLD, steal);
             event.output.add(Emote.BUY + "**" + event.actor.getUsername() + "** stole **" + steal + "** gold!");
@@ -50,6 +52,11 @@ public class Thief extends Unit {
     public String getDescription() {
         return "The first crit per turn steals gold equal to **" + Util.percent(STEAL_AMOUNT) + "** base damage."
                 + "\nCrit damage is reduced by **" + Util.percent(CRIT_REDUCE) + "**, however, subsequent crits in a turn deal increasing damage.";
+    }
+
+    @Override
+    public String[] getTopic() {
+        return new String[]{"Crit: " + (1 + (critAmount * CRIT_INCREASE)) + "x", "Gold Stolen: " + goldStolen};
     }
 
     @Override

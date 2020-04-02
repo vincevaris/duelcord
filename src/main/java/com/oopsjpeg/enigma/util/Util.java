@@ -69,7 +69,7 @@ public class Util {
             output.add("Gold/turn: +**" + stats.getInt(Stats.GOLD_PER_TURN) + "**");
         if (stats.get(Stats.ENERGY_PER_TURN) > 0)
             output.add("Energy/turn: +**" + stats.getInt(Stats.ENERGY_PER_TURN) + "**");
-        return Util.joinNonEmpty(output);
+        return Util.joinNonEmpty("\n", output);
     }
 
     public static String formatEffects(Effect[] effects) {
@@ -120,13 +120,13 @@ public class Util {
         return stack.stream().limit(3).collect(Collectors.joining(" "));
     }
 
-    public static String joinNonEmpty(Collection<String> output) {
+    public static String joinNonEmpty(String delimiter, Collection<String> output) {
         output.removeAll(Arrays.asList("", null));
-        return String.join("\n", output);
+        return String.join(delimiter, output);
     }
 
-    public static String joinNonEmpty(String... output) {
-        return joinNonEmpty(new ArrayList<>(Arrays.asList(output)));
+    public static String joinNonEmpty(String delimiter, String... output) {
+        return joinNonEmpty(delimiter, new ArrayList<>(Arrays.asList(output)));
     }
 
     public static String comma(int value) {

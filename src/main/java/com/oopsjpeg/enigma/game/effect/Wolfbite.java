@@ -5,35 +5,40 @@ import com.oopsjpeg.enigma.game.buff.Weaken;
 import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.util.Util;
 
-public class CrushingBlow extends Effect {
+public class Wolfbite extends Effect {
     private final float power;
-    private final int turns;
+    private final int attacks;
 
-    private int turn;
+    private int stack;
 
-    public CrushingBlow(float power, int turns) {
+    public Wolfbite(float power, int attacks) {
         this.power = power;
-        this.turns = turns;
+        this.attacks = attacks;
     }
 
     @Override
     public DamageEvent hitOut(DamageEvent event) {
-        turn++;
-        if (turn >= turns) {
+        stack++;
+        if (stack >= attacks) {
             event.output.add(event.target.buff(new Weaken(event.actor, 1, power)));
-            turn = 0;
+            stack = 0;
         }
         return event;
     }
 
     @Override
     public String getName() {
-        return "Crushing Blow";
+        return "Wolfbite";
     }
 
     @Override
     public String getDescription() {
-        return "Every **" + turns + "** attacks weakens the enemy by **" + Util.percent(power) + "** for **1** turn.";
+        return "Every **" + attacks + "** attacks, the enemy is weakened by **" + Util.percent(power) + "** for **1** turn.";
+    }
+
+    @Override
+    public String[] getTopic() {
+        return new String[]{"Wolfbite: **" + stack + "** / " + attacks};
     }
 
     @Override

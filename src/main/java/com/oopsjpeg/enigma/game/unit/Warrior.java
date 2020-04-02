@@ -53,7 +53,8 @@ public class Warrior extends Unit {
 
     @Override
     public String[] getTopic() {
-        return new String[]{"Attack: **" + getBonus().getCurrent() + " / 3**"};
+        return new String[]{"Bonus: **" + getBonus().getCurrent() + " / 3**",
+                bash.isDone() ? "Bash is ready." : "Bash in **" + bash.getCurrent() + "** turn(s)."};
     }
 
     @Override

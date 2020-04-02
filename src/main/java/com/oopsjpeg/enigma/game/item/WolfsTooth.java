@@ -1,7 +1,7 @@
 package com.oopsjpeg.enigma.game.item;
 
 import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.effect.CrushingBlow;
+import com.oopsjpeg.enigma.game.effect.Wolfbite;
 import com.oopsjpeg.enigma.game.effect.Wounder;
 import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.game.obj.Item;
@@ -34,7 +34,7 @@ public class WolfsTooth extends Item {
 
     @Override
     public Effect[] getEffects() {
-        return new Effect[]{new Wounder(0.4f), new CrushingBlow(0.1f, 3)};
+        return new Effect[]{new Wounder(0.4f), new Wolfbite(0.1f, 3)};
     }
 
     @Override

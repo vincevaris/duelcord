@@ -1,6 +1,10 @@
 package com.oopsjpeg.enigma.game;
 
 public abstract class GameObject {
+    public String[] getTopic() {
+        return null;
+    }
+
     public String onTurnStart(GameMember member) {
         return null;
     }

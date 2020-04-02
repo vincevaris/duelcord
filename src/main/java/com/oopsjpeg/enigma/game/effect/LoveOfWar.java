@@ -51,6 +51,11 @@ public class LoveOfWar extends Effect {
     }
 
     @Override
+    public String[] getTopic() {
+        return new String[]{"Love of War: **" + Util.percent(getStack() * power) + "**"};
+    }
+
+    @Override
     public float getPower() {
         return power;
     }

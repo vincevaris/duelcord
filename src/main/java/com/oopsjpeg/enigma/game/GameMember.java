@@ -216,7 +216,7 @@ public class GameMember {
             List<String> output = new ArrayList<>();
             output.add(Emote.SHIELD + "**" + getUsername() + "** is defending (**20%** resist, **" + (stats.getInt(Stats.HEALTH_PER_TURN) * 2) + "** regen)!");
             output.addAll(getData().stream().map(o -> o.onDefend(this)).collect(Collectors.toList()));
-            return Util.joinNonEmpty(output);
+            return Util.joinNonEmpty("\n", output);
         }
         return null;
     }
@@ -317,7 +317,7 @@ public class GameMember {
                 event.output.add(event.target.lose());
         }
 
-        return Util.joinNonEmpty(event.output);
+        return Util.joinNonEmpty("\n", event.output);
     }
 
     public String win() {
@@ -337,7 +337,7 @@ public class GameMember {
         } else if (game.getCurrentMember().equals(this))
             game.nextTurn();
 
-        return Util.joinNonEmpty(output);
+        return Util.joinNonEmpty("\n", output);
     }
 
     public float getBonusDamage() {

@@ -2,6 +2,7 @@ package com.oopsjpeg.enigma.game;
 
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.buff.Silence;
+import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.listener.CommandListener;
 import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.Emote;
@@ -127,7 +128,7 @@ public class Game {
             member.getStats().put(SHIELD, 0);
         }
 
-        channel.createMessage(Util.joinNonEmpty(output)).block();
+        channel.createMessage(Util.joinNonEmpty("\n", output)).block();
         setTopic(getCurrentMember());
     }
 
@@ -145,9 +146,14 @@ public class Game {
             output.add("Health: **" + member.getStats().getInt(HEALTH) + " / " + member.getStats().getInt(MAX_HEALTH)
                     + "** (+**" + member.getStats().getInt(HEALTH_PER_TURN) + "**/t)");
             output.add("Energy: **" + member.getStats().getInt(ENERGY) + "**");
-            output.addAll(Arrays.asList(member.getUnit().getTopic()));
             output.add("Items: **" + member.getItems() + "**");
-            return Util.joinNonEmpty(output);
+
+            // Add unit topic
+            output.addAll(Arrays.asList(member.getUnit().getTopic()));
+            // Add effect topics
+            member.getEffects().stream().map(Effect::getTopic).flatMap(Arrays::stream).forEach(output::add);
+
+            return Util.joinNonEmpty(",\n", output);
         }
     }
 

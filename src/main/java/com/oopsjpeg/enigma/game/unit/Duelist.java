@@ -80,7 +80,8 @@ public class Duelist extends Unit {
 
     @Override
     public String[] getTopic() {
-        return new String[]{"Bonus: **" + getBonus().getCurrent() + " / " + Duelist.BONUS_MAX + "**"};
+        return new String[]{"Bonus: **" + getBonus().getCurrent() + " / " + Duelist.BONUS_MAX + "**",
+                crush.isDone() ? "Crush is ready." : "Crush in **" + crush.getCurrent() + "** turn(s)."};
     }
 
     @Override

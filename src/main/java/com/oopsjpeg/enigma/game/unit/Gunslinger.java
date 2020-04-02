@@ -71,6 +71,11 @@ public class Gunslinger extends Unit {
     }
 
     @Override
+    public String[] getTopic() {
+        return new String[]{(barrage.isDone() ? "Barrage is ready." : "Barrage in **" + barrage.getCurrent() + "** turn(s).")};
+    }
+
+    @Override
     public Command[] getCommands() {
         return new Command[]{new BarrageCommand()};
     }
@@ -136,7 +141,7 @@ public class Gunslinger extends Unit {
                 }
             output.add(0, Emote.USE + "**" + actor.getUsername() + "** used **Barrage**!");
 
-            return Util.joinNonEmpty(output);
+            return Util.joinNonEmpty("\n", output);
         }
 
         @Override
