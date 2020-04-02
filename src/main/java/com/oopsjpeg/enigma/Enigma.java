@@ -103,9 +103,12 @@ public class Enigma {
     }
 
     public Player getPlayer(long id) {
-        if (!players.containsKey(id))
-            players.put(id, new Player(id));
-        return players.get(id);
+        if (!players.containsKey(id)) {
+            User user = client.getUserById(Snowflake.of(id)).block();
+            if (user != null && !user.isBot())
+                players.put(id, new Player(id));
+        }
+        return players.getOrDefault(id, null);
     }
 
     public Player getPlayer(User user) {

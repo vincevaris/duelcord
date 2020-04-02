@@ -75,6 +75,8 @@ public enum GeneralCommand implements Command {
                 if (mode == null)
                     Util.sendFailure(channel, "Invalid game mode.");
                 else {
+                    if (player.isSpectating())
+                        player.setSpectateId(-1);
                     player.setQueue(mode);
                     Util.sendSuccess(channel, "**" + author.getUsername() + "** is in queue for **" + mode.getName() + "**.");
                 }
@@ -88,20 +90,16 @@ public enum GeneralCommand implements Command {
             User author = message.getAuthor().orElse(null);
             Player player = Enigma.getInstance().getPlayer(author);
 
-            if (player == null)
-                Util.sendFailure(channel, "You do not have any stats.");
-            else {
-                channel.createEmbed(e -> {
-                    e.setAuthor(author.getUsername() + " (" + Math.round(player.getRankedPoints()) + " RP)", null, author.getAvatarUrl());
-                    e.setDescription("**" + player.getWins() + "**W **" + player.getLosses() + "**L (**" + Util.percent(player.getWinRate()) + "** WR)"
-                            + "\nGems: **" + player.getGems() + "**");
-                    e.addField("Top Units", player.getUnitDatas().stream()
-                            .sorted(Comparator.comparingInt(Player.UnitData::getPoints).reversed())
-                            .limit(3)
-                            .map(data -> data.getUnitName() + " (" + data.getPoints() + " pts)")
-                            .collect(Collectors.joining("\n")), true);
-                }).block();
-            }
+            channel.createEmbed(e -> {
+                e.setAuthor(author.getUsername() + " (" + Math.round(player.getRankedPoints()) + " RP)", null, author.getAvatarUrl());
+                e.setDescription("**" + player.getWins() + "**W **" + player.getLosses() + "**L (**" + Util.percent(player.getWinRate()) + "** WR)"
+                        + "\nGems: **" + player.getGems() + "**");
+                e.addField("Top Units", player.getUnitDatas().stream()
+                        .sorted(Comparator.comparingInt(Player.UnitData::getPoints).reversed())
+                        .limit(3)
+                        .map(data -> data.getUnitName() + " (" + data.getPoints() + " pts)")
+                        .collect(Collectors.joining("\n")), true);
+            }).block();
         }
     },
     LEADERBOARD("leaderboard") {
@@ -109,6 +107,40 @@ public enum GeneralCommand implements Command {
         public void execute(Message message, String alias, String[] args) {
             MessageChannel channel = message.getChannel().block();
             channel.createEmbed(Util.leaderboard()).block();
+        }
+    },
+    SPECTATE("spectate") {
+        @Override
+        public void execute(Message message, String alias, String[] args) {
+            MessageChannel channel = message.getChannel().block();
+            User author = message.getAuthor().orElse(null);
+            Player player = Enigma.getInstance().getPlayer(author);
+
+            if (player.isSpectating()) {
+                player.setSpectateId(-1);
+                Util.sendFailure(channel, "You have stopped spectating.");
+            } else if (player.isInGame()) {
+                Util.sendFailure(channel, "You can't spectate while in a match.");
+            } else if (args.length < 1) {
+                Util.sendFailure(channel, "You must specify a user to spectate.");
+            } else {
+                User target = Enigma.getInstance().getClient().getUsers()
+                        .filter(p -> p.getUsername().toLowerCase().startsWith(String.join(" ", args).toLowerCase()))
+                        .blockFirst();
+                if (target == null || target.isBot()) {
+                    Util.sendFailure(channel, "That player either doesn't exist or cannot be spectated.");
+                } else {
+                    Player targetPlayer = Enigma.getInstance().getPlayer(target);
+                    if (!targetPlayer.isInGame()) {
+                        Util.sendFailure(channel, "That player isn't in a match.");
+                    } else {
+                        if (player.isInQueue()) player.removeQueue();
+
+                        player.setSpectateId(target.getId().asLong());
+                        Util.sendSuccess(channel, "You are now spectating **" + target.getUsername() + "**#" + target.getDiscriminator() + " in " + targetPlayer.getGame().getChannel().getMention() + ".");
+                    }
+                }
+            }
         }
     };
 

@@ -5,8 +5,11 @@ import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.GameMode;
 import com.oopsjpeg.enigma.game.obj.Unit;
 import com.oopsjpeg.enigma.util.Util;
+import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.util.Permission;
+import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +23,7 @@ public class Player {
     private transient GameMode queueMode;
     @Getter @Setter private transient Instant queueTime;
     @Getter @Setter private transient Game game;
+    @Getter private transient long spectateId = -1;
     @Getter @Setter private int gems;
     @Getter @Setter private int wins;
     @Getter @Setter private int losses;
@@ -66,8 +70,36 @@ public class Player {
         setQueue(null);
     }
 
+    public boolean isInGame() {
+        return game != null;
+    }
+
     public void removeGame() {
         setGame(null);
+    }
+
+    public void setSpectateId(long spectateId) {
+        if (this.spectateId != -1) {
+            Player player = Enigma.getInstance().getPlayer(spectateId);
+            Snowflake id = Snowflake.of(this.id);
+            player.getGame().getChannel().addMemberOverwrite(id, PermissionOverwrite.forMember(id,
+                    PermissionSet.none(),
+                    PermissionSet.none())).block();
+        }
+
+        this.spectateId = spectateId;
+
+        if (this.spectateId != -1) {
+            Player player = Enigma.getInstance().getPlayer(spectateId);
+            Snowflake id = Snowflake.of(this.id);
+            player.getGame().getChannel().addMemberOverwrite(id, PermissionOverwrite.forMember(id,
+                    PermissionSet.of(Permission.VIEW_CHANNEL),
+                    PermissionSet.of(Permission.SEND_MESSAGES))).block();
+        }
+    }
+
+    public boolean isSpectating() {
+        return spectateId != -1;
     }
 
     public void addGems(int gems) {
