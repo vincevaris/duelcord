@@ -39,7 +39,7 @@ public class BuyAction implements GameAction {
         output.add(0, Emote.BUY + "**" + actor.getUsername() + "** purchased a(n) **"
                 + item.getName() + "** for **" + build.getCost() + "** gold.");
 
-        return Util.joinNonEmpty(output);
+        return Util.joinNonEmpty("\n", output);
     }
 
     @Override
