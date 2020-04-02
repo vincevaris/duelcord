@@ -66,7 +66,7 @@ public class Duelist extends Unit {
     @Override
     public String getDescription() {
         return "Every **" + BONUS_MAX + "th** basic attack deals bonus damage equal to **"
-                + Util.percent(BONUS_DAMAGE) + "** of the target's max health and applies **Bleed** for **"
+                + Util.percent(BONUS_DAMAGE) + "** of the target's max health and applies **Bleed** by **"
                 + Util.percent(BLEED_DAMAGE) + "** base damage for **" + BLEED_TURNS + "** turn(s).\n\n"
                 + "Using `>crush` weakens the target by **" + Util.percent(CRUSH_POWER) + "** for **" + CRUSH_TURNS + "** turn(s).\n"
                 + "If the target receives any other debuff while weakened, it is extended by **" + CRUSH_EXTEND + "** turn(s).\n"

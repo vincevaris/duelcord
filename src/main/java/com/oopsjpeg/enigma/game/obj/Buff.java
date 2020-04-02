@@ -26,6 +26,10 @@ public abstract class Buff extends GameObject {
 
     public abstract String getName();
 
+    public boolean hasPower() {
+        return power != 0;
+    }
+
     @Override
     public String toString() {
         return getName();

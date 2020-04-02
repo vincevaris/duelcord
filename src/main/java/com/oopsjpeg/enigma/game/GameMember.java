@@ -181,7 +181,9 @@ public class GameMember {
         }
 
         data.add(buff);
-        return Emote.BLEED + "**" + buff.getSource().getUsername() + "** applied **" + buff.getName() + "** for **" + buff.getTurns() + "** turn(s)!";
+        return Emote.BLEED + "**" + buff.getSource().getUsername() + "** applied **" + buff.getName() + "** "
+                + (buff.hasPower() ? "by **" + buff.getPower() + "** " : "")
+                + "for **" + buff.getTurns() + "** turn(s)!";
     }
 
     public String shield(float amount) {
