@@ -43,10 +43,11 @@ public class ReadyListener implements Listener {
                     else if (g.getAfkTimer().isDone())
                         g.getChannel().createMessage(g.getCurrentMember().lose()).block();
                 }), 1, 1, TimeUnit.MINUTES);
-        Enigma.SCHEDULER.scheduleAtFixedRate(() -> {
-            instance.getLeaderboardChannel().getMessagesBefore(Snowflake.of(Instant.now())).blockFirst().delete().block();
-            instance.getLeaderboardChannel().createEmbed(Util.leaderboard().andThen(e -> e.setFooter("Updates every 10 minutes.", null))).block();
-        }, 0, 10, TimeUnit.MINUTES);
+        Enigma.SCHEDULER.scheduleAtFixedRate(() -> instance.getLeaderboardChannel().getMessagesBefore(Snowflake.of(Instant.now()))
+                .switchIfEmpty(instance.getLeaderboardChannel().createEmbed(e -> e.setTitle("...")))
+                .blockFirst()
+                .edit(m -> m.setEmbed(Util.leaderboard().andThen(e -> e.setFooter("Updates every 10 minutes.", null))))
+                .block(), 0, 10, TimeUnit.MINUTES);
     }
 
     public void onReady(ReadyEvent event) {
