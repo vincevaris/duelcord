@@ -86,7 +86,7 @@ public enum GameCommand implements Command {
                     Item item = Item.fromName(String.join(" ", args));
                     if (item != null) {
                         Build build = item.build(member.getItems());
-                        Util.send(channel, item.getName() + " (" + build.getCost() + "g)", Util.joinNonEmpty(
+                        Util.send(channel, item.getName() + " (" + build.getCost() + "g)", Util.joinNonEmpty("\n",
                                 item.hasBuild() ? "*Build: " + Arrays.toString(item.getBuild()) + "*\n" : null,
                                 Util.formatStats(item.getStats()),
                                 Util.formatEffects(item.getEffects())));
