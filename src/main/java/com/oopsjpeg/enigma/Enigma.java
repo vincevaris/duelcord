@@ -215,4 +215,8 @@ public class Enigma {
     public TextChannel getLogChannel() {
         return client.getChannelById(Snowflake.of(settings.get(Settings.LOG_ID))).cast(TextChannel.class).block();
     }
+
+    public TextChannel getLeaderboardChannel() {
+        return client.getChannelById(Snowflake.of(settings.get(Settings.LEADERBOARD_ID))).cast(TextChannel.class).block();
+    }
 }

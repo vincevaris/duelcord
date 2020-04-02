@@ -23,7 +23,7 @@ public class Player {
     @Getter @Setter private int gems;
     @Getter @Setter private int wins;
     @Getter @Setter private int losses;
-    private float rankedPoints;
+    private int rp;
     private List<UnitData> unitDatas;
 
     public Player(long id) {
@@ -87,15 +87,17 @@ public class Player {
     }
 
     public void win(float loserRp) {
-        float average = (rankedPoints + loserRp) / 2;
-        float weight = rankedPoints / average;
-        rankedPoints += Util.limit(weight * 100, 50, 125);
+        float average = (rp + loserRp) / 2;
+        float weight = rp / average;
+        rp += Util.limit(weight * 100, 50, 125);
+        wins++;
     }
 
     public void lose(float winnerRp) {
-        float average = (rankedPoints + winnerRp) / 2;
-        float weight = rankedPoints / average;
-        rankedPoints -= Util.limit(weight * 100, 50, 125);
+        float average = (rp + winnerRp) / 2;
+        float weight = rp / average;
+        rp -= Util.limit(weight * 100, 50, 125);
+        losses++;
     }
 
     public int getTotalGames() {
@@ -122,14 +124,15 @@ public class Player {
                 });
     }
 
-    public float getRankedPoints() {
-        if (rankedPoints == 0)
-            rankedPoints = 1000;
-        return rankedPoints;
+    public int getRankedPoints() {
+        if (rp == 0)
+            rp = 1000;
+        return rp;
     }
 
     public void setRankedPoints(int rankedPoints) {
-        this.rankedPoints = Math.max(1, rankedPoints);
+        getRankedPoints();
+        this.rp = Math.max(1, rankedPoints);
     }
 
     @Override

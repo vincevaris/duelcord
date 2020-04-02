@@ -75,12 +75,12 @@ public class Bloodreaper extends Unit {
 
     @Override
     public String[] getTopic() {
-        return new String[]{"Soul: **" + Math.round(soul) + "**", endure.isDone() ? "**Endure** is ready." : "**Endure** in " + endure.getCurrent() + " turn(s)."};
+        return new String[]{"Soul: **" + Math.round(soul) + "**", endure.isDone() ? "Endure is ready." : "Endure in **" + endure.getCurrent() + "** turn(s)."};
     }
 
     @Override
     public DamageEvent damageIn(DamageEvent event) {
-        soul = Util.limit(soul + event.total() * SOUL_RATIO, 0, SOUL_MAX + (event.actor.getBonusHealth() * SOUL_MAX_HP_RATIO));
+        soul = Util.limit(soul + (event.total() * SOUL_RATIO), 0, SOUL_MAX + (event.target.getBonusHealth() * SOUL_MAX_HP_RATIO));
         return event;
     }
 

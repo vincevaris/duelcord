@@ -19,6 +19,7 @@ public class Settings {
     public static final String UNITS_ID = "units_id";
     public static final String ITEMS_ID = "items_id";
     public static final String LOG_ID = "log_id";
+    public static final String LEADERBOARD_ID = "leaderboard_id";
     private static final Properties DEFAULTS = new Properties();
 
     static {
@@ -32,6 +33,7 @@ public class Settings {
         DEFAULTS.put(UNITS_ID, "units_id");
         DEFAULTS.put(ITEMS_ID, "items_id");
         DEFAULTS.put(LOG_ID, "log_id");
+        DEFAULTS.put(LEADERBOARD_ID, "leaderboard_id");
     }
 
     @Getter private final File file;
