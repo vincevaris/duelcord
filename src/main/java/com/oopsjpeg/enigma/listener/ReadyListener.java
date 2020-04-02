@@ -12,13 +12,9 @@ import discord4j.core.object.util.Snowflake;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.awt.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class ReadyListener implements Listener {
@@ -49,20 +45,7 @@ public class ReadyListener implements Listener {
                 }), 1, 1, TimeUnit.MINUTES);
         Enigma.SCHEDULER.scheduleAtFixedRate(() -> {
             instance.getLeaderboardChannel().getMessagesBefore(Snowflake.of(Instant.now())).blockFirst().delete().block();
-            instance.getLeaderboardChannel().createEmbed(e -> {
-                e.setAuthor("Top 10 Players", null, client.getSelf().block().getAvatarUrl());
-                e.setColor(Color.YELLOW);
-
-                AtomicInteger place = new AtomicInteger();
-                e.setDescription(instance.getPlayers().values().stream()
-                        .filter(p -> p.getTotalGames() > 3 && p.getRankedPoints() != 1000)
-                        .sorted(Comparator.comparingDouble(Player::getRankedPoints).reversed())
-                        .limit(10)
-                        .map(p -> place.incrementAndGet() + ". **" + p.getUsername() + "**#" + p.getUser().getDiscriminator() + " (" + p.getRankedPoints() + " RP)")
-                        .collect(Collectors.joining("\n")));
-
-                e.setFooter("Updates every 10 minutes.", null);
-            }).block();
+            instance.getLeaderboardChannel().createEmbed(Util.leaderboard().andThen(e -> e.setFooter("Updates every 10 minutes.", null))).block();
         }, 0, 10, TimeUnit.MINUTES);
     }
 

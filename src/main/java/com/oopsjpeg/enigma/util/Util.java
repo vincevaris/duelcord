@@ -1,9 +1,11 @@
 package com.oopsjpeg.enigma.util;
 
+import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.storage.Player;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 
@@ -13,6 +15,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -76,6 +79,21 @@ public class Util {
         return Arrays.stream(effects)
                 .map(e -> "**" + e.getName() + "**: " + e.getDescription())
                 .collect(Collectors.joining("\n"));
+    }
+
+    public static Consumer<EmbedCreateSpec> leaderboard() {
+        return e -> {
+            e.setAuthor("Top 10 Players", null, Enigma.getInstance().getClient().getSelf().block().getAvatarUrl());
+            e.setColor(Color.YELLOW);
+
+            AtomicInteger place = new AtomicInteger();
+            e.setDescription(Enigma.getInstance().getPlayers().values().stream()
+                    .filter(p -> p.getTotalGames() > 3 && p.getRankedPoints() != 1000)
+                    .sorted(Comparator.comparingDouble(Player::getRankedPoints).reversed())
+                    .limit(10)
+                    .map(p -> place.incrementAndGet() + ". **" + p.getUsername() + "**#" + p.getUser().getDiscriminator() + " (" + p.getRankedPoints() + " RP)")
+                    .collect(Collectors.joining("\n")));
+        };
     }
 
     public static String percent(float x) {

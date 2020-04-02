@@ -103,6 +103,13 @@ public enum GeneralCommand implements Command {
                 }).block();
             }
         }
+    },
+    LEADERBOARD("leaderboard") {
+        @Override
+        public void execute(Message message, String alias, String[] args) {
+            MessageChannel channel = message.getChannel().block();
+            channel.createEmbed(Util.leaderboard()).block();
+        }
     };
 
     @Getter private final String[] aliases;
