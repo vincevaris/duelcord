@@ -28,14 +28,12 @@ public class Bloodreaper extends Unit {
     public static final float SHIELD_HEAL = 0.3f;
     public static final int REAP_DAMAGE = 15;
     public static final float REAP_DAMAGE_AP_RATIO = 0.6f;
-    public static final float REAP_HEAL = 0.3f;
+    public static final float REAP_HEAL = 0.25f;
     public static final float REAP_WOUND = 0.6f;
     public static final int REAP_WOUND_USES = 4;
-    public static final int REAP_USES = 2;
     public static final int ENDURE_ENERGY = 25;
     public static final int ENDURE_COOLDOWN = 3;
 
-    @Getter private final Stacker reap = new Stacker(REAP_USES);
     @Getter public static final Stacker wound = new Stacker(REAP_WOUND_USES);
     @Getter private final Cooldown endure = new Cooldown(ENDURE_COOLDOWN);
 
@@ -49,12 +47,11 @@ public class Bloodreaper extends Unit {
     @Override
     public String getDescription() {
         return "**" + Util.percent(SOUL_RATIO) + "** of damage received is stored as **Soul**, up to **" + SOUL_MAX + "** (+" + Util.percent(SOUL_MAX_HP_RATIO) + " bonus health)."
-                + "\nUnbroken shields heal by **" + Util.percent(SHIELD_HEAL) + "** of their value."
-                + "\n\n`>reap` deals **" + REAP_DAMAGE + "** (+" + Util.percent(REAP_DAMAGE_AP_RATIO) + " AP) damage and heals by **" + Util.percent(REAP_HEAL) + "**."
+                + "\nUnbroken shields heal for **" + Util.percent(SHIELD_HEAL) + "** of their value."
+                + "\n\n`>reap` deals **" + REAP_DAMAGE + "** (+" + Util.percent(REAP_DAMAGE_AP_RATIO) + " AP) damage and heals for **" + Util.percent(REAP_HEAL) + "**."
                 + "\nEvery **" + REAP_WOUND_USES + "** uses, Reap applies Wound by **" + Util.percent(REAP_WOUND) + "** for **1** turn."
-                + "\nReap can be used **" + REAP_USES + "** time(s) per turn."
                 + "\n\n`>endure` resets **Soul**, shielding equal to its amount."
-                + "\nAdditionally, it removes all de-buffs and restores **" + ENDURE_ENERGY + "** energy,"
+                + "\nAdditionally, it removes all de-buffs and restores **" + ENDURE_ENERGY + "** energy."
                 + "\nEndure can only be used once every **" + ENDURE_COOLDOWN + "** turn(s).";
     }
 
@@ -90,7 +87,6 @@ public class Bloodreaper extends Unit {
 
     @Override
     public String onTurnStart(GameMember member) {
-        reap.reset();
         ArrayList<String> output = new ArrayList<>();
         if (endure.count() && endure.tryNotify())
             output.add(Emote.INFO + "**" + member.getUsername() + "**'s Endure is ready to use.");
@@ -111,8 +107,6 @@ public class Bloodreaper extends Unit {
                 message.delete().block();
                 if (member.hasData(Silence.class))
                     Util.sendFailure(channel, "You cannot **Reap** while silenced.");
-                else if (reap.isDone())
-                    Util.sendFailure(channel, "You cannot **Reap** anymore this turn.");
                 else
                     member.act(new ReapAction(game.getRandomTarget(member)));
             }
@@ -155,7 +149,6 @@ public class Bloodreaper extends Unit {
 
         @Override
         public String act(GameMember actor) {
-            reap.stack();
             wound.stack();
 
             DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
