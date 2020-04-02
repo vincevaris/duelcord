@@ -20,7 +20,8 @@ public class Gunslinger extends Unit {
     public static final float BONUS_AP = 1.25f;
     public static final int BARRAGE_SHOTS = 4;
     public static final int BARRAGE_DAMAGE = 5;
-    public static final float BARRAGE_AP = 0.25f;
+    public static final float BARRAGE_AD_RATIO = 0.15f;
+    public static final float BARRAGE_AP_RATIO = 0.25f;
     public static final int BARRAGE_COOLDOWN = 3;
     private final Cooldown barrage = new Cooldown(BARRAGE_COOLDOWN);
     private boolean bonus = false;
@@ -64,7 +65,7 @@ public class Gunslinger extends Unit {
     public String getDescription() {
         return "The first basic attack per turn always crits and deals **" + Util.percent(BONUS_AP) + " AP** bonus damage.\n\n"
                 + "Using `>barrage` fires **" + BARRAGE_SHOTS + "** shots that each deal **"
-                + BARRAGE_DAMAGE + "** (+" + Util.percent(BARRAGE_AP) + " AP) damage.\n"
+                + BARRAGE_DAMAGE + "** (+" + Util.percent(BARRAGE_AD_RATIO) + " bonus AD) (+" + Util.percent(BARRAGE_AP_RATIO) + " AP) damage.\n"
                 + "Barrage shots can crit and apply on-hit effects.\n"
                 + "Barrage can only be used once every **" + BARRAGE_COOLDOWN + "** turn(s).";
     }
@@ -128,7 +129,7 @@ public class Gunslinger extends Unit {
             for (int i = 0; i < Gunslinger.BARRAGE_SHOTS; i++)
                 if (target.isAlive()) {
                     DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
-                    event.damage = Gunslinger.BARRAGE_DAMAGE + (actor.getStats().get(Stats.ABILITY_POWER) * Gunslinger.BARRAGE_AP);
+                    event.damage = Gunslinger.BARRAGE_DAMAGE + (actor.getBonusDamage() * Gunslinger.BARRAGE_AD_RATIO) + (actor.getStats().get(Stats.ABILITY_POWER) * Gunslinger.BARRAGE_AP_RATIO);
                     actor.crit(event);
                     actor.hit(event);
                     output.add(actor.damage(event, Emote.GUN, "Barrage"));
