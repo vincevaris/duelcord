@@ -73,7 +73,7 @@ public class Warrior extends Unit {
     @Override
     public String onTurnStart(GameMember member) {
         if (bash.count() && bash.tryNotify())
-            return Emote.INFO + "**" + member.getUsername() + "'s Bash** is ready to use.";
+            return Emote.INFO + "**" + member.getUsername() + "**'s Bash is ready to use.";
         return null;
     }
 

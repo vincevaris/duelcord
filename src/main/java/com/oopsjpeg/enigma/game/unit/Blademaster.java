@@ -77,7 +77,7 @@ public class Blademaster extends Unit {
             member.getStats().add(Stats.ENERGY, GEMBLADE_ENERGY);
 
         if (reflect.count() && reflect.tryNotify())
-            return Emote.INFO + "**" + member.getUsername() + "'s Reflect** is ready to use.";
+            return Emote.INFO + "**" + member.getUsername() + "**'s Reflect is ready to use.";
         return null;
     }
 

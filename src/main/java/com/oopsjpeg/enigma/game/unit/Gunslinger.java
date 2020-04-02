@@ -51,7 +51,7 @@ public class Gunslinger extends Unit {
     public String onTurnStart(GameMember member) {
         setBonus(false);
         if (barrage.count() && barrage.tryNotify())
-            return Emote.INFO + "**" + member.getUsername() + "'s Barrage** is ready to use.";
+            return Emote.INFO + "**" + member.getUsername() + "**'s Barrage is ready to use.";
         return null;
     }
 
