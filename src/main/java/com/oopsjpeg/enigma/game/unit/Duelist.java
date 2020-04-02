@@ -45,6 +45,7 @@ public class Duelist extends Unit {
             float bonus = event.target.getStats().getInt(Stats.MAX_HEALTH) * BONUS_DAMAGE;
             float bleed = event.actor.getStats().get(Stats.DAMAGE) * BLEED_DAMAGE;
             event.bonus += bonus;
+            event = event.actor.ability(event);
             event.output.add(event.target.buff(new Bleed(event.actor, BLEED_TURNS, bleed)));
         }
         return event;

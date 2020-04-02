@@ -132,7 +132,7 @@ public class Warrior extends Unit {
             if (event.target.getStats().get(Stats.SHIELD) > 0)
                 event.target.getStats().put(Stats.SHIELD, 0.01f);
 
-            event.actor.ability(event);
+            event = event.actor.ability(event);
 
             return actor.damage(event, Emote.KNIFE, "Bash");
         }

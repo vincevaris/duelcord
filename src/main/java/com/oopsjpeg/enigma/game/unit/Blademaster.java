@@ -59,6 +59,8 @@ public class Blademaster extends Unit {
 
             event.bonus += event.actor.getStats().get(Stats.DAMAGE) * (REFLECT_DAMAGE + (gemblade.getCurrent() * REFLECT_SCALE));
 
+            event = event.actor.ability(event);
+
             event.output.add(Emote.KNIFE + "**" + event.actor.getUsername() + "** reflected the attack!");
 
             reflectState = REFLECTED;

@@ -99,6 +99,7 @@ public class Phasebreaker extends Unit {
                     event.bonus *= ignore;
                     // Double passive
                     event.bonus += event.actor.getStats().get(Stats.ABILITY_POWER) * PASSIVE_AP;
+                    event = event.actor.ability(event);
                     break;
             }
         }
