@@ -54,24 +54,26 @@ public class Util {
 
     public static String formatStats(Stats stats) {
         List<String> output = new ArrayList<>();
-        if (stats.get(Stats.MAX_HEALTH) > 0)
-            output.add("Max Health: +**" + stats.getInt(Stats.MAX_HEALTH) + "**");
-        if (stats.get(Stats.DAMAGE) > 0)
-            output.add("Damage: +**" + stats.getInt(Stats.DAMAGE) + "**");
-        if (stats.get(Stats.ABILITY_POWER) > 0)
-            output.add("Ability Power: +**" + stats.getInt(Stats.ABILITY_POWER) + "**");
-        if (stats.get(Stats.CRIT_CHANCE) > 0)
-            output.add("Critical Chance: +**" + Util.percent(stats.get(Stats.CRIT_CHANCE)) + "**");
-        if (stats.get(Stats.CRIT_DAMAGE) > 0)
-            output.add("Critical Damage: +**" + Util.percent(stats.get(Stats.CRIT_DAMAGE)) + "**");
-        if (stats.get(Stats.LIFE_STEAL) > 0)
-            output.add("Life Steal: **" + Util.percent(stats.get(Stats.LIFE_STEAL)) + "**");
-        if (stats.get(Stats.HEALTH_PER_TURN) > 0)
-            output.add("Health/turn: +**" + stats.getInt(Stats.HEALTH_PER_TURN) + "**");
-        if (stats.get(Stats.GOLD_PER_TURN) > 0)
-            output.add("Gold/turn: +**" + stats.getInt(Stats.GOLD_PER_TURN) + "**");
-        if (stats.get(Stats.ENERGY_PER_TURN) > 0)
-            output.add("Energy/turn: +**" + stats.getInt(Stats.ENERGY_PER_TURN) + "**");
+        if (stats.get(MAX_HEALTH) > 0)
+            output.add("Max Health: +**" + stats.getInt(MAX_HEALTH) + "**");
+        if (stats.get(RESIST) > 0)
+            output.add("Resist: +**" + Util.percent(stats.get(RESIST)) + "**");
+        if (stats.get(DAMAGE) > 0)
+            output.add("Damage: +**" + stats.getInt(DAMAGE) + "**");
+        if (stats.get(ABILITY_POWER) > 0)
+            output.add("Ability Power: +**" + stats.getInt(ABILITY_POWER) + "**");
+        if (stats.get(CRIT_CHANCE) > 0)
+            output.add("Critical Chance: +**" + Util.percent(stats.get(CRIT_CHANCE)) + "**");
+        if (stats.get(CRIT_DAMAGE) > 0)
+            output.add("Critical Damage: +**" + Util.percent(stats.get(CRIT_DAMAGE)) + "**");
+        if (stats.get(LIFE_STEAL) > 0)
+            output.add("Life Steal: **" + Util.percent(stats.get(LIFE_STEAL)) + "**");
+        if (stats.get(HEALTH_PER_TURN) > 0)
+            output.add("Health/turn: +**" + stats.getInt(HEALTH_PER_TURN) + "**");
+        if (stats.get(GOLD_PER_TURN) > 0)
+            output.add("Gold/turn: +**" + stats.getInt(GOLD_PER_TURN) + "**");
+        if (stats.get(ENERGY_PER_TURN) > 0)
+            output.add("Energy/turn: +**" + stats.getInt(ENERGY_PER_TURN) + "**");
         return Util.joinNonEmpty("\n", output);
     }
 
@@ -115,8 +117,8 @@ public class Util {
     public static String damageText(DamageEvent event, String attacker, String victim, String emote, String source) {
         return emote + "**" + attacker + "** damaged **" + victim + "** by **" + Math.round(event.damage)
                 + "**" + (event.bonus > 0 ? " (+" + Math.round(event.bonus) + ")" : "") + "!" + (event.crit ? " **CRIT**!" : "")
-                + (event.miss ? " **MISS**!" : "") + " [**" + event.target.getStats().getInt(Stats.HEALTH)
-                + " / " + event.target.getStats().getInt(Stats.MAX_HEALTH) + "**]"
+                + (event.miss ? " **MISS**!" : "") + " [**" + event.target.getStats().getInt(HEALTH)
+                + " / " + event.target.getStats().getInt(MAX_HEALTH) + "**]"
                 + (!source.isEmpty() ? " (" + source + ")" : "");
     }
 

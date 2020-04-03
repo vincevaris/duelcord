@@ -11,7 +11,8 @@ public class DivinePlatemail extends Item {
     public static final String TIP = "less damage from abilities";
     public static final int COST = 425;
     public static final Stats STATS = new Stats()
-            .put(Stats.MAX_HEALTH, 60);
+            .put(Stats.MAX_HEALTH, 60)
+            .put(Stats.RESIST, 0.05f);
     public static final Effect[] EFFECTS = new Effect[]{new Divinity(0.15f)};
     public static final Item[] BUILD = new Item[]{new Crystal()};
 

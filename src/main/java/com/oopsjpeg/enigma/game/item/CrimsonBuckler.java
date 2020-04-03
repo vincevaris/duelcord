@@ -12,7 +12,8 @@ public class CrimsonBuckler extends Item {
     public static final String TIP = "damage based on max health";
     public static final int COST = 1050;
     public static final Stats STATS = new Stats()
-            .put(Stats.MAX_HEALTH, 100);
+            .put(Stats.MAX_HEALTH, 100)
+            .put(Stats.RESIST, 0.12f);
     public static final Effect[] EFFECTS = new Effect[]{new Divinity(0.4f), new Brawn(0.1f)};
     public static final Item[] BUILD = new Item[]{new DivinePlatemail(), new Knife()};
 
