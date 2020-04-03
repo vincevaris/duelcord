@@ -9,16 +9,17 @@ import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.object.util.Snowflake;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
-@RequiredArgsConstructor
 public class ReadyListener implements Listener {
-    @Getter private final Enigma instance;
+    private final Enigma instance;
+
+    public ReadyListener(Enigma instance) {
+        this.instance = instance;
+    }
 
     @Override
     public void register(DiscordClient client) {
@@ -52,5 +53,9 @@ public class ReadyListener implements Listener {
 
     public void onReady(ReadyEvent event) {
         Enigma.LOGGER.info("Enigma is ready.");
+    }
+
+    public Enigma getInstance() {
+        return this.instance;
     }
 }

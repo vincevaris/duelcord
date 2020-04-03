@@ -9,19 +9,15 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.User;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
 import java.util.Arrays;
 import java.util.LinkedList;
 
-@RequiredArgsConstructor
 public class CommandListener implements Listener {
-    @Getter private final Enigma instance;
-    @Getter private final String prefix;
-    @Getter private final LinkedList<Command> commands;
-    @Getter @Setter private TextChannel limit;
+    private final Enigma instance;
+    private final String prefix;
+    private final LinkedList<Command> commands;
+    private TextChannel limit;
 
     public CommandListener(Enigma instance, String prefix, Command[] commands) {
         this.instance = instance;
@@ -32,6 +28,12 @@ public class CommandListener implements Listener {
     public CommandListener(Enigma instance, String prefix, Command[] commands, TextChannel limit) {
         this(instance, prefix, commands);
         this.limit = limit;
+    }
+
+    public CommandListener(Enigma instance, String prefix, LinkedList<Command> commands) {
+        this.instance = instance;
+        this.prefix = prefix;
+        this.commands = commands;
     }
 
     @Override
@@ -57,5 +59,25 @@ public class CommandListener implements Listener {
 
             if (command != null) command.execute(message, alias, args);
         }
+    }
+
+    public Enigma getInstance() {
+        return this.instance;
+    }
+
+    public String getPrefix() {
+        return this.prefix;
+    }
+
+    public LinkedList<Command> getCommands() {
+        return this.commands;
+    }
+
+    public TextChannel getLimit() {
+        return this.limit;
+    }
+
+    public void setLimit(TextChannel limit) {
+        this.limit = limit;
     }
 }

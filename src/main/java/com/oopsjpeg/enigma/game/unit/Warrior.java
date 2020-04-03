@@ -22,8 +22,8 @@ public class Warrior extends Unit {
     public static final float BASH_HP_SCALE = 0.3f;
     public static final int BASH_COOLDOWN = 2;
 
-    private Stacker bonus = new Stacker(BONUS_MAX);
-    private Cooldown bash = new Cooldown(BASH_COOLDOWN);
+    private final Stacker bonus = new Stacker(BONUS_MAX);
+    private final Cooldown bash = new Cooldown(BASH_COOLDOWN);
 
     public Stacker getBonus() {
         return bonus;

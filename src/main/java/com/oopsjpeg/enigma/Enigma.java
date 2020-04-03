@@ -18,7 +18,6 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
-import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,17 +37,16 @@ public class Enigma {
     public static final Gson GSON = new GsonBuilder().create();
     public static final ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() + 1);
 
-    @Getter private static Enigma instance;
+    private static Enigma instance;
 
-    @Getter private MongoManager mongo;
-    @Getter private DiscordClient client;
-    @Getter private Settings settings = new Settings(getSettingsFile());
-    @Getter private ArrayList<Listener> listeners = new ArrayList<>();
-
-    @Getter private CommandListener commands;
-    @Getter private LinkedList<Game> games = new LinkedList<>();
-    @Getter private HashMap<Long, Player> players = new HashMap<>();
-    @Getter private HashMap<GameMode, LinkedList<Player>> queues = new HashMap<>();
+    private final Settings settings = new Settings(getSettingsFile());
+    private final ArrayList<Listener> listeners = new ArrayList<>();
+    private final LinkedList<Game> games = new LinkedList<>();
+    private final HashMap<Long, Player> players = new HashMap<>();
+    private final HashMap<GameMode, LinkedList<Player>> queues = new HashMap<>();
+    private MongoManager mongo;
+    private DiscordClient client;
+    private CommandListener commands;
 
     public static File getSettingsFile() {
         return new File("enigma.properties");
@@ -57,6 +55,10 @@ public class Enigma {
     public static void main(String[] args) {
         instance = new Enigma();
         instance.start();
+    }
+
+    public static Enigma getInstance() {
+        return Enigma.instance;
     }
 
     private void start() {
@@ -221,5 +223,37 @@ public class Enigma {
 
     public TextChannel getLeaderboardChannel() {
         return client.getChannelById(Snowflake.of(settings.get(Settings.LEADERBOARD_ID))).cast(TextChannel.class).block();
+    }
+
+    public MongoManager getMongo() {
+        return this.mongo;
+    }
+
+    public DiscordClient getClient() {
+        return this.client;
+    }
+
+    public Settings getSettings() {
+        return this.settings;
+    }
+
+    public ArrayList<Listener> getListeners() {
+        return this.listeners;
+    }
+
+    public CommandListener getCommands() {
+        return this.commands;
+    }
+
+    public LinkedList<Game> getGames() {
+        return this.games;
+    }
+
+    public HashMap<Long, Player> getPlayers() {
+        return this.players;
+    }
+
+    public HashMap<GameMode, LinkedList<Player>> getQueues() {
+        return this.queues;
     }
 }

@@ -13,8 +13,6 @@ import com.oopsjpeg.enigma.util.ChanceBag;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.User;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,18 +22,18 @@ import java.util.stream.Collectors;
 import static com.oopsjpeg.enigma.game.Stats.*;
 
 public class GameMember {
-    @Getter private final Game game;
-    @Getter private final Player player;
-    @Getter private Unit unit;
-    @Getter @Setter private boolean alive = true;
-    @Getter @Setter private boolean defensive = false;
+    private final Game game;
+    private final Player player;
+    private Unit unit;
+    private boolean alive = true;
+    private boolean defensive = false;
 
-    @Getter @Setter private List<GameObject> data = new ArrayList<>();
-    @Getter @Setter private List<Item> itemHeals = new ArrayList<>();
+    private List<GameObject> data = new ArrayList<>();
+    private List<Item> itemHeals = new ArrayList<>();
 
-    @Getter @Setter private ChanceBag critBag = new ChanceBag(0, 0.5f);
+    private ChanceBag critBag = new ChanceBag(0, 0.5f);
 
-    @Getter @Setter private Stats stats = new Stats();
+    private Stats stats = new Stats();
 
     public GameMember(Game game, Player player) {
         this.game = game;
@@ -101,21 +99,6 @@ public class GameMember {
                 .filter(o -> o instanceof Buff)
                 .map(o -> (Buff) o)
                 .collect(Collectors.toList());
-    }
-
-    public void setUnit(Unit unit) {
-        this.unit = unit;
-        data.clear();
-        data.add(unit);
-        updateStats();
-
-        stats.put(HEALTH, stats.get(MAX_HEALTH));
-        stats.put(GOLD, game.getMode().handleGold(175 + (100 * game.getAlive().indexOf(this))));
-
-        game.getCommandListener().getCommands().addAll(Arrays.asList(unit.getCommands()));
-
-        if (unit instanceof Berserker)
-            ((Berserker) unit).getRage().setCurrent(game.getAlive().indexOf(this));
     }
 
     public boolean hasUnit() {
@@ -351,5 +334,80 @@ public class GameMember {
     @Override
     public String toString() {
         return getPlayer().toString();
+    }
+
+    public Game getGame() {
+        return this.game;
+    }
+
+    public Player getPlayer() {
+        return this.player;
+    }
+
+    public Unit getUnit() {
+        return this.unit;
+    }
+
+    public void setUnit(Unit unit) {
+        this.unit = unit;
+        data.clear();
+        data.add(unit);
+        updateStats();
+
+        stats.put(HEALTH, stats.get(MAX_HEALTH));
+        stats.put(GOLD, game.getMode().handleGold(175 + (100 * game.getAlive().indexOf(this))));
+
+        game.getCommandListener().getCommands().addAll(Arrays.asList(unit.getCommands()));
+
+        if (unit instanceof Berserker)
+            ((Berserker) unit).getRage().setCurrent(game.getAlive().indexOf(this));
+    }
+
+    public boolean isAlive() {
+        return this.alive;
+    }
+
+    public void setAlive(boolean alive) {
+        this.alive = alive;
+    }
+
+    public boolean isDefensive() {
+        return this.defensive;
+    }
+
+    public void setDefensive(boolean defensive) {
+        this.defensive = defensive;
+    }
+
+    public List<GameObject> getData() {
+        return this.data;
+    }
+
+    public void setData(List<GameObject> data) {
+        this.data = data;
+    }
+
+    public List<Item> getItemHeals() {
+        return this.itemHeals;
+    }
+
+    public void setItemHeals(List<Item> itemHeals) {
+        this.itemHeals = itemHeals;
+    }
+
+    public ChanceBag getCritBag() {
+        return this.critBag;
+    }
+
+    public void setCritBag(ChanceBag critBag) {
+        this.critBag = critBag;
+    }
+
+    public Stats getStats() {
+        return this.stats;
+    }
+
+    public void setStats(Stats stats) {
+        this.stats = stats;
     }
 }

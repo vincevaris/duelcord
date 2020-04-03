@@ -1,7 +1,5 @@
 package com.oopsjpeg.enigma.util;
 
-import lombok.Getter;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -36,7 +34,7 @@ public class Settings {
         DEFAULTS.put(LEADERBOARD_ID, "leaderboard_id");
     }
 
-    @Getter private final File file;
+    private final File file;
     private final Properties properties = new Properties();
 
     public Settings(File file) {
@@ -68,4 +66,7 @@ public class Settings {
         return Long.parseLong(get(key));
     }
 
+    public File getFile() {
+        return this.file;
+    }
 }

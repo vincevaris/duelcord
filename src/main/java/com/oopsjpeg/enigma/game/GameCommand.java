@@ -14,7 +14,6 @@ import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
-import lombok.Getter;
 
 import java.util.Arrays;
 
@@ -226,9 +225,13 @@ public enum GameCommand implements Command {
         }
     };
 
-    @Getter private final String[] aliases;
+    private final String[] aliases;
 
     GameCommand(String... aliases) {
         this.aliases = aliases;
+    }
+
+    public String[] getAliases() {
+        return this.aliases;
     }
 }

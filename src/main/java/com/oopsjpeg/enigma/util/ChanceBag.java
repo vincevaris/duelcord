@@ -1,12 +1,9 @@
 package com.oopsjpeg.enigma.util;
 
-import lombok.Getter;
-import lombok.Setter;
-
 public class ChanceBag {
-    @Getter @Setter private float chance;
-    @Getter @Setter private float influence;
-    @Getter @Setter private int attempts = 0;
+    private float chance;
+    private float influence;
+    private int attempts = 0;
 
     public ChanceBag(float chance) {
         this(chance, 1.0f);
@@ -31,5 +28,29 @@ public class ChanceBag {
             return attempts >= 1 / (chance * influence);
         }
         return false;
+    }
+
+    public float getChance() {
+        return this.chance;
+    }
+
+    public void setChance(float chance) {
+        this.chance = chance;
+    }
+
+    public float getInfluence() {
+        return this.influence;
+    }
+
+    public void setInfluence(float influence) {
+        this.influence = influence;
+    }
+
+    public int getAttempts() {
+        return this.attempts;
+    }
+
+    public void setAttempts(int attempts) {
+        this.attempts = attempts;
     }
 }

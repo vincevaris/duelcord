@@ -5,9 +5,9 @@ import java.util.List;
 
 public class DamageEvent {
     public final Game game;
+    public final List<String> output = new ArrayList<>();
     public GameMember actor;
     public GameMember target;
-    public List<String> output = new ArrayList<>();
     public float damage;
     public float bonus;
     public boolean crit;

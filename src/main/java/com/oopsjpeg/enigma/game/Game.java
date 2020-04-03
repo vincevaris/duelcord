@@ -16,8 +16,6 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Permission;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -29,19 +27,19 @@ public class Game {
     public static final int PICKING = 0;
     public static final int PLAYING = 1;
     public static final int FINISHED = 2;
-    @Getter private final Enigma instance;
-    @Getter private final TextChannel channel;
-    @Getter private final GameMode mode;
-    @Getter private final List<GameMember> members;
-    @Getter private final CommandListener commandListener;
-    @Getter private final Stacker afkTimer = new Stacker(10);
+    private final Enigma instance;
+    private final TextChannel channel;
+    private final GameMode mode;
+    private final List<GameMember> members;
+    private final CommandListener commandListener;
+    private final Stacker afkTimer = new Stacker(10);
 
-    @Getter @Setter private List<GameAction> actions = new ArrayList<>();
-    @Getter @Setter private LocalDateTime lastAction = LocalDateTime.now();
+    private List<GameAction> actions = new ArrayList<>();
+    private LocalDateTime lastAction = LocalDateTime.now();
 
-    @Getter @Setter private int gameState = PICKING;
-    @Getter @Setter private int turnCount = 0;
-    @Getter @Setter private int turnIndex = -1;
+    private int gameState = PICKING;
+    private int turnCount = 0;
+    private int turnIndex = -1;
 
     public Game(Enigma instance, GameMode mode, List<Player> players) {
         this.instance = instance;
@@ -191,5 +189,69 @@ public class Game {
 
     public GameMember getWinner() {
         return gameState == FINISHED ? getAlive().get(0) : null;
+    }
+
+    public Enigma getInstance() {
+        return this.instance;
+    }
+
+    public TextChannel getChannel() {
+        return this.channel;
+    }
+
+    public GameMode getMode() {
+        return this.mode;
+    }
+
+    public List<GameMember> getMembers() {
+        return this.members;
+    }
+
+    public CommandListener getCommandListener() {
+        return this.commandListener;
+    }
+
+    public Stacker getAfkTimer() {
+        return this.afkTimer;
+    }
+
+    public List<GameAction> getActions() {
+        return this.actions;
+    }
+
+    public void setActions(List<GameAction> actions) {
+        this.actions = actions;
+    }
+
+    public LocalDateTime getLastAction() {
+        return this.lastAction;
+    }
+
+    public void setLastAction(LocalDateTime lastAction) {
+        this.lastAction = lastAction;
+    }
+
+    public int getGameState() {
+        return this.gameState;
+    }
+
+    public void setGameState(int gameState) {
+        this.gameState = gameState;
+    }
+
+    public int getTurnCount() {
+        return this.turnCount;
+    }
+
+    public void setTurnCount(int turnCount) {
+        this.turnCount = turnCount;
+    }
+
+    public int getTurnIndex() {
+        return this.turnIndex;
+    }
+
+    public void setTurnIndex(int turnIndex) {
+        this.turnIndex = turnIndex;
     }
 }

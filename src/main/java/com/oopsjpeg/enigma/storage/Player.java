@@ -11,22 +11,20 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Permission;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Player {
-    @Getter private final long id;
+    private final long id;
     private transient GameMode queueMode;
-    @Getter @Setter private transient Instant queueTime;
-    @Getter @Setter private transient Game game;
-    @Getter private transient long spectateId;
-    @Getter @Setter private int gems;
-    @Getter @Setter private int wins;
-    @Getter @Setter private int losses;
+    private transient Instant queueTime;
+    private transient Game game;
+    private transient long spectateId;
+    private int gems;
+    private int wins;
+    private int losses;
     private int rp;
     private List<UnitData> unitDatas;
 
@@ -76,26 +74,6 @@ public class Player {
 
     public void removeGame() {
         setGame(null);
-    }
-
-    public void setSpectateId(long spectateId) {
-        if (isSpectating()) {
-            Player player = Enigma.getInstance().getPlayer(spectateId);
-            Snowflake id = Snowflake.of(this.id);
-            player.getGame().getChannel().addMemberOverwrite(id, PermissionOverwrite.forMember(id,
-                    PermissionSet.none(),
-                    PermissionSet.none())).block();
-        }
-
-        this.spectateId = spectateId;
-
-        if (isSpectating()) {
-            Player player = Enigma.getInstance().getPlayer(spectateId);
-            Snowflake id = Snowflake.of(this.id);
-            player.getGame().getChannel().addMemberOverwrite(id, PermissionOverwrite.forMember(id,
-                    PermissionSet.of(Permission.VIEW_CHANNEL),
-                    PermissionSet.of(Permission.SEND_MESSAGES))).block();
-        }
     }
 
     public boolean isSpectating() {
@@ -179,6 +157,74 @@ public class Player {
     @Override
     public boolean equals(Object o) {
         return (o instanceof Player && ((Player) o).id == id) || o.equals(getUser());
+    }
+
+    public long getId() {
+        return this.id;
+    }
+
+    public Instant getQueueTime() {
+        return this.queueTime;
+    }
+
+    public void setQueueTime(Instant queueTime) {
+        this.queueTime = queueTime;
+    }
+
+    public Game getGame() {
+        return this.game;
+    }
+
+    public void setGame(Game game) {
+        this.game = game;
+    }
+
+    public long getSpectateId() {
+        return this.spectateId;
+    }
+
+    public void setSpectateId(long spectateId) {
+        if (isSpectating()) {
+            Player player = Enigma.getInstance().getPlayer(spectateId);
+            Snowflake id = Snowflake.of(this.id);
+            player.getGame().getChannel().addMemberOverwrite(id, PermissionOverwrite.forMember(id,
+                    PermissionSet.none(),
+                    PermissionSet.none())).block();
+        }
+
+        this.spectateId = spectateId;
+
+        if (isSpectating()) {
+            Player player = Enigma.getInstance().getPlayer(spectateId);
+            Snowflake id = Snowflake.of(this.id);
+            player.getGame().getChannel().addMemberOverwrite(id, PermissionOverwrite.forMember(id,
+                    PermissionSet.of(Permission.VIEW_CHANNEL),
+                    PermissionSet.of(Permission.SEND_MESSAGES))).block();
+        }
+    }
+
+    public int getGems() {
+        return this.gems;
+    }
+
+    public void setGems(int gems) {
+        this.gems = gems;
+    }
+
+    public int getWins() {
+        return this.wins;
+    }
+
+    public void setWins(int wins) {
+        this.wins = wins;
+    }
+
+    public int getLosses() {
+        return this.losses;
+    }
+
+    public void setLosses(int losses) {
+        this.losses = losses;
     }
 
     public static class UnitData {

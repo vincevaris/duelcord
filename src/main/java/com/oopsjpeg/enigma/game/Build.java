@@ -1,18 +1,33 @@
 package com.oopsjpeg.enigma.game;
 
 import com.oopsjpeg.enigma.game.obj.Item;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
 
-@RequiredArgsConstructor
 public class Build {
-    @Getter private final Item item;
-    @Getter private final int reduction;
-    @Getter private final ArrayList<Item> postData;
+    private final Item item;
+    private final int reduction;
+    private final ArrayList<Item> postData;
+
+    public Build(Item item, int reduction, ArrayList<Item> postData) {
+        this.item = item;
+        this.reduction = reduction;
+        this.postData = postData;
+    }
 
     public int getCost() {
         return item.getCost() - reduction;
+    }
+
+    public Item getItem() {
+        return this.item;
+    }
+
+    public int getReduction() {
+        return this.reduction;
+    }
+
+    public ArrayList<Item> getPostData() {
+        return this.postData;
     }
 }

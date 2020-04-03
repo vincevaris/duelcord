@@ -14,9 +14,6 @@ import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -34,10 +31,10 @@ public class Bloodreaper extends Unit {
     public static final int ENDURE_ENERGY = 25;
     public static final int ENDURE_COOLDOWN = 3;
 
-    @Getter public static final Stacker wound = new Stacker(REAP_WOUND_USES);
-    @Getter private final Cooldown endure = new Cooldown(ENDURE_COOLDOWN);
+    private final Stacker wound = new Stacker(REAP_WOUND_USES);
+    private final Cooldown endure = new Cooldown(ENDURE_COOLDOWN);
 
-    @Getter @Setter private float soul = 0;
+    private float soul = 0;
 
     @Override
     public String getName() {
@@ -97,6 +94,18 @@ public class Bloodreaper extends Unit {
         return String.join("\n", output);
     }
 
+    public Cooldown getEndure() {
+        return this.endure;
+    }
+
+    public float getSoul() {
+        return this.soul;
+    }
+
+    public void setSoul(float soul) {
+        this.soul = soul;
+    }
+
     private class ReapCommand implements Command {
         @Override
         public void execute(Message message, String alias, String[] args) {
@@ -145,9 +154,12 @@ public class Bloodreaper extends Unit {
         }
     }
 
-    @RequiredArgsConstructor
     private class ReapAction implements GameAction {
-        @Getter private final GameMember target;
+        private final GameMember target;
+
+        public ReapAction(GameMember target) {
+            this.target = target;
+        }
 
         @Override
         public String act(GameMember actor) {
@@ -170,6 +182,10 @@ public class Bloodreaper extends Unit {
         @Override
         public int getEnergy() {
             return 50;
+        }
+
+        public GameMember getTarget() {
+            return this.target;
         }
     }
 

@@ -64,7 +64,7 @@ public class Berserker extends Unit {
     @Override
     public String[] getTopic() {
         return new String[]{(bonus > 0 ? "Bonus: **" + Util.percent(getBonus()) + "**" : "Rage: **" + getRage().getCurrent() + " / 5**")};
-     }
+    }
 
     @Override
     public Color getColor() {

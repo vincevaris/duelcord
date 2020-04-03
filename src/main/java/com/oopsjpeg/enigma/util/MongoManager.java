@@ -12,7 +12,7 @@ import org.bson.Document;
 import java.util.function.Consumer;
 
 public class MongoManager extends MongoClient {
-    private String database;
+    private final String database;
 
     public MongoManager(String host, String database) {
         super(host);

@@ -1,14 +1,10 @@
 package com.oopsjpeg.enigma.game;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-@RequiredArgsConstructor
 public enum GameMode {
     DUEL("Duel", 2, true),
     CHAOS("Chaos", 3, false) {
@@ -32,9 +28,15 @@ public enum GameMode {
         }
     };
 
-    @Getter private final String name;
-    @Getter private final int size;
-    @Getter private final boolean ranked;
+    private final String name;
+    private final int size;
+    private final boolean ranked;
+
+    GameMode(String name, int size, boolean ranked) {
+        this.name = name;
+        this.size = size;
+        this.ranked = ranked;
+    }
 
     public static GameMode fromName(String name) {
         return Arrays.stream(values())
@@ -49,5 +51,17 @@ public enum GameMode {
 
     public DamageEvent handleDamage(DamageEvent event) {
         return event;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public int getSize() {
+        return this.size;
+    }
+
+    public boolean isRanked() {
+        return this.ranked;
     }
 }

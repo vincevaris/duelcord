@@ -23,7 +23,7 @@ public class Stats {
     public static final String HEALTH_PER_TURN = "health_per_turn";
     public static final String ENERGY_PER_TURN = "energy_per_turn";
 
-    private Map<String, Float> values = new HashMap<>();
+    private final Map<String, Float> values = new HashMap<>();
 
     public Stats() {
         values.put(HEALTH, 0.0f);

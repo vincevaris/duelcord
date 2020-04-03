@@ -1,12 +1,9 @@
 package com.oopsjpeg.enigma.util;
 
-import lombok.Getter;
-import lombok.Setter;
-
 public class Stacker implements Notifier {
-    @Getter @Setter private int max;
-    @Getter private int current = 0;
-    @Getter @Setter private boolean notified = false;
+    private int max;
+    private int current = 0;
+    private boolean notified = false;
 
     public Stacker(int max) {
         this.max = max;
@@ -26,7 +23,27 @@ public class Stacker implements Notifier {
         return getCurrent() == getMax();
     }
 
+    public int getMax() {
+        return this.max;
+    }
+
+    public void setMax(int max) {
+        this.max = max;
+    }
+
+    public int getCurrent() {
+        return this.current;
+    }
+
     public void setCurrent(int current) {
         this.current = Util.limit(current, 0, max);
+    }
+
+    public boolean isNotified() {
+        return this.notified;
+    }
+
+    public void setNotified(boolean notified) {
+        this.notified = notified;
     }
 }
