@@ -10,10 +10,10 @@ import com.oopsjpeg.enigma.util.Util;
 import java.awt.*;
 
 public class Thief extends Unit {
-    public static final float STEAL_AD = 0.25f;
+    public static final float STEAL_AD = 0.35f;
     public static final float CRIT_REDUCE = 0.2f;
-    public static final float CRIT_INCREASE = 0.2f;
-    public static final int GOLD_TARGET = 275;
+    public static final float CRIT_INCREASE = 0.15f;
+    public static final int GOLD_TARGET = 125;
     public static final int BONUS_ENERGY = 50;
 
     private int critAmount = 0;
@@ -78,8 +78,8 @@ public class Thief extends Unit {
     public Stats getStats() {
         return new Stats()
                 .put(Stats.ENERGY, 150 + (goldTargetHit ? 50 : 0))
-                .put(Stats.MAX_HEALTH, 740)
-                .put(Stats.DAMAGE, 18)
+                .put(Stats.MAX_HEALTH, 750)
+                .put(Stats.DAMAGE, 17)
                 .put(Stats.CRIT_CHANCE, 0.2f)
                 .put(Stats.CRIT_DAMAGE, -1 * CRIT_REDUCE)
                 .put(Stats.HEALTH_PER_TURN, 8);
