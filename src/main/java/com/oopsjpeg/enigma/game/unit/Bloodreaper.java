@@ -59,7 +59,7 @@ public class Bloodreaper extends Unit {
     public String[] getTopic(GameMember member) {
         return new String[]{"Soul: **" + Math.round(soul) + "**",
                 "Wound: **" + wound.getCurrent() + " / " + REAP_WOUND_USES + "**",
-                endure.isDone() ? "Endure is ready." : "Endure in **" + endure.getCurrent() + "** turn(s)"};
+                endure.isDone() ? "Endure is ready" : "Endure in **" + endure.getCurrent() + "** turn(s)"};
     }
 
     @Override

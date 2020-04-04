@@ -46,7 +46,7 @@ public class Gunslinger extends Unit {
 
     @Override
     public String[] getTopic(GameMember member) {
-        return new String[]{(barrage.isDone() ? "Barrage is ready." : "Barrage in **" + barrage.getCurrent() + "** turn(s)")};
+        return new String[]{(barrage.isDone() ? "Barrage is ready" : "Barrage in **" + barrage.getCurrent() + "** turn(s)")};
     }
 
     @Override

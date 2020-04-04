@@ -44,7 +44,7 @@ public class Warrior extends Unit {
     @Override
     public String[] getTopic(GameMember member) {
         return new String[]{"Bonus: **" + bonus.getCurrent() + " / 3**",
-                bash.isDone() ? "Bash is ready." : "Bash in **" + bash.getCurrent() + "** turn(s)"};
+                bash.isDone() ? "Bash is ready" : "Bash in **" + bash.getCurrent() + "** turn(s)"};
     }
 
     @Override

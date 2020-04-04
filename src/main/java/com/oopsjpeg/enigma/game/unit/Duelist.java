@@ -51,7 +51,7 @@ public class Duelist extends Unit {
     @Override
     public String[] getTopic(GameMember member) {
         return new String[]{"Bonus: **" + bonus.getCurrent() + " / " + Duelist.BONUS_MAX + "**",
-                crush.isDone() ? "Crush is ready." : "Crush in **" + crush.getCurrent() + "** turn(s)"};
+                crush.isDone() ? "Crush is ready" : "Crush in **" + crush.getCurrent() + "** turn(s)"};
     }
 
     @Override

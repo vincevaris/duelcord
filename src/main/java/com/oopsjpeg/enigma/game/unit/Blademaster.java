@@ -52,7 +52,7 @@ public class Blademaster extends Unit {
     @Override
     public String[] getTopic(GameMember member) {
         return new String[]{"Gemblade: **" + gemblade.getCurrent() + " / " + GEMBLADE_MAX + "**",
-                reflect.isDone() ? "Reflect is ready." : "Reflect in **" + reflect.getCurrent() + "** turn(s)"};
+                reflect.isDone() ? "Reflect is ready" : "Reflect in **" + reflect.getCurrent() + "** turn(s)"};
     }
 
     @Override
