@@ -2,28 +2,22 @@ package com.oopsjpeg.enigma.game.buff;
 
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.GameMember;
-import com.oopsjpeg.enigma.game.obj.Buff;
+import com.oopsjpeg.enigma.game.object.Buff;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Util;
 
 public class Weaken extends Buff {
-    public Weaken(GameMember source, int turns, float power) {
-        super(source, true, turns, power);
-    }
-
-    @Override
-    public String getName() {
-        return "Weaken";
+    public Weaken(GameMember source, int totalTurns, float power) {
+        super("Weaken", true, source, totalTurns, power);
     }
 
     @Override
     public String onTurnStart(GameMember member) {
-        return Emote.SILENCE + "**" + member.getUsername() + "** is weakened by **" + Util.percent(getPower()) + "** by **"
-                + getSource().getUsername() + "** this turn.";
+        return Emote.SILENCE + "**" + member.getUsername() + "** is weakened by **" + Util.percent(getPower()) + "** by **" + getSource().getUsername() + "** this turn.";
     }
 
     @Override
-    public String getFormattedPower() {
+    public String formatPower() {
         return Util.percent(getPower());
     }
 

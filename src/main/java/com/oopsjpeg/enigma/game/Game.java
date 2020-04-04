@@ -2,7 +2,6 @@ package com.oopsjpeg.enigma.game;
 
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.buff.Silence;
-import com.oopsjpeg.enigma.game.obj.Effect;
 import com.oopsjpeg.enigma.listener.CommandListener;
 import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.Emote;
@@ -136,7 +135,7 @@ public class Game {
             return member.getUsername() + " is picking their unit.";
         else {
             List<String> output = new ArrayList<>();
-            output.add(member.getUnit().getName() + " " + member.getMention() + " (" + turnCount + ") -\n");
+            output.add(member.getUnit().getName() + " " + member.getMention() + " (" + turnCount + ")");
             output.add("Gold: **" + Util.comma(member.getStats().getInt(GOLD)) + "**");
             output.add("Health: **" + member.getStats().getInt(HEALTH) + " / " + member.getStats().getInt(MAX_HEALTH)
                     + "** (+**" + member.getStats().getInt(HEALTH_PER_TURN) + "**/t)");
@@ -144,9 +143,9 @@ public class Game {
             output.add("Items: **" + member.getItems() + "**");
 
             // Add unit topic
-            Arrays.stream(member.getUnit().getTopic()).filter(Objects::nonNull).forEach(output::add);
+            Arrays.stream(member.getUnit().getTopic(member)).filter(Objects::nonNull).forEach(output::add);
             // Add effect topics
-            member.getEffects().stream().map(Effect::getTopic).filter(Objects::nonNull).flatMap(Arrays::stream).forEach(output::add);
+            member.getEffects().stream().map(e -> e.getTopic(member)).filter(Objects::nonNull).flatMap(Arrays::stream).forEach(output::add);
 
             return Util.joinNonEmpty(",\n", output);
         }

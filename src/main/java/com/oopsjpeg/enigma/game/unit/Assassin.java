@@ -4,7 +4,7 @@ import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.*;
 import com.oopsjpeg.enigma.game.buff.Silence;
-import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
@@ -21,33 +21,18 @@ public class Assassin extends Unit {
     public static final float SLASH_AP = 0.5f;
     public static final int SLASH_MAX = 3;
     public static final int SILENCE_TURNS = 1;
+
     private final Stacker slash = new Stacker(SLASH_MAX);
     private final Stacker potency = new Stacker(POTENCY_TURNS);
     private boolean slashed = false;
     private float potencyTotal = 0;
 
-    public boolean getSlashed() {
-        return slashed;
-    }
-
-    public void setSlashed(boolean slashed) {
-        this.slashed = slashed;
-    }
-
-    public Stacker getSlash() {
-        return slash;
-    }
-
-    public Stacker getPotency() {
-        return potency;
-    }
-
-    public float getPotencyTotal() {
-        return potencyTotal;
-    }
-
-    public void setPotencyTotal(float potencyTotal) {
-        this.potencyTotal = potencyTotal;
+    public Assassin() {
+        super("Assassin", new Command[]{new SlashCommand()}, new Color(0, 69, 255), new Stats()
+                .put(Stats.ENERGY, 125)
+                .put(Stats.MAX_HEALTH, 720)
+                .put(Stats.DAMAGE, 24)
+                .put(Stats.HEALTH_PER_TURN, 11));
     }
 
     @Override
@@ -67,11 +52,6 @@ public class Assassin extends Unit {
     }
 
     @Override
-    public String getName() {
-        return "Assassin";
-    }
-
-    @Override
     public String getDescription() {
         return "**" + Util.percent(POTENCY_STORE) + "**"
                 + " of damage dealt in the last turn is stored as **Potency**."
@@ -83,31 +63,35 @@ public class Assassin extends Unit {
     }
 
     @Override
-    public Command[] getCommands() {
-        return new Command[]{new SlashCommand()};
+    public String[] getTopic(GameMember member) {
+        return new String[]{"Slash: **" + slash.getCurrent() + " / " + Assassin.SLASH_MAX + "**", "Potency: **" + Math.round(potencyTotal) + "**"};
     }
 
-    @Override
-    public String[] getTopic() {
-        return new String[]{"Slash: **" + getSlash().getCurrent() + " / " + Assassin.SLASH_MAX + "**",
-                "Potency: **" + Math.round(getPotencyTotal()) + "**"};
+    public Stacker getSlash() {
+        return slash;
     }
 
-    @Override
-    public Color getColor() {
-        return new Color(0, 69, 255);
+    public Stacker getPotency() {
+        return potency;
     }
 
-    @Override
-    public Stats getStats() {
-        return new Stats()
-                .put(Stats.ENERGY, 125)
-                .put(Stats.MAX_HEALTH, 720)
-                .put(Stats.DAMAGE, 24)
-                .put(Stats.HEALTH_PER_TURN, 11);
+    public boolean hasSlashed() {
+        return slashed;
     }
 
-    public class SlashCommand implements Command {
+    public void setSlashed(boolean slashed) {
+        this.slashed = slashed;
+    }
+
+    public float getPotencyTotal() {
+        return potencyTotal;
+    }
+
+    public void setPotencyTotal(float potencyTotal) {
+        this.potencyTotal = potencyTotal;
+    }
+
+    public static class SlashCommand implements Command {
         @Override
         public void execute(Message message, String alias, String[] args) {
             User author = message.getAuthor().orElse(null);
@@ -117,9 +101,10 @@ public class Assassin extends Unit {
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
+                Assassin unit = (Assassin) member.getUnit();
                 if (member.hasData(Silence.class))
                     Util.sendFailure(channel, "You cannot **Slash** while silenced.");
-                else if (getSlashed())
+                else if (unit.slashed)
                     Util.sendFailure(channel, "You can only use **Slash** once per turn.");
                 else
                     member.act(new SlashAction(game.getRandomTarget(member)));
@@ -132,7 +117,7 @@ public class Assassin extends Unit {
         }
     }
 
-    public class SlashAction implements GameAction {
+    public static class SlashAction implements GameAction {
         private final GameMember target;
 
         public SlashAction(GameMember target) {
@@ -141,17 +126,18 @@ public class Assassin extends Unit {
 
         @Override
         public String act(GameMember actor) {
-            setSlashed(true);
+            Assassin unit = (Assassin) actor.getUnit();
+            unit.setSlashed(true);
 
             DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
             event.damage = (actor.getStats().get(Stats.DAMAGE) * Assassin.SLASH_DAMAGE) + (actor.getStats().get(Stats.ABILITY_POWER) * Assassin.SLASH_AP);
 
-            if (getSlash().stack()) {
-                event.damage += getPotencyTotal();
+            if (unit.getSlash().stack()) {
+                event.damage += unit.getPotencyTotal();
                 event.output.add(target.buff(new Silence(actor, Assassin.SILENCE_TURNS)));
-                getSlash().reset();
-                getPotency().reset();
-                setPotencyTotal(0);
+                unit.getSlash().reset();
+                unit.getPotency().reset();
+                unit.setPotencyTotal(0);
             }
 
             event = event.actor.hit(event);

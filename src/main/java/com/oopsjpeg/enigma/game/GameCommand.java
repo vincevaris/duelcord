@@ -7,8 +7,8 @@ import com.oopsjpeg.enigma.game.action.BuyAction;
 import com.oopsjpeg.enigma.game.action.SellAction;
 import com.oopsjpeg.enigma.game.action.UseAction;
 import com.oopsjpeg.enigma.game.buff.Silence;
-import com.oopsjpeg.enigma.game.obj.Item;
-import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.game.object.Item;
+import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.Message;
@@ -216,8 +216,6 @@ public enum GameCommand implements Command {
                         Util.sendFailure(channel, "You don't have a(n) **" + item.getName() + "**.");
                     else if (!item.canUse(member))
                         Util.sendFailure(channel, "**" + item.getName() + "** can't be used.");
-                    else if (item.getCooldown() != null && !item.getCooldown().count())
-                        Util.sendFailure(channel, "**" + item.getName() + "** is on cooldown for **" + item.getCooldown().getCurrent() + "** more turn(s).");
                     else
                         member.act(new UseAction(item));
                 }

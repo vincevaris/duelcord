@@ -1,42 +1,40 @@
 package com.oopsjpeg.enigma.game.effect;
 
 import com.oopsjpeg.enigma.game.DamageEvent;
+import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.obj.Effect;
+import com.oopsjpeg.enigma.game.object.Effect;
 import com.oopsjpeg.enigma.util.Util;
 
 public class KorasMight extends Effect {
-    public static final String NAME = "Kora's Might";
-    private final float power;
-    private final float ap;
+    private final float apRatio;
 
     public KorasMight(float power) {
         this(power, 0);
     }
 
-    public KorasMight(float power, float ap) {
-        this.power = power;
-        this.ap = ap;
+    public KorasMight(float power, float apRatio) {
+        super("Kora's Might", power, null);
+        this.apRatio = apRatio;
+    }
+
+    private float get(float ap) {
+        return getPower() + (ap * apRatio);
     }
 
     @Override
     public DamageEvent abilityOut(DamageEvent event) {
-        event.bonus += power + (event.actor.getStats().get(Stats.ABILITY_POWER) * ap);
+        event.bonus += get(event.actor.getStats().get(Stats.ABILITY_POWER));
         return event;
     }
 
     @Override
-    public String getName() {
-        return NAME;
-    }
-
-    @Override
     public String getDescription() {
-        return "Abilities do **" + Math.round(power) + "** " + (ap > 0 ? "(+" + Util.percent(ap) + " AP) " : "") + "more damage.";
+        return "Abilities do **" + Math.round(getPower()) + "** " + (apRatio > 0 ? "(+" + Util.percent(apRatio) + " AP) " : "") + "more damage.";
     }
 
     @Override
-    public float getPower() {
-        return power;
+    public String[] getTopic(GameMember member) {
+        return new String[]{"Kora's Might: **" + get(member.getStats().get(Stats.ABILITY_POWER)) + "**"};
     }
 }

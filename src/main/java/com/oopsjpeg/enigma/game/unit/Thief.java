@@ -3,7 +3,7 @@ package com.oopsjpeg.enigma.game.unit;
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Util;
 
@@ -16,45 +16,17 @@ public class Thief extends Unit {
     public static final int GOLD_TARGET = 125;
     public static final int BONUS_ENERGY = 50;
 
-    private int critAmount = 0;
+    private int crits = 0;
     private int goldStolen = 0;
     private boolean goldTargetHit = false;
 
-    public int getCritAmount() {
-        return critAmount;
-    }
-
-    public void setCritAmount(int critAmount) {
-        this.critAmount = Math.max(0, critAmount);
+    public Thief() {
+        super("Thief", null, Color.YELLOW, null);
     }
 
     public int crit() {
-        setCritAmount(critAmount + 1);
-        return critAmount;
-    }
-
-    @Override
-    public DamageEvent critOut(DamageEvent event) {
-        event.critMul += getCritAmount() * CRIT_INCREASE;
-        if (crit() == 1) {
-            int steal = (int) Math.min((event.actor.getStats().get(Stats.DAMAGE) * STEAL_AD) + (event.actor.getStats().get(Stats.ABILITY_POWER)), event.target.getStats().getInt(Stats.GOLD));
-
-            goldStolen += steal;
-            if (goldStolen >= GOLD_TARGET && !goldTargetHit) {
-                goldTargetHit = true;
-                event.output.add(Emote.ENERGY + "**" + event.actor.getUnit() + "** reached the gold target.");
-            }
-
-            event.actor.getStats().add(Stats.GOLD, steal);
-            event.target.getStats().sub(Stats.GOLD, steal);
-            event.output.add(Emote.BUY + "**" + event.actor.getUsername() + "** stole **" + steal + "** gold!");
-        }
-        return event;
-    }
-
-    @Override
-    public String getName() {
-        return "Thief";
+        crits++;
+        return crits;
     }
 
     @Override
@@ -65,13 +37,8 @@ public class Thief extends Unit {
     }
 
     @Override
-    public String[] getTopic() {
-        return new String[]{"Crit: **" + (1 + (critAmount * CRIT_INCREASE)) + "x**", "Gold Stolen: **" + goldStolen + (!goldTargetHit ? " / " + GOLD_TARGET : "") + "**"};
-    }
-
-    @Override
-    public Color getColor() {
-        return Color.YELLOW;
+    public String[] getTopic(GameMember member) {
+        return new String[]{"Crit: **" + (1 + (crits * CRIT_INCREASE)) + "x**", "Gold Stolen: **" + goldStolen + (!goldTargetHit ? " / " + GOLD_TARGET : "") + "**"};
     }
 
     @Override
@@ -87,7 +54,26 @@ public class Thief extends Unit {
 
     @Override
     public String onTurnEnd(GameMember member) {
-        critAmount = 0;
+        crits = 0;
         return null;
+    }
+
+    @Override
+    public DamageEvent critOut(DamageEvent event) {
+        event.critMul += crits * CRIT_INCREASE;
+        if (crit() == 1) {
+            int steal = (int) Math.min((event.actor.getStats().get(Stats.DAMAGE) * STEAL_AD) + (event.actor.getStats().get(Stats.ABILITY_POWER)), event.target.getStats().getInt(Stats.GOLD));
+
+            goldStolen += steal;
+            if (goldStolen >= GOLD_TARGET && !goldTargetHit) {
+                goldTargetHit = true;
+                event.output.add(Emote.ENERGY + "**" + event.actor.getUnit() + "** reached the gold target.");
+            }
+
+            event.actor.getStats().add(Stats.GOLD, steal);
+            event.target.getStats().sub(Stats.GOLD, steal);
+            event.output.add(Emote.BUY + "**" + event.actor.getUsername() + "** stole **" + steal + "** gold!");
+        }
+        return event;
     }
 }

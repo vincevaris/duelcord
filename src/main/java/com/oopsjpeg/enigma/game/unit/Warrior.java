@@ -4,7 +4,7 @@ import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.*;
 import com.oopsjpeg.enigma.game.buff.Silence;
-import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.util.Cooldown;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Stacker;
@@ -25,17 +25,12 @@ public class Warrior extends Unit {
     private final Stacker bonus = new Stacker(BONUS_MAX);
     private final Cooldown bash = new Cooldown(BASH_COOLDOWN);
 
-    public Stacker getBonus() {
-        return bonus;
-    }
-
-    public Cooldown getBash() {
-        return bash;
-    }
-
-    @Override
-    public String getName() {
-        return "Warrior";
+    public Warrior() {
+        super("Warrior", new Command[]{new BashCommand()}, Color.CYAN, new Stats()
+                .put(Stats.ENERGY, 125)
+                .put(Stats.MAX_HEALTH, 795)
+                .put(Stats.DAMAGE, 22)
+                .put(Stats.HEALTH_PER_TURN, 12));
     }
 
     @Override
@@ -47,28 +42,9 @@ public class Warrior extends Unit {
     }
 
     @Override
-    public Command[] getCommands() {
-        return new Command[]{new BashCommand()};
-    }
-
-    @Override
-    public String[] getTopic() {
-        return new String[]{"Bonus: **" + getBonus().getCurrent() + " / 3**",
-                bash.isDone() ? "Bash is ready." : "Bash in **" + bash.getCurrent() + "** turn(s)."};
-    }
-
-    @Override
-    public Color getColor() {
-        return Color.CYAN;
-    }
-
-    @Override
-    public Stats getStats() {
-        return new Stats()
-                .put(Stats.ENERGY, 125)
-                .put(Stats.MAX_HEALTH, 795)
-                .put(Stats.DAMAGE, 22)
-                .put(Stats.HEALTH_PER_TURN, 12);
+    public String[] getTopic(GameMember member) {
+        return new String[]{"Bonus: **" + bonus.getCurrent() + " / 3**",
+                bash.isDone() ? "Bash is ready." : "Bash in **" + bash.getCurrent() + "** turn(s)"};
     }
 
     @Override
@@ -87,7 +63,7 @@ public class Warrior extends Unit {
         return event;
     }
 
-    public class BashCommand implements Command {
+    public static class BashCommand implements Command {
         @Override
         public void execute(Message message, String alias, String[] args) {
             User author = message.getAuthor().orElse(null);
@@ -96,11 +72,12 @@ public class Warrior extends Unit {
             GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
+                Warrior unit = (Warrior) member.getUnit();
                 message.delete().block();
                 if (member.hasData(Silence.class))
                     Util.sendFailure(channel, "You cannot **Bash** while silenced.");
-                else if (!getBash().isDone())
-                    Util.sendFailure(channel, "**Bash** is on cooldown for **" + getBash().getCurrent() + "** more turn(s).");
+                else if (!unit.bash.isDone())
+                    Util.sendFailure(channel, "**Bash** is on cooldown for **" + unit.bash.getCurrent() + "** more turn(s).");
                 else
                     member.act(new BashAction(game.getRandomTarget(member)));
             }
@@ -112,7 +89,7 @@ public class Warrior extends Unit {
         }
     }
 
-    public class BashAction implements GameAction {
+    public static class BashAction implements GameAction {
         private final GameMember target;
 
         public BashAction(GameMember target) {
@@ -121,8 +98,9 @@ public class Warrior extends Unit {
 
         @Override
         public String act(GameMember actor) {
-            getBash().start();
-            getBonus().stack();
+            Warrior unit = (Warrior) actor.getUnit();
+            unit.bash.start();
+            unit.bonus.stack();
 
             DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
 

@@ -6,7 +6,7 @@ import com.oopsjpeg.enigma.game.*;
 import com.oopsjpeg.enigma.game.buff.Bleed;
 import com.oopsjpeg.enigma.game.buff.Silence;
 import com.oopsjpeg.enigma.game.buff.Weaken;
-import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.util.Cooldown;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Stacker;
@@ -30,12 +30,28 @@ public class Duelist extends Unit {
     private final Stacker bonus = new Stacker(BONUS_MAX);
     private final Cooldown crush = new Cooldown(CRUSH_COOLDOWN);
 
-    public Stacker getBonus() {
-        return bonus;
+    public Duelist() {
+        super("Duelist", new Command[]{new CrushCommand()}, Color.MAGENTA, new Stats()
+                .put(Stats.ENERGY, 125)
+                .put(Stats.MAX_HEALTH, 750)
+                .put(Stats.DAMAGE, 21)
+                .put(Stats.HEALTH_PER_TURN, 10));
     }
 
-    public Cooldown getCrush() {
-        return crush;
+    @Override
+    public String getDescription() {
+        return "Every **" + BONUS_MAX + "th** basic attack deals bonus damage equal to **"
+                + Util.percent(BONUS_DAMAGE) + "** of the target's max health and applies **Bleed** by **"
+                + Util.percent(BLEED_DAMAGE) + "** base damage for **" + BLEED_TURNS + "** turn(s).\n\n"
+                + "Using `>crush` weakens the target by **" + Util.percent(CRUSH_POWER) + "** for **" + CRUSH_TURNS + "** turn(s).\n"
+                + "If the target receives any other debuff while weakened, it is extended by **" + CRUSH_EXTEND + "** turn(s).\n"
+                + "Crush can only be used once every **" + CRUSH_COOLDOWN + "** turn(s).";
+    }
+
+    @Override
+    public String[] getTopic(GameMember member) {
+        return new String[]{"Bonus: **" + bonus.getCurrent() + " / " + Duelist.BONUS_MAX + "**",
+                crush.isDone() ? "Crush is ready." : "Crush in **" + crush.getCurrent() + "** turn(s)"};
     }
 
     @Override
@@ -58,47 +74,15 @@ public class Duelist extends Unit {
         return null;
     }
 
-    @Override
-    public String getName() {
-        return "Duelist";
+    public Stacker getBonus() {
+        return bonus;
     }
 
-    @Override
-    public String getDescription() {
-        return "Every **" + BONUS_MAX + "th** basic attack deals bonus damage equal to **"
-                + Util.percent(BONUS_DAMAGE) + "** of the target's max health and applies **Bleed** by **"
-                + Util.percent(BLEED_DAMAGE) + "** base damage for **" + BLEED_TURNS + "** turn(s).\n\n"
-                + "Using `>crush` weakens the target by **" + Util.percent(CRUSH_POWER) + "** for **" + CRUSH_TURNS + "** turn(s).\n"
-                + "If the target receives any other debuff while weakened, it is extended by **" + CRUSH_EXTEND + "** turn(s).\n"
-                + "Crush can only be used once every **" + CRUSH_COOLDOWN + "** turn(s).";
+    public Cooldown getCrush() {
+        return crush;
     }
 
-    @Override
-    public Command[] getCommands() {
-        return new Command[]{new CrushCommand()};
-    }
-
-    @Override
-    public String[] getTopic() {
-        return new String[]{"Bonus: **" + getBonus().getCurrent() + " / " + Duelist.BONUS_MAX + "**",
-                crush.isDone() ? "Crush is ready." : "Crush in **" + crush.getCurrent() + "** turn(s)."};
-    }
-
-    @Override
-    public Color getColor() {
-        return Color.MAGENTA;
-    }
-
-    @Override
-    public Stats getStats() {
-        return new Stats()
-                .put(Stats.ENERGY, 125)
-                .put(Stats.MAX_HEALTH, 750)
-                .put(Stats.DAMAGE, 21)
-                .put(Stats.HEALTH_PER_TURN, 10);
-    }
-
-    public class CrushCommand implements Command {
+    public static class CrushCommand implements Command {
         @Override
         public void execute(Message message, String alias, String[] args) {
             User author = message.getAuthor().orElse(null);
@@ -107,11 +91,12 @@ public class Duelist extends Unit {
             GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
+                Duelist unit = (Duelist) member.getUnit();
                 message.delete().block();
                 if (member.hasData(Silence.class))
                     Util.sendFailure(channel, "You cannot **Crush** while silenced.");
-                else if (!getCrush().isDone())
-                    Util.sendFailure(channel, "**Crush** is on cooldown for **" + getCrush().getCurrent() + "** more turn(s).");
+                else if (!unit.crush.isDone())
+                    Util.sendFailure(channel, "**Crush** is on cooldown for **" + unit.crush.getCurrent() + "** more turn(s).");
                 else
                     member.act(new CrushAction(game.getRandomTarget(member)));
             }
@@ -123,7 +108,7 @@ public class Duelist extends Unit {
         }
     }
 
-    public class CrushAction implements GameAction {
+    public static class CrushAction implements GameAction {
         private final GameMember target;
 
         public CrushAction(GameMember target) {
@@ -132,7 +117,8 @@ public class Duelist extends Unit {
 
         @Override
         public String act(GameMember actor) {
-            getCrush().start();
+            Duelist unit = (Duelist) actor.getUnit();
+            unit.crush.start();
             return Util.joinNonEmpty(Emote.USE + "**" + actor.getUsername() + "** used **Crush**!",
                     target.buff(new Weaken(actor, Duelist.CRUSH_TURNS, Duelist.CRUSH_POWER)));
         }

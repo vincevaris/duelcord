@@ -1,32 +1,12 @@
 package com.oopsjpeg.enigma.game.item;
 
 import com.oopsjpeg.enigma.game.Stats;
-import com.oopsjpeg.enigma.game.obj.Item;
+import com.oopsjpeg.enigma.game.Tree;
+import com.oopsjpeg.enigma.game.object.Item;
 
 public class Hatchet extends Item {
-    public static final String NAME = "Hatchet";
-    public static final Tree TREE = Tree.DAMAGE;
-    public static final int COST = 450;
-    public static final Stats STATS = new Stats()
-            .put(Stats.DAMAGE, 10);
-
-    @Override
-    public String getName() {
-        return NAME;
-    }
-
-    @Override
-    public Tree getTree() {
-        return TREE;
-    }
-
-    @Override
-    public int getCost() {
-        return COST;
-    }
-
-    @Override
-    public Stats getStats() {
-        return STATS;
+    public Hatchet() {
+        super("Hatchet", Tree.DAMAGE, null, 450, null, null, new Stats()
+                .put(Stats.DAMAGE, 10));
     }
 }

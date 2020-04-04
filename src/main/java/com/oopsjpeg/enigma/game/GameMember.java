@@ -2,10 +2,10 @@ package com.oopsjpeg.enigma.game;
 
 import com.oopsjpeg.enigma.game.buff.Weaken;
 import com.oopsjpeg.enigma.game.buff.Wound;
-import com.oopsjpeg.enigma.game.obj.Buff;
-import com.oopsjpeg.enigma.game.obj.Effect;
-import com.oopsjpeg.enigma.game.obj.Item;
-import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.game.object.Buff;
+import com.oopsjpeg.enigma.game.object.Effect;
+import com.oopsjpeg.enigma.game.object.Item;
+import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.game.unit.Berserker;
 import com.oopsjpeg.enigma.game.unit.Duelist;
 import com.oopsjpeg.enigma.storage.Player;
@@ -131,7 +131,7 @@ public class GameMember {
         }
 
         for (Effect effect : getEffects())
-            stats.addAll(effect.getStats(this));
+            stats.addAll(effect.getStats());
 
         critBag.setChance(stats.get(Stats.CRIT_CHANCE));
     }
@@ -152,7 +152,7 @@ public class GameMember {
         if (hasData(Weaken.class)) {
             Weaken weaken = (Weaken) getData(Weaken.class);
             if (weaken.getSource().getUnit() instanceof Duelist)
-                buff.setTurns(buff.getTurns() + 1);
+                buff.setCurrentTurns(buff.getCurrentTurns() + 1);
         }
 
         if (hasData(buff.getClass())) {
@@ -165,8 +165,8 @@ public class GameMember {
 
         data.add(buff);
         return Emote.BLEED + "**" + buff.getSource().getUsername() + "** applied **" + buff.getName() + "** "
-                + (buff.hasPower() ? "by **" + buff.getFormattedPower() + "** " : "")
-                + "for **" + buff.getTurns() + "** turn(s)!";
+                + (buff.hasPower() ? "(" + buff.formatPower() + ") " : "")
+                + "for **" + buff.getTotalTurns() + "** turn(s)!";
     }
 
     public String shield(float amount) {

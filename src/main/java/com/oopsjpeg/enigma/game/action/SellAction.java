@@ -2,7 +2,7 @@ package com.oopsjpeg.enigma.game.action;
 
 import com.oopsjpeg.enigma.game.GameAction;
 import com.oopsjpeg.enigma.game.GameMember;
-import com.oopsjpeg.enigma.game.obj.Item;
+import com.oopsjpeg.enigma.game.object.Item;
 import com.oopsjpeg.enigma.util.Emote;
 
 import static com.oopsjpeg.enigma.game.Stats.GOLD;

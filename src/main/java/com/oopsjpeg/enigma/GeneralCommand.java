@@ -1,8 +1,9 @@
 package com.oopsjpeg.enigma;
 
 import com.oopsjpeg.enigma.game.GameMode;
-import com.oopsjpeg.enigma.game.obj.Item;
-import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.game.Tree;
+import com.oopsjpeg.enigma.game.object.Item;
+import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.Message;
@@ -24,10 +25,10 @@ public enum GeneralCommand implements Command {
         public void execute(Message message, String alias, String[] args) {
             if (args[0].equalsIgnoreCase("items")) {
                 TextChannel channel = Enigma.getInstance().getItemsChannel();
-                channel.createEmbed(buildItemTree(Item.Tree.CONSUMABLES)).block();
-                channel.createEmbed(buildItemTree(Item.Tree.DAMAGE)).block();
-                channel.createEmbed(buildItemTree(Item.Tree.HEALTH)).block();
-                channel.createEmbed(buildItemTree(Item.Tree.ABILITY)).block();
+                channel.createEmbed(buildItemTree(Tree.CONSUMABLES)).block();
+                channel.createEmbed(buildItemTree(Tree.DAMAGE)).block();
+                channel.createEmbed(buildItemTree(Tree.HEALTH)).block();
+                channel.createEmbed(buildItemTree(Tree.ABILITY)).block();
             } else if (args[0].equalsIgnoreCase("units")) {
                 TextChannel channel = Enigma.getInstance().getUnitsChannel();
                 for (Unit unit : Unit.values())
@@ -40,7 +41,7 @@ public enum GeneralCommand implements Command {
             return PermissionSet.of(Permission.MANAGE_GUILD);
         }
 
-        public Consumer<EmbedCreateSpec> buildItemTree(Item.Tree tree) {
+        public Consumer<EmbedCreateSpec> buildItemTree(Tree tree) {
             return e -> {
                 e.setTitle("**" + tree.getName() + "**");
                 e.setColor(tree.getColor());

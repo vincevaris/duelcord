@@ -1,53 +1,18 @@
 package com.oopsjpeg.enigma.game.item;
 
 import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.Tree;
 import com.oopsjpeg.enigma.game.effect.Divinity;
-import com.oopsjpeg.enigma.game.obj.Effect;
-import com.oopsjpeg.enigma.game.obj.Item;
+import com.oopsjpeg.enigma.game.object.Effect;
+import com.oopsjpeg.enigma.game.object.Item;
 
 public class DivinePlatemail extends Item {
-    public static final String NAME = "Divine Platemail";
-    public static final Tree TREE = Tree.HEALTH;
-    public static final String TIP = "less damage from abilities";
-    public static final int COST = 425;
-    public static final Stats STATS = new Stats()
-            .put(Stats.MAX_HEALTH, 60)
-            .put(Stats.RESIST, 0.05f);
-    public static final Effect[] EFFECTS = new Effect[]{new Divinity(0.15f)};
-    public static final Item[] BUILD = new Item[]{new Crystal()};
-
-    @Override
-    public String getName() {
-        return NAME;
-    }
-
-    @Override
-    public Tree getTree() {
-        return TREE;
-    }
-
-    @Override
-    public String getTip() {
-        return TIP;
-    }
-
-    @Override
-    public int getCost() {
-        return COST;
-    }
-
-    @Override
-    public Item[] getBuild() {
-        return BUILD;
-    }
-
-    @Override
-    public Effect[] getEffects() {
-        return EFFECTS;
-    }
-
-    @Override
-    public Stats getStats() {
-        return STATS;
+    public DivinePlatemail() {
+        super("Divine Platemail", Tree.HEALTH, "Less damage from abilities", 425,
+                new Item[]{new Crystal()},
+                new Effect[]{new Divinity(0.15f)},
+                new Stats()
+                        .put(Stats.MAX_HEALTH, 60)
+                        .put(Stats.RESIST, 0.05f));
     }
 }

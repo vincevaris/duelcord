@@ -2,7 +2,7 @@ package com.oopsjpeg.enigma.game.action;
 
 import com.oopsjpeg.enigma.game.GameAction;
 import com.oopsjpeg.enigma.game.GameMember;
-import com.oopsjpeg.enigma.game.obj.Item;
+import com.oopsjpeg.enigma.game.object.Item;
 import com.oopsjpeg.enigma.util.Emote;
 
 public class UseAction implements GameAction {
@@ -14,7 +14,6 @@ public class UseAction implements GameAction {
 
     @Override
     public String act(GameMember actor) {
-        if (item.getCooldown() != null) item.getCooldown().start();
         String output = Emote.USE + "**" + actor.getUsername() + "** used a(n) **" + item.getName() + "**.\n" + item.onUse(actor);
         if (item.removeOnUse()) actor.getData().remove(item);
         actor.updateStats();

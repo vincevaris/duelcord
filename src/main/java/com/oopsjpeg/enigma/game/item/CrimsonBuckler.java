@@ -1,54 +1,19 @@
 package com.oopsjpeg.enigma.game.item;
 
 import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.Tree;
 import com.oopsjpeg.enigma.game.effect.Brawn;
 import com.oopsjpeg.enigma.game.effect.Divinity;
-import com.oopsjpeg.enigma.game.obj.Effect;
-import com.oopsjpeg.enigma.game.obj.Item;
+import com.oopsjpeg.enigma.game.object.Effect;
+import com.oopsjpeg.enigma.game.object.Item;
 
 public class CrimsonBuckler extends Item {
-    public static final String NAME = "Crimson Buckler";
-    public static final Tree TREE = Tree.HEALTH;
-    public static final String TIP = "damage based on max health";
-    public static final int COST = 1050;
-    public static final Stats STATS = new Stats()
-            .put(Stats.MAX_HEALTH, 100)
-            .put(Stats.RESIST, 0.12f);
-    public static final Effect[] EFFECTS = new Effect[]{new Divinity(0.4f), new Brawn(0.1f)};
-    public static final Item[] BUILD = new Item[]{new DivinePlatemail(), new Knife()};
-
-    @Override
-    public String getName() {
-        return NAME;
-    }
-
-    @Override
-    public Tree getTree() {
-        return TREE;
-    }
-
-    @Override
-    public String getTip() {
-        return TIP;
-    }
-
-    @Override
-    public int getCost() {
-        return COST;
-    }
-
-    @Override
-    public Item[] getBuild() {
-        return BUILD;
-    }
-
-    @Override
-    public Effect[] getEffects() {
-        return EFFECTS;
-    }
-
-    @Override
-    public Stats getStats() {
-        return STATS;
+    public CrimsonBuckler() {
+        super("Crimson Buckler", Tree.HEALTH, "Damage from bonus health", 1050,
+                new Item[]{new DivinePlatemail(), new Knife()},
+                new Effect[]{new Divinity(0.4f), new Brawn(0.1f)},
+                new Stats()
+                        .put(Stats.MAX_HEALTH, 100)
+                        .put(Stats.RESIST, 0.12f));
     }
 }

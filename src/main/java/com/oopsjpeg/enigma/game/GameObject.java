@@ -1,7 +1,21 @@
 package com.oopsjpeg.enigma.game;
 
 public abstract class GameObject {
-    public String[] getTopic() {
+    private final String name;
+
+    public GameObject(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return null;
+    }
+
+    public String[] getTopic(GameMember member) {
         return null;
     }
 

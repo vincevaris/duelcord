@@ -1,13 +1,8 @@
-package com.oopsjpeg.enigma.game.obj;
+package com.oopsjpeg.enigma.game.object;
 
-import com.oopsjpeg.enigma.game.Build;
-import com.oopsjpeg.enigma.game.GameMember;
-import com.oopsjpeg.enigma.game.GameObject;
-import com.oopsjpeg.enigma.game.Stats;
+import com.oopsjpeg.enigma.game.*;
 import com.oopsjpeg.enigma.game.item.*;
-import com.oopsjpeg.enigma.util.Cooldown;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -15,6 +10,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class Item extends GameObject {
+    private final Tree tree;
+    private final String tip;
+    private final int cost;
+    private final Item[] build;
+    private final Effect[] effects;
+    private final Stats stats;
+
     private static final Item[] values = {
             new BloodlustBlade(),
             new BoneSpear(),
@@ -39,6 +41,16 @@ public abstract class Item extends GameObject {
             new WolfsTooth()
     };
 
+    public Item(String name, Tree tree, String tip, int cost, Item[] build, Effect[] effects, Stats stats) {
+        super(name);
+        this.tree = tree;
+        this.tip = tip;
+        this.cost = cost;
+        this.build = build;
+        this.effects = effects;
+        this.stats = stats;
+    }
+
     public static Item[] values() {
         return values;
     }
@@ -52,27 +64,9 @@ public abstract class Item extends GameObject {
 
     public static List<Item> fromTree(Tree tree) {
         return Arrays.stream(values())
-                .filter(i -> tree.equals(i.getTree()))
+                .filter(i -> tree.equals(i.tree))
                 .collect(Collectors.toList());
     }
-
-    public abstract String getName();
-
-    public abstract Tree getTree();
-
-    public String getTip() {
-        return null;
-    }
-
-    public boolean hasTip() {
-        return getTip() != null;
-    }
-
-    public String getDescription() {
-        return null;
-    }
-
-    public abstract int getCost();
 
     public Build build(Collection<Item> items) {
         int reduction = 0;
@@ -82,9 +76,9 @@ public abstract class Item extends GameObject {
         for (Item item : getBuild()) {
             if (postData.contains(item)) {
                 // Reduce directly
-                reduction += item.getCost();
+                reduction += item.cost;
                 postData.remove(item);
-            } else if (item.hasBuild()) {
+            } else if (item.getBuild() != null) {
                 // Find a reduction in the build
                 Build build = item.build(postData);
                 reduction += build.getReduction();
@@ -95,23 +89,7 @@ public abstract class Item extends GameObject {
         return new Build(this, reduction, postData);
     }
 
-    public Item[] getBuild() {
-        return new Item[0];
-    }
-
-    public boolean hasBuild() {
-        return getBuild() != null && getBuild().length > 0;
-    }
-
-    public Effect[] getEffects() {
-        return new Effect[0];
-    }
-
-    public Stats getStats() {
-        return new Stats();
-    }
-
-    public Cooldown getCooldown() {
+    public String onUse(GameMember member) {
         return null;
     }
 
@@ -123,35 +101,40 @@ public abstract class Item extends GameObject {
         return false;
     }
 
-    public String onUse(GameMember member) {
-        return null;
+    public Tree getTree() {
+        return tree;
+    }
+
+    public String getTip() {
+        return tip != null ? tip : "";
+    }
+
+    public boolean hasTip() {
+        return tip != null;
+    }
+
+    public int getCost() {
+        return cost;
+    }
+
+    public Item[] getBuild() {
+        return build != null ? build : new Item[0];
+    }
+
+    public boolean hasBuild() {
+        return build != null;
+    }
+
+    public Effect[] getEffects() {
+        return effects != null ? effects : new Effect[0];
+    }
+
+    public Stats getStats() {
+        return stats != null ? stats : new Stats();
     }
 
     @Override
     public String toString() {
         return getName();
-    }
-
-    public enum Tree {
-        CONSUMABLES("Consumables", new Color(168, 232, 255)),
-        DAMAGE("Damage", new Color(255, 168, 168)),
-        HEALTH("Health", new Color(201, 255, 168)),
-        ABILITY("Ability", new Color(239, 168, 255));
-
-        private final String name;
-        private final Color color;
-
-        Tree(String name, Color color) {
-            this.name = name;
-            this.color = color;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public Color getColor() {
-            return color;
-        }
     }
 }

@@ -2,18 +2,12 @@ package com.oopsjpeg.enigma.game.buff;
 
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.GameMember;
-import com.oopsjpeg.enigma.game.obj.Buff;
+import com.oopsjpeg.enigma.game.object.Buff;
 import com.oopsjpeg.enigma.util.Emote;
-import com.oopsjpeg.enigma.util.Util;
 
 public class Bleed extends Buff {
-    public Bleed(GameMember source, int turns, float power) {
-        super(source, true, turns, power);
-    }
-
-    @Override
-    public String getName() {
-        return "Bleed";
+    public Bleed(GameMember source, int totalTurns, float power) {
+        super("Bleed", true, source, totalTurns, power);
     }
 
     @Override
@@ -21,10 +15,5 @@ public class Bleed extends Buff {
         DamageEvent event = new DamageEvent(member.getGame(), getSource(), member);
         event.damage = getPower();
         return getSource().damage(event, Emote.BLEED, "Bleed");
-    }
-
-    @Override
-    public String getFormattedPower() {
-        return Util.percent(getPower());
     }
 }

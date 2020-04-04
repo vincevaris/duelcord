@@ -1,17 +1,12 @@
 package com.oopsjpeg.enigma.game.buff;
 
 import com.oopsjpeg.enigma.game.GameMember;
-import com.oopsjpeg.enigma.game.obj.Buff;
+import com.oopsjpeg.enigma.game.object.Buff;
 import com.oopsjpeg.enigma.util.Emote;
 
 public class Silence extends Buff {
-    public Silence(GameMember source, int turns) {
-        super(source, true, turns);
-    }
-
-    @Override
-    public String getName() {
-        return "Silence";
+    public Silence(GameMember source, int totalTurns) {
+        super("Silence", true, source, totalTurns, 0);
     }
 
     @Override

@@ -4,7 +4,7 @@ import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.*;
 import com.oopsjpeg.enigma.game.buff.Silence;
-import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.util.Cooldown;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Stacker;
@@ -32,8 +32,27 @@ public class Blademaster extends Unit {
     private final Cooldown reflect = new Cooldown(REFLECT_COOLDOWN);
     private int reflectState = 0;
 
-    public String notif(GameMember member) {
-        return Emote.INFO + "**" + member.getUsername() + "'s Gemblade** is at max capacity.";
+    public Blademaster() {
+        super("Blademaster", new Command[]{new ReflectCommand()}, new Color(255, 110, 140), new Stats()
+                .put(Stats.MAX_HEALTH, 725)
+                .put(Stats.DAMAGE, 20)
+                .put(Stats.ENERGY, 125)
+                .put(Stats.HEALTH_PER_TURN, 10));
+    }
+
+    @Override
+    public String getDescription() {
+        return "Basic attacks stack **Gemblade** up to **" + GEMBLADE_MAX + "** times, dealing **" + Util.percent(GEMBLADE_DAMAGE) + "** (+1% per " + GEMBLADE_AD_SCALE + " bonus AD) more damage each stack."
+                + " At max stacks, **Gemblade** grants **" + GEMBLADE_ENERGY + "** bonus energy."
+                + "\n\n`>reflect` completely reflects the next attack, deals **" + Util.percent(REFLECT_DAMAGE) + "** (+" + Util.percent(REFLECT_SCALE) + " per **Gemblade** stack) bonus base damage, and resets **Gemblade**."
+                + "\n**Reflect** expires if it is not proc’d before the next turn."
+                + "\n**Reflect** can only be used once every **" + REFLECT_COOLDOWN + "** turns.";
+    }
+
+    @Override
+    public String[] getTopic(GameMember member) {
+        return new String[]{"Gemblade: **" + gemblade.getCurrent() + " / " + GEMBLADE_MAX + "**",
+                reflect.isDone() ? "Reflect is ready." : "Reflect in **" + reflect.getCurrent() + "** turn(s)"};
     }
 
     @Override
@@ -43,7 +62,7 @@ public class Blademaster extends Unit {
         event.bonus += bonus;
 
         if (gemblade.stack() && gemblade.isDone() && gemblade.tryNotify())
-            event.output.add(notif(event.actor));
+            event.output.add(Emote.INFO + "**" + event.actor.getUsername() + "'s Gemblade** is at max capacity.");
 
         return event;
     }
@@ -90,46 +109,23 @@ public class Blademaster extends Unit {
         return null;
     }
 
-    @Override
-    public String getName() {
-        return "Blademaster";
+    public Stacker getGemblade() {
+        return gemblade;
     }
 
-    @Override
-    public String getDescription() {
-        return "Basic attacks stack **Gemblade** up to **" + GEMBLADE_MAX + "** times, dealing **" + Util.percent(GEMBLADE_DAMAGE) + "** (+1% per " + GEMBLADE_AD_SCALE + " bonus AD) more damage each stack."
-                + " At max stacks, **Gemblade** grants **" + GEMBLADE_ENERGY + "** bonus energy."
-                + "\n\n`>reflect` completely reflects the next attack, deals **" + Util.percent(REFLECT_DAMAGE) + "** (+" + Util.percent(REFLECT_SCALE) + " per **Gemblade** stack) bonus base damage, and resets **Gemblade**."
-                + "\n**Reflect** expires if it is not proc’d before the next turn."
-                + "\n**Reflect** can only be used once every **" + REFLECT_COOLDOWN + "** turns.";
+    public Cooldown getReflect() {
+        return reflect;
     }
 
-    @Override
-    public Command[] getCommands() {
-        return new Command[]{new ReflectCommand()};
+    public int getReflectState() {
+        return reflectState;
     }
 
-    @Override
-    public String[] getTopic() {
-        return new String[]{"Gemblade: **" + gemblade.getCurrent() + " / " + GEMBLADE_MAX + "**",
-                reflect.isDone() ? "Reflect is ready." : "Reflect in **" + reflect.getCurrent() + "** turn(s)."};
+    public void setReflectState(int reflectState) {
+        this.reflectState = reflectState;
     }
 
-    @Override
-    public Color getColor() {
-        return new Color(255, 110, 140);
-    }
-
-    @Override
-    public Stats getStats() {
-        return new Stats()
-                .put(Stats.MAX_HEALTH, 725)
-                .put(Stats.DAMAGE, 20)
-                .put(Stats.ENERGY, 125)
-                .put(Stats.HEALTH_PER_TURN, 10);
-    }
-
-    public class ReflectCommand implements Command {
+    public static class ReflectCommand implements Command {
         @Override
         public void execute(Message message, String alias, String[] args) {
             User author = message.getAuthor().orElse(null);
@@ -139,12 +135,13 @@ public class Blademaster extends Unit {
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
+                Blademaster unit = (Blademaster) member.getUnit();
                 if (member.hasData(Silence.class))
                     Util.sendFailure(channel, "You cannot **Reflect** while silenced.");
-                else if (reflectState == REFLECTING)
+                else if (unit.reflectState == REFLECTING)
                     Util.sendFailure(channel, "You are already reflecting.");
-                else if (!reflect.isDone())
-                    Util.sendFailure(channel, "**Reflect** is on cooldown for **" + reflect.getCurrent() + "** more turn(s).");
+                else if (!unit.reflect.isDone())
+                    Util.sendFailure(channel, "**Reflect** is on cooldown for **" + unit.reflect.getCurrent() + "** more turn(s).");
                 else
                     member.act(new ReflectAction());
             }
@@ -156,11 +153,12 @@ public class Blademaster extends Unit {
         }
     }
 
-    public class ReflectAction implements GameAction {
+    public static class ReflectAction implements GameAction {
         @Override
         public String act(GameMember actor) {
-            reflect.start();
-            reflectState = REFLECTING;
+            Blademaster unit = (Blademaster) actor.getUnit();
+            unit.reflect.start();
+            unit.reflectState = REFLECTING;
 
             return Util.joinNonEmpty(Emote.USE + "**" + actor.getUsername() + "** used **Reflect**!", actor.defend());
         }

@@ -3,7 +3,7 @@ package com.oopsjpeg.enigma.storage;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.Game;
 import com.oopsjpeg.enigma.game.GameMode;
-import com.oopsjpeg.enigma.game.obj.Unit;
+import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Member;

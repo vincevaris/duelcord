@@ -1,36 +1,22 @@
 package com.oopsjpeg.enigma.game.item;
 
 import com.oopsjpeg.enigma.game.GameMember;
+import com.oopsjpeg.enigma.game.Tree;
 import com.oopsjpeg.enigma.game.buff.PotionHealing;
-import com.oopsjpeg.enigma.game.obj.Item;
+import com.oopsjpeg.enigma.game.object.Item;
 
 public class Potion extends Item {
     public static final float HEAL = 120;
     public static final int TURNS = 2;
 
-    public static final String NAME = "Potion";
-    public static final Tree TREE = Tree.CONSUMABLES;
-    public static final String TIP = "heals for **" + Math.round(HEAL) + "**.";
-    public static final int COST = 50;
-
-    @Override
-    public String getName() {
-        return NAME;
+    public Potion() {
+        super("Potion", Tree.CONSUMABLES, "Heals for **" + Math.round(HEAL) + "**", 50, null, null, null);
     }
 
     @Override
-    public Tree getTree() {
-        return TREE;
-    }
-
-    @Override
-    public String getTip() {
-        return TIP;
-    }
-
-    @Override
-    public int getCost() {
-        return COST;
+    public String onUse(GameMember member) {
+        member.getData().add(new PotionHealing(member, TURNS, HEAL));
+        return member.heal(HEAL / TURNS, "Potion");
     }
 
     @Override
@@ -41,11 +27,5 @@ public class Potion extends Item {
     @Override
     public boolean removeOnUse() {
         return true;
-    }
-
-    @Override
-    public String onUse(GameMember member) {
-        member.getData().add(new PotionHealing(member, TURNS));
-        return member.heal(HEAL / TURNS, "Potion");
     }
 }

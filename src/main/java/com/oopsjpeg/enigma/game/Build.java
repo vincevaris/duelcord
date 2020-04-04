@@ -1,6 +1,6 @@
 package com.oopsjpeg.enigma.game;
 
-import com.oopsjpeg.enigma.game.obj.Item;
+import com.oopsjpeg.enigma.game.object.Item;
 
 import java.util.ArrayList;
 

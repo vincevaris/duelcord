@@ -1,4 +1,4 @@
-package com.oopsjpeg.enigma.game.obj;
+package com.oopsjpeg.enigma.game.object;
 
 import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.game.GameObject;
@@ -10,6 +10,17 @@ import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 
 public abstract class Unit extends GameObject {
+    private final Command[] commands;
+    private final Color color;
+    private final Stats stats;
+
+    public Unit(String name, Command[] commands, Color color, Stats stats) {
+        super(name);
+        this.commands = commands;
+        this.color = color;
+        this.stats = stats;
+    }
+
     private static final Unit[] values = {
             new Berserker(), new Thief(), new Warrior(),
             new Duelist(), new Gunslinger(), new Assassin(),
@@ -36,17 +47,17 @@ public abstract class Unit extends GameObject {
         return null;
     }
 
-    public abstract String getName();
-
-    public abstract String getDescription();
-
     public Command[] getCommands() {
-        return new Command[0];
+        return commands != null ? commands : new Command[0];
     }
 
-    public abstract Color getColor();
+    public Color getColor() {
+        return color;
+    }
 
-    public abstract Stats getStats();
+    public Stats getStats() {
+        return stats;
+    }
 
     @Override
     public String toString() {
