@@ -115,10 +115,11 @@ public class Util {
     }
 
     public static String damageText(DamageEvent event, String attacker, String victim, String emote, String source) {
+        Stats stats = event.target.getStats();
         return emote + "**" + attacker + "** damaged **" + victim + "** by **" + Math.round(event.damage)
                 + "**" + (event.bonus > 0 ? " (+" + Math.round(event.bonus) + ")" : "") + "!" + (event.crit ? " **CRIT**!" : "")
-                + (event.miss ? " **MISS**!" : "") + " [**" + event.target.getStats().getInt(HEALTH)
-                + " / " + event.target.getStats().getInt(MAX_HEALTH) + "**]"
+                + (event.miss ? " **MISS**!" : "") + " [**" + (stats.getInt(SHIELD) > 0 ? stats.getInt(SHIELD) : stats.getInt(HEALTH)
+                + " / " + stats.getInt(MAX_HEALTH)) + "**]"
                 + (!source.isEmpty() ? " (" + source + ")" : "");
     }
 
