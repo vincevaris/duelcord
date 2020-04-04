@@ -11,6 +11,6 @@ public class Shatterwand extends Item {
         super("Shatterwand", Tree.ABILITY, "More ability damage", 1275,
                 new Item[]{new KorasScepter(), new Ring()},
                 new Effect[]{new KorasMight(10, 0.2f)},
-                new Stats().put(Stats.ABILITY_POWER, 50));
+                new Stats().put(Stats.ABILITY_POWER, 60));
     }
 }

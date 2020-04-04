@@ -13,7 +13,7 @@ public class DawnHammer extends Item {
                 new Item[]{new SteelMallet(), new Gemheart()},
                 new Effect[]{new StatsEffect(new Stats().put(Stats.ENERGY_PER_TURN, 25)), new DawnShield(100)},
                 new Stats()
-                        .put(Stats.ABILITY_POWER, 25)
+                        .put(Stats.ABILITY_POWER, 30)
                         .put(Stats.MAX_HEALTH, 140));
     }
 }
