@@ -119,7 +119,7 @@ public class Duelist extends Unit {
         public String act(GameMember actor) {
             Duelist unit = (Duelist) actor.getUnit();
             unit.crush.start();
-            return Util.joinNonEmpty(Emote.USE + "**" + actor.getUsername() + "** used **Crush**!",
+            return Util.joinNonEmpty("\n", Emote.USE + "**" + actor.getUsername() + "** used **Crush**!",
                     target.buff(new Weaken(actor, Duelist.CRUSH_TURNS, Duelist.CRUSH_POWER)));
         }
 

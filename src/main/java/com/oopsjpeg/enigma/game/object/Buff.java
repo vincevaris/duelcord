@@ -6,9 +6,9 @@ import com.oopsjpeg.enigma.game.GameObject;
 public abstract class Buff extends GameObject {
     private final boolean debuff;
     private final GameMember source;
-    private final int totalTurns;
     private final float power;
 
+    private int totalTurns;
     private int currentTurns;
 
     public Buff(String name, boolean debuff, GameMember source, int totalTurns, float power) {
@@ -34,10 +34,6 @@ public abstract class Buff extends GameObject {
         return source;
     }
 
-    public int getTotalTurns() {
-        return totalTurns;
-    }
-
     public float getPower() {
         return power;
     }
@@ -48,6 +44,14 @@ public abstract class Buff extends GameObject {
 
     public String formatPower() {
         return String.valueOf((int) Math.ceil(getPower()));
+    }
+
+    public int getTotalTurns() {
+        return totalTurns;
+    }
+
+    public void setTotalTurns(int totalTurns) {
+        this.totalTurns = totalTurns;
     }
 
     public int getCurrentTurns() {

@@ -151,8 +151,10 @@ public class GameMember {
     public String buff(Buff buff) {
         if (hasData(Weaken.class)) {
             Weaken weaken = (Weaken) getData(Weaken.class);
-            if (weaken.getSource().getUnit() instanceof Duelist)
+            if (weaken.getSource().unit instanceof Duelist) {
+                buff.setTotalTurns(buff.getTotalTurns() + 1);
                 buff.setCurrentTurns(buff.getCurrentTurns() + 1);
+            }
         }
 
         if (hasData(buff.getClass())) {
