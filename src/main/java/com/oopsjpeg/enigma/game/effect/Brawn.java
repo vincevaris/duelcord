@@ -23,6 +23,6 @@ public class Brawn extends Effect {
 
     @Override
     public String[] getTopic(GameMember member) {
-        return new String[]{"Brawn: **" + (member.getBonusHealth() * getPower()) + "**"};
+        return new String[]{"Brawn: **" + Math.round(member.getBonusHealth() * getPower()) + "**"};
     }
 }
