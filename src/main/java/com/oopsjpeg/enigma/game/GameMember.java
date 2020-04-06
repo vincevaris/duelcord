@@ -288,6 +288,8 @@ public class GameMember {
 
             if (event.target.stats.get(Stats.SHIELD) > 0)
                 event.output.add(0, Util.damageText(event, event.actor.getUsername(), event.target.getUsername() + "'s Shield", emote, source));
+            else
+                event.output.add(Emote.SHIELD + "**" + event.actor.getUsername() + "** destroyed **" + event.target.getUsername() + "'s Shield**!");
 
             event.bonus -= shdBonus;
             event.damage -= shdDamage;
