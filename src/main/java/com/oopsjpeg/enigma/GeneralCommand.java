@@ -94,11 +94,12 @@ public enum GeneralCommand implements Command {
                 e.setAuthor(author.getUsername() + " (" + Math.round(player.getRankedPoints()) + " RP)", null, author.getAvatarUrl());
                 e.setDescription("**" + player.getWins() + "**W **" + player.getLosses() + "**L (**" + Util.percent(player.getWinRate()) + "** WR)"
                         + "\nGems: **" + player.getGems() + "**");
-                e.addField("Top Units", player.getUnitDatas().stream()
-                        .sorted(Comparator.comparingInt(Player.UnitData::getPoints).reversed())
-                        .limit(3)
-                        .map(data -> data.getUnitName() + " (" + data.getPoints() + " pts)")
-                        .collect(Collectors.joining("\n")), true);
+                if (!player.getUnitDatas().isEmpty())
+                    e.addField("Top Units", player.getUnitDatas().stream()
+                            .sorted(Comparator.comparingInt(Player.UnitData::getPoints).reversed())
+                            .limit(3)
+                            .map(data -> data.getUnitName() + " (" + data.getPoints() + " pts)")
+                            .collect(Collectors.joining("\n")), true);
             }).block();
         }
     },
