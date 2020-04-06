@@ -28,7 +28,7 @@ public class Warrior extends Unit {
     public Warrior() {
         super("Warrior", new Command[]{new BashCommand()}, Color.CYAN, new Stats()
                 .put(Stats.ENERGY, 125)
-                .put(Stats.MAX_HEALTH, 795)
+                .put(Stats.MAX_HEALTH, 775)
                 .put(Stats.DAMAGE, 22)
                 .put(Stats.HEALTH_PER_TURN, 12));
     }

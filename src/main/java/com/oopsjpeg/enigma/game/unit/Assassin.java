@@ -16,10 +16,10 @@ import java.awt.*;
 
 public class Assassin extends Unit {
     public static final float POTENCY_STORE = 0.25f;
-    public static final int POTENCY_TURNS = 5;
+    public static final int POTENCY_TURNS = 4;
     public static final float SLASH_DAMAGE = 0.25f;
     public static final float SLASH_AP = 0.5f;
-    public static final int SLASH_MAX = 3;
+    public static final int SLASH_MAX = 4;
     public static final int SILENCE_TURNS = 1;
 
     private final Stacker slash = new Stacker(SLASH_MAX);
@@ -31,8 +31,8 @@ public class Assassin extends Unit {
         super("Assassin", new Command[]{new SlashCommand()}, new Color(0, 69, 255), new Stats()
                 .put(Stats.ENERGY, 125)
                 .put(Stats.MAX_HEALTH, 720)
-                .put(Stats.DAMAGE, 24)
-                .put(Stats.HEALTH_PER_TURN, 11));
+                .put(Stats.DAMAGE, 22)
+                .put(Stats.HEALTH_PER_TURN, 9));
     }
 
     @Override
@@ -57,7 +57,7 @@ public class Assassin extends Unit {
                 + " of damage dealt in the last turn is stored as **Potency**."
                 + " This can only occur **" + POTENCY_TURNS + "** times until **Potency** is reset."
                 + "\n\nUsing `>slash` deals **" + Util.percent(SLASH_DAMAGE) + "** AD (+" + Util.percent(SLASH_AP) + " AP) damage."
-                + " Every **" + SLASH_MAX + "rd** slash applies **Silence** for **" + SILENCE_TURNS + "** turn(s) and deals"
+                + " Every **" + SLASH_MAX + "th** slash applies **Silence** for **" + SILENCE_TURNS + "** turn(s) and deals"
                 + " bonus damage equal to the total **Potency**, resetting it as well."
                 + "\n\nSlash does not count towards total **Potency**.";
     }

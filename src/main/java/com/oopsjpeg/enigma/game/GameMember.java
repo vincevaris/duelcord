@@ -108,15 +108,15 @@ public class GameMember {
     public void updateStats() {
         data.removeAll(getEffects());
         stats.put(MAX_HEALTH, unit.getStats().get(MAX_HEALTH));
-        stats.put(Stats.DAMAGE, unit.getStats().get(Stats.DAMAGE));
-        stats.put(Stats.ABILITY_POWER, unit.getStats().get(Stats.ABILITY_POWER));
-        stats.put(Stats.CRIT_CHANCE, unit.getStats().get(Stats.CRIT_CHANCE));
-        stats.put(Stats.CRIT_DAMAGE, unit.getStats().get(Stats.CRIT_DAMAGE));
-        stats.put(Stats.LIFE_STEAL, unit.getStats().get(Stats.LIFE_STEAL));
-        stats.put(Stats.RESIST, unit.getStats().get(Stats.RESIST));
-        stats.put(Stats.HEALTH_PER_TURN, unit.getStats().get(Stats.HEALTH_PER_TURN));
-        stats.put(Stats.GOLD_PER_TURN, unit.getStats().get(Stats.GOLD_PER_TURN));
-        stats.put(Stats.ENERGY_PER_TURN, unit.getStats().get(Stats.ENERGY_PER_TURN));
+        stats.put(DAMAGE, unit.getStats().get(DAMAGE));
+        stats.put(ABILITY_POWER, unit.getStats().get(ABILITY_POWER));
+        stats.put(CRIT_CHANCE, unit.getStats().get(CRIT_CHANCE));
+        stats.put(CRIT_DAMAGE, unit.getStats().get(CRIT_DAMAGE));
+        stats.put(LIFE_STEAL, unit.getStats().get(LIFE_STEAL));
+        stats.put(RESIST, unit.getStats().get(RESIST));
+        stats.put(HEALTH_PER_TURN, unit.getStats().get(HEALTH_PER_TURN));
+        stats.put(GOLD_PER_TURN, unit.getStats().get(GOLD_PER_TURN));
+        stats.put(ENERGY_PER_TURN, unit.getStats().get(ENERGY_PER_TURN));
 
         for (Item item : getItems()) {
             stats.addAll(item.getStats());
@@ -133,7 +133,7 @@ public class GameMember {
         for (Effect effect : getEffects())
             stats.addAll(effect.getStats());
 
-        critBag.setChance(stats.get(Stats.CRIT_CHANCE));
+        critBag.setChance(stats.get(CRIT_CHANCE));
     }
 
     public void act(GameAction action) {
@@ -173,9 +173,9 @@ public class GameMember {
 
     public String shield(float amount) {
         amount *= 1 - (hasData(Wound.class) ? ((Wound) getData(Wound.class)).getPower() : 0);
-        stats.add(Stats.SHIELD, amount);
+        stats.add(SHIELD, amount);
         return Emote.HEAL + "**" + getUsername() + "** shielded by **" + Math.round(amount)
-                + "**! [**" + stats.getInt(Stats.SHIELD) + "**]";
+                + "**! [**" + stats.getInt(SHIELD) + "**]";
     }
 
     public String heal(float amount) {
@@ -198,9 +198,8 @@ public class GameMember {
     public String defend() {
         if (!defensive) {
             defensive = true;
-            List<String> output = new ArrayList<>();
-            output.add(Emote.SHIELD + "**" + getUsername() + "** is defending (**20%** resist, **" + (stats.getInt(Stats.HEALTH_PER_TURN) * 2) + "** regen)!");
-            output.addAll(getData().stream().map(o -> o.onDefend(this)).collect(Collectors.toList()));
+            List<String> output = getData().stream().map(o -> o.onDefend(this)).collect(Collectors.toList());
+            output.add(Emote.SHIELD + "**" + getUsername() + "** is defending (**" + Util.percent(getResist()) + "** resist, **" + (stats.getInt(HEALTH_PER_TURN) * 2) + "** regen)!");
             return Util.joinNonEmpty("\n", output);
         }
         return null;
@@ -211,8 +210,8 @@ public class GameMember {
         for (GameObject o : event.target.data) event = o.hitIn(event);
 
         // Life steal healing
-        if (stats.get(Stats.LIFE_STEAL) > 0)
-            event.heal += stats.get(Stats.LIFE_STEAL) * event.damage;
+        if (stats.get(LIFE_STEAL) > 0)
+            event.heal += stats.get(LIFE_STEAL) * event.damage;
 
         return event;
     }
@@ -229,7 +228,7 @@ public class GameMember {
 
         // Critical strike bonus damage
         if (event.crit) {
-            event.critMul += .5f + stats.get(Stats.CRIT_DAMAGE);
+            event.critMul += .5f + stats.get(CRIT_DAMAGE);
             event.damage += event.damage * event.critMul;
         }
 
@@ -244,7 +243,7 @@ public class GameMember {
 
     public DamageEvent basicAttack(GameMember target) {
         DamageEvent event = new DamageEvent(game, this, target);
-        event.damage = stats.get(Stats.DAMAGE);
+        event.damage = stats.get(DAMAGE);
         event.actor.stats.add(GOLD, game.getMode().handleGold(Math.round(Util.nextInt(20, 30) + (game.getTurnCount() * 0.5f))));
 
         for (GameObject o : event.actor.data) event = o.basicAttackOut(event);
@@ -269,24 +268,23 @@ public class GameMember {
         if (event.heal > 0) event.output.add(heal(event.heal));
         if (event.shield > 0) event.output.add(shield(event.shield));
 
-        float defend = event.target.defensive ? 0.2f : 0;
-        event.damage *= 1 - event.target.getStats().get(Stats.RESIST) - defend;
-        event.bonus *= 1 - event.target.getStats().get(Stats.RESIST) - defend;
+        event.damage *= 1 - getResist();
+        event.bonus *= 1 - getResist();
 
         // Shield damaging
-        if (event.target.stats.get(Stats.SHIELD) > 0) {
+        if (event.target.stats.get(SHIELD) > 0) {
             // Remove bonus damage first
-            float shdBonus = Util.limit(event.bonus, 0, event.target.stats.get(Stats.SHIELD));
+            float shdBonus = Util.limit(event.bonus, 0, event.target.stats.get(SHIELD));
             float shdDamage = 0;
-            event.target.stats.sub(Stats.SHIELD, shdBonus);
+            event.target.stats.sub(SHIELD, shdBonus);
 
             // Remove main damage after
-            if (event.target.stats.get(Stats.SHIELD) > 0) {
-                shdDamage = Util.limit(event.damage, 0, event.target.stats.get(Stats.SHIELD));
-                event.target.stats.sub(Stats.SHIELD, shdDamage);
+            if (event.target.stats.get(SHIELD) > 0) {
+                shdDamage = Util.limit(event.damage, 0, event.target.stats.get(SHIELD));
+                event.target.stats.sub(SHIELD, shdDamage);
             }
 
-            if (event.target.stats.get(Stats.SHIELD) > 0)
+            if (event.target.stats.get(SHIELD) > 0)
                 event.output.add(0, Util.damageText(event, event.actor.getUsername(), event.target.getUsername() + "'s Shield", emote, source));
             else
                 event.output.add(Emote.SHIELD + "**" + event.actor.getUsername() + "** destroyed **" + event.target.getUsername() + "'s Shield**!");
@@ -295,7 +293,7 @@ public class GameMember {
             event.damage -= shdDamage;
         }
 
-        if (event.target.stats.get(Stats.SHIELD) <= 0 && event.total() > 0) {
+        if (event.target.stats.get(SHIELD) <= 0 && event.total() > 0) {
             event.target.stats.sub(HEALTH, event.total());
             event.output.add(0, Util.damageText(event, event.actor.getUsername(), event.target.getUsername(), emote, source));
             if (event.target.stats.get(HEALTH) <= 0)
@@ -323,6 +321,10 @@ public class GameMember {
             game.nextTurn();
 
         return Util.joinNonEmpty("\n", output);
+    }
+
+    public float getResist() {
+        return stats.get(RESIST) + (defensive ? 0.2f : 0);
     }
 
     public float getBonusDamage() {

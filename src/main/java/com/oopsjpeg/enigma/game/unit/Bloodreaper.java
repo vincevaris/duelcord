@@ -39,7 +39,7 @@ public class Bloodreaper extends Unit {
     public Bloodreaper() {
         super("Bloodreaper", new Command[]{new ReapCommand(), new EndureCommand()}, new Color(120, 0, 0), new Stats()
                 .put(Stats.MAX_HEALTH, 720)
-                .put(Stats.HEALTH_PER_TURN, 10)
+                .put(Stats.HEALTH_PER_TURN, 7)
                 .put(Stats.DAMAGE, 14)
                 .put(Stats.ENERGY, 125));
     }

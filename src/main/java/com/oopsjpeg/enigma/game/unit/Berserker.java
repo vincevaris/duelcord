@@ -24,11 +24,7 @@ public class Berserker extends Unit {
     private float bonus = 0;
 
     public Berserker() {
-        super("Berserker", new Command[]{new RageCommand()}, Color.RED, new Stats()
-                .put(Stats.ENERGY, 100)
-                .put(Stats.MAX_HEALTH, 780)
-                .put(Stats.DAMAGE, 19)
-                .put(Stats.HEALTH_PER_TURN, 12));
+        super("Berserker", new Command[]{new RageCommand()}, Color.RED, null);
     }
 
     public String rage(GameMember member) {
@@ -50,13 +46,26 @@ public class Berserker extends Unit {
     }
 
     @Override
-    public String onTurnEnd(GameMember member) {
-        bonus = 0;
+    public Stats getStats() {
+        return new Stats()
+                .put(Stats.ENERGY, 100)
+                .put(Stats.MAX_HEALTH, 760)
+                .put(Stats.DAMAGE, 19)
+                .put(Stats.HEALTH_PER_TURN, 10)
+                .put(Stats.RESIST, bonus == 0 ? 0.2f : 0);
+    }
+
+    @Override
+    public String onTurnStart(GameMember member) {
+        if (bonus > 0) {
+            bonus = 0;
+            member.updateStats();
+        }
         return null;
     }
 
     @Override
-    public DamageEvent damageOut(DamageEvent event) {
+    public DamageEvent basicAttackOut(DamageEvent event) {
         if (bonus > 0)
             event.damage *= 1 + bonus;
         else
