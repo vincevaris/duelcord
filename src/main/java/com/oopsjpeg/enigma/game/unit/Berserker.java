@@ -130,6 +130,8 @@ public class Berserker extends Unit {
 
             unit.rage.reset();
 
+            actor.updateStats();
+
             return Emote.RAGE + "**" + actor.getUsername() + "** has gained **" + Util.percent(unit.bonus) + "** more damage "
                     + (unit.rage.getCurrent() == Berserker.RAGE_MAX ? "and **100** energy " : "") + "this turn!";
         }

@@ -268,8 +268,8 @@ public class GameMember {
         if (event.heal > 0) event.output.add(heal(event.heal));
         if (event.shield > 0) event.output.add(shield(event.shield));
 
-        event.damage *= 1 - getResist();
-        event.bonus *= 1 - getResist();
+        event.damage *= 1 - event.target.getResist();
+        event.bonus *= 1 - event.target.getResist();
 
         // Shield damaging
         if (event.target.stats.get(SHIELD) > 0) {
