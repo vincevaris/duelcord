@@ -144,7 +144,7 @@ public class GameMember {
             game.getActions().add(action);
             stats.sub(ENERGY, action.getEnergy());
             if (stats.get(ENERGY) <= 0) game.nextTurn();
-            else game.setTopic(this);
+            else game.updateInfo(this);
         }
     }
 

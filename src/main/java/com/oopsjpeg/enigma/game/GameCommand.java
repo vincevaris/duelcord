@@ -79,8 +79,6 @@ public enum GameCommand implements Command {
                 message.delete().block();
                 if (game.getGameState() == Game.PICKING)
                     Util.sendFailure(channel, "You cannot check until the game has started.");
-                else if (args.length == 0)
-                    Util.send(channel, game.getTopic(game.getRandomTarget(member)));
                 else {
                     Item item = Item.fromName(String.join(" ", args));
                     if (item != null) {
@@ -168,7 +166,7 @@ public enum GameCommand implements Command {
 
             if (channel.equals(game.getChannel())) {
                 message.delete().block();
-                game.setTopic(game.getMember(author));
+                game.updateInfo(game.getMember(author));
             }
         }
     },

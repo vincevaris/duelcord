@@ -10,12 +10,14 @@ import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Permission;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 
+import java.awt.Color;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,6 +30,7 @@ public class Game {
     public static final int FINISHED = 2;
     private final Enigma instance;
     private final TextChannel channel;
+    private final Message infoMessage;
     private final GameMode mode;
     private final List<GameMember> members;
     private final CommandListener commandListener;
@@ -51,6 +54,9 @@ public class Game {
                 PermissionSet.none(), PermissionSet.of(Permission.VIEW_CHANNEL))).block();
         players.forEach(p -> channel.addMemberOverwrite(Snowflake.of(p.getId()), PermissionOverwrite.forMember(Snowflake.of(p.getId()),
                 PermissionSet.of(Permission.VIEW_CHANNEL), PermissionSet.none())).block());
+
+        infoMessage = channel.createEmbed(e -> e.setDescription("Game information will appear here.")).block();
+        infoMessage.pin().subscribe();
 
         commandListener = new CommandListener(instance,
                 instance.getSettings().get(Settings.GAME_PREFIX),
@@ -123,14 +129,19 @@ public class Game {
         }
 
         channel.createMessage(Util.joinNonEmpty("\n", output)).block();
-        setTopic(getCurrentMember());
+        updateInfo(getCurrentMember());
     }
 
-    public void setTopic(GameMember member) {
-        channel.edit(c -> c.setTopic(getTopic(member))).block();
+    public void updateInfo(GameMember member) {
+        String info = getInfo(member);
+        infoMessage.edit(edit -> edit.setEmbed(e ->
+                                e.setAuthor(member.getUsername(), null, member.getUser().getAvatarUrl())
+                                .setDescription(info)
+                                        .setColor(Color.ORANGE)))
+                .subscribe();
     }
 
-    public String getTopic(GameMember member) {
+    public String getInfo(GameMember member) {
         if (gameState == PICKING)
             return member.getUsername() + " is picking their unit.";
         else {
