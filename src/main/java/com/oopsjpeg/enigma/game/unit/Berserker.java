@@ -3,16 +3,15 @@ package com.oopsjpeg.enigma.game.unit;
 import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.*;
-import com.oopsjpeg.enigma.game.buff.Silence;
+import com.oopsjpeg.enigma.game.buff.DebuffSilence;
 import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
-
-import java.awt.*;
+import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.rest.util.Color;
 
 public class Berserker extends Unit {
     public static final int RAGE_MAX = 5;
@@ -35,9 +34,7 @@ public class Berserker extends Unit {
 
     @Override
     public String getDescription() {
-        return "Basic attacking or being basic attacked builds up to **" + RAGE_MAX + "** stacks of **Rage**."
-                + "\nUsing `>rage` consumes stacks to increase damage dealt for one turn (**" + Util.percent(BONUS_DAMAGE) + "** (+1% per " + BONUS_AP + " AP) per stack)."
-                + "\nAt maximum stacks, Rage grants **" + BONUS_ENERGY + "** bonus energy.";
+        return "Attacking or being attacked builds **Rage** (up to **" + RAGE_MAX + "**).";
     }
 
     @Override
@@ -93,7 +90,7 @@ public class Berserker extends Unit {
 
     public static class RageCommand implements Command {
         @Override
-        public void execute(Message message, String alias, String[] args) {
+        public void execute(Message message, String[] args) {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
@@ -102,7 +99,7 @@ public class Berserker extends Unit {
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
                 Berserker unit = (Berserker) member.getUnit();
-                if (member.hasData(Silence.class))
+                if (member.hasData(DebuffSilence.class))
                     Util.sendFailure(channel, "You cannot **Rage** while silenced.");
                 else if (unit.rage.getCurrent() == 0)
                     Util.sendFailure(channel, "You cannot **Rage** without any stacks.");
@@ -112,8 +109,14 @@ public class Berserker extends Unit {
         }
 
         @Override
-        public String[] getAliases() {
-            return new String[]{"rage"};
+        public String getName() {
+            return "rage";
+        }
+
+        @Override
+        public String getDescription() {
+            return "Consumes stacks to increase damage dealt for one turn (**" + Util.percent(BONUS_DAMAGE) + "** (+1% per " + BONUS_AP + " AP) per stack)." +
+                    "\nAt **" + RAGE_MAX + "** stacks, **Rage** grants **" + BONUS_ENERGY + "** bonus energy.";
         }
     }
 

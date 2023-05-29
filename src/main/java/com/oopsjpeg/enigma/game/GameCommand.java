@@ -6,21 +6,21 @@ import com.oopsjpeg.enigma.game.action.AttackAction;
 import com.oopsjpeg.enigma.game.action.BuyAction;
 import com.oopsjpeg.enigma.game.action.SellAction;
 import com.oopsjpeg.enigma.game.action.UseAction;
-import com.oopsjpeg.enigma.game.buff.Silence;
+import com.oopsjpeg.enigma.game.buff.DebuffSilence;
 import com.oopsjpeg.enigma.game.object.Item;
 import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.MessageChannel;
 
 import java.util.Arrays;
 
 public enum GameCommand implements Command {
     ATTACK("attack") {
         @Override
-        public void execute(Message message, String alias, String[] args) {
+        public void execute(Message message, String[] args) {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
@@ -28,9 +28,9 @@ public enum GameCommand implements Command {
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
-                if (game.getGameState() == Game.PICKING)
+                if (game.getGameState() == GameState.PICKING)
                     Util.sendFailure(channel, "You cannot attack until the game has started.");
-                else if (member.hasData(Silence.class))
+                else if (member.hasData(DebuffSilence.class))
                     Util.sendFailure(channel, "You cannot attack while silenced.");
                 else
                     member.act(new AttackAction(game.getRandomTarget(member)));
@@ -39,7 +39,7 @@ public enum GameCommand implements Command {
     },
     BUY("buy") {
         @Override
-        public void execute(Message message, String alias, String[] args) {
+        public void execute(Message message, String[] args) {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
@@ -47,12 +47,14 @@ public enum GameCommand implements Command {
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
-                if (game.getGameState() == Game.PICKING)
+                if (game.getGameState() == GameState.PICKING)
                     Util.sendFailure(channel, "You cannot buy items until the game has started.");
                 else {
                     Item item = Item.fromName(String.join(" ", args));
                     if (item == null)
                         Util.sendFailure(channel, "Invalid item. Please try again.");
+                    else if (!item.isBuyable())
+                        Util.sendFailure(channel, "That item can't be bought.");
                     else {
                         Build build = item.build(member.getItems());
 
@@ -67,9 +69,9 @@ public enum GameCommand implements Command {
             }
         }
     },
-    CHECK("check", "stats") {
+    STATS("stats") {
         @Override
-        public void execute(Message message, String alias, String[] args) {
+        public void execute(Message message, String[] args) {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
@@ -77,8 +79,8 @@ public enum GameCommand implements Command {
 
             if (channel.equals(game.getChannel())) {
                 message.delete().block();
-                if (game.getGameState() == Game.PICKING)
-                    Util.sendFailure(channel, "You cannot check until the game has started.");
+                if (game.getGameState() == GameState.PICKING)
+                    Util.sendFailure(channel, "You cannot check stats until the game has started.");
                 else {
                     Item item = Item.fromName(String.join(" ", args));
                     if (item != null) {
@@ -90,7 +92,7 @@ public enum GameCommand implements Command {
                     } else {
                         Unit unit = Unit.fromName(String.join(" ", args));
                         if (unit != null)
-                            channel.createEmbed(Util.formatUnit(unit)).block();
+                            channel.createMessage(unit.format()).block();
                         else
                             Util.sendFailure(channel, "Invalid item/unit name.");
                     }
@@ -100,7 +102,7 @@ public enum GameCommand implements Command {
     },
     END("end") {
         @Override
-        public void execute(Message message, String alias, String[] args) {
+        public void execute(Message message, String[] args) {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
@@ -108,16 +110,16 @@ public enum GameCommand implements Command {
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
-                if (game.getGameState() == Game.PICKING)
+                if (game.getGameState() == GameState.PICKING)
                     Util.sendFailure(channel, "You cannot end your turn until the game has started.");
                 else
                     game.nextTurn();
             }
         }
     },
-    FORFEIT("forfeit", "ff") {
+    FORFEIT("ff") {
         @Override
-        public void execute(Message message, String alias, String[] args) {
+        public void execute(Message message, String[] args) {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
@@ -130,7 +132,7 @@ public enum GameCommand implements Command {
     },
     PICK("pick") {
         @Override
-        public void execute(Message message, String alias, String[] args) {
+        public void execute(Message message, String[] args) {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
@@ -138,7 +140,7 @@ public enum GameCommand implements Command {
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
-                if (game.getGameState() == Game.PLAYING)
+                if (game.getGameState() == GameState.PLAYING)
                     Util.sendFailure(channel, "You cannot pick a unit after the game has started.");
                 else {
                     String name = String.join(" ", args);
@@ -159,7 +161,7 @@ public enum GameCommand implements Command {
     },
     REFRESH("refresh") {
         @Override
-        public void execute(Message message, String alias, String[] args) {
+        public void execute(Message message, String[] args) {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
@@ -172,7 +174,7 @@ public enum GameCommand implements Command {
     },
     SELL("sell") {
         @Override
-        public void execute(Message message, String alias, String[] args) {
+        public void execute(Message message, String[] args) {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
@@ -180,7 +182,7 @@ public enum GameCommand implements Command {
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
-                if (game.getGameState() == Game.PICKING)
+                if (game.getGameState() == GameState.PICKING)
                     Util.sendFailure(channel, "You cannot sell items until the game has started.");
                 else {
                     Item item = Item.fromName(String.join(" ", args));
@@ -196,7 +198,7 @@ public enum GameCommand implements Command {
     },
     USE("use") {
         @Override
-        public void execute(Message message, String alias, String[] args) {
+        public void execute(Message message, String[] args) {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
@@ -204,7 +206,7 @@ public enum GameCommand implements Command {
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
-                if (game.getGameState() == Game.PICKING)
+                if (game.getGameState() == GameState.PICKING)
                     Util.sendFailure(channel, "You cannot use items until the game has started.");
                 else {
                     Item item = Item.fromName(String.join(" ", args));
@@ -221,13 +223,19 @@ public enum GameCommand implements Command {
         }
     };
 
-    private final String[] aliases;
+    private final String name;
 
-    GameCommand(String... aliases) {
-        this.aliases = aliases;
+    GameCommand(String name) {
+        this.name = name;
     }
 
-    public String[] getAliases() {
-        return this.aliases;
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public String getDescription() {
+        return "placeholder";
     }
 }

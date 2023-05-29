@@ -5,8 +5,8 @@ import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.object.Buff;
 import com.oopsjpeg.enigma.util.Emote;
 
-public class Bleed extends Buff {
-    public Bleed(GameMember source, int totalTurns, float power) {
+public class DebuffBleed extends Buff {
+    public DebuffBleed(GameMember source, int totalTurns, float power) {
         super("Bleed", true, source, totalTurns, power);
     }
 

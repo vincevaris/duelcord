@@ -3,8 +3,8 @@ package com.oopsjpeg.enigma.game.buff;
 import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.object.Buff;
 
-public class PotionHealing extends Buff {
-    public PotionHealing(GameMember source, int totalTurns, float power) {
+public class BuffPotion extends Buff {
+    public BuffPotion(GameMember source, int totalTurns, float power) {
         super("Potion", false, source, totalTurns, power);
     }
 
@@ -15,6 +15,6 @@ public class PotionHealing extends Buff {
 
     @Override
     public String getName() {
-        return "Potion Healing";
+        return "Potion";
     }
 }

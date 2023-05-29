@@ -1,30 +1,29 @@
 package com.oopsjpeg.enigma.util;
 
+import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.object.Effect;
 import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.storage.Player;
-import discord4j.core.object.entity.MessageChannel;
+import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.rest.util.Color;
 
-import java.awt.*;
 import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.oopsjpeg.enigma.game.Stats.*;
 
 public class Util {
     public static final Random RANDOM = new Random();
-    public static final Color COLOR_SUCCESS = new Color(119, 178, 85);
-    public static final Color COLOR_FAILURE = new Color(221, 46, 68);
+    public static final Color COLOR_SUCCESS = Color.of(119, 178, 85);
+    public static final Color COLOR_FAILURE = Color.of(221, 46, 68);
 
     public static int nextInt(int min, int max) {
         return min + RANDOM.nextInt(max - min);
@@ -32,24 +31,6 @@ public class Util {
 
     public static float nextFloat(float min, float max) {
         return min + RANDOM.nextFloat() * (max - min);
-    }
-
-    public static Consumer<EmbedCreateSpec> formatUnit(Unit unit) {
-        return embed -> {
-            embed.setTitle(unit.getName());
-            embed.setColor(unit.getColor());
-            List<String> desc = new ArrayList<>();
-            Stats stats = unit.getStats();
-            desc.add("Health: **" + stats.getInt(MAX_HEALTH) + "** (+**" + stats.getInt(HEALTH_PER_TURN) + "**/turn)");
-            desc.add("Damage: **" + stats.getInt(DAMAGE) + "**");
-            desc.add("Energy: **" + stats.getInt(ENERGY) + "**");
-            if (stats.get(CRIT_CHANCE) > 0)
-                desc.add("Critical Chance: **" + Util.percent(stats.get(CRIT_CHANCE)) + "**");
-            if (stats.get(LIFE_STEAL) > 0)
-                desc.add("Life Steal: **" + Util.percent(stats.get(LIFE_STEAL)) + "**");
-            embed.setDescription(String.join("\n", desc));
-            embed.addField("Passives / Abilities", unit.getDescription(), false);
-        };
     }
 
     public static String formatStats(Stats stats) {
@@ -83,19 +64,20 @@ public class Util {
                 .collect(Collectors.joining("\n"));
     }
 
-    public static Consumer<EmbedCreateSpec> leaderboard() {
-        return e -> {
-            e.setAuthor("Top 10 Players", null, Enigma.getInstance().getClient().getSelf().block().getAvatarUrl());
-            e.setColor(Color.YELLOW);
+    public static EmbedCreateSpec leaderboard() {
+        EmbedCreateSpec.Builder embed = EmbedCreateSpec.builder();
+        embed.author("Top 10 Players", null, Enigma.getInstance().getClient().getSelf().block().getAvatarUrl());
+        embed.color(Color.YELLOW);
 
-            AtomicInteger place = new AtomicInteger();
-            e.setDescription(Enigma.getInstance().getPlayers().values().stream()
-                    .filter(p -> p.getTotalGames() > 3 && p.getRankedPoints() != 1000)
-                    .sorted(Comparator.comparingDouble(Player::getRankedPoints).reversed())
-                    .limit(10)
-                    .map(p -> place.incrementAndGet() + ". **" + p.getUsername() + "**#" + p.getUser().getDiscriminator() + " (" + p.getRankedPoints() + " RP)")
-                    .collect(Collectors.joining("\n")));
-        };
+        AtomicInteger place = new AtomicInteger();
+        embed.description(Enigma.getInstance().getPlayers().values().stream()
+                .filter(p -> p.getTotalGames() > 3 && p.getRankedPoints() != 1000)
+                .sorted(Comparator.comparingDouble(Player::getRankedPoints).reversed())
+                .limit(10)
+                .map(p -> place.incrementAndGet() + ". **" + p.getUsername() + "**#" + p.getUser().getDiscriminator() + " (" + p.getRankedPoints() + " RP)")
+                .collect(Collectors.joining("\n")));
+
+        return embed.build();
     }
 
     public static String percent(float x) {
@@ -154,34 +136,35 @@ public class Util {
         return new DecimalFormat("#,###").format(value);
     }
 
-    public static Consumer<? super EmbedCreateSpec> embed(String title, String description, Color color) {
-        return e -> e
-                .setTitle(title)
-                .setDescription(description)
-                .setColor(color);
+    public static EmbedCreateSpec embed(String title, String description, Color color) {
+        return EmbedCreateSpec.builder()
+                .title(title)
+                .description(description)
+                .color(color)
+                .build();
     }
 
     public static void send(MessageChannel channel, String content) {
-        channel.createMessage(m -> m.setEmbed(embed("", content, Color.CYAN))).block();
+        channel.createMessage(embed("", content, Color.CYAN)).block();
     }
 
     public static void send(MessageChannel channel, String title, String content) {
-        channel.createMessage(m -> m.setEmbed(embed(title, content, Color.CYAN))).block();
+        channel.createMessage(embed(title, content, Color.CYAN)).block();
     }
 
     public static void sendFailure(MessageChannel channel, String content) {
-        channel.createMessage(m -> m.setEmbed(embed("", Emote.NO + content, COLOR_FAILURE))).block();
+        channel.createMessage(embed("", Emote.NO + content, COLOR_FAILURE)).block();
     }
 
     public static void sendFailure(MessageChannel channel, String title, String content) {
-        channel.createMessage(m -> m.setEmbed(embed(title, Emote.NO + content, COLOR_FAILURE))).block();
+        channel.createMessage(embed(title, Emote.NO + content, COLOR_FAILURE)).block();
     }
 
     public static void sendSuccess(MessageChannel channel, String content) {
-        channel.createMessage(m -> m.setEmbed(embed("", Emote.YES + content, COLOR_SUCCESS))).block();
+        channel.createMessage(embed("", Emote.YES + content, COLOR_SUCCESS)).block();
     }
 
     public static void sendSuccess(MessageChannel channel, String title, String content) {
-        channel.createMessage(m -> m.setEmbed(embed(title, Emote.YES + content, COLOR_SUCCESS))).block();
+        channel.createMessage(embed(title, Emote.YES + content, COLOR_SUCCESS)).block();
     }
 }

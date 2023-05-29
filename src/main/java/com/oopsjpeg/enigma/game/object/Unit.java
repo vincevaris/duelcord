@@ -5,9 +5,15 @@ import com.oopsjpeg.enigma.game.GameObject;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.unit.*;
 import com.oopsjpeg.enigma.util.Util;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.rest.util.Color;
 
-import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.oopsjpeg.enigma.game.Stats.*;
+import static com.oopsjpeg.enigma.game.Stats.LIFE_STEAL;
 
 public abstract class Unit extends GameObject {
     private final Command[] commands;
@@ -24,7 +30,7 @@ public abstract class Unit extends GameObject {
     private static final Unit[] values = {
             new Berserker(), new Thief(), new Warrior(),
             new Duelist(), new Gunslinger(), new Assassin(),
-            new Phasebreaker(), new Blademaster(), new Bloodreaper()
+            new Phasebreaker(), new Bloodreaper(),
     };
 
     public static Unit[] values() {
@@ -57,6 +63,37 @@ public abstract class Unit extends GameObject {
 
     public Stats getStats() {
         return stats;
+    }
+
+    public EmbedCreateSpec format() {
+        EmbedCreateSpec.Builder embed = EmbedCreateSpec.builder();
+
+        embed.color(getColor());
+        embed.description("## " + getName() + "\n" + getDescription() + "\n\u1CBC\u1CBC");
+
+        for (Command cmd : getCommands())
+            embed.addField("`>" + cmd.getName() + "`", cmd.getDescription(), false);
+
+        return embed.build();
+    }
+
+    public EmbedCreateSpec formatStats() {
+        EmbedCreateSpec.Builder embed = EmbedCreateSpec.builder();
+        List<String> desc = new ArrayList<>();
+
+        desc.add("## " + getName() + " Stats");
+        desc.add("Health: **" + stats.getInt(MAX_HEALTH) + "** (+**" + stats.getInt(HEALTH_PER_TURN) + "**/turn)");
+        desc.add("Damage: **" + stats.getInt(DAMAGE) + "**");
+        desc.add("Energy: **" + stats.getInt(ENERGY) + "**");
+        if (stats.get(CRIT_CHANCE) > 0)
+            desc.add("Critical Chance: **" + Util.percent(stats.get(CRIT_CHANCE)) + "**");
+        if (stats.get(LIFE_STEAL) > 0)
+            desc.add("Life Steal: **" + Util.percent(stats.get(LIFE_STEAL)) + "**");
+
+        embed.color(getColor());
+        embed.description(String.join("\n", desc));
+
+        return embed.build();
     }
 
     @Override

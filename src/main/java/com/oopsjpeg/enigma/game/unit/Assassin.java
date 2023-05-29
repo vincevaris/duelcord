@@ -3,20 +3,21 @@ package com.oopsjpeg.enigma.game.unit;
 import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.*;
-import com.oopsjpeg.enigma.game.buff.Silence;
+import com.oopsjpeg.enigma.game.buff.DebuffSilence;
 import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.rest.util.Color;
 
-import java.awt.*;
+import static com.oopsjpeg.enigma.util.Util.percent;
 
 public class Assassin extends Unit {
     public static final float POTENCY_STORE = 0.25f;
-    public static final int POTENCY_TURNS = 4;
+    public static final int POTENCY_TURNS = 3;
     public static final float SLASH_DAMAGE = 0.25f;
     public static final float SLASH_AP = 0.5f;
     public static final int SLASH_MAX = 4;
@@ -28,7 +29,7 @@ public class Assassin extends Unit {
     private float potencyTotal = 0;
 
     public Assassin() {
-        super("Assassin", new Command[]{new SlashCommand()}, new Color(0, 69, 255), new Stats()
+        super("Assassin", new Command[]{new SlashCommand()}, Color.of(0, 69, 255), new Stats()
                 .put(Stats.ENERGY, 125)
                 .put(Stats.MAX_HEALTH, 720)
                 .put(Stats.DAMAGE, 22)
@@ -53,13 +54,8 @@ public class Assassin extends Unit {
 
     @Override
     public String getDescription() {
-        return "**" + Util.percent(POTENCY_STORE) + "**"
-                + " of damage dealt in the last turn is stored as **Potency**."
-                + " This can only occur **" + POTENCY_TURNS + "** times until **Potency** is reset."
-                + "\n\nUsing `>slash` deals **" + Util.percent(SLASH_DAMAGE) + "** AD (+" + Util.percent(SLASH_AP) + " AP) damage."
-                + " Every **" + SLASH_MAX + "th** slash applies **Silence** for **" + SILENCE_TURNS + "** turn(s) and deals"
-                + " bonus damage equal to the total **Potency**, resetting it as well."
-                + "\n\nSlash does not count towards total **Potency**.";
+        return "**" + percent(POTENCY_STORE) + "** of the damage dealt last turn is stored as **Potency**." +
+                "\nThis can occur **" + POTENCY_TURNS + "** times until **Potency** is consumed.";
     }
 
     @Override
@@ -93,7 +89,7 @@ public class Assassin extends Unit {
 
     public static class SlashCommand implements Command {
         @Override
-        public void execute(Message message, String alias, String[] args) {
+        public void execute(Message message, String[] args) {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
@@ -102,7 +98,7 @@ public class Assassin extends Unit {
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
                 Assassin unit = (Assassin) member.getUnit();
-                if (member.hasData(Silence.class))
+                if (member.hasData(DebuffSilence.class))
                     Util.sendFailure(channel, "You cannot **Slash** while silenced.");
                 else if (unit.slashed)
                     Util.sendFailure(channel, "You can only use **Slash** once per turn.");
@@ -112,8 +108,15 @@ public class Assassin extends Unit {
         }
 
         @Override
-        public String[] getAliases() {
-            return new String[]{"slash"};
+        public String getName() {
+            return "slash";
+        }
+
+        @Override
+        public String getDescription() {
+            return "Deals **" + percent(SLASH_DAMAGE) + "** (+" + percent(SLASH_AP) + " AP) damage." +
+                    "\nEvery **" + SLASH_MAX + "th** use applies **Silence** for **" + SILENCE_TURNS + "** turns and consumes **Potency** to deal bonus damage equal to it." +
+                    "\n**Slash** doesn't count towards **Potency**.";
         }
     }
 
@@ -134,7 +137,7 @@ public class Assassin extends Unit {
 
             if (unit.getSlash().stack()) {
                 event.damage += unit.getPotencyTotal();
-                event.output.add(target.buff(new Silence(actor, Assassin.SILENCE_TURNS)));
+                event.output.add(target.buff(new DebuffSilence(actor, Assassin.SILENCE_TURNS)));
                 unit.getSlash().reset();
                 unit.getPotency().reset();
                 unit.setPotencyTotal(0);

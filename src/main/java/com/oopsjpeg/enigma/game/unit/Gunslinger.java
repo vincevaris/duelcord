@@ -3,16 +3,16 @@ package com.oopsjpeg.enigma.game.unit;
 import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.*;
-import com.oopsjpeg.enigma.game.buff.Silence;
+import com.oopsjpeg.enigma.game.buff.DebuffSilence;
 import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.util.Cooldown;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.rest.util.Color;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class Gunslinger extends Unit {
     private boolean bonus = false;
 
     public Gunslinger() {
-        super("Gunslinger", new Command[]{new BarrageCommand()}, new Color(255, 110, 0), new Stats()
+        super("Gunslinger", new Command[]{new BarrageCommand()}, Color.of(255, 110, 0), new Stats()
                 .put(Stats.ENERGY, 125)
                 .put(Stats.MAX_HEALTH, 750)
                 .put(Stats.DAMAGE, 19)
@@ -37,11 +37,7 @@ public class Gunslinger extends Unit {
 
     @Override
     public String getDescription() {
-        return "The first basic attack per turn always crits and deals **" + Util.percent(BONUS_AP) + " AP** bonus damage.\n\n"
-                + "Using `>barrage` fires **" + BARRAGE_SHOTS + "** shots that each deal **"
-                + BARRAGE_DAMAGE + "** (+" + Util.percent(BARRAGE_AD_RATIO) + " bonus AD) (+" + Util.percent(BARRAGE_AP_RATIO) + " AP) damage.\n"
-                + "Barrage shots can crit and apply on-hit effects.\n"
-                + "Barrage can only be used once every **" + BARRAGE_COOLDOWN + "** turn(s).";
+        return "The first attack per turn always crits and deals **" + Util.percent(BONUS_AP) + " AP** bonus damage.";
     }
 
     @Override
@@ -69,7 +65,7 @@ public class Gunslinger extends Unit {
 
     public static class BarrageCommand implements Command {
         @Override
-        public void execute(Message message, String alias, String[] args) {
+        public void execute(Message message, String[] args) {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
@@ -78,7 +74,7 @@ public class Gunslinger extends Unit {
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 Gunslinger unit = (Gunslinger) member.getUnit();
                 message.delete().block();
-                if (member.hasData(Silence.class))
+                if (member.hasData(DebuffSilence.class))
                     Util.sendFailure(channel, "You cannot **Barrage** while silenced.");
                 else if (!unit.barrage.isDone())
                     Util.sendFailure(channel, "**Barrage** is on cooldown for **" + unit.barrage.getCurrent() + "** more turn(s).");
@@ -88,8 +84,14 @@ public class Gunslinger extends Unit {
         }
 
         @Override
-        public String[] getAliases() {
-            return new String[]{"barrage"};
+        public String getName() {
+            return "barrage";
+        }
+
+        @Override
+        public String getDescription() {
+            return "Fires **" + BARRAGE_SHOTS + "** shots that each deal **" + BARRAGE_DAMAGE + "** (+" + Util.percent(BARRAGE_AD_RATIO) + " bonus AD) (+" + Util.percent(BARRAGE_AP_RATIO) + " AP) damage." +
+                    "\nShots can crit and apply on-hit effects.";
         }
     }
 

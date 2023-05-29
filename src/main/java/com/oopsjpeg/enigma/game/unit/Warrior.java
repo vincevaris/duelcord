@@ -3,17 +3,18 @@ package com.oopsjpeg.enigma.game.unit;
 import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.*;
-import com.oopsjpeg.enigma.game.buff.Silence;
+import com.oopsjpeg.enigma.game.buff.DebuffSilence;
 import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.util.Cooldown;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.rest.util.Color;
 
-import java.awt.*;
+import static com.oopsjpeg.enigma.util.Util.percent;
 
 public class Warrior extends Unit {
     public static final int BONUS_MAX = 3;
@@ -35,10 +36,7 @@ public class Warrior extends Unit {
 
     @Override
     public String getDescription() {
-        return "Every **" + BONUS_MAX + "rd** attack deals **" + Util.percent(BONUS_DAMAGE) + "** bonus damage."
-                + "\n\nUsing `>bash` breaks the target's shield and resist then deals **" + Util.percent(BASH_DAMAGE) + "** base damage (+" + Util.percent(BASH_HP_SCALE) + " bonus max health)."
-                + "\n**Bash** counts towards stacks of bonus damage, but does not proc it."
-                + "\n**Bash** can only be used once every **" + BASH_COOLDOWN + "** turn(s).";
+        return "Every **" + BONUS_MAX + "rd** attack deals **" + percent(BONUS_DAMAGE) + "** bonus damage.";
     }
 
     @Override
@@ -65,7 +63,7 @@ public class Warrior extends Unit {
 
     public static class BashCommand implements Command {
         @Override
-        public void execute(Message message, String alias, String[] args) {
+        public void execute(Message message, String[] args) {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
@@ -74,7 +72,7 @@ public class Warrior extends Unit {
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 Warrior unit = (Warrior) member.getUnit();
                 message.delete().block();
-                if (member.hasData(Silence.class))
+                if (member.hasData(DebuffSilence.class))
                     Util.sendFailure(channel, "You cannot **Bash** while silenced.");
                 else if (!unit.bash.isDone())
                     Util.sendFailure(channel, "**Bash** is on cooldown for **" + unit.bash.getCurrent() + "** more turn(s).");
@@ -84,8 +82,14 @@ public class Warrior extends Unit {
         }
 
         @Override
-        public String[] getAliases() {
-            return new String[]{"bash"};
+        public String getName() {
+            return "bash";
+        }
+
+        @Override
+        public String getDescription() {
+            return "Break the target's shield and resist, then deal **" + percent(BASH_DAMAGE) + "** (+" + percent(BASH_HP_SCALE) + " bonus max health) damage." +
+                    "\n**Bash** stacks Warrior's passive, but doesn't activate it.";
         }
     }
 
@@ -105,7 +109,10 @@ public class Warrior extends Unit {
             DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
 
             event.target.setDefensive(false);
-            event.target.getStats().put(Stats.RESIST, 0);
+            if (event.target.getStats().get(Stats.RESIST) > 0) {
+                event.target.getStats().put(Stats.RESIST, 0);
+                event.output.add(Emote.SHIELD + " It broke their resist!");
+            }
             event.damage = (actor.getStats().get(Stats.DAMAGE) * Warrior.BASH_DAMAGE);
             event.bonus = (actor.getStats().get(Stats.MAX_HEALTH) - actor.getUnit().getStats().get(Stats.MAX_HEALTH)) * Warrior.BASH_HP_SCALE;
             if (event.target.getStats().get(Stats.SHIELD) > 0)

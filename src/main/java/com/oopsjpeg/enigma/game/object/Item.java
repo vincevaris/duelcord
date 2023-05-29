@@ -16,6 +16,7 @@ public abstract class Item extends GameObject {
     private final Item[] build;
     private final Effect[] effects;
     private final Stats stats;
+    private final boolean buyable;
 
     private static final Item[] values = {
             new BloodlustBlade(),
@@ -42,6 +43,10 @@ public abstract class Item extends GameObject {
     };
 
     public Item(String name, Tree tree, String tip, int cost, Item[] build, Effect[] effects, Stats stats) {
+        this(name, tree, tip, cost, build, effects, stats, true);
+    }
+
+    public Item(String name, Tree tree, String tip, int cost, Item[] build, Effect[] effects, Stats stats, boolean buyable) {
         super(name);
         this.tree = tree;
         this.tip = tip;
@@ -49,6 +54,7 @@ public abstract class Item extends GameObject {
         this.build = build;
         this.effects = effects;
         this.stats = stats;
+        this.buyable = buyable;
     }
 
     public static Item[] values() {
@@ -131,6 +137,10 @@ public abstract class Item extends GameObject {
 
     public Stats getStats() {
         return stats != null ? stats : new Stats();
+    }
+
+    public boolean isBuyable() {
+        return buyable;
     }
 
     @Override

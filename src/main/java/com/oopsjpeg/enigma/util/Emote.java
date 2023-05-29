@@ -23,7 +23,7 @@ public class Emote {
     public static final String BUFF = ":eight_spoked_asterisk: ";
 
     // Custom emotes
-    public static final String HEAL = "<:enigmaHeal:629158098681987072> ";
+    public static final String HEAL = "<:enigmaHeal:944702328177569892> ";
     public static final String RAGE = "<:enigmaRage:629168653438418950> ";
     // public static final String BASH = "";
 }

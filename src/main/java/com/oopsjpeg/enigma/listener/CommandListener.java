@@ -3,12 +3,12 @@ package com.oopsjpeg.enigma.listener;
 import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.util.Listener;
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.MessageChannel;
-import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -37,27 +37,27 @@ public class CommandListener implements Listener {
     }
 
     @Override
-    public void register(DiscordClient client) {
-        client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(this::onMessage);
+    public void register(GatewayDiscordClient client) {
+        client.on(MessageCreateEvent.class).subscribe(this::onMessage);
     }
 
     private void onMessage(MessageCreateEvent event) {
-        DiscordClient client = event.getClient();
+        GatewayDiscordClient client = event.getClient();
         Message message = event.getMessage();
         User author = message.getAuthor().orElse(null);
-        String content = message.getContent().orElse(null);
+        String content = message.getContent();
         MessageChannel channel = message.getChannel().block();
 
-        if (author != null && content != null && channel != null
+        if (author != null && channel != null
                 && (limit == null || channel.equals(limit))
                 && !author.equals(client.getSelf().block())
                 && content.toLowerCase().startsWith(prefix.toLowerCase())) {
             String[] split = content.replaceFirst(prefix, "").split(" ");
-            String alias = split[0];
+            String name = split[0];
             String[] args = Arrays.copyOfRange(split, 1, split.length);
-            Command command = Command.get(commands, author, alias);
+            Command command = Command.get(commands, author, name);
 
-            if (command != null) command.execute(message, alias, args);
+            if (command != null) command.execute(message, args);
         }
     }
 

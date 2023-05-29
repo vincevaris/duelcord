@@ -1,33 +1,34 @@
 package com.oopsjpeg.enigma.game;
 
 import com.oopsjpeg.enigma.Enigma;
-import com.oopsjpeg.enigma.game.buff.Silence;
+import com.oopsjpeg.enigma.game.buff.DebuffSilence;
 import com.oopsjpeg.enigma.listener.CommandListener;
 import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Settings;
 import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.util.Permission;
-import discord4j.core.object.util.PermissionSet;
-import discord4j.core.object.util.Snowflake;
+import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.MessageEditSpec;
+import discord4j.core.spec.TextChannelCreateSpec;
+import discord4j.rest.util.Color;
+import discord4j.rest.util.Permission;
+import discord4j.rest.util.PermissionSet;
 
-import java.awt.Color;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.oopsjpeg.enigma.game.GameState.*;
 import static com.oopsjpeg.enigma.game.Stats.*;
 
 public class Game {
-    public static final int PICKING = 0;
-    public static final int PLAYING = 1;
-    public static final int FINISHED = 2;
     private final Enigma instance;
     private final TextChannel channel;
     private final Message infoMessage;
@@ -39,7 +40,7 @@ public class Game {
     private List<GameAction> actions = new ArrayList<>();
     private LocalDateTime lastAction = LocalDateTime.now();
 
-    private int gameState = PICKING;
+    private GameState gameState = PICKING;
     private int turnCount = 0;
     private int turnIndex = -1;
 
@@ -47,7 +48,7 @@ public class Game {
         this.instance = instance;
         this.mode = mode;
 
-        channel = instance.getGuild().createTextChannel(c -> c.setName("game")).block();
+        channel = instance.getGuild().createTextChannel(TextChannelCreateSpec.builder().name("game").build()).block();
 
         Snowflake roleId = getGuild().getEveryoneRole().block().getId();
         channel.addRoleOverwrite(roleId, PermissionOverwrite.forRole(roleId,
@@ -55,7 +56,7 @@ public class Game {
         players.forEach(p -> channel.addMemberOverwrite(Snowflake.of(p.getId()), PermissionOverwrite.forMember(Snowflake.of(p.getId()),
                 PermissionSet.of(Permission.VIEW_CHANNEL), PermissionSet.none())).block());
 
-        infoMessage = channel.createEmbed(e -> e.setDescription("Game information will appear here.")).block();
+        infoMessage = channel.createEmbed(EmbedCreateSpec.builder().description("Game information will appear here.").build()).block();
         infoMessage.pin().subscribe();
 
         commandListener = new CommandListener(instance,
@@ -77,7 +78,7 @@ public class Game {
             // On turn end
             output.addAll(getCurrentMember().getData().stream().map(e -> e.onTurnEnd(getCurrentMember())).collect(Collectors.toList()));
             // On defend
-            if (turnCount >= 1 && getCurrentMember().getStats().get(ENERGY) > 0 && !getCurrentMember().hasData(Silence.class))
+            if (turnCount >= 1 && getCurrentMember().getStats().get(ENERGY) > 0 && !getCurrentMember().hasData(DebuffSilence.class))
                 output.add(getCurrentMember().defend());
             // Check buffs
             getCurrentMember().getBuffs().stream().filter(b -> b.turn() == 0).forEach(buff -> {
@@ -104,7 +105,7 @@ public class Game {
             }
             output.add("[**" + getCurrentMember().getMention() + ", pick your unit!**]");
             output.add("Check " + instance.getUnitsChannel().getMention() + " to view units, then pick with one with `"
-                    + commandListener.getPrefix() + GameCommand.PICK.getAliases()[0] + "`.");
+                    + commandListener.getPrefix() + GameCommand.PICK.getName() + "`.");
         } else if (gameState == PLAYING) {
             GameMember member = getCurrentMember();
             member.heal(member.getStats().get(HEALTH_PER_TURN) * (member.isDefensive() ? 2 : 1), null, false);
@@ -134,10 +135,12 @@ public class Game {
 
     public void updateInfo(GameMember member) {
         String info = getInfo(member);
-        infoMessage.edit(edit -> edit.setEmbed(e ->
-                                e.setAuthor(member.getUsername(), null, member.getUser().getAvatarUrl())
-                                .setDescription(info)
-                                        .setColor(Color.ORANGE)))
+        infoMessage.edit(MessageEditSpec.builder().addEmbed(EmbedCreateSpec.builder()
+                                .author(member.getUsername(), null, member.getUser().getAvatarUrl())
+                                .description(info)
+                                .color(Color.ORANGE)
+                                .build())
+                        .build())
                 .subscribe();
     }
 
@@ -241,11 +244,11 @@ public class Game {
         this.lastAction = lastAction;
     }
 
-    public int getGameState() {
+    public GameState getGameState() {
         return this.gameState;
     }
 
-    public void setGameState(int gameState) {
+    public void setGameState(GameState state) {
         this.gameState = gameState;
     }
 

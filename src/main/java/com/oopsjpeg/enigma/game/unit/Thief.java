@@ -6,8 +6,7 @@ import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Util;
-
-import java.awt.*;
+import discord4j.rest.util.Color;
 
 public class Thief extends Unit {
     public static final float STEAL_AD = 0.35f;
@@ -47,9 +46,10 @@ public class Thief extends Unit {
                 .put(Stats.ENERGY, 150 + (goldTargetHit ? 50 : 0))
                 .put(Stats.MAX_HEALTH, 735)
                 .put(Stats.DAMAGE, 17)
+                .put(Stats.HEALTH_PER_TURN, 8)
                 .put(Stats.CRIT_CHANCE, 0.2f)
-                .put(Stats.CRIT_DAMAGE, -1 * CRIT_REDUCE)
-                .put(Stats.HEALTH_PER_TURN, 8);
+                .put(Stats.CRIT_DAMAGE, -1 * CRIT_REDUCE);
+
     }
 
     @Override

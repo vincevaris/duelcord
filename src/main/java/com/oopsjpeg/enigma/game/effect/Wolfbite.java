@@ -2,7 +2,7 @@ package com.oopsjpeg.enigma.game.effect;
 
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.GameMember;
-import com.oopsjpeg.enigma.game.buff.Weaken;
+import com.oopsjpeg.enigma.game.buff.DebuffWeaken;
 import com.oopsjpeg.enigma.game.object.Effect;
 import com.oopsjpeg.enigma.util.Util;
 
@@ -20,7 +20,7 @@ public class Wolfbite extends Effect {
     public DamageEvent hitOut(DamageEvent event) {
         stack++;
         if (stack >= attacks) {
-            event.output.add(event.target.buff(new Weaken(event.actor, 1, getPower())));
+            event.output.add(event.target.buff(new DebuffWeaken(event.actor, 1, getPower())));
             stack = 0;
         }
         return event;

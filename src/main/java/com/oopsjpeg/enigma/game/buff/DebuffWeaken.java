@@ -6,14 +6,14 @@ import com.oopsjpeg.enigma.game.object.Buff;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Util;
 
-public class Weaken extends Buff {
-    public Weaken(GameMember source, int totalTurns, float power) {
+public class DebuffWeaken extends Buff {
+    public DebuffWeaken(GameMember source, int totalTurns, float power) {
         super("Weaken", true, source, totalTurns, power);
     }
 
     @Override
     public String onTurnStart(GameMember member) {
-        return Emote.SILENCE + "**" + member.getUsername() + "** is weakened by **" + Util.percent(getPower()) + "** by **" + getSource().getUsername() + "** this turn.";
+        return Emote.SILENCE + "**" + member.getUsername() + "** is weakened for **" + Util.percent(getPower()) + "** by **" + getSource().getUsername() + "**.";
     }
 
     @Override

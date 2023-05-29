@@ -1,7 +1,8 @@
 package com.oopsjpeg.enigma.game;
 
-import com.oopsjpeg.enigma.game.buff.Weaken;
-import com.oopsjpeg.enigma.game.buff.Wound;
+import com.oopsjpeg.enigma.game.buff.DebuffWeaken;
+import com.oopsjpeg.enigma.game.buff.DebuffWound;
+import com.oopsjpeg.enigma.game.item.Potion;
 import com.oopsjpeg.enigma.game.object.Buff;
 import com.oopsjpeg.enigma.game.object.Effect;
 import com.oopsjpeg.enigma.game.object.Item;
@@ -149,8 +150,8 @@ public class GameMember {
     }
 
     public String buff(Buff buff) {
-        if (hasData(Weaken.class)) {
-            Weaken weaken = (Weaken) getData(Weaken.class);
+        if (hasData(DebuffWeaken.class)) {
+            DebuffWeaken weaken = (DebuffWeaken) getData(DebuffWeaken.class);
             if (weaken.getSource().unit instanceof Duelist) {
                 buff.setTotalTurns(buff.getTotalTurns() + 1);
                 buff.setCurrentTurns(buff.getCurrentTurns() + 1);
@@ -172,7 +173,7 @@ public class GameMember {
     }
 
     public String shield(float amount) {
-        amount *= 1 - (hasData(Wound.class) ? ((Wound) getData(Wound.class)).getPower() : 0);
+        amount *= 1 - (hasData(DebuffWound.class) ? ((DebuffWound) getData(DebuffWound.class)).getPower() : 0);
         stats.add(SHIELD, amount);
         return Emote.HEAL + "**" + getUsername() + "** shielded by **" + Math.round(amount)
                 + "**! [**" + stats.getInt(SHIELD) + "**]";
@@ -187,7 +188,7 @@ public class GameMember {
     }
 
     public String heal(float amount, String source, boolean message) {
-        amount *= 1 - (hasData(Wound.class) ? ((Wound) getData(Wound.class)).getPower() : 0);
+        amount *= 1 - (hasData(DebuffWound.class) ? ((DebuffWound) getData(DebuffWound.class)).getPower() : 0);
         stats.add(HEALTH, amount);
         if (message) return Emote.HEAL + "**" + getUsername() + "** healed by **" + Math.round(amount) + "**! [**"
                 + stats.getInt(HEALTH) + " / " + stats.getInt(MAX_HEALTH) + "**]"
@@ -315,7 +316,7 @@ public class GameMember {
         alive = false;
 
         if (game.getAlive().size() == 1) {
-            game.setGameState(Game.FINISHED);
+            game.setGameState(GameState.FINISHED);
             output.add(game.getAlive().get(0).win());
         } else if (game.getCurrentMember().equals(this))
             game.nextTurn();
@@ -356,12 +357,16 @@ public class GameMember {
         this.unit = unit;
         data.clear();
         data.add(unit);
+        // Start the player with one potion
+        data.add(new Potion());
         updateStats();
 
         stats.put(HEALTH, stats.get(MAX_HEALTH));
         stats.put(GOLD, game.getMode().handleGold(175 + (100 * game.getAlive().indexOf(this))));
 
         game.getCommandListener().getCommands().addAll(Arrays.asList(unit.getCommands()));
+
+
 
         if (unit instanceof Berserker)
             ((Berserker) unit).getRage().setCurrent(game.getAlive().indexOf(this));

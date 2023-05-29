@@ -6,33 +6,50 @@ import com.oopsjpeg.enigma.game.object.Item;
 import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.Util;
+import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.Button;
+import discord4j.core.object.component.SelectMenu;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.MessageChannel;
-import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.util.Permission;
-import discord4j.core.object.util.PermissionSet;
+import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.MessageCreateSpec;
+import discord4j.rest.util.Permission;
+import discord4j.rest.util.PermissionSet;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.function.Consumer;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public enum GeneralCommand implements Command {
     BUILD("build") {
         @Override
-        public void execute(Message message, String alias, String[] args) {
+        public void execute(Message message, String[] args) {
             if (args[0].equalsIgnoreCase("items")) {
                 TextChannel channel = Enigma.getInstance().getItemsChannel();
-                channel.createEmbed(buildItemTree(Tree.CONSUMABLES)).block();
-                channel.createEmbed(buildItemTree(Tree.DAMAGE)).block();
-                channel.createEmbed(buildItemTree(Tree.HEALTH)).block();
-                channel.createEmbed(buildItemTree(Tree.ABILITY)).block();
+                //channel.createMessage(buildItemTree(Tree.CONSUMABLES)).block();
+                channel.createMessage(buildItemTree(Tree.DAMAGE)).block();
+                channel.createMessage(buildItemTree(Tree.HEALTH)).block();
+                channel.createMessage(buildItemTree(Tree.ABILITY)).block();
             } else if (args[0].equalsIgnoreCase("units")) {
+                GatewayDiscordClient client = message.getClient();
                 TextChannel channel = Enigma.getInstance().getUnitsChannel();
-                for (Unit unit : Unit.values())
-                    channel.createEmbed(Util.formatUnit(unit)).block();
+
+                // Create a list of select menu options for units
+                List<SelectMenu.Option> options = Arrays.stream(Unit.values())
+                        .map(unit -> SelectMenu.Option.of(unit.getName(), unit.getName()))
+                        .collect(Collectors.toList());
+
+                channel.createMessage(MessageCreateSpec.builder()
+                        .content("# Units\nSelect a unit using the menu below to review it.")
+                        .addComponent(
+                                ActionRow.of(
+                                        SelectMenu.of("unit_viewer", options)
+                                ))
+                        .build()).block();
             }
         }
 
@@ -41,24 +58,25 @@ public enum GeneralCommand implements Command {
             return PermissionSet.of(Permission.MANAGE_GUILD);
         }
 
-        public Consumer<EmbedCreateSpec> buildItemTree(Tree tree) {
-            return e -> {
-                e.setTitle("**" + tree.getName() + "**");
-                e.setColor(tree.getColor());
-                Item.fromTree(tree).stream()
-                        .sorted(Comparator.comparingInt(Item::getCost))
-                        .forEach(i -> {
-                            String value = (i.hasTip() ? "_" + i.getTip() + "_\n" : "")
-                                    + Util.formatStats(i.getStats()) + "\n"
-                                    + (i.hasBuild() ? "[_" + Arrays.stream(i.getBuild()).map(Item::getName).collect(Collectors.joining(", ")) + "_]" : "");
-                            e.addField(i.getName() + " (" + i.getCost() + "g)", value, true);
-                        });
-            };
+        public EmbedCreateSpec buildItemTree(Tree tree) {
+            EmbedCreateSpec.Builder embed = EmbedCreateSpec.builder();
+            embed.title("**" + tree.getName() + "**");
+            embed.color(tree.getColor());
+            Item.fromTree(tree).stream()
+                    .filter(Item::isBuyable)
+                    .sorted(Comparator.comparingInt(Item::getCost))
+                    .forEach(i -> {
+                        String value = (i.hasTip() ? "_" + i.getTip() + "_\n" : "")
+                                + Util.formatStats(i.getStats()) + "\n"
+                                + (i.hasBuild() ? "[_" + Arrays.stream(i.getBuild()).map(Item::getName).collect(Collectors.joining(", ")) + "_]" : "");
+                        embed.addField(i.getName() + " (" + i.getCost() + "g)", value, true);
+                    });
+            return embed.build();
         }
     },
-    QUEUE("queue", "find", "mm", "q") {
+    QUEUE("q") {
         @Override
-        public void execute(Message message, String alias, String[] args) {
+        public void execute(Message message, String[] args) {
             MessageChannel channel = message.getChannel().block();
             User author = message.getAuthor().orElse(null);
             Player player = Enigma.getInstance().getPlayer(author);
@@ -85,7 +103,7 @@ public enum GeneralCommand implements Command {
     },
     STATS("stats") {
         @Override
-        public void execute(Message message, String alias, String[] args) {
+        public void execute(Message message, String[] args) {
             MessageChannel channel = message.getChannel().block();
             User author = message.getAuthor().orElse(null);
             Player player = Enigma.getInstance().getPlayer(author);
@@ -105,14 +123,14 @@ public enum GeneralCommand implements Command {
     },
     LEADERBOARD("leaderboard") {
         @Override
-        public void execute(Message message, String alias, String[] args) {
+        public void execute(Message message, String[] args) {
             MessageChannel channel = message.getChannel().block();
             channel.createEmbed(Util.leaderboard()).block();
         }
     },
     SPECTATE("spectate") {
         @Override
-        public void execute(Message message, String alias, String[] args) {
+        public void execute(Message message, String[] args) {
             MessageChannel channel = message.getChannel().block();
             User author = message.getAuthor().orElse(null);
             Player player = Enigma.getInstance().getPlayer(author);
@@ -143,15 +161,41 @@ public enum GeneralCommand implements Command {
                 }
             }
         }
+    },
+    TEST("test") {
+        @Override
+        public void execute(Message message, String[] args) {
+            message.getChannel().flatMap(channel -> channel.createMessage(MessageCreateSpec.builder()
+                    .content("# Duel" +
+                            "\nvincevaris **vs.** boogaloonky" +
+                            "\n### Select your unit using the menu below.")
+                    .addComponent(ActionRow.of(
+                            SelectMenu.of("test", SelectMenu.Option.of("Gunslinger", "gunslinger"))))
+                    .addComponent(ActionRow.of(
+                            Button.danger("forfeit", "Forfeit"),
+                            Button.primary("select", "Select")))
+                    .build())).subscribe();
+        }
+
+        @Override
+        public PermissionSet getPermissions() {
+            return PermissionSet.of(Permission.ADMINISTRATOR);
+        }
     };
 
-    private final String[] aliases;
+    private final String name;
 
-    GeneralCommand(String... aliases) {
-        this.aliases = aliases;
+    GeneralCommand(String name) {
+        this.name = name;
     }
 
-    public String[] getAliases() {
-        return this.aliases;
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getDescription() {
+        return "placeholder";
     }
 }

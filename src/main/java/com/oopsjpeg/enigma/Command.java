@@ -2,21 +2,22 @@ package com.oopsjpeg.enigma;
 
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.util.PermissionSet;
+import discord4j.rest.util.PermissionSet;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 public interface Command {
-    static Command get(Collection<Command> commands, User user, String alias) {
+    static Command get(Collection<Command> commands, User user, String name) {
         return commands.stream()
-                .filter(cmd -> Arrays.stream(cmd.getAliases()).anyMatch(a -> a.equalsIgnoreCase(alias)))
+                .filter(cmd -> cmd.getName().equalsIgnoreCase(name))
                 .findAny().orElse(null);
     }
 
-    void execute(Message message, String alias, String[] args);
+    void execute(Message message, String[] args);
 
-    String[] getAliases();
+    String getName();
+
+    String getDescription();
 
     default PermissionSet getPermissions() {
         return PermissionSet.none();

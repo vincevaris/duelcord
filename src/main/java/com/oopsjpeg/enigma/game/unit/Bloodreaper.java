@@ -3,8 +3,8 @@ package com.oopsjpeg.enigma.game.unit;
 import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.*;
-import com.oopsjpeg.enigma.game.buff.Silence;
-import com.oopsjpeg.enigma.game.buff.Wound;
+import com.oopsjpeg.enigma.game.buff.DebuffSilence;
+import com.oopsjpeg.enigma.game.buff.DebuffWound;
 import com.oopsjpeg.enigma.game.object.Buff;
 import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.util.Cooldown;
@@ -12,10 +12,10 @@ import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.rest.util.Color;
 
-import java.awt.*;
 import java.util.ArrayList;
 
 public class Bloodreaper extends Unit {
@@ -37,7 +37,7 @@ public class Bloodreaper extends Unit {
     private float soul = 0;
 
     public Bloodreaper() {
-        super("Bloodreaper", new Command[]{new ReapCommand(), new EndureCommand()}, new Color(120, 0, 0), new Stats()
+        super("Bloodreaper", new Command[]{new ReapCommand(), new EndureCommand()}, Color.of(120, 0, 0), new Stats()
                 .put(Stats.MAX_HEALTH, 720)
                 .put(Stats.HEALTH_PER_TURN, 7)
                 .put(Stats.DAMAGE, 14)
@@ -46,13 +46,8 @@ public class Bloodreaper extends Unit {
 
     @Override
     public String getDescription() {
-        return "**" + Util.percent(SOUL_RATIO) + "** of damage received is stored as **Soul**, up to **" + SOUL_MAX + "** (+" + Util.percent(SOUL_MAX_HP_RATIO) + " bonus health)."
-                + "\nUnbroken shields heal for **" + Util.percent(SHIELD_HEAL) + "** of their value."
-                + "\n\n`>reap` deals **" + REAP_DAMAGE + "** (+" + Util.percent(REAP_DAMAGE_AP_RATIO) + " AP) damage and heals for **" + Util.percent(REAP_HEAL) + "**."
-                + "\nEvery **" + REAP_WOUND_USES + "** uses, Reap applies Wound by **" + Util.percent(REAP_WOUND) + "** for **1** turn."
-                + "\n\n`>endure` resets **Soul**, shielding equal to its amount."
-                + "\nAdditionally, it removes all de-buffs and restores **" + ENDURE_ENERGY + "** energy."
-                + "\nEndure can only be used once every **" + ENDURE_COOLDOWN + "** turn(s).";
+        return "**" + Util.percent(SOUL_RATIO) + "** of damage received is stored as **Soul**, up to **" + SOUL_MAX + "** (+" + Util.percent(SOUL_MAX_HP_RATIO) + " bonus health)." +
+                "\nUnbroken shields heal for **" + Util.percent(SHIELD_HEAL) + "** of their value.";
     }
 
     @Override
@@ -80,7 +75,7 @@ public class Bloodreaper extends Unit {
 
     private static class ReapCommand implements Command {
         @Override
-        public void execute(Message message, String alias, String[] args) {
+        public void execute(Message message, String[] args) {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
@@ -88,7 +83,7 @@ public class Bloodreaper extends Unit {
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
                 message.delete().block();
-                if (member.hasData(Silence.class))
+                if (member.hasData(DebuffSilence.class))
                     Util.sendFailure(channel, "You cannot **Reap** while silenced.");
                 else
                     member.act(new ReapAction(game.getRandomTarget(member)));
@@ -96,14 +91,20 @@ public class Bloodreaper extends Unit {
         }
 
         @Override
-        public String[] getAliases() {
-            return new String[]{"reap"};
+        public String getName() {
+            return "reap";
+        }
+
+        @Override
+        public String getDescription() {
+            return "Deals **" + REAP_DAMAGE + "** (+" + Util.percent(REAP_DAMAGE_AP_RATIO) + " AP) damage and heals for **" + Util.percent(REAP_HEAL) + "** of damage dealt." +
+                    "\nEvery **" + REAP_WOUND_USES + "** use applies **Wound** by **" + Util.percent(REAP_WOUND) + "** for **1** turn.";
         }
     }
 
     private static class EndureCommand implements Command {
         @Override
-        public void execute(Message message, String alias, String[] args) {
+        public void execute(Message message, String[] args) {
             User author = message.getAuthor().orElse(null);
             MessageChannel channel = message.getChannel().block();
             Game game = Enigma.getInstance().getPlayer(author).getGame();
@@ -122,8 +123,13 @@ public class Bloodreaper extends Unit {
         }
 
         @Override
-        public String[] getAliases() {
-            return new String[]{"endure"};
+        public String getName() {
+            return "endure";
+        }
+
+        @Override
+        public String getDescription() {
+            return "Consumes **Soul**, shielding equal to its amount and restoring **25** energy.";
         }
     }
 
@@ -145,7 +151,7 @@ public class Bloodreaper extends Unit {
 
             if (unit.wound.isDone()) {
                 unit.wound.reset();
-                event.output.add(target.buff(new Wound(actor, 1, REAP_WOUND)));
+                event.output.add(target.buff(new DebuffWound(actor, 1, REAP_WOUND)));
             }
 
             event = actor.ability(event);
