@@ -78,7 +78,7 @@ public class Game {
             // On turn end
             output.addAll(getCurrentMember().getData().stream().map(e -> e.onTurnEnd(getCurrentMember())).collect(Collectors.toList()));
             // On defend
-            if (turnCount >= 1 && getCurrentMember().getStats().get(ENERGY) > 0 && !getCurrentMember().hasData(DebuffSilence.class))
+            if (turnCount >= 1 && getCurrentMember().hasEnergy() && !getCurrentMember().hasData(DebuffSilence.class))
                 output.add(getCurrentMember().defend());
             // Check buffs
             getCurrentMember().getBuffs().stream().filter(b -> b.turn() == 0).forEach(buff -> {
@@ -109,10 +109,9 @@ public class Game {
         } else if (gameState == PLAYING) {
             GameMember member = getCurrentMember();
             member.heal(member.getStats().get(HEALTH_PER_TURN) * (member.isDefensive() ? 2 : 1), null, false);
-            member.getStats().add(GOLD, mode.handleGold(125 + turnCount));
-            member.getStats().add(GOLD, member.getStats().get(GOLD_PER_TURN));
-            member.getStats().put(ENERGY, member.getUnit().getStats().get(ENERGY));
-            member.getStats().add(ENERGY, member.getStats().get(ENERGY_PER_TURN));
+            member.giveGold(mode.handleGold(125 + turnCount));
+            member.giveGold(member.getStats().getInt(GOLD_PER_TURN));
+            member.setEnergy(member.getStats().getInt(MAX_ENERGY));
             member.setDefensive(false);
 
             turnCount++;
@@ -123,10 +122,10 @@ public class Game {
             // On turn start
             output.addAll(member.getData().stream().map(e -> e.onTurnStart(member)).collect(Collectors.toList()));
             // Low health warning
-            if (member.getStats().get(HEALTH) < member.getStats().get(MAX_HEALTH) * 0.2f)
+            if (member.getHealth() < member.getStats().get(MAX_HEALTH) * 0.2f)
                 output.add(Emote.WARN + "**" + member.getUsername() + "** is critically low on health.");
 
-            member.getStats().put(SHIELD, 0);
+            member.setShield(0);
         }
 
         channel.createMessage(Util.joinNonEmpty("\n", output)).block();
@@ -150,10 +149,10 @@ public class Game {
         else {
             List<String> output = new ArrayList<>();
             output.add(member.getUnit().getName() + " " + member.getMention() + " (" + turnCount + ")");
-            output.add("Gold: **" + Util.comma(member.getStats().getInt(GOLD)) + "**");
-            output.add("Health: **" + member.getStats().getInt(HEALTH) + " / " + member.getStats().getInt(MAX_HEALTH)
+            output.add("Gold: **" + Util.comma(member.getGold()) + "**");
+            output.add("Health: **" + member.getHealth() + " / " + member.getStats().getInt(MAX_HEALTH)
                     + "** (+**" + member.getStats().getInt(HEALTH_PER_TURN) + "**/t)");
-            output.add("Energy: **" + member.getStats().getInt(ENERGY) + "**");
+            output.add("Energy: **" + member.getEnergy() + "**");
             output.add("Items: **" + member.getItems() + "**");
 
             // Add unit topic
@@ -249,7 +248,7 @@ public class Game {
     }
 
     public void setGameState(GameState state) {
-        this.gameState = gameState;
+        this.gameState = state;
     }
 
     public int getTurnCount() {

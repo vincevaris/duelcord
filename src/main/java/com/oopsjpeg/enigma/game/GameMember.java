@@ -34,6 +34,11 @@ public class GameMember {
 
     private ChanceBag critBag = new ChanceBag(0, 0.5f);
 
+    private int health = 0;
+    private int gold = 0;
+    private int energy = 0;
+    private int shield = 0;
+
     private Stats stats = new Stats();
 
     public GameMember(Game game, Player player) {
@@ -108,16 +113,7 @@ public class GameMember {
 
     public void updateStats() {
         data.removeAll(getEffects());
-        stats.put(MAX_HEALTH, unit.getStats().get(MAX_HEALTH));
-        stats.put(DAMAGE, unit.getStats().get(DAMAGE));
-        stats.put(ABILITY_POWER, unit.getStats().get(ABILITY_POWER));
-        stats.put(CRIT_CHANCE, unit.getStats().get(CRIT_CHANCE));
-        stats.put(CRIT_DAMAGE, unit.getStats().get(CRIT_DAMAGE));
-        stats.put(LIFE_STEAL, unit.getStats().get(LIFE_STEAL));
-        stats.put(RESIST, unit.getStats().get(RESIST));
-        stats.put(HEALTH_PER_TURN, unit.getStats().get(HEALTH_PER_TURN));
-        stats.put(GOLD_PER_TURN, unit.getStats().get(GOLD_PER_TURN));
-        stats.put(ENERGY_PER_TURN, unit.getStats().get(ENERGY_PER_TURN));
+        stats.putAll(unit.getStats());
 
         for (Item item : getItems()) {
             stats.addAll(item.getStats());
@@ -138,13 +134,13 @@ public class GameMember {
     }
 
     public void act(GameAction action) {
-        if (stats.get(ENERGY) < action.getEnergy())
+        if (getEnergy() < action.getEnergy())
             Util.sendFailure(game.getChannel(), "You do not have **" + action.getEnergy() + "** energy.");
         else {
             game.getChannel().createMessage(action.execute(this)).block();
             game.getActions().add(action);
-            stats.sub(ENERGY, action.getEnergy());
-            if (stats.get(ENERGY) <= 0) game.nextTurn();
+            takeEnergy(action.getEnergy());
+            if (!hasEnergy()) game.nextTurn();
             else game.updateInfo(this);
         }
     }
@@ -172,26 +168,26 @@ public class GameMember {
                 + "for **" + buff.getTotalTurns() + "** turn(s)!";
     }
 
-    public String shield(float amount) {
-        amount *= 1 - (hasData(DebuffWound.class) ? ((DebuffWound) getData(DebuffWound.class)).getPower() : 0);
-        stats.add(SHIELD, amount);
-        return Emote.HEAL + "**" + getUsername() + "** shielded by **" + Math.round(amount)
-                + "**! [**" + stats.getInt(SHIELD) + "**]";
+    public String shield(float shieldAmount) {
+        shieldAmount *= 1 - (hasData(DebuffWound.class) ? ((DebuffWound) getData(DebuffWound.class)).getPower() : 0);
+        giveShield(Math.round(shieldAmount));
+        return Emote.HEAL + "**" + getUsername() + "** shielded by **" + Math.round(shieldAmount)
+                + "**! [**" + getShield() + "**]";
     }
 
-    public String heal(float amount) {
-        return heal(amount, null, true);
+    public String heal(float healthAmount) {
+        return heal(healthAmount, null, true);
     }
 
-    public String heal(float amount, String source) {
-        return heal(amount, source, true);
+    public String heal(float healthAmount, String source) {
+        return heal(healthAmount, source, true);
     }
 
-    public String heal(float amount, String source, boolean message) {
-        amount *= 1 - (hasData(DebuffWound.class) ? ((DebuffWound) getData(DebuffWound.class)).getPower() : 0);
-        stats.add(HEALTH, amount);
-        if (message) return Emote.HEAL + "**" + getUsername() + "** healed by **" + Math.round(amount) + "**! [**"
-                + stats.getInt(HEALTH) + " / " + stats.getInt(MAX_HEALTH) + "**]"
+    public String heal(float healthAmount, String source, boolean message) {
+        healthAmount *= 1 - (hasData(DebuffWound.class) ? ((DebuffWound) getData(DebuffWound.class)).getPower() : 0);
+        giveHealth(Math.round(healthAmount));
+        if (message) return Emote.HEAL + "**" + getUsername() + "** healed by **" + healthAmount + "**! [**"
+                + getHealth() + " / " + stats.getInt(MAX_HEALTH) + "**]"
                 + (source == null ? "" : " (" + source + ")");
         else return null;
     }
@@ -245,7 +241,7 @@ public class GameMember {
     public DamageEvent basicAttack(GameMember target) {
         DamageEvent event = new DamageEvent(game, this, target);
         event.damage = stats.get(DAMAGE);
-        event.actor.stats.add(GOLD, game.getMode().handleGold(Math.round(Util.nextInt(20, 30) + (game.getTurnCount() * 0.5f))));
+        event.actor.giveGold(game.getMode().handleGold(Math.round(Util.nextInt(20, 30) + (game.getTurnCount() * 0.5f))));
 
         for (GameObject o : event.actor.data) event = o.basicAttackOut(event);
         for (GameObject o : event.target.data) event = o.basicAttackIn(event);
@@ -266,26 +262,26 @@ public class GameMember {
 
         event = game.getMode().handleDamage(event);
 
-        if (event.heal > 0) event.output.add(heal(event.heal));
-        if (event.shield > 0) event.output.add(shield(event.shield));
+        if (event.heal > 0) event.output.add(heal(Math.round(event.heal)));
+        if (event.shield > 0) event.output.add(shield(Math.round(event.shield)));
 
         event.damage *= 1 - event.target.getResist();
         event.bonus *= 1 - event.target.getResist();
 
         // Shield damaging
-        if (event.target.stats.get(SHIELD) > 0) {
+        if (event.target.hasShield()) {
             // Remove bonus damage first
-            float shdBonus = Util.limit(event.bonus, 0, event.target.stats.get(SHIELD));
+            float shdBonus = Util.limit(event.bonus, 0, event.target.getShield());
             float shdDamage = 0;
-            event.target.stats.sub(SHIELD, shdBonus);
+            event.target.takeShield(Math.round(shdBonus));
 
             // Remove main damage after
-            if (event.target.stats.get(SHIELD) > 0) {
-                shdDamage = Util.limit(event.damage, 0, event.target.stats.get(SHIELD));
-                event.target.stats.sub(SHIELD, shdDamage);
+            if (event.target.hasShield()) {
+                shdDamage = Util.limit(event.damage, 0, event.target.getShield());
+                event.target.takeShield(Math.round(shdDamage));
             }
 
-            if (event.target.stats.get(SHIELD) > 0)
+            if (event.target.hasShield())
                 event.output.add(0, Util.damageText(event, event.actor.getUsername(), event.target.getUsername() + "'s Shield", emote, source));
             else
                 event.output.add(Emote.SHIELD + "**" + event.actor.getUsername() + "** destroyed **" + event.target.getUsername() + "'s Shield**!");
@@ -294,10 +290,10 @@ public class GameMember {
             event.damage -= shdDamage;
         }
 
-        if (event.target.stats.get(SHIELD) <= 0 && event.total() > 0) {
-            event.target.stats.sub(HEALTH, event.total());
+        if (!event.target.hasShield() && event.total() > 0) {
+            event.target.takeHealth(Math.round(event.total()));
             event.output.add(0, Util.damageText(event, event.actor.getUsername(), event.target.getUsername(), emote, source));
-            if (event.target.stats.get(HEALTH) <= 0)
+            if (!event.target.hasHealth())
                 event.output.add(event.target.lose());
         }
 
@@ -361,12 +357,10 @@ public class GameMember {
         data.add(new Potion());
         updateStats();
 
-        stats.put(HEALTH, stats.get(MAX_HEALTH));
-        stats.put(GOLD, game.getMode().handleGold(175 + (100 * game.getAlive().indexOf(this))));
+        setHealth(stats.getInt(MAX_HEALTH));
+        setGold(game.getMode().handleGold(175 + (100 * game.getAlive().indexOf(this))));
 
         game.getCommandListener().getCommands().addAll(Arrays.asList(unit.getCommands()));
-
-
 
         if (unit instanceof Berserker)
             ((Berserker) unit).getRage().setCurrent(game.getAlive().indexOf(this));
@@ -410,6 +404,106 @@ public class GameMember {
 
     public void setCritBag(ChanceBag critBag) {
         this.critBag = critBag;
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public void setHealth(int healthAmount) {
+        health = Util.limit(healthAmount, 0, stats.getInt(MAX_HEALTH));
+    }
+
+    public int giveHealth(int healthAmount) {
+        setHealth(getHealth() + healthAmount);
+        return getHealth();
+    }
+
+    public int takeHealth(int healthAmount) {
+        setHealth(getHealth() - healthAmount);
+        return getHealth();
+    }
+
+    public boolean hasHealth(int healthAmount) {
+        return getHealth() > healthAmount;
+    }
+
+    public boolean hasHealth() {
+        return hasHealth(0);
+    }
+
+    public int getEnergy() {
+        return energy;
+    }
+
+    public void setEnergy(int energyAmount) {
+        energy = Util.limit(energyAmount, 0, stats.getInt(MAX_ENERGY));
+    }
+
+    public int giveEnergy(int energyAmount) {
+        setEnergy(getEnergy() + energyAmount);
+        return getEnergy();
+    }
+
+    public int takeEnergy(int energyAmount) {
+        setEnergy(getEnergy() - energyAmount);
+        return getEnergy();
+    }
+
+    public boolean hasEnergy(int energyAmount) {
+        return getEnergy() > energyAmount;
+    }
+
+    public boolean hasEnergy() {
+        return hasEnergy(0);
+    }
+
+    public int getGold() {
+        return gold;
+    }
+
+    public void setGold(int goldAmount) {
+        gold = Math.max(goldAmount, 0);
+    }
+
+    public int giveGold(int goldAmount) {
+        setGold(getGold() + goldAmount);
+        return getGold();
+    }
+
+    public int takeGold(int goldAmount) {
+        setGold(getGold() - goldAmount);
+        return getGold();
+    }
+
+    public boolean hasGold(int goldAmount) {
+        return getGold() >= goldAmount;
+    }
+
+    public int getGoldDifference(int targetGoldAmount) {
+        return targetGoldAmount - getGold();
+    }
+
+    public int getShield() {
+        return shield;
+    }
+
+    public void setShield(int shieldAmount) {
+        shield = Math.max(shieldAmount, 0);
+    }
+
+    public int giveShield(int shieldAmount) {
+        setShield(getShield() + shieldAmount);
+        return getShield();
+    }
+
+    public int takeShield(int shieldAmount) {
+        setShield(getShield() - shieldAmount);
+        return getShield();
+    }
+
+    public boolean hasShield() {
+        return getShield() > 0;
     }
 
     public Stats getStats() {

@@ -10,7 +10,6 @@ import com.oopsjpeg.enigma.util.Util;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.oopsjpeg.enigma.game.Stats.GOLD;
 import static com.oopsjpeg.enigma.game.Stats.MAX_HEALTH;
 
 public class BuyAction implements GameAction {
@@ -25,7 +24,7 @@ public class BuyAction implements GameAction {
         List<String> output = new ArrayList<>();
         Item item = build.getItem();
 
-        actor.getStats().sub(GOLD, build.getCost());
+        actor.takeGold(build.getCost());
         actor.getData().removeIf(o -> o instanceof Item);
         actor.getData().add(item);
         actor.getData().addAll(build.getPostData());

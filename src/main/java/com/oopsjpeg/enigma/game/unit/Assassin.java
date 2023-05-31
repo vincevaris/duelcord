@@ -30,7 +30,7 @@ public class Assassin extends Unit {
 
     public Assassin() {
         super("Assassin", new Command[]{new SlashCommand()}, Color.of(0, 69, 255), new Stats()
-                .put(Stats.ENERGY, 125)
+                .put(Stats.MAX_ENERGY, 125)
                 .put(Stats.MAX_HEALTH, 720)
                 .put(Stats.DAMAGE, 22)
                 .put(Stats.HEALTH_PER_TURN, 9));

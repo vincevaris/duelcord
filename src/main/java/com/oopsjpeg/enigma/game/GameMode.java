@@ -18,7 +18,7 @@ public enum GameMode {
             Game game = event.actor.getGame();
             if (game.getTurnCount() >= 7) {
                 List<GameMember> members = new ArrayList<>(game.getMembers());
-                members.sort(Comparator.comparing(m -> m.getStats().get(Stats.HEALTH)));
+                members.sort(Comparator.comparing(GameMember::getHealth));
                 if (members.get(0).equals(event.actor)) {
                     event.damage *= 1.5f;
                     event.bonus *= 1.5f;

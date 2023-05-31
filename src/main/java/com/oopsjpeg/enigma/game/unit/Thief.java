@@ -43,13 +43,12 @@ public class Thief extends Unit {
     @Override
     public Stats getStats() {
         return new Stats()
-                .put(Stats.ENERGY, 150 + (goldTargetHit ? 50 : 0))
+                .put(Stats.MAX_ENERGY, 150 + (goldTargetHit ? 50 : 0))
                 .put(Stats.MAX_HEALTH, 735)
                 .put(Stats.DAMAGE, 17)
                 .put(Stats.HEALTH_PER_TURN, 8)
                 .put(Stats.CRIT_CHANCE, 0.2f)
                 .put(Stats.CRIT_DAMAGE, -1 * CRIT_REDUCE);
-
     }
 
     @Override
@@ -62,7 +61,7 @@ public class Thief extends Unit {
     public DamageEvent critOut(DamageEvent event) {
         event.critMul += crits * CRIT_INCREASE;
         if (crit() == 1) {
-            int steal = (int) Math.min((event.actor.getStats().get(Stats.DAMAGE) * STEAL_AD) + (event.actor.getStats().get(Stats.ABILITY_POWER)), event.target.getStats().getInt(Stats.GOLD));
+            int steal = (int) Math.min((event.actor.getStats().get(Stats.DAMAGE) * STEAL_AD) + (event.actor.getStats().get(Stats.ABILITY_POWER)), event.target.getGold());
 
             goldStolen += steal;
             if (goldStolen >= GOLD_TARGET && !goldTargetHit) {
@@ -70,8 +69,8 @@ public class Thief extends Unit {
                 event.output.add(Emote.ENERGY + "**" + event.actor.getUnit() + "** reached the gold target.");
             }
 
-            event.actor.getStats().add(Stats.GOLD, steal);
-            event.target.getStats().sub(Stats.GOLD, steal);
+            event.actor.giveGold(steal);
+            event.target.takeGold(steal);
             event.output.add(Emote.BUY + "**" + event.actor.getUsername() + "** stole **" + steal + "** gold!");
         }
         return event;

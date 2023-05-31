@@ -33,7 +33,7 @@ public class Duelist extends Unit {
 
     public Duelist() {
         super("Duelist", new Command[]{new CrushCommand()}, Color.MAGENTA, new Stats()
-                .put(Stats.ENERGY, 125)
+                .put(Stats.MAX_ENERGY, 125)
                 .put(Stats.MAX_HEALTH, 750)
                 .put(Stats.DAMAGE, 21)
                 .put(Stats.HEALTH_PER_TURN, 10));

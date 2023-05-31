@@ -100,7 +100,7 @@ public class Util {
         Stats stats = event.target.getStats();
         return emote + "**" + attacker + "** damaged **" + victim + "** by **" + Math.round(event.damage)
                 + "**" + (event.bonus > 0 ? " (+" + Math.round(event.bonus) + ")" : "") + "!" + (event.crit ? " **CRIT**!" : "")
-                + (event.miss ? " **MISS**!" : "") + " [**" + (stats.getInt(SHIELD) > 0 ? stats.getInt(SHIELD) : stats.getInt(HEALTH)
+                + (event.miss ? " **MISS**!" : "") + " [**" + (event.target.hasShield() ? event.target.getShield() : event.target.getHealth()
                 + " / " + stats.getInt(MAX_HEALTH)) + "**]"
                 + (!source.isEmpty() ? " (" + source + ")" : "");
     }

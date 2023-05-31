@@ -84,7 +84,7 @@ public abstract class Unit extends GameObject {
         desc.add("## " + getName() + " Stats");
         desc.add("Health: **" + stats.getInt(MAX_HEALTH) + "** (+**" + stats.getInt(HEALTH_PER_TURN) + "**/turn)");
         desc.add("Damage: **" + stats.getInt(DAMAGE) + "**");
-        desc.add("Energy: **" + stats.getInt(ENERGY) + "**");
+        desc.add("Energy: **" + stats.getInt(MAX_ENERGY) + "**");
         if (stats.get(CRIT_CHANCE) > 0)
             desc.add("Critical Chance: **" + Util.percent(stats.get(CRIT_CHANCE)) + "**");
         if (stats.get(LIFE_STEAL) > 0)

@@ -11,7 +11,7 @@ public class DawnShield extends Effect {
 
     @Override
     public String onDefend(GameMember member) {
-        return member.shield(Math.min(getPower(), member.getStats().get(Stats.ENERGY)));
+        return member.shield(Math.min(getPower(), member.getEnergy()));
     }
 
     @Override

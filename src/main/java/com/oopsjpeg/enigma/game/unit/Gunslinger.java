@@ -29,7 +29,7 @@ public class Gunslinger extends Unit {
 
     public Gunslinger() {
         super("Gunslinger", new Command[]{new BarrageCommand()}, Color.of(255, 110, 0), new Stats()
-                .put(Stats.ENERGY, 125)
+                .put(Stats.MAX_ENERGY, 125)
                 .put(Stats.MAX_HEALTH, 750)
                 .put(Stats.DAMAGE, 19)
                 .put(Stats.HEALTH_PER_TURN, 12));

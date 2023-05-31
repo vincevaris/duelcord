@@ -45,7 +45,7 @@ public class Berserker extends Unit {
     @Override
     public Stats getStats() {
         return new Stats()
-                .put(Stats.ENERGY, 100)
+                .put(Stats.MAX_ENERGY, 100)
                 .put(Stats.MAX_HEALTH, 760)
                 .put(Stats.DAMAGE, 19)
                 .put(Stats.HEALTH_PER_TURN, 10)
@@ -129,7 +129,7 @@ public class Berserker extends Unit {
             unit.bonus = stack * unit.rage.getCurrent();
 
             if (unit.rage.getCurrent() == Berserker.RAGE_MAX)
-                actor.getStats().add(Stats.ENERGY, 100);
+                actor.getStats().add(Stats.MAX_ENERGY, 100);
 
             unit.rage.reset();
 

@@ -44,7 +44,7 @@ public class Phasebreaker extends Unit {
     @Override
     public Stats getStats() {
         return new Stats()
-                .put(Stats.ENERGY, 125)
+                .put(Stats.MAX_ENERGY, 125)
                 .put(Stats.MAX_HEALTH, 750)
                 .put(Stats.DAMAGE, 18)
                 .put(Stats.ABILITY_POWER, bonusAp)

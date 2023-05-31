@@ -58,8 +58,8 @@ public enum GameCommand implements Command {
                     else {
                         Build build = item.build(member.getItems());
 
-                        if (member.getStats().getInt(Stats.GOLD) < build.getCost())
-                            Util.sendFailure(channel, "You need **" + (build.getCost() - member.getStats().getInt(Stats.GOLD)) + "** more gold for a(n) **" + item.getName() + "**.");
+                        if (!member.hasGold(build.getCost()))
+                            Util.sendFailure(channel, "You need **" + member.getGoldDifference(build.getCost()) + "** more gold for a(n) **" + item.getName() + "**.");
                         else if (build.getPostData().size() >= 4)
                             Util.sendFailure(channel, "You do not have enough inventory space for a(n) **" + item.getName() + "**.");
                         else

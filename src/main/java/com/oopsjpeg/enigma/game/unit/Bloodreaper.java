@@ -18,6 +18,8 @@ import discord4j.rest.util.Color;
 
 import java.util.ArrayList;
 
+import static com.oopsjpeg.enigma.game.Stats.MAX_ENERGY;
+
 public class Bloodreaper extends Unit {
     public static final float SOUL_RATIO = 0.2f;
     public static final int SOUL_MAX = 50;
@@ -38,10 +40,11 @@ public class Bloodreaper extends Unit {
 
     public Bloodreaper() {
         super("Bloodreaper", new Command[]{new ReapCommand(), new EndureCommand()}, Color.of(120, 0, 0), new Stats()
+                .put(MAX_ENERGY, 125)
                 .put(Stats.MAX_HEALTH, 720)
                 .put(Stats.HEALTH_PER_TURN, 7)
-                .put(Stats.DAMAGE, 14)
-                .put(Stats.ENERGY, 125));
+                .put(Stats.DAMAGE, 14));
+
     }
 
     @Override
@@ -68,8 +71,8 @@ public class Bloodreaper extends Unit {
         ArrayList<String> output = new ArrayList<>();
         if (endure.count() && endure.tryNotify())
             output.add(Emote.INFO + "**" + member.getUsername() + "**'s Endure is ready to use.");
-        if (member.getStats().get(Stats.SHIELD) > 0)
-            output.add(member.heal(member.getStats().get(Stats.SHIELD) * SHIELD_HEAL, "Lifeforce"));
+        if (member.hasShield())
+            output.add(member.heal(member.getShield() * SHIELD_HEAL, "Lifeforce"));
         return String.join("\n", output);
     }
 
@@ -183,9 +186,9 @@ public class Bloodreaper extends Unit {
             if (actor.getData().stream().anyMatch(o -> o instanceof Buff && ((Buff) o).isDebuff()))
                 actor.getData().removeIf(o -> o instanceof Buff && ((Buff) o).isDebuff());
             // Restore energy
-            if (actor.getStats().get(Stats.ENERGY) < unit.getStats().get(Stats.ENERGY)) {
+            if (actor.getEnergy() < unit.getStats().get(MAX_ENERGY)) {
                 output.add(Emote.ENERGY + "**" + actor.getUsername() + "** restored **" + ENDURE_ENERGY + "** energy.");
-                actor.getStats().add(Stats.ENERGY, ENDURE_ENERGY);
+                actor.giveEnergy(ENDURE_ENERGY);
             }
 
             unit.soul = 0;

@@ -28,7 +28,7 @@ public class Warrior extends Unit {
 
     public Warrior() {
         super("Warrior", new Command[]{new BashCommand()}, Color.CYAN, new Stats()
-                .put(Stats.ENERGY, 125)
+                .put(Stats.MAX_ENERGY, 125)
                 .put(Stats.MAX_HEALTH, 775)
                 .put(Stats.DAMAGE, 22)
                 .put(Stats.HEALTH_PER_TURN, 12));
@@ -115,8 +115,10 @@ public class Warrior extends Unit {
             }
             event.damage = (actor.getStats().get(Stats.DAMAGE) * Warrior.BASH_DAMAGE);
             event.bonus = (actor.getStats().get(Stats.MAX_HEALTH) - actor.getUnit().getStats().get(Stats.MAX_HEALTH)) * Warrior.BASH_HP_SCALE;
-            if (event.target.getStats().get(Stats.SHIELD) > 0)
-                event.target.getStats().put(Stats.SHIELD, 0.01f);
+            if (event.target.hasShield()) {
+                event.target.setShield(0);
+                event.output.add(Emote.SHIELD + " It broke their shield!");
+            }
 
             event = event.actor.ability(event);
 
