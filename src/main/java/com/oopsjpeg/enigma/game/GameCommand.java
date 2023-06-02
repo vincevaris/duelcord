@@ -30,8 +30,6 @@ public enum GameCommand implements Command {
                 message.delete().block();
                 if (game.getGameState() == GameState.PICKING)
                     Util.sendFailure(channel, "You cannot attack until the game has started.");
-                else if (member.hasBuff(SilenceDebuff.class))
-                    Util.sendFailure(channel, "You cannot attack while silenced.");
                 else
                     member.act(new AttackAction(game.getRandomTarget(member)));
             }
