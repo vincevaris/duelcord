@@ -80,7 +80,7 @@ public enum Item implements GameObject {
                     .put(SKILL_POWER, 45)),
     CRIMSON_MIGHT("Crimson Might", Tree.COMPLETE, 1175,
             new Item[] {HOLY_BAND, RING},
-            new Effect[] {new MagicalMasteryEffect(1, 2, .3f)},
+            new Effect[] {new MagicalMasteryEffect(1, 2, .03f)},
             new Stats()
                     .put(SKILL_POWER, 50)),
     DAWN_HAMMER("Dawn Hammer", Tree.COMPLETE, 1200,
