@@ -35,8 +35,9 @@ public class BloodWellEffect extends Effect {
     public DamageEvent attackOut(DamageEvent event) {
         float shieldAmount = event.damage + event.bonus;
 
-        shieldAmount = Util.limit(shieldAmount, 0, maxShield - currentShield);
+        shieldAmount = Util.limit(shieldAmount * getPower(), 0, maxShield - currentShield);
 
+        currentShield += shieldAmount;
         event.shield = shieldAmount;
 
         return event;
@@ -44,7 +45,7 @@ public class BloodWellEffect extends Effect {
 
     @Override
     public String getDescription() {
-        return "Attacks Shield for __" + percent(getPower()) + "__ of damage dealt.";
+        return "Attacks Shield for __" + percent(getPower()) + "__ of damage dealt, up to **" + maxShield + "**.";
     }
 
     @Override
