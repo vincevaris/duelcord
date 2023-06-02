@@ -407,7 +407,7 @@ public enum Unit implements GameObject {
 
         @Override
         public String getDescription() {
-            return "Every **" + WARRIOR_PASSIVE_LIMIT + "** Attacks deals __" + percent(WARRIOR_PASSIVE_AP_RATIO) + " Attack Power__ bonus damage.";
+            return "Every **" + WARRIOR_PASSIVE_LIMIT + "** Attacks, deal __" + percent(WARRIOR_PASSIVE_AP_RATIO) + " Attack Power__ bonus damage.";
         }
 
         @Override
