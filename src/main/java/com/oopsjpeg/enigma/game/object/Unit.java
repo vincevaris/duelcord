@@ -537,8 +537,8 @@ public enum Unit implements GameObject {
             public String getDescription() {
                 return "Deal __" + GUNSLINGER_DEADEYE_DAMAGE + "__ + __" + percent(GUNSLINGER_DEADEYE_AP_RATIO) + " Attack Power__." +
                         "\nHas a __" + percent(GUNSLINGER_DEADEYE_CHANCE) + "__ chance to **Jackpot**, increased by __" + percentRaw(GUNSLINGER_DEADEYE_JACKPOT_BARRAGE_INCREASE) + "__ per Barrage shot hit." +
-                        "\nJackpot deals __" + percent(GUNSLINGER_DEADEYE_JACKPOT_RATIO) + "__ of the target's missing health." +
-                        "\nDeadshot can crit.";
+                        "\nJackpot instead deals __" + percent(GUNSLINGER_DEADEYE_JACKPOT_RATIO) + "__ of the target's missing health." +
+                        "\nDeadeye can crit.";
             }
         }
 
@@ -561,18 +561,19 @@ public enum Unit implements GameObject {
                 setDeadeyeCooldown(vars, deadeyeCooldown);
 
                 DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
-                event.damage += GUNSLINGER_DEADEYE_DAMAGE;
-                event.damage += stats.get(ATTACK_POWER) * GUNSLINGER_DEADEYE_AP_RATIO;
-                actor.crit(event);
-
                 List<String> output = new ArrayList<>();
 
                 boolean jackpot = false;
                 float jackpotRand = Util.RANDOM.nextFloat();
                 if (jackpotRand <= GUNSLINGER_DEADEYE_CHANCE + (barrageCount * GUNSLINGER_DEADEYE_JACKPOT_BARRAGE_INCREASE)) {
-                    event.bonus += Math.max(1, (event.target.getStats().get(MAX_HEALTH) - event.target.getHealth()) * GUNSLINGER_DEADEYE_JACKPOT_RATIO);
+                    event.damage += Math.max(1, (event.target.getStats().get(MAX_HEALTH) - event.target.getHealth()) * GUNSLINGER_DEADEYE_JACKPOT_RATIO);
                     jackpot = true;
+                } else {
+                    event.damage += GUNSLINGER_DEADEYE_DAMAGE;
+                    event.damage += stats.get(ATTACK_POWER) * GUNSLINGER_DEADEYE_AP_RATIO;
                 }
+
+                actor.crit(event);
 
                 output.add(actor.damage(event, Emote.GUN, "Deadeye"));
                 output.add(0, Emote.USE + "**" + actor.getUsername() + "** used **Deadeye**!" + (jackpot ? " **JACKPOT**!" : ""));

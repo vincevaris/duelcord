@@ -31,6 +31,6 @@ public class UnitConstants {
     public static final float GUNSLINGER_DEADEYE_CHANCE = 0.15f;
     public static final int GUNSLINGER_DEADEYE_DAMAGE = 10;
     public static final float GUNSLINGER_DEADEYE_AP_RATIO = 0.75f;
-    public static final float GUNSLINGER_DEADEYE_JACKPOT_RATIO = 0.25f;
+    public static final float GUNSLINGER_DEADEYE_JACKPOT_RATIO = 0.2f;
     public static final int GUNSLINGER_DEADEYE_COOLDOWN = 3;
 }
