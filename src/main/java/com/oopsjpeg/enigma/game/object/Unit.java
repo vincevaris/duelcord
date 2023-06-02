@@ -20,6 +20,7 @@ import java.util.List;
 import static com.oopsjpeg.enigma.game.Stats.*;
 import static com.oopsjpeg.enigma.game.unit.UnitConstants.*;
 import static com.oopsjpeg.enigma.util.Util.percent;
+import static com.oopsjpeg.enigma.util.Util.percentRaw;
 
 public enum Unit implements GameObject {
     ASSASSIN("Assassin", Color.of(0, 69, 255), new Stats()
@@ -216,10 +217,13 @@ public enum Unit implements GameObject {
     //        .put(Stats.HEALTH_PER_TURN, 10)),
     GUNSLINGER("Gunslinger", Color.of(255, 110, 0), new Stats()
             .put(MAX_ENERGY, 125)
-            .put(MAX_HEALTH, 750)
+            .put(MAX_HEALTH, 1090)
             .put(ATTACK_POWER, 19)
             .put(HEALTH_PER_TURN, 12)) {
         private static final String VAR_BARRAGE_COOLDOWN = "barrage_cooldown";
+        private static final String VAR_BARRAGE_COUNT = "barrage_count";
+        private static final String VAR_ROLL_COOLDOWN = "roll_cooldown";
+        private static final String VAR_DEADEYE_COOLDOWN = "deadeye_cooldown";
         private static final String VAR_FIRST_ATTACKED = "already_first_attacked";
 
         public Cooldown getBarrageCooldown(GameMemberVars vars) {
@@ -230,6 +234,36 @@ public enum Unit implements GameObject {
 
         public void setBarrageCooldown(GameMemberVars vars, Cooldown barrageCooldown) {
             vars.put(this, VAR_BARRAGE_COOLDOWN, barrageCooldown);
+        }
+
+        public int getBarrageCount(GameMemberVars vars) {
+            if (!vars.has(this, VAR_BARRAGE_COUNT))
+                setBarrageCount(vars, 0);
+            return vars.get(this, VAR_BARRAGE_COUNT, Integer.class);
+        }
+
+        public void setBarrageCount(GameMemberVars vars, int barrageCount) {
+            vars.put(this, VAR_BARRAGE_COUNT, barrageCount);
+        }
+
+        public Cooldown getRollCooldown(GameMemberVars vars) {
+            if (!vars.has(this, VAR_ROLL_COOLDOWN))
+                setRollCooldown(vars, new Cooldown(GUNSLINGER_ROLL_COOLDOWN));
+            return vars.get(this, VAR_ROLL_COOLDOWN, Cooldown.class);
+        }
+
+        public void setRollCooldown(GameMemberVars vars, Cooldown rollCooldown) {
+            vars.put(this, VAR_ROLL_COOLDOWN, rollCooldown);
+        }
+
+        public Cooldown getDeadeyeCooldown(GameMemberVars vars) {
+            if (!vars.has(this, VAR_DEADEYE_COOLDOWN))
+                setDeadeyeCooldown(vars, new Cooldown(GUNSLINGER_DEADEYE_COOLDOWN));
+            return vars.get(this, VAR_DEADEYE_COOLDOWN, Cooldown.class);
+        }
+
+        public void setDeadeyeCooldown(GameMemberVars vars, Cooldown deadeyeCooldown) {
+            vars.put(this, VAR_DEADEYE_COOLDOWN, deadeyeCooldown);
         }
 
         public boolean getFirstAttacked(GameMemberVars vars) {
@@ -244,22 +278,32 @@ public enum Unit implements GameObject {
 
         @Override
         public String getDescription() {
-            return "The first Attack per turn always Crits and deals __" + percent(GUNSLINGER_PASSIVE_SP_RATIO) + " Skill Power__ bonus damage.";
+            return "The first Attack per turn always Crits and deals __" + percent(GUNSLINGER_PASSIVE_AP_RATIO) + " Attack Power__ bonus damage.";
         }
 
         @Override
         public String[] getTopic(GameMember member) {
             GameMemberVars vars = member.getVars();
             Cooldown barrageCooldown = getBarrageCooldown(vars);
+            Cooldown rollCooldown = getRollCooldown(vars);
+            Cooldown deadeyeCooldown = getDeadeyeCooldown(vars);
 
-            return new String[]{(barrageCooldown.isDone()
-                    ? "Barrage: **Ready**"
-                    : "Barrage: **" + barrageCooldown.getCurrent() + "** turns")};
+            return new String[]{
+                    (barrageCooldown.isDone()
+                            ? "Barrage: Ready"
+                            : "Barrage: " + barrageCooldown.getCurrent() + " turns"),
+                    (rollCooldown.isDone()
+                            ? "Roll: Ready"
+                            : "Roll: " + rollCooldown.getCurrent() + " turns"),
+                    (deadeyeCooldown.isDone()
+                            ? "Deadeye: Ready"
+                            : "Deadeye: " + deadeyeCooldown.getCurrent() + " turns")
+            };
         }
 
         @Override
         public Command[] getCommands() {
-            return new Command[]{new BarrageCommand()};
+            return new Command[]{ new BarrageCommand(), new RollCommand(), new DeadeyeCommand() };
         }
 
         @Override
@@ -270,7 +314,7 @@ public enum Unit implements GameObject {
             if (!getFirstAttacked(vars)) {
                 setFirstAttacked(vars, true);
                 event.crit = true;
-                event.bonus += stats.get(SKILL_POWER) * GUNSLINGER_PASSIVE_SP_RATIO;
+                event.bonus += stats.get(ATTACK_POWER) * GUNSLINGER_PASSIVE_AP_RATIO;
             }
 
             return event;
@@ -280,15 +324,34 @@ public enum Unit implements GameObject {
         public String onTurnStart(GameMember member) {
             GameMemberVars vars = member.getVars();
             setFirstAttacked(vars, false);
+
+            List<String> output = new ArrayList<>();
+
             Cooldown barrageCooldown = getBarrageCooldown(vars);
             boolean barrageReady = barrageCooldown.count();
             boolean barrageNotify = barrageReady && barrageCooldown.tryNotify();
             setBarrageCooldown(vars, barrageCooldown);
 
             if (barrageReady && barrageNotify)
-                return Emote.INFO + "**" + member.getUsername() + "**'s Barrage is ready to use.";
+                output.add(Emote.INFO + "**" + member.getUsername() + "**'s Barrage is ready to use.");
 
-            return null;
+            Cooldown rollCooldown = getRollCooldown(vars);
+            boolean rollReady = rollCooldown.count();
+            boolean rollNotify = rollReady && rollCooldown.tryNotify();
+            setRollCooldown(vars, rollCooldown);
+
+            if (rollReady && rollNotify)
+                output.add(Emote.INFO + "**" + member.getUsername() + "**'s Roll is ready to use.");
+
+            Cooldown deadeyeCooldown = getDeadeyeCooldown(vars);
+            boolean deadeyeReady = deadeyeCooldown.count();
+            boolean deadeyeNotify = deadeyeReady && deadeyeCooldown.tryNotify();
+            setDeadeyeCooldown(vars, deadeyeCooldown);
+
+            if (deadeyeReady && deadeyeNotify)
+                output.add(Emote.INFO + "**" + member.getUsername() + "**'s Deadeye is ready to use.");
+
+            return output.isEmpty() ? null : String.join("\n", output);
         }
 
         class BarrageCommand implements Command {
@@ -322,7 +385,7 @@ public enum Unit implements GameObject {
 
             @Override
             public String getDescription() {
-                return "Fire **" + GUNSLINGER_BARRAGE_SHOTS + "** shots, each dealing **" + GUNSLINGER_BARRAGE_DAMAGE + "** + __" + percent(GUNSLINGER_BARRAGE_AP_RATIO) + " Attack Power__ + __" + percent(GUNSLINGER_BARRAGE_SP_RATIO) + " Skill Power__." +
+                return "Fire **" + GUNSLINGER_BARRAGE_SHOTS + "** shots, each dealing __" + GUNSLINGER_BARRAGE_DAMAGE + "__ + __" + percent(GUNSLINGER_BARRAGE_AP_RATIO) + " Attack Power__ + __" + percent(GUNSLINGER_BARRAGE_SP_RATIO) + " Skill Power__." +
                         "\nShots can crit and apply on-hit effects.";
             }
         }
@@ -345,15 +408,21 @@ public enum Unit implements GameObject {
                 setBarrageCooldown(vars, barrageCooldown);
 
                 List<String> output = new ArrayList<>();
+                int barrageCount = getBarrageCount(vars);
                 for (int i = 0; i < GUNSLINGER_BARRAGE_SHOTS; i++)
                     if (target.isAlive()) {
                         DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
                         event.damage += stats.get(ATTACK_POWER) * GUNSLINGER_BARRAGE_AP_RATIO;
-                        event.damage += stats.get(SKILL_POWER) * GUNSLINGER_PASSIVE_SP_RATIO;
+                        event.damage += stats.get(SKILL_POWER) * GUNSLINGER_BARRAGE_SP_RATIO;
                         actor.crit(event);
                         actor.hit(event);
+
+                        if (!event.cancelled)
+                            barrageCount++;
+
                         output.add(actor.damage(event, Emote.GUN, "Barrage"));
                     }
+                setBarrageCount(vars, barrageCount);
                 output.add(0, Emote.USE + "**" + actor.getUsername() + "** used **Barrage**!");
 
                 return Util.joinNonEmpty("\n", output);
@@ -362,6 +431,158 @@ public enum Unit implements GameObject {
             @Override
             public int getEnergy() {
                 return 25;
+            }
+        }
+
+        class RollCommand implements Command {
+            @Override
+            public void execute(Message message, String[] args) {
+                User author = message.getAuthor().orElse(null);
+                MessageChannel channel = message.getChannel().block();
+                Game game = Enigma.getInstance().getPlayer(author).getGame();
+                GameMember member = game.getMember(author);
+
+                if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
+                    message.delete().block();
+                    if (member.hasBuff(SilenceDebuff.class))
+                        Util.sendFailure(channel, "You cannot **Roll** while silenced.");
+                    else {
+                        GameMemberVars vars = member.getVars();
+                        Cooldown rollCooldown = getRollCooldown(vars);
+
+                        if (!rollCooldown.isDone())
+                            Util.sendFailure(channel, "**Roll** is on cooldown for **" + rollCooldown.getCurrent() + "** more turns.");
+                        else
+                            member.act(new RollAction());
+                    }
+                }
+            }
+
+            @Override
+            public String getName() {
+                return "roll";
+            }
+
+            @Override
+            public String getDescription() {
+                return "End the turn and gain __" + percent(GUNSLINGER_ROLL_DODGE) + "__ + __" + percentRaw(GUNSLINGER_ROLL_SP_RATIO) + " Skill Power__ Dodge.";
+            }
+        }
+
+        class RollAction implements GameAction {
+            @Override
+            public String act(GameMember actor) {
+                GameMemberVars vars = actor.getVars();
+                Game game = actor.getGame();
+                Cooldown rollCooldown = getRollCooldown(vars);
+                Stats stats = actor.getStats();
+
+                rollCooldown.start();
+                setRollCooldown(vars, rollCooldown);
+
+                actor.buff(new RollBuff(actor, GUNSLINGER_ROLL_DODGE + (stats.get(SKILL_POWER) * GUNSLINGER_ROLL_SP_RATIO)));
+                actor.setEnergy(0);
+
+                return Emote.USE + "**" + actor.getUsername() + "** used **Roll**!";
+            }
+
+            @Override
+            public int getEnergy() {
+                return 0;
+            }
+        }
+
+        class RollBuff extends Buff {
+            public RollBuff(GameMember source, float power) {
+                super("Roll", false, source, 2, power);
+            }
+
+            @Override
+            public Stats getStats() {
+                return new Stats()
+                        .put(DODGE, getPower());
+            }
+        }
+
+        class DeadeyeCommand implements Command {
+            @Override
+            public void execute(Message message, String[] args) {
+                User author = message.getAuthor().orElse(null);
+                MessageChannel channel = message.getChannel().block();
+                Game game = Enigma.getInstance().getPlayer(author).getGame();
+                GameMember member = game.getMember(author);
+
+                if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
+                    message.delete().block();
+                    if (member.hasBuff(SilenceDebuff.class))
+                        Util.sendFailure(channel, "You cannot **Deadeye** while silenced.");
+                    else {
+                        GameMemberVars vars = member.getVars();
+                        Cooldown deadeyeCooldown = getDeadeyeCooldown(vars);
+
+                        if (!deadeyeCooldown.isDone())
+                            Util.sendFailure(channel, "**Deadeye** is on cooldown for **" + deadeyeCooldown.getCurrent() + "** more turns.");
+                        else
+                            member.act(new DeadeyeAction(game.getRandomTarget(member)));
+                    }
+                }
+            }
+
+            @Override
+            public String getName() {
+                return "deadeye";
+            }
+
+            @Override
+            public String getDescription() {
+                return "Deal __" + GUNSLINGER_DEADEYE_DAMAGE + "__ + __" + percent(GUNSLINGER_DEADEYE_AP_RATIO) + " Attack Power__." +
+                        "\nHas a __" + percent(GUNSLINGER_DEADEYE_CHANCE) + "__ chance to **Jackpot**, increased by __" + percentRaw(GUNSLINGER_DEADEYE_JACKPOT_BARRAGE_INCREASE) + "__ per Barrage shot hit." +
+                        "\nJackpot deals __" + percent(GUNSLINGER_DEADEYE_JACKPOT_RATIO) + "__ of the target's missing health." +
+                        "\nDeadshot can crit.";
+            }
+        }
+
+        class DeadeyeAction implements GameAction {
+            private final GameMember target;
+
+            public DeadeyeAction(GameMember target) {
+                this.target = target;
+            }
+
+            @Override
+            public String act(GameMember actor) {
+                GameMemberVars vars = actor.getVars();
+                Game game = actor.getGame();
+                Cooldown deadeyeCooldown = getDeadeyeCooldown(vars);
+                int barrageCount = getBarrageCount(vars);
+                Stats stats = actor.getStats();
+
+                deadeyeCooldown.start();
+                setDeadeyeCooldown(vars, deadeyeCooldown);
+
+                DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
+                event.damage += GUNSLINGER_DEADEYE_DAMAGE;
+                event.damage += stats.get(ATTACK_POWER) * GUNSLINGER_DEADEYE_AP_RATIO;
+                actor.crit(event);
+
+                List<String> output = new ArrayList<>();
+
+                boolean jackpot = false;
+                float jackpotRand = Util.RANDOM.nextFloat();
+                if (jackpotRand <= GUNSLINGER_DEADEYE_CHANCE + (barrageCount * GUNSLINGER_DEADEYE_JACKPOT_BARRAGE_INCREASE)) {
+                    event.bonus += Math.max(1, (event.target.getStats().get(MAX_HEALTH) - event.target.getHealth()) * GUNSLINGER_DEADEYE_JACKPOT_RATIO);
+                    jackpot = true;
+                }
+
+                output.add(actor.damage(event, Emote.GUN, "Deadeye"));
+                output.add(0, Emote.USE + "**" + actor.getUsername() + "** used **Deadeye**!" + (jackpot ? " **JACKPOT**!" : ""));
+
+                return Util.joinNonEmpty("\n", output);
+            }
+
+            @Override
+            public int getEnergy() {
+                return 50;
             }
         }
     },

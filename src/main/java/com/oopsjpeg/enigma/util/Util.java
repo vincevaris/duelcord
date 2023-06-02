@@ -86,6 +86,10 @@ public class Util {
         return Math.round(x * 100) + "%";
     }
 
+    public static String percentRaw(float x) {
+        return x * 100 + "%";
+    }
+
     public static float limit(float x, float min, float max) {
         return Math.max(min, Math.min(max, x));
     }

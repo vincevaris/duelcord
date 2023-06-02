@@ -144,9 +144,9 @@ public class GameMember {
 
     public String buff(Buff buff) {
         buffs.add(buff);
-        return Emote.BLEED + "**" + buff.getSource().getUsername() + "** applied **" + buff.getName() + "** " +
-                (buff.hasPower() ? "(" + buff.formatPower() + ") " : "") +
-                (buff.getTotalTurns() > 1 ? "for **" + buff.getTotalTurns() + "** turns" : "") + "!";
+        return Emote.BLEED + "**" + buff.getSource().getUsername() + "** applied **" + buff.getName() + "**" +
+                (buff.hasPower() ? " (" + buff.formatPower() + ")" : "") +
+                (buff.getTotalTurns() > 1 ? " for **" + buff.getTotalTurns() + "** turns" : "") + "!";
     }
 
     public String shield(float shieldAmount) {
@@ -193,9 +193,18 @@ public class GameMember {
         for (GameObject o : event.actor.getData()) event = o.hitOut(event);
         for (GameObject o : event.target.getData()) event = o.hitIn(event);
 
+        if (event.target.stats.get(DODGE) > 0) {
+            float dodgeRand = Util.RANDOM.nextFloat();
+            if (dodgeRand <= event.target.stats.get(DODGE)) {
+                event.output.add(Emote.DODGE + "**" + event.target.getUsername() + "** dodged the hit!");
+                event.cancelled = true;
+                return event;
+            }
+        }
+
         // Life steal healing
-        if (stats.get(LIFE_STEAL) > 0)
-            event.heal += stats.get(LIFE_STEAL) * event.damage;
+        if (event.actor.stats.get(LIFE_STEAL) > 0)
+            event.heal += event.actor.stats.get(LIFE_STEAL) * event.damage;
 
         return event;
     }
@@ -246,6 +255,8 @@ public class GameMember {
     public String damage(DamageEvent event, String emote, String source) {
         for (GameObject o : event.actor.getData()) event = o.damageOut(event);
         for (GameObject o : event.target.getData()) event = o.damageIn(event);
+
+        if (event.cancelled) return Util.joinNonEmpty("\n", event.output);
 
         event = game.getMode().handleDamage(event);
 

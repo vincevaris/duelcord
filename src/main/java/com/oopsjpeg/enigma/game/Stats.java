@@ -14,6 +14,7 @@ public class Stats {
     public static final String CRIT_DAMAGE = "crit_damage";
     public static final String LIFE_STEAL = "life_steal";
     public static final String RESIST = "resist";
+    public static final String DODGE = "dodge";
     public static final String COOLDOWN_REDUCTION = "cooldown_reduction";
 
     public static final String GOLD_PER_TURN = "gold_per_turn";
@@ -30,6 +31,7 @@ public class Stats {
         values.put(CRIT_DAMAGE, 0.0f);
         values.put(LIFE_STEAL, 0.0f);
         values.put(RESIST, 0.0f);
+        values.put(DODGE, 0.0f);
         values.put(COOLDOWN_REDUCTION, 0.0f);
 
         values.put(GOLD_PER_TURN, 0.0f);

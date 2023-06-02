@@ -15,6 +15,7 @@ public class DamageEvent {
     public boolean miss;
     public float heal;
     public float shield;
+    public boolean cancelled;
 
     public DamageEvent(Game game, GameMember actor, GameMember target) {
         this.game = game;

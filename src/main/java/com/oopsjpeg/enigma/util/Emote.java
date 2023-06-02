@@ -21,6 +21,7 @@ public class Emote {
     public static final String SILENCE = ":eight_pointed_black_star: ";
     public static final String ENERGY = ":sparkle: ";
     public static final String BUFF = ":eight_spoked_asterisk: ";
+    public static final String DODGE = ":interrobang: ";
 
     // Custom emotes
     public static final String HEAL = "<:enigmaHeal:944702328177569892> ";
