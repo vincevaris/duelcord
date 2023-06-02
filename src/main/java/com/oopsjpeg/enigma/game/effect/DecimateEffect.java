@@ -32,6 +32,7 @@ public class DecimateEffect extends Effect {
     @Override
     public String[] getTopic(GameMember member) {
         return new String[]{
-                "Decimate: **" + critCount.getCurrent() + " / " + critCount.getMax() + "**"};
+                "Decimate: " + critCount.getCurrent() + " / " + critCount.getMax()
+        };
     }
 }

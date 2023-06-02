@@ -37,6 +37,7 @@ public class KorasWillEffect extends Effect {
     @Override
     public String[] getTopic(GameMember member) {
         return new String[]{
-                "Kora's Will: " + getTotalPower(member.getStats().get(SKILL_POWER))};
+                "Kora's Will: " + getTotalPower(member.getStats().get(SKILL_POWER))
+        };
     }
 }

@@ -32,6 +32,7 @@ public class LifewasterEffect extends Effect {
     @Override
     public String[] getTopic(GameMember member) {
         return new String[]{
-                "Lifewaster: " + hitCount.getCurrent() + " / " + hitCount.getMax()};
+                "Lifewaster: " + hitCount.getCurrent() + " / " + hitCount.getMax()
+        };
     }
 }

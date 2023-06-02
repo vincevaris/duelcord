@@ -33,6 +33,7 @@ public class WolfbiteEffect extends Effect {
     @Override
     public String[] getTopic(GameMember member) {
         return new String[]{
-                "Wolfbite: **" + attackCount.getCurrent() + " / " + attackCount.getMax() + "**"};
+                "Wolfbite: " + attackCount.getCurrent() + " / " + attackCount.getMax()
+        };
     }
 }
