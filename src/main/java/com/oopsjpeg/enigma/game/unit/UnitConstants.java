@@ -27,8 +27,8 @@ public class UnitConstants {
     public static final float GUNSLINGER_ROLL_SP_RATIO = 0.0025f;
     public static final int GUNSLINGER_ROLL_COOLDOWN = 4;
 
-    public static final float GUNSLINGER_DEADEYE_JACKPOT_BARRAGE_INCREASE = 0.045f;
-    public static final float GUNSLINGER_DEADEYE_CHANCE = 0.18f;
+    public static final float GUNSLINGER_DEADEYE_JACKPOT_BARRAGE_INCREASE = 0.025f;
+    public static final float GUNSLINGER_DEADEYE_CHANCE = 0.15f;
     public static final int GUNSLINGER_DEADEYE_DAMAGE = 10;
     public static final float GUNSLINGER_DEADEYE_AP_RATIO = 0.75f;
     public static final float GUNSLINGER_DEADEYE_JACKPOT_RATIO = 0.25f;
