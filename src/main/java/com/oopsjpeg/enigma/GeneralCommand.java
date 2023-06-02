@@ -187,6 +187,19 @@ public enum GeneralCommand implements Command {
                         Util.formatStats(item.getStats()),
                         Util.formatEffects(item.getEffects())));
         }
+    },
+    UNIT("unit") {
+        @Override
+        public void execute(Message message, String[] args) {
+            Unit unit = Unit.fromName(String.join(" ", args));
+
+            if (unit == null) return;
+
+            MessageChannel channel = message.getChannel().block();
+            channel.createMessage(MessageCreateSpec.builder()
+                    .addEmbed(unit.format())
+                    .build()).subscribe();
+        }
     };
 
     private final String name;
