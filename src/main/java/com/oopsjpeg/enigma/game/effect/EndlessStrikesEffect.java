@@ -28,12 +28,13 @@ public class EndlessStrikesEffect extends Effect {
 
     @Override
     public String getDescription() {
-        return "Each Attack deals __" + percent(getPower()) + "__ more than the last for this turn.";
+        return "Each Hit deals __" + percent(getPower()) + "__ more than the last for this turn.";
     }
 
     @Override
     public String[] getTopic(GameMember member) {
         return new String[]{
-                "Endless Strikes: " + percent(multiplier * getPower())};
+                "Endless Strikes: " + percent(multiplier * getPower())
+        };
     }
 }
