@@ -42,9 +42,9 @@ public class ReadyListener implements Listener {
                 .forEach(g -> {
                     g.getAfkTimer().stack();
                     if (g.getAfkTimer().getCurrent() == 4)
-                        g.getChannel().createMessage(Emote.WARN + g.getCurrentMember().getMention() + ", you have **" + (g.getAfkTimer().getMax() / 2) + "** minutes to perform an action, otherwise you will **forfeit**.").block();
+                        g.getChannel().createMessage(Emote.WARN + g.getCurrentMember().getMention() + ", you have **" + (g.getAfkTimer().getMax() / 2) + "** minutes to perform an action, otherwise you will **forfeit**.").subscribe();
                     else if (g.getAfkTimer().isDone())
-                        g.getChannel().createMessage(g.getCurrentMember().lose()).block();
+                        g.getChannel().createMessage(g.getCurrentMember().lose()).subscribe();
                 }), 1, 1, TimeUnit.MINUTES);
         Enigma.SCHEDULER.scheduleAtFixedRate(() -> instance.getLeaderboardChannel().getMessagesBefore(Snowflake.of(Instant.now()))
                 .switchIfEmpty(instance.getLeaderboardChannel().createEmbed(e -> e.setTitle("...")))
@@ -52,7 +52,7 @@ public class ReadyListener implements Listener {
                 .edit(MessageEditSpec.builder().addEmbed(Util.leaderboard()
                         .withFooter(EmbedCreateFields.Footer.of("Updates every 10 minutes.", null)))
                         .build())
-                .block(), 0, 10, TimeUnit.MINUTES);
+                .subscribe(), 0, 10, TimeUnit.MINUTES);
     }
 
     public void onReady(ReadyEvent event) {

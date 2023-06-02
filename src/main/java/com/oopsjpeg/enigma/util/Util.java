@@ -1,11 +1,9 @@
 package com.oopsjpeg.enigma.util;
 
-import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.object.Effect;
-import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.storage.Player;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
@@ -33,28 +31,32 @@ public class Util {
         return min + RANDOM.nextFloat() * (max - min);
     }
 
+    public static <T> T pickRandom(T[] array) {
+        return array[RANDOM.nextInt(array.length)];
+    }
+
     public static String formatStats(Stats stats) {
         List<String> output = new ArrayList<>();
         if (stats.get(MAX_HEALTH) > 0)
             output.add("Max Health: +**" + stats.getInt(MAX_HEALTH) + "**");
-        if (stats.get(RESIST) > 0)
-            output.add("Resist: +**" + Util.percent(stats.get(RESIST)) + "**");
-        if (stats.get(DAMAGE) > 0)
-            output.add("Damage: +**" + stats.getInt(DAMAGE) + "**");
-        if (stats.get(ABILITY_POWER) > 0)
-            output.add("Ability Power: +**" + stats.getInt(ABILITY_POWER) + "**");
+        if (stats.get(MAX_ENERGY) > 0)
+            output.add("Max Energy: +**" + stats.getInt(MAX_ENERGY) + "**");
+        if (stats.get(ATTACK_POWER) > 0)
+            output.add("Attack Power: +**" + stats.getInt(ATTACK_POWER) + "**");
+        if (stats.get(SKILL_POWER) > 0)
+            output.add("Skill Power: +**" + stats.getInt(SKILL_POWER) + "**");
         if (stats.get(CRIT_CHANCE) > 0)
-            output.add("Critical Chance: +**" + Util.percent(stats.get(CRIT_CHANCE)) + "**");
+            output.add("Critical Chance: +**" + percent(stats.get(CRIT_CHANCE)) + "**");
         if (stats.get(CRIT_DAMAGE) > 0)
-            output.add("Critical Damage: +**" + Util.percent(stats.get(CRIT_DAMAGE)) + "**");
+            output.add("Critical Damage: +**" + percent(stats.get(CRIT_DAMAGE)) + "**");
         if (stats.get(LIFE_STEAL) > 0)
-            output.add("Life Steal: **" + Util.percent(stats.get(LIFE_STEAL)) + "**");
+            output.add("Life Steal: +**" + percent(stats.get(LIFE_STEAL)) + "**");
+        if (stats.get(RESIST) > 0)
+            output.add("Resist: +**" + percent(stats.get(RESIST)) + "**");
         if (stats.get(HEALTH_PER_TURN) > 0)
             output.add("Health/turn: +**" + stats.getInt(HEALTH_PER_TURN) + "**");
         if (stats.get(GOLD_PER_TURN) > 0)
             output.add("Gold/turn: +**" + stats.getInt(GOLD_PER_TURN) + "**");
-        if (stats.get(ENERGY_PER_TURN) > 0)
-            output.add("Energy/turn: +**" + stats.getInt(ENERGY_PER_TURN) + "**");
         return Util.joinNonEmpty("\n", output);
     }
 

@@ -3,14 +3,20 @@ package com.oopsjpeg.enigma.game.object;
 import com.oopsjpeg.enigma.game.GameObject;
 import com.oopsjpeg.enigma.game.Stats;
 
-public abstract class Effect extends GameObject {
+public abstract class Effect implements GameObject {
+    private final String name;
     private final float power;
     private final Stats stats;
 
     public Effect(String name, float power, Stats stats) {
-        super(name);
+        this.name = name;
         this.power = power;
         this.stats = stats;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     public float getPower() {

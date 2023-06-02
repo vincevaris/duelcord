@@ -1,7 +1,8 @@
 package com.oopsjpeg.enigma.game;
 
 import com.oopsjpeg.enigma.Enigma;
-import com.oopsjpeg.enigma.game.buff.DebuffSilence;
+import com.oopsjpeg.enigma.game.buff.SilenceDebuff;
+import com.oopsjpeg.enigma.game.object.Buff;
 import com.oopsjpeg.enigma.listener.CommandListener;
 import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.Emote;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 
 import static com.oopsjpeg.enigma.game.GameState.*;
 import static com.oopsjpeg.enigma.game.Stats.*;
+import static com.oopsjpeg.enigma.util.Util.comma;
 
 public class Game {
     private final Enigma instance;
@@ -78,12 +80,15 @@ public class Game {
             // On turn end
             output.addAll(getCurrentMember().getData().stream().map(e -> e.onTurnEnd(getCurrentMember())).collect(Collectors.toList()));
             // On defend
-            if (turnCount >= 1 && getCurrentMember().hasEnergy() && !getCurrentMember().hasData(DebuffSilence.class))
+            if (turnCount >= 1 && getCurrentMember().hasEnergy() && !getCurrentMember().hasBuff(SilenceDebuff.class))
                 output.add(getCurrentMember().defend());
             // Check buffs
-            getCurrentMember().getBuffs().stream().filter(b -> b.turn() == 0).forEach(buff -> {
+            getCurrentMember().getData().stream()
+                    .filter(d -> d instanceof Buff)
+                    .filter(b -> ((Buff) b).turn() == 0)
+                    .forEach(buff -> {
                 output.add(Emote.INFO + "**" + getCurrentMember().getUsername() + "**'s " + buff.getName() + " has expired.");
-                getCurrentMember().getData().remove(buff);
+                getCurrentMember().getBuffs().remove(buff);
             });
         }
 
@@ -93,7 +98,7 @@ public class Game {
         if (turnIndex >= members.size()) {
             turnIndex = 0;
             // Start game once all players have picked
-            if (gameState == PICKING && members.stream().allMatch(GameMember::hasUnit))
+            if (gameState == PICKING && members.stream().allMatch(GameMember::alreadyPickedUnit))
                 gameState = PLAYING;
         }
 
@@ -148,12 +153,12 @@ public class Game {
             return member.getUsername() + " is picking their unit.";
         else {
             List<String> output = new ArrayList<>();
+            Stats stats = member.getStats();
             output.add(member.getUnit().getName() + " " + member.getMention() + " (" + turnCount + ")");
-            output.add("Gold: **" + Util.comma(member.getGold()) + "**");
-            output.add("Health: **" + member.getHealth() + " / " + member.getStats().getInt(MAX_HEALTH)
-                    + "** (+**" + member.getStats().getInt(HEALTH_PER_TURN) + "**/t)");
-            output.add("Energy: **" + member.getEnergy() + "**");
-            output.add("Items: **" + member.getItems() + "**");
+            output.add("Gold: " + comma(member.getGold()) + "**");
+            output.add("Health: " + member.getHealth() + " / " + stats.getInt(MAX_HEALTH) + " (+" + stats.getInt(HEALTH_PER_TURN) + "/t)");
+            output.add("Energy: " + member.getEnergy());
+            output.add("Items: " + member.getItems());
 
             // Add unit topic
             Arrays.stream(member.getUnit().getTopic(member)).filter(Objects::nonNull).forEach(output::add);

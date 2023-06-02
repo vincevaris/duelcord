@@ -10,8 +10,6 @@ import com.oopsjpeg.enigma.util.Util;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.oopsjpeg.enigma.game.Stats.MAX_HEALTH;
-
 public class BuyAction implements GameAction {
     private final Build build;
 
@@ -25,15 +23,10 @@ public class BuyAction implements GameAction {
         Item item = build.getItem();
 
         actor.takeGold(build.getCost());
-        actor.getData().removeIf(o -> o instanceof Item);
-        actor.getData().add(item);
-        actor.getData().addAll(build.getPostData());
+        actor.getItems().clear();
+        actor.getItems().add(item);
+        actor.getItems().addAll(build.getPostData());
         actor.updateStats();
-
-        if (item.getStats().get(MAX_HEALTH) > 0 && !actor.getItemHeals().contains(item)) {
-            output.add(actor.heal(item.getStats().get(MAX_HEALTH) / 2, item.getName()));
-            actor.getItemHeals().add(item);
-        }
 
         output.add(0, Emote.BUY + "**" + actor.getUsername() + "** purchased a(n) **"
                 + item.getName() + "** for **" + build.getCost() + "** gold.");

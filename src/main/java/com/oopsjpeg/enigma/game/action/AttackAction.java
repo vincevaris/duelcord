@@ -17,7 +17,7 @@ public class AttackAction implements GameAction {
 
     @Override
     public String act(GameMember actor) {
-        return actor.damage(actor.basicAttack(target), Emote.ATTACK);
+        return actor.damage(actor.attack(target), Emote.ATTACK);
     }
 
     @Override

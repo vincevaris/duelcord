@@ -6,7 +6,7 @@ import com.oopsjpeg.enigma.game.action.AttackAction;
 import com.oopsjpeg.enigma.game.action.BuyAction;
 import com.oopsjpeg.enigma.game.action.SellAction;
 import com.oopsjpeg.enigma.game.action.UseAction;
-import com.oopsjpeg.enigma.game.buff.DebuffSilence;
+import com.oopsjpeg.enigma.game.buff.SilenceDebuff;
 import com.oopsjpeg.enigma.game.object.Item;
 import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.util.Emote;
@@ -30,7 +30,7 @@ public enum GameCommand implements Command {
                 message.delete().block();
                 if (game.getGameState() == GameState.PICKING)
                     Util.sendFailure(channel, "You cannot attack until the game has started.");
-                else if (member.hasData(DebuffSilence.class))
+                else if (member.hasBuff(SilenceDebuff.class))
                     Util.sendFailure(channel, "You cannot attack while silenced.");
                 else
                     member.act(new AttackAction(game.getRandomTarget(member)));
@@ -60,7 +60,7 @@ public enum GameCommand implements Command {
 
                         if (!member.hasGold(build.getCost()))
                             Util.sendFailure(channel, "You need **" + member.getGoldDifference(build.getCost()) + "** more gold for a(n) **" + item.getName() + "**.");
-                        else if (build.getPostData().size() >= 4)
+                        else if (build.getPostData().size() >= 5)
                             Util.sendFailure(channel, "You do not have enough inventory space for a(n) **" + item.getName() + "**.");
                         else
                             member.act(new BuyAction(build));
@@ -143,13 +143,12 @@ public enum GameCommand implements Command {
                 if (game.getGameState() == GameState.PLAYING)
                     Util.sendFailure(channel, "You cannot pick a unit after the game has started.");
                 else {
-                    String name = String.join(" ", args);
-                    Unit unit = name.equalsIgnoreCase("random") ? Unit.values()[Util.RANDOM.nextInt(Unit.values().length)]
-                            : Unit.fromName(String.join(" ", args));
+                    String name = String.join(" ", args).toLowerCase();
+                    Unit unit = name.equals("random")
+                            ? Util.pickRandom(Unit.values())
+                            : Unit.fromName(name);
                     if (unit == null)
                         Util.sendFailure(channel, "Invalid unit.");
-                    else if (game.getMembers().stream().anyMatch(m -> unit.equals(m.getUnit())))
-                        Util.sendFailure(channel, "That unit was already chosen.");
                     else {
                         member.setUnit(unit);
                         channel.createMessage(Emote.YES + "**" + author.getUsername() + "** has picked **" + unit.getName() + "**.").block();

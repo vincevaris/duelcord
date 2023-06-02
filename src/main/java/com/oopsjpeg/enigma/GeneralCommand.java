@@ -1,5 +1,7 @@
 package com.oopsjpeg.enigma;
 
+import com.oopsjpeg.enigma.game.Build;
+import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.GameMode;
 import com.oopsjpeg.enigma.game.Tree;
 import com.oopsjpeg.enigma.game.object.Item;
@@ -8,7 +10,6 @@ import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.component.Button;
 import discord4j.core.object.component.SelectMenu;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
@@ -31,16 +32,16 @@ public enum GeneralCommand implements Command {
             if (args[0].equalsIgnoreCase("items")) {
                 TextChannel channel = Enigma.getInstance().getItemsChannel();
                 //channel.createMessage(buildItemTree(Tree.CONSUMABLES)).block();
-                channel.createMessage(buildItemTree(Tree.DAMAGE)).block();
-                channel.createMessage(buildItemTree(Tree.HEALTH)).block();
-                channel.createMessage(buildItemTree(Tree.ABILITY)).block();
+                channel.createMessage(buildItemTree(Tree.BASIC)).block();
+                channel.createMessage(buildItemTree(Tree.ADVANCED)).block();
+                channel.createMessage(buildItemTree(Tree.COMPLETE)).block();
             } else if (args[0].equalsIgnoreCase("units")) {
                 GatewayDiscordClient client = message.getClient();
                 TextChannel channel = Enigma.getInstance().getUnitsChannel();
 
                 // Create a list of select menu options for units
                 List<SelectMenu.Option> options = Arrays.stream(Unit.values())
-                        .map(unit -> SelectMenu.Option.of(unit.getName(), unit.getName()))
+                        .map(unit -> SelectMenu.Option.of(unit.getName(), unit.name()))
                         .collect(Collectors.toList());
 
                 channel.createMessage(MessageCreateSpec.builder()
@@ -62,7 +63,8 @@ public enum GeneralCommand implements Command {
             EmbedCreateSpec.Builder embed = EmbedCreateSpec.builder();
             embed.title("**" + tree.getName() + "**");
             embed.color(tree.getColor());
-            Item.fromTree(tree).stream()
+            Arrays.stream(Item.values())
+                    .filter(item -> item.getTree() == tree)
                     .filter(Item::isBuyable)
                     .sorted(Comparator.comparingInt(Item::getCost))
                     .forEach(i -> {
@@ -162,24 +164,28 @@ public enum GeneralCommand implements Command {
             }
         }
     },
-    TEST("test") {
+    ITEM("item") {
         @Override
         public void execute(Message message, String[] args) {
-            message.getChannel().flatMap(channel -> channel.createMessage(MessageCreateSpec.builder()
-                    .content("# Duel" +
-                            "\nvincevaris **vs.** boogaloonky" +
-                            "\n### Select your unit using the menu below.")
-                    .addComponent(ActionRow.of(
-                            SelectMenu.of("test", SelectMenu.Option.of("Gunslinger", "gunslinger"))))
-                    .addComponent(ActionRow.of(
-                            Button.danger("forfeit", "Forfeit"),
-                            Button.primary("select", "Select")))
-                    .build())).subscribe();
-        }
+            Item item = Item.fromName(String.join(" ", args));
 
-        @Override
-        public PermissionSet getPermissions() {
-            return PermissionSet.of(Permission.ADMINISTRATOR);
+            if (item == null) return;
+
+            int cost = item.getCost();
+            User author = message.getAuthor().get();
+            Player player = Enigma.getInstance().getPlayer(author);
+
+            if (player.isInGame()) {
+                GameMember member = player.getGame().getMember(author);
+                Build build = item.build(member.getItems());
+                cost -= build.getReduction();
+            }
+
+            MessageChannel channel = message.getChannel().block();
+            Util.send(channel, item.getName() + " (" + cost + "g)", Util.joinNonEmpty("\n",
+                        item.hasBuild() ? "*Build: " + Arrays.toString(item.getBuild()) + "*\n" : null,
+                        Util.formatStats(item.getStats()),
+                        Util.formatEffects(item.getEffects())));
         }
     };
 

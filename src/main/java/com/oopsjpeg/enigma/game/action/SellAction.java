@@ -17,7 +17,7 @@ public class SellAction implements GameAction {
         int gold = Math.round(item.getCost() * 0.6f);
         String output = Emote.BUY + "**" + actor.getUsername() + "** sold a(n) **" + item.getName() + "** for **" + gold + "** gold.";
         actor.giveGold(gold);
-        actor.getData().remove(item);
+        actor.getItems().remove(item);
         actor.updateStats();
         return output;
     }

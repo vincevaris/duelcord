@@ -189,7 +189,7 @@ public class Player {
             Snowflake id = Snowflake.of(this.id);
             player.getGame().getChannel().addMemberOverwrite(id, PermissionOverwrite.forMember(id,
                     PermissionSet.none(),
-                    PermissionSet.none())).block();
+                    PermissionSet.none())).subscribe();
         }
 
         this.spectateId = spectateId;
@@ -199,7 +199,7 @@ public class Player {
             Snowflake id = Snowflake.of(this.id);
             player.getGame().getChannel().addMemberOverwrite(id, PermissionOverwrite.forMember(id,
                     PermissionSet.of(Permission.VIEW_CHANNEL),
-                    PermissionSet.of(Permission.SEND_MESSAGES))).block();
+                    PermissionSet.of(Permission.SEND_MESSAGES))).subscribe();
         }
     }
 

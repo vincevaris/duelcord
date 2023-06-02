@@ -24,12 +24,10 @@ public class ComponentListener implements Listener {
         // Unit viewer
         if (event.getCustomId().equals("unit_viewer")) {
             MessageChannel channel = event.getMessage().get().getChannel().block();
-            Unit unit = Unit.fromName(event.getValues().get(0));
-
-            if (unit == null) return;
+            Unit unit = Unit.valueOf(event.getValues().get(0));
 
             // Create a temp button to view stats
-            Button statsBtn = Button.primary("unit_viewer-stats;" + unit.getName(), "View Stats");
+            Button statsBtn = Button.primary("unit_viewer-stats;" + unit.name(), "View Stats");
 
             event.reply(InteractionApplicationCommandCallbackSpec.builder()
                     .ephemeral(true)
@@ -45,9 +43,7 @@ public class ComponentListener implements Listener {
 
         // Unit viewer for stats
         if (id.equals("unit_viewer-stats")) {
-            Unit unit = Unit.fromName(idChunks[1]);
-
-            if (unit == null) return;
+            Unit unit = Unit.valueOf(idChunks[1]);
 
             event.reply(InteractionApplicationCommandCallbackSpec.builder()
                     .ephemeral(true)

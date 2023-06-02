@@ -2,8 +2,10 @@ package com.oopsjpeg.enigma.game.object;
 
 import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.GameObject;
+import com.oopsjpeg.enigma.game.Stats;
 
-public abstract class Buff extends GameObject {
+public abstract class Buff implements GameObject {
+    private final String name;
     private final boolean debuff;
     private final GameMember source;
     private final float power;
@@ -12,13 +14,18 @@ public abstract class Buff extends GameObject {
     private int currentTurns;
 
     public Buff(String name, boolean debuff, GameMember source, int totalTurns, float power) {
-        super(name);
+        this.name = name;
         this.debuff = debuff;
         this.source = source;
         this.totalTurns = totalTurns;
         this.power = power;
 
         currentTurns = totalTurns;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     public int turn() {
@@ -60,6 +67,10 @@ public abstract class Buff extends GameObject {
 
     public void setCurrentTurns(int currentTurns) {
         this.currentTurns = currentTurns;
+    }
+
+    public Stats getStats() {
+        return new Stats();
     }
 
     @Override

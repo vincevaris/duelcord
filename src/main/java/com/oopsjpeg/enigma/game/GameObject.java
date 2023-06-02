@@ -1,78 +1,75 @@
 package com.oopsjpeg.enigma.game;
 
-public abstract class GameObject {
-    private final String name;
+public interface GameObject {
+    String getName();
 
-    public GameObject(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
+    default String getDescription() {
         return null;
     }
 
-    public String[] getTopic(GameMember member) {
+    default String[] getTopic(GameMember member) {
         return null;
     }
 
-    public String onTurnStart(GameMember member) {
+    default String onTurnStart(GameMember member) {
         return null;
     }
 
-    public String onTurnEnd(GameMember member) {
+    default String onTurnEnd(GameMember member) {
         return null;
     }
 
-    public String onDefend(GameMember member) {
+    default String onDefend(GameMember member) {
         return null;
     }
 
-    public DamageEvent damageOut(DamageEvent event) {
+    default float onHeal(float healAmount)
+    {
+        return healAmount;
+    }
+
+    default float onShield(float shieldAmount)
+    {
+        return shieldAmount;
+    }
+
+    default DamageEvent damageOut(DamageEvent event) {
         return event;
     }
 
-    public DamageEvent damageIn(DamageEvent event) {
+    default DamageEvent damageIn(DamageEvent event) {
         return event;
     }
 
-    public DamageEvent basicAttackOut(DamageEvent event) {
+    default DamageEvent attackOut(DamageEvent event) {
         return event;
     }
 
-    public DamageEvent basicAttackIn(DamageEvent event) {
+    default DamageEvent attackIn(DamageEvent event) {
         return event;
     }
 
-    public DamageEvent hitOut(DamageEvent event) {
+    default DamageEvent hitOut(DamageEvent event) {
         return event;
     }
 
-    public DamageEvent hitIn(DamageEvent event) {
+    default DamageEvent hitIn(DamageEvent event) {
         return event;
     }
 
-    public DamageEvent critOut(DamageEvent event) {
+    default DamageEvent critOut(DamageEvent event) {
         return event;
     }
 
-    public DamageEvent critIn(DamageEvent event) {
+    default DamageEvent critIn(DamageEvent event) {
         return event;
     }
 
-    public DamageEvent abilityOut(DamageEvent event) {
+    default DamageEvent abilityOut(DamageEvent event) {
         return event;
     }
 
-    public DamageEvent abilityIn(DamageEvent event) {
+    default DamageEvent abilityIn(DamageEvent event) {
         return event;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return obj != null && obj.getClass().equals(this.getClass());
     }
 }

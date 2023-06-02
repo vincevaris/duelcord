@@ -15,7 +15,7 @@ public class UseAction implements GameAction {
     @Override
     public String act(GameMember actor) {
         String output = Emote.USE + "**" + actor.getUsername() + "** used a(n) **" + item.getName() + "**.\n" + item.onUse(actor);
-        if (item.removeOnUse()) actor.getData().remove(item);
+        if (item.removeOnUse()) actor.getItems().remove(item);
         actor.updateStats();
         return output;
     }
