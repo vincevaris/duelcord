@@ -194,11 +194,16 @@ public class GameMember {
         for (GameObject o : event.actor.getData()) event = o.hitOut(event);
         for (GameObject o : event.target.getData()) event = o.hitIn(event);
 
+        // Dodge
         if (event.target.stats.get(DODGE) > 0) {
             float dodgeRand = Util.RANDOM.nextFloat();
             if (dodgeRand <= event.target.stats.get(DODGE)) {
                 event.output.add(Emote.DODGE + "**" + event.target.getUsername() + "** dodged the hit!");
                 event.cancelled = true;
+
+                for (GameObject o : event.actor.getData()) event = o.dodgeYou(event);
+                for (GameObject o : event.target.getData()) event = o.dodgeMe(event);
+
                 return event;
             }
         }

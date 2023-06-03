@@ -72,4 +72,12 @@ public interface GameObject {
     default DamageEvent abilityIn(DamageEvent event) {
         return event;
     }
+
+    default DamageEvent dodgeYou(DamageEvent event) {
+        return event;
+    }
+
+    default DamageEvent dodgeMe(DamageEvent event) {
+        return event;
+    }
 }
