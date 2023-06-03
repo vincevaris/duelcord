@@ -17,6 +17,7 @@ import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
@@ -113,6 +114,13 @@ public class Enigma {
                 players.put(id, new Player(id));
         }
         return players.getOrDefault(id, null);
+    }
+
+    public static GameMember getGameMemberFromMessage(Message message) {
+        User user = message.getAuthor().get();
+        Player player = Enigma.getInstance().getPlayer(user);
+        Game game = player.getGame();
+        return game.getMember(user);
     }
 
     public Player getPlayer(User user) {

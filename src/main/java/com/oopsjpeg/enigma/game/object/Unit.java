@@ -1,16 +1,9 @@
 package com.oopsjpeg.enigma.game.object;
 
-import com.oopsjpeg.enigma.Command;
-import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.*;
-import com.oopsjpeg.enigma.game.buff.SilenceDebuff;
 import com.oopsjpeg.enigma.util.Cooldown;
 import com.oopsjpeg.enigma.util.Emote;
-import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 
@@ -23,183 +16,13 @@ import static com.oopsjpeg.enigma.util.Util.percent;
 import static com.oopsjpeg.enigma.util.Util.percentRaw;
 
 public enum Unit implements GameObject {
-    ASSASSIN("Assassin", Color.of(0, 69, 255), new Stats()
-            .put(MAX_ENERGY, 125)
-            .put(MAX_HEALTH, 720)
-            .put(ATTACK_POWER, 22)
-            .put(HEALTH_PER_TURN, 9)) {
-
-        private Stacker getPotencyTurn(GameMemberVars vars) {
-            if (!vars.has(this, "potency_turn"))
-                setPotencyTurn(vars, new Stacker(ASSASSIN_POTENCY_TURN_LIMIT));
-            return vars.get(this, "potency_turn", Stacker.class);
-        }
-
-        private void setPotencyTurn(GameMemberVars vars, Stacker potencyTurn) {
-            vars.put(this, "potency_turn", potencyTurn);
-        }
-
-        private int getPotency(GameMemberVars vars) {
-            if (!vars.has(this, "potency"))
-                setPotency(vars, 0);
-            return vars.get(this, "potency", Integer.class);
-        }
-
-        private void setPotency(GameMemberVars vars, int potency) {
-            vars.put(this, "potency", potency);
-        }
-
-        private Stacker getSlashCount(GameMemberVars vars) {
-            if (!vars.has(this, "slash_count"))
-                setSlashCount(vars, new Stacker(ASSASSIN_SLASH_COUNT_LIMIT));
-            return vars.get(this, "slash_count", Stacker.class);
-        }
-
-        private void setSlashCount(GameMemberVars vars, Stacker slashCount) {
-            vars.put(this, "slash_count", slashCount);
-        }
-
-        private boolean getSlashedAlready(GameMemberVars vars) {
-            if (!vars.has(this, "slashed_already"))
-                setSlashedAlready(vars, false);
-            return vars.get(this, "slashed_already", Boolean.class);
-        }
-
-        private void setSlashedAlready(GameMemberVars vars, boolean slashedAlready) {
-            vars.put(this, "slashed_already", slashedAlready);
-        }
-
-        @Override
-        public String getDescription() {
-            return "**" + percent(ASSASSIN_DAMAGE_TO_POTENCY) + "** of damage dealt last turn is stored as **Potency**." +
-                    "\nThis can occur **" + ASSASSIN_POTENCY_TURN_LIMIT + "** times until **Potency** is consumed.";
-        }
-
-        @Override
-        public String[] getTopic(GameMember member) {
-            GameMemberVars vars = member.getVars();
-            Stacker slashCount = getSlashCount(vars);
-            int potency = getPotency(vars);
-
-            return new String[]{
-                    "Slash: **" + slashCount.getCurrent() + " / " + slashCount.getMax() + "**",
-                    "Potency: **" + potency + "**"};
-        }
-
-        @Override
-        public Command[] getCommands() {
-            return new Command[]{new SlashCommand()};
-        }
-
-        @Override
-        public String onTurnEnd(GameMember member) {
-            GameMemberVars vars = member.getVars();
-            Stacker potencyCount = getPotencyTurn(vars);
-            boolean potencyFull = potencyCount.stack();
-            setSlashedAlready(vars, false);
-            setPotencyTurn(vars, potencyCount);
-
-            if (potencyFull)
-                return Emote.KNIFE + "**" + member.getUsername() + "'s Potency** is at max capacity.";
-
-            return null;
-        }
-
-        @Override
-        public DamageEvent attackOut(DamageEvent event) {
-            // Assassin potency stacking
-            GameMemberVars vars = event.actor.getVars();
-            Stacker potencyCount = getPotencyTurn(vars);
-
-            if (!potencyCount.isDone()) {
-                int potency = getPotency(vars);
-                potency += event.damage * ASSASSIN_DAMAGE_TO_POTENCY;
-                setPotency(vars, potency);
-            }
-
-            return event;
-        }
-
-        class SlashCommand implements Command {
-            @Override
-            public void execute(Message message, String[] args) {
-                User author = message.getAuthor().orElse(null);
-                MessageChannel channel = message.getChannel().block();
-                Game game = Enigma.getInstance().getPlayer(author).getGame();
-                GameMember member = game.getMember(author);
-
-                if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
-                    message.delete().block();
-                    GameMemberVars vars = member.getVars();
-                    if (member.hasBuff(SilenceDebuff.class))
-                        Util.sendFailure(channel, "You cannot **Slash** while silenced.");
-                    else if (getSlashedAlready(vars))
-                        Util.sendFailure(channel, "You can only use **Slash** once per turn.");
-                    else
-                        member.act(new SlashAction(game.getRandomTarget(member)));
-                }
-            }
-
-            @Override
-            public String getName() {
-                return "slash";
-            }
-
-            @Override
-            public String getDescription() {
-                return "Deal __" + percent(ASSASSIN_SLASH_AP_RATIO) + " Attack Power__ + __" + percent(ASSASSIN_SLASH_SP_RATIO) + " Skill Power__."
-                        + "\nEvery **" + ASSASSIN_SLASH_COUNT_LIMIT + "** uses, **Silence** and consume **Potency** to deal bonus damage equal to it."
-                        + "\nSlash damage doesn't count towards Potency.";
-            }
-        }
-
-        class SlashAction implements GameAction {
-            private final GameMember target;
-
-            public SlashAction(GameMember target) {
-                this.target = target;
-            }
-
-            @Override
-            public String act(GameMember actor) {
-                GameMemberVars vars = actor.getVars();
-                Stats stats = actor.getStats();
-
-                setSlashedAlready(vars, true);
-
-                DamageEvent event = new DamageEvent(actor, target);
-                event.damage += stats.get(ATTACK_POWER) * ASSASSIN_SLASH_AP_RATIO;
-                event.damage += stats.get(SKILL_POWER) * ASSASSIN_SLASH_SP_RATIO;
-
-                Stacker slashCount = getSlashCount(vars);
-                if (slashCount.stack()) {
-                    Stacker potencyTurn = getPotencyTurn(vars);
-
-                    event.damage += getPotency(vars);
-                    event.output.add(target.buff(new SilenceDebuff(actor)));
-
-                    slashCount.reset();
-                    potencyTurn.reset();
-
-                    setPotency(vars, 0);
-                    setPotencyTurn(vars, potencyTurn);
-                }
-
-                setSlashCount(vars, slashCount);
-
-                event = event.actor.hit(event);
-                event = event.actor.crit(event);
-                event = event.actor.ability(event);
-
-                return actor.damage(event, Emote.KNIFE, "Slash");
-            }
-
-            @Override
-            public int getEnergy() {
-                return 25;
-            }
-        }
-    },
+    //ASSASSIN("Assassin", Color.of(0, 69, 255), new Stats()
+    //        .put(MAX_ENERGY, 125)
+    //        .put(MAX_HEALTH, 720)
+    //        .put(ATTACK_POWER, 22)
+    //        .put(HEALTH_PER_TURN, 9)) {
+//
+    //},
     //BERSERKER("Berserker", Color.RED, new Stats()
     //        .put(Stats.MAX_ENERGY, 100)
     //        .put(Stats.MAX_HEALTH, 760)
@@ -302,8 +125,8 @@ public enum Unit implements GameObject {
         }
 
         @Override
-        public Command[] getCommands() {
-            return new Command[]{ new BarrageCommand(), new RollCommand(), new DeadeyeCommand() };
+        public Skill[] getSkills() {
+            return new Skill[]{ new BarrageSkill(), new RollSkill(), new DeadeyeSkill() };
         }
 
         @Override
@@ -324,58 +147,17 @@ public enum Unit implements GameObject {
         public String onTurnStart(GameMember member) {
             GameMemberVars vars = member.getVars();
             setFirstAttacked(vars, false);
-
-            List<String> output = new ArrayList<>();
-
-            Cooldown barrageCooldown = getBarrageCooldown(vars);
-            boolean barrageReady = barrageCooldown.count();
-            boolean barrageNotify = barrageReady && barrageCooldown.tryNotify();
-            setBarrageCooldown(vars, barrageCooldown);
-
-            if (barrageReady && barrageNotify)
-                output.add(Emote.INFO + "**" + member.getUsername() + "**'s Barrage is ready to use.");
-
-            Cooldown rollCooldown = getRollCooldown(vars);
-            boolean rollReady = rollCooldown.count();
-            boolean rollNotify = rollReady && rollCooldown.tryNotify();
-            setRollCooldown(vars, rollCooldown);
-
-            if (rollReady && rollNotify)
-                output.add(Emote.INFO + "**" + member.getUsername() + "**'s Roll is ready to use.");
-
-            Cooldown deadeyeCooldown = getDeadeyeCooldown(vars);
-            boolean deadeyeReady = deadeyeCooldown.count();
-            boolean deadeyeNotify = deadeyeReady && deadeyeCooldown.tryNotify();
-            setDeadeyeCooldown(vars, deadeyeCooldown);
-
-            if (deadeyeReady && deadeyeNotify)
-                output.add(Emote.INFO + "**" + member.getUsername() + "**'s Deadeye is ready to use.");
-
-            return output.isEmpty() ? null : String.join("\n", output);
+            return null;
         }
 
-        class BarrageCommand implements Command {
+        class BarrageSkill extends Skill {
+            public BarrageSkill() {
+                super(GUNSLINGER, GUNSLINGER_BARRAGE_COOLDOWN);
+            }
+
             @Override
-            public void execute(Message message, String[] args) {
-                User author = message.getAuthor().orElse(null);
-                MessageChannel channel = message.getChannel().block();
-                Game game = Enigma.getInstance().getPlayer(author).getGame();
-                GameMember member = game.getMember(author);
-
-                if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
-                    message.delete().block();
-                    if (member.hasBuff(SilenceDebuff.class))
-                        Util.sendFailure(channel, "You cannot **Barrage** while silenced.");
-                    else {
-                        GameMemberVars vars = member.getVars();
-                        Cooldown barrageCooldown = getBarrageCooldown(vars);
-
-                        if (!barrageCooldown.isDone())
-                            Util.sendFailure(channel, "**Barrage** is on cooldown for **" + barrageCooldown.getCurrent() + "** more turns.");
-                        else
-                            member.act(new BarrageAction(game.getRandomTarget(member)));
-                    }
-                }
+            public GameAction act(Game game, GameMember member) {
+                return new BarrageAction(game.getRandomTarget(member));
             }
 
             @Override
@@ -434,28 +216,14 @@ public enum Unit implements GameObject {
             }
         }
 
-        class RollCommand implements Command {
+        class RollSkill extends Skill {
+            public RollSkill() {
+                super(GUNSLINGER, GUNSLINGER_ROLL_COOLDOWN);
+            }
+
             @Override
-            public void execute(Message message, String[] args) {
-                User author = message.getAuthor().orElse(null);
-                MessageChannel channel = message.getChannel().block();
-                Game game = Enigma.getInstance().getPlayer(author).getGame();
-                GameMember member = game.getMember(author);
-
-                if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
-                    message.delete().block();
-                    if (member.hasBuff(SilenceDebuff.class))
-                        Util.sendFailure(channel, "You cannot **Roll** while silenced.");
-                    else {
-                        GameMemberVars vars = member.getVars();
-                        Cooldown rollCooldown = getRollCooldown(vars);
-
-                        if (!rollCooldown.isDone())
-                            Util.sendFailure(channel, "**Roll** is on cooldown for **" + rollCooldown.getCurrent() + "** more turns.");
-                        else
-                            member.act(new RollAction());
-                    }
-                }
+            public GameAction act(Game game, GameMember member) {
+                return new RollAction();
             }
 
             @Override
@@ -504,28 +272,14 @@ public enum Unit implements GameObject {
             }
         }
 
-        class DeadeyeCommand implements Command {
+        class DeadeyeSkill extends Skill {
+            public DeadeyeSkill() {
+                super(GUNSLINGER, GUNSLINGER_DEADEYE_COOLDOWN);
+            }
+
             @Override
-            public void execute(Message message, String[] args) {
-                User author = message.getAuthor().orElse(null);
-                MessageChannel channel = message.getChannel().block();
-                Game game = Enigma.getInstance().getPlayer(author).getGame();
-                GameMember member = game.getMember(author);
-
-                if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
-                    message.delete().block();
-                    if (member.hasBuff(SilenceDebuff.class))
-                        Util.sendFailure(channel, "You cannot **Deadeye** while silenced.");
-                    else {
-                        GameMemberVars vars = member.getVars();
-                        Cooldown deadeyeCooldown = getDeadeyeCooldown(vars);
-
-                        if (!deadeyeCooldown.isDone())
-                            Util.sendFailure(channel, "**Deadeye** is on cooldown for **" + deadeyeCooldown.getCurrent() + "** more turns.");
-                        else
-                            member.act(new DeadeyeAction(game.getRandomTarget(member)));
-                    }
-                }
+            public GameAction act(Game game, GameMember member) {
+                return new DeadeyeAction(game.getRandomTarget(member));
             }
 
             @Override
@@ -586,7 +340,7 @@ public enum Unit implements GameObject {
                 return 50;
             }
         }
-    },
+    };
     //PHASEBREAKER("Phasebreaker", Color.of(0, 255, 191), new Stats()
     //        .put(Stats.MAX_ENERGY, 125)
     //        .put(Stats.MAX_HEALTH, 750)
@@ -599,173 +353,173 @@ public enum Unit implements GameObject {
     //        .put(Stats.HEALTH_PER_TURN, 8)
     //        .put(Stats.CRIT_CHANCE, 0.2f)
     //        .put(Stats.CRIT_DAMAGE, -1 * .2f)),
-    WARRIOR("Warrior", Color.CYAN, new Stats()
-            .put(MAX_ENERGY, 125)
-            .put(MAX_HEALTH, 775)
-            .put(ATTACK_POWER, 22)
-            .put(HEALTH_PER_TURN, 12)) {
-        private static final String VAR_PASSIVE_COUNT = "passive_count";
-        private static final String VAR_BASH_COOLDOWN = "bash_cooldown";
-
-        public Stacker getPassiveCount(GameMemberVars vars) {
-            if (!vars.has(this, VAR_PASSIVE_COUNT))
-                setPassiveCount(vars, new Stacker(WARRIOR_PASSIVE_LIMIT));
-            return vars.get(this, VAR_PASSIVE_COUNT, Stacker.class);
-        }
-
-        public void setPassiveCount(GameMemberVars vars, Stacker passiveCount) {
-            vars.put(this, VAR_PASSIVE_COUNT, passiveCount);
-        }
-
-        public Cooldown getBashCooldown(GameMemberVars vars) {
-            if (!vars.has(this, VAR_BASH_COOLDOWN))
-                setBashCooldown(vars, new Cooldown(WARRIOR_BASH_COOLDOWN));
-            return vars.get(this, VAR_BASH_COOLDOWN, Cooldown.class);
-        }
-
-        public void setBashCooldown(GameMemberVars vars, Cooldown bashCooldown) {
-            vars.put(this, VAR_BASH_COOLDOWN, bashCooldown);
-        }
-
-        @Override
-        public String getDescription() {
-            return "Every **" + WARRIOR_PASSIVE_LIMIT + "** Attacks, deal __" + percent(WARRIOR_PASSIVE_AP_RATIO) + " Attack Power__ bonus damage.";
-        }
-
-        @Override
-        public String[] getTopic(GameMember member) {
-            GameMemberVars vars = member.getVars();
-            Stacker passiveCount = getPassiveCount(vars);
-            Cooldown bashCooldown = getBashCooldown(vars);
-
-            return new String[]{
-                    "Bonus: **" + passiveCount.getCurrent() + " / 3**",
-                    bashCooldown.isDone()
-                            ? "Bash: **Ready**"
-                            : "Bash: **" + bashCooldown.getCurrent() + "** turns"};
-        }
-
-        @Override
-        public Command[] getCommands() {
-            return new Command[]{new BashCommand()};
-        }
-
-        @Override
-        public String onTurnStart(GameMember member) {
-            GameMemberVars vars = member.getVars();
-            Cooldown bashCooldown = getBashCooldown(vars);
-            boolean bashReady = bashCooldown.count();
-            boolean bashNotify = bashReady && bashCooldown.tryNotify();
-
-            setBashCooldown(vars, bashCooldown);
-
-            if (bashReady && bashNotify)
-                return Emote.INFO + "**" + member.getUsername() + "**'s Bash is ready to use.";
-
-            return null;
-        }
-
-        @Override
-        public DamageEvent attackOut(DamageEvent event) {
-            GameMemberVars vars = event.actor.getVars();
-            Stacker passiveCount = getPassiveCount(vars);
-
-            if (passiveCount.stack()) {
-                Stats stats = event.actor.getStats();
-                event.bonus += stats.get(ATTACK_POWER) * WARRIOR_PASSIVE_AP_RATIO;
-                passiveCount.reset();
-            }
-
-            setPassiveCount(vars, passiveCount);
-
-            return event;
-        }
-
-        class BashCommand implements Command {
-            @Override
-            public void execute(Message message, String[] args) {
-                User author = message.getAuthor().orElse(null);
-                MessageChannel channel = message.getChannel().block();
-                Game game = Enigma.getInstance().getPlayer(author).getGame();
-                GameMember member = game.getMember(author);
-
-                if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
-                    message.delete().block();
-                    if (member.hasBuff(SilenceDebuff.class))
-                        Util.sendFailure(channel, "You cannot **Bash** while silenced.");
-                    else {
-                        GameMemberVars vars = member.getVars();
-                        Cooldown bashCooldown = getBashCooldown(vars);
-
-                        if (!bashCooldown.isDone())
-                            Util.sendFailure(channel, "**Bash** is on cooldown for **" + bashCooldown.getCurrent() + "** more turns.");
-                        else
-                            member.act(new BashAction(game.getRandomTarget(member)));
-                    }
-                }
-            }
-
-            @Override
-            public String getName() {
-                return "bash";
-            }
-
-            @Override
-            public String getDescription() {
-                return "Break the target's shield and resist, then deal __" + percent(WARRIOR_BASH_AP_RATIO) + " Attack Power__ + __" + percent(WARRIOR_BASH_SP_RATIO) + " Skill Power__." +
-                        "\nBash stacks Warrior's passive, but doesn't activate it.";
-            }
-        }
-
-        class BashAction implements GameAction {
-            private final GameMember target;
-
-            public BashAction(GameMember target) {
-                this.target = target;
-            }
-
-            @Override
-            public String act(GameMember actor) {
-                GameMemberVars vars = actor.getVars();
-                Cooldown bashCooldown = getBashCooldown(vars);
-                Stacker passiveCount = getPassiveCount(vars);
-
-                bashCooldown.start();
-                passiveCount.stack();
-
-                setBashCooldown(vars, bashCooldown);
-                setPassiveCount(vars, passiveCount);
-
-                DamageEvent event = new DamageEvent(actor, target);
-                Stats actorStats = event.actor.getStats();
-                Stats targetStats = event.target.getStats();
-
-                event.target.setDefensive(false);
-
-                if (targetStats.get(Stats.RESIST) > 0) {
-                    targetStats.put(Stats.RESIST, 0);
-                    event.output.add(Emote.SHIELD + " It broke their resist!");
-                }
-
-                if (event.target.hasShield()) {
-                    event.target.setShield(0);
-                    event.output.add(Emote.SHIELD + " It broke their shield!");
-                }
-
-                event.damage += actorStats.get(ATTACK_POWER) * WARRIOR_BASH_AP_RATIO;
-                event.damage += actorStats.get(SKILL_POWER) * WARRIOR_BASH_SP_RATIO;
-
-                event = event.actor.ability(event);
-
-                return actor.damage(event, Emote.KNIFE, "Bash");
-            }
-
-            @Override
-            public int getEnergy() {
-                return 25;
-            }
-        }
-    };
+    //WARRIOR("Warrior", Color.CYAN, new Stats()
+    //        .put(MAX_ENERGY, 125)
+    //        .put(MAX_HEALTH, 775)
+    //        .put(ATTACK_POWER, 22)
+    //        .put(HEALTH_PER_TURN, 12)) {
+    //    private static final String VAR_PASSIVE_COUNT = "passive_count";
+    //    private static final String VAR_BASH_COOLDOWN = "bash_cooldown";
+//
+    //    public Stacker getPassiveCount(GameMemberVars vars) {
+    //        if (!vars.has(this, VAR_PASSIVE_COUNT))
+    //            setPassiveCount(vars, new Stacker(WARRIOR_PASSIVE_LIMIT));
+    //        return vars.get(this, VAR_PASSIVE_COUNT, Stacker.class);
+    //    }
+//
+    //    public void setPassiveCount(GameMemberVars vars, Stacker passiveCount) {
+    //        vars.put(this, VAR_PASSIVE_COUNT, passiveCount);
+    //    }
+//
+    //    public Cooldown getBashCooldown(GameMemberVars vars) {
+    //        if (!vars.has(this, VAR_BASH_COOLDOWN))
+    //            setBashCooldown(vars, new Cooldown(WARRIOR_BASH_COOLDOWN));
+    //        return vars.get(this, VAR_BASH_COOLDOWN, Cooldown.class);
+    //    }
+//
+    //    public void setBashCooldown(GameMemberVars vars, Cooldown bashCooldown) {
+    //        vars.put(this, VAR_BASH_COOLDOWN, bashCooldown);
+    //    }
+//
+    //    @Override
+    //    public String getDescription() {
+    //        return "Every **" + WARRIOR_PASSIVE_LIMIT + "** Attacks, deal __" + percent(WARRIOR_PASSIVE_AP_RATIO) + " Attack Power__ bonus damage.";
+    //    }
+//
+    //    @Override
+    //    public String[] getTopic(GameMember member) {
+    //        GameMemberVars vars = member.getVars();
+    //        Stacker passiveCount = getPassiveCount(vars);
+    //        Cooldown bashCooldown = getBashCooldown(vars);
+//
+    //        return new String[]{
+    //                "Bonus: **" + passiveCount.getCurrent() + " / 3**",
+    //                bashCooldown.isDone()
+    //                        ? "Bash: **Ready**"
+    //                        : "Bash: **" + bashCooldown.getCurrent() + "** turns"};
+    //    }
+//
+    //    @Override
+    //    public Skill[] getSkills() {
+    //        return new Skill[] { new BashSkill() };
+    //    }
+//
+    //    @Override
+    //    public String onTurnStart(GameMember member) {
+    //        GameMemberVars vars = member.getVars();
+    //        Cooldown bashCooldown = getBashCooldown(vars);
+    //        boolean bashReady = bashCooldown.count();
+    //        boolean bashNotify = bashReady && bashCooldown.tryNotify();
+//
+    //        setBashCooldown(vars, bashCooldown);
+//
+    //        if (bashReady && bashNotify)
+    //            return Emote.INFO + "**" + member.getUsername() + "**'s Bash is ready to use.";
+//
+    //        return null;
+    //    }
+//
+    //    @Override
+    //    public DamageEvent attackOut(DamageEvent event) {
+    //        GameMemberVars vars = event.actor.getVars();
+    //        Stacker passiveCount = getPassiveCount(vars);
+//
+    //        if (passiveCount.stack()) {
+    //            Stats stats = event.actor.getStats();
+    //            event.bonus += stats.get(ATTACK_POWER) * WARRIOR_PASSIVE_AP_RATIO;
+    //            passiveCount.reset();
+    //        }
+//
+    //        setPassiveCount(vars, passiveCount);
+//
+    //        return event;
+    //    }
+//
+    //    class BashCommand implements Command {
+    //        @Override
+    //        public void execute(Message message, String[] args) {
+    //            User author = message.getAuthor().orElse(null);
+    //            MessageChannel channel = message.getChannel().block();
+    //            Game game = Enigma.getInstance().getPlayer(author).getGame();
+    //            GameMember member = game.getMember(author);
+//
+    //            if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
+    //                message.delete().block();
+    //                if (member.hasBuff(SilenceDebuff.class))
+    //                    Util.sendFailure(channel, "You cannot **Bash** while silenced.");
+    //                else {
+    //                    GameMemberVars vars = member.getVars();
+    //                    Cooldown bashCooldown = getBashCooldown(vars);
+//
+    //                    if (!bashCooldown.isDone())
+    //                        Util.sendFailure(channel, "**Bash** is on cooldown for **" + bashCooldown.getCurrent() + "** more turns.");
+    //                    else
+    //                        member.act(new BashAction(game.getRandomTarget(member)));
+    //                }
+    //            }
+    //        }
+//
+    //        @Override
+    //        public String getName() {
+    //            return "bash";
+    //        }
+//
+    //        @Override
+    //        public String getDescription() {
+    //            return "Break the target's shield and resist, then deal __" + percent(WARRIOR_BASH_AP_RATIO) + " Attack Power__ + __" + percent(WARRIOR_BASH_SP_RATIO) + " Skill Power__." +
+    //                    "\nBash stacks Warrior's passive, but doesn't activate it.";
+    //        }
+    //    }
+//
+    //    class BashAction implements GameAction {
+    //        private final GameMember target;
+//
+    //        public BashAction(GameMember target) {
+    //            this.target = target;
+    //        }
+//
+    //        @Override
+    //        public String act(GameMember actor) {
+    //            GameMemberVars vars = actor.getVars();
+    //            Cooldown bashCooldown = getBashCooldown(vars);
+    //            Stacker passiveCount = getPassiveCount(vars);
+//
+    //            bashCooldown.start();
+    //            passiveCount.stack();
+//
+    //            setBashCooldown(vars, bashCooldown);
+    //            setPassiveCount(vars, passiveCount);
+//
+    //            DamageEvent event = new DamageEvent(actor, target);
+    //            Stats actorStats = event.actor.getStats();
+    //            Stats targetStats = event.target.getStats();
+//
+    //            event.target.setDefensive(false);
+//
+    //            if (targetStats.get(Stats.RESIST) > 0) {
+    //                targetStats.put(Stats.RESIST, 0);
+    //                event.output.add(Emote.SHIELD + " It broke their resist!");
+    //            }
+//
+    //            if (event.target.hasShield()) {
+    //                event.target.setShield(0);
+    //                event.output.add(Emote.SHIELD + " It broke their shield!");
+    //            }
+//
+    //            event.damage += actorStats.get(ATTACK_POWER) * WARRIOR_BASH_AP_RATIO;
+    //            event.damage += actorStats.get(SKILL_POWER) * WARRIOR_BASH_SP_RATIO;
+//
+    //            event = event.actor.ability(event);
+//
+    //            return actor.damage(event, Emote.KNIFE, "Bash");
+    //        }
+//
+    //        @Override
+    //        public int getEnergy() {
+    //            return 25;
+    //        }
+    //    }
+    //};
 
     private final String name;
     private final Color color;
@@ -803,8 +557,8 @@ public enum Unit implements GameObject {
         return stats;
     }
 
-    public Command[] getCommands() {
-        return new Command[0];
+    public Skill[] getSkills() {
+        return new Skill[0];
     }
 
     public EmbedCreateSpec format() {
@@ -813,8 +567,8 @@ public enum Unit implements GameObject {
         embed.color(getColor());
         embed.description("## " + getName() + "\n" + getDescription() + "\n\u1CBC\u1CBC");
 
-        for (Command cmd : getCommands())
-            embed.addField("`>" + cmd.getName() + "`", cmd.getDescription(), false);
+        for (Skill skill : getSkills())
+            embed.addField("`>" + skill.getName() + "`", skill.getDescription(), false);
 
         return embed.build();
     }

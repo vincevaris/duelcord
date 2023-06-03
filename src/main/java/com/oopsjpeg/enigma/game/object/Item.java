@@ -35,6 +35,11 @@ public enum Item implements GameObject {
         public boolean removeOnUse() {
             return true;
         }
+
+        @Override
+        public boolean isBuyable() {
+            return false;
+        }
     },
 
     RING("Ring", Tree.BASIC, 200, new Stats()
@@ -127,32 +132,26 @@ public enum Item implements GameObject {
     private final Stats stats;
     private final Item[] build;
     private final Effect[] effects;
-    private final boolean buyable;
 
     Item(String name, int cost) {
-        this(name, null, cost, null, null, true, null);
+        this(name, null, cost, null, null, null);
     }
 
     Item(String name, Tree tree, int cost, Stats stats) {
-        this(name, tree, cost, null, null, true, stats);
+        this(name, tree, cost, null, null, stats);
     }
 
     Item(String name, Tree tree, int cost, Item[] build, Stats stats) {
-        this(name, tree, cost, build, null, true, stats);
+        this(name, tree, cost, build, null, stats);
     }
 
     Item(String name, Tree tree, int cost, Item[] build, Effect[] effects, Stats stats) {
-        this(name, tree, cost, build, effects, true, stats);
-    }
-
-    Item(String name, Tree tree, int cost, Item[] build, Effect[] effects, boolean buyable, Stats stats) {
         this.name = name;
         this.tree = tree;
         this.cost = cost;
         this.stats = stats;
         this.build = build;
         this.effects = effects;
-        this.buyable = buyable;
     }
 
     public static Item fromName(String name) {
@@ -233,7 +232,7 @@ public enum Item implements GameObject {
     }
 
     public boolean isBuyable() {
-        return buyable;
+        return true;
     }
 
     @Override

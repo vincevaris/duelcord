@@ -9,9 +9,10 @@ public class Cooldown implements Notifier {
         this.duration = duration;
     }
 
-    public void start() {
+    public Cooldown start() {
         setCurrent(getDuration());
         setNotified(false);
+        return this;
     }
 
     public boolean count() {

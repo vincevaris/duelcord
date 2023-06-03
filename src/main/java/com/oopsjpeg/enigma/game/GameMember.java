@@ -144,6 +144,7 @@ public class GameMember {
 
     public String buff(Buff buff) {
         buffs.add(buff);
+        updateStats();
         return Emote.BLEED + "**" + buff.getSource().getUsername() + "** applied **" + buff.getName() + "**" +
                 (buff.hasPower() ? " (" + buff.formatPower() + ")" : "") +
                 (buff.getTotalTurns() > 1 ? " for **" + buff.getTotalTurns() + "** turns" : "") + "!";
@@ -237,13 +238,14 @@ public class GameMember {
     public DamageEvent attack(GameMember target) {
         DamageEvent event = new DamageEvent(this, target);
         event.damage += stats.get(ATTACK_POWER);
-        event.actor.giveGold(game.getMode().handleGold(Math.round(Util.nextInt(20, 30) + (game.getTurnCount() * 0.5f))));
 
         for (GameObject o : event.actor.getData()) event = o.attackOut(event);
         for (GameObject o : event.target.getData()) event = o.attackIn(event);
 
         event = hit(event);
         event = crit(event);
+
+        if (!event.cancelled) event.actor.giveGold(game.getMode().handleGold(Math.round(Util.nextInt(20, 30) + (game.getTurnCount() * 0.5f))));
 
         return event;
     }
@@ -253,10 +255,10 @@ public class GameMember {
     }
 
     public String damage(DamageEvent event, String emote, String source) {
+        if (event.cancelled) return Util.joinNonEmpty("\n", event.output);
+
         for (GameObject o : event.actor.getData()) event = o.damageOut(event);
         for (GameObject o : event.target.getData()) event = o.damageIn(event);
-
-        if (event.cancelled) return Util.joinNonEmpty("\n", event.output);
 
         event = game.getMode().handleDamage(event);
 
@@ -361,7 +363,7 @@ public class GameMember {
         setHealth(stats.getInt(MAX_HEALTH));
         setGold(game.getMode().handleGold(175 + (100 * game.getAlive().indexOf(this))));
 
-        game.getCommandListener().getCommands().addAll(Arrays.asList(unit.getCommands()));
+        game.getCommandListener().getCommands().addAll(Arrays.asList(unit.getSkills()));
 
         //if (unit instanceof Berserker)
         //    ((Berserker) unit).getRage().setCurrent(game.getAlive().indexOf(this));

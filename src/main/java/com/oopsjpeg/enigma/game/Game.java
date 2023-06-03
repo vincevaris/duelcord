@@ -3,12 +3,10 @@ package com.oopsjpeg.enigma.game;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.buff.SilenceDebuff;
 import com.oopsjpeg.enigma.game.object.Buff;
+import com.oopsjpeg.enigma.game.object.Skill;
 import com.oopsjpeg.enigma.listener.CommandListener;
 import com.oopsjpeg.enigma.storage.Player;
-import com.oopsjpeg.enigma.util.Emote;
-import com.oopsjpeg.enigma.util.Settings;
-import com.oopsjpeg.enigma.util.Stacker;
-import com.oopsjpeg.enigma.util.Util;
+import com.oopsjpeg.enigma.util.*;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
@@ -90,6 +88,8 @@ public class Game {
                 output.add(Emote.INFO + "**" + getCurrentMember().getUsername() + "**'s " + buff.getName() + " has expired.");
                 getCurrentMember().getBuffs().remove(buff);
             });
+            // Update current member's stats
+            getCurrentMember().updateStats();
         }
 
         // Start next turn
@@ -126,9 +126,19 @@ public class Game {
 
             // On turn start
             output.addAll(member.getData().stream().map(e -> e.onTurnStart(member)).collect(Collectors.toList()));
+            // Count skill cooldowns
+            Arrays.stream(member.getUnit().getSkills())
+                    .filter(Skill::hasCooldown)
+                    .forEach(skill -> {
+                        Cooldown cooldown = skill.getCooldown(member.getVars());
+                        if (cooldown.count() && cooldown.tryNotify())
+                            output.add(":repeat: **`" + skill.getName() + "`** is ready to use.");
+                    });
             // Low health warning
             if (member.getHealth() < member.getStats().get(MAX_HEALTH) * 0.2f)
                 output.add(Emote.WARN + "**" + member.getUsername() + "** is critically low on health.");
+            // Update current member's stats
+            getCurrentMember().updateStats();
 
             member.setShield(0);
         }
