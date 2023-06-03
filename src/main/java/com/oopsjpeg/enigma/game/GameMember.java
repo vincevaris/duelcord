@@ -5,7 +5,7 @@ import com.oopsjpeg.enigma.game.object.Effect;
 import com.oopsjpeg.enigma.game.object.Item;
 import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.storage.Player;
-import com.oopsjpeg.enigma.util.ChanceBag;
+import com.oopsjpeg.enigma.util.Pity;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.User;
@@ -28,7 +28,7 @@ public class GameMember {
     private final Map<Class<? extends Effect>, Effect> effects = new HashMap<>();
     private final List<Buff> buffs = new ArrayList<>();
 
-    private ChanceBag critBag = new ChanceBag(0, 0.5f);
+    private final Pity critPity = new Pity(0, 0.5f);
 
     private int health = 0;
     private int gold = 0;
@@ -127,7 +127,7 @@ public class GameMember {
         for (Buff buff : getBuffs())
             stats.addAll(buff.getStats());
 
-        critBag.setChance(stats.get(CRIT_CHANCE));
+        critPity.setChance(stats.get(CRIT_CHANCE));
     }
 
     public void act(GameAction action) {
@@ -211,7 +211,7 @@ public class GameMember {
 
     public DamageEvent crit(DamageEvent event) {
         // Crit checks
-        if (event.crit || !event.miss && critBag.get()) {
+        if (event.crit || critPity.roll()) {
             // Pseudo RNG crit bag
             event.crit = true;
 
@@ -383,12 +383,8 @@ public class GameMember {
         this.defensive = defensive;
     }
 
-    public ChanceBag getCritBag() {
-        return this.critBag;
-    }
-
-    public void setCritBag(ChanceBag critBag) {
-        this.critBag = critBag;
+    public Pity getCritPity() {
+        return critPity;
     }
 
     public int getHealth() {

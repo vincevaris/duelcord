@@ -12,7 +12,6 @@ public class DamageEvent {
     public float bonus;
     public boolean crit;
     public float critMul;
-    public boolean miss;
     public float heal;
     public float shield;
     public boolean cancelled;
