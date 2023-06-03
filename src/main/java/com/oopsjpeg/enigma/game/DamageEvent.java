@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DamageEvent {
-    public final Game game;
     public final List<String> output = new ArrayList<>();
     public GameMember actor;
     public GameMember target;
@@ -16,8 +15,7 @@ public class DamageEvent {
     public float shield;
     public boolean cancelled;
 
-    public DamageEvent(Game game, GameMember actor, GameMember target) {
-        this.game = game;
+    public DamageEvent(GameMember actor, GameMember target) {
         this.actor = actor;
         this.target = target;
     }

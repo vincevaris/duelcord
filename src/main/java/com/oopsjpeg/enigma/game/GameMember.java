@@ -235,7 +235,7 @@ public class GameMember {
     }
 
     public DamageEvent attack(GameMember target) {
-        DamageEvent event = new DamageEvent(game, this, target);
+        DamageEvent event = new DamageEvent(this, target);
         event.damage += stats.get(ATTACK_POWER);
         event.actor.giveGold(game.getMode().handleGold(Math.round(Util.nextInt(20, 30) + (game.getTurnCount() * 0.5f))));
 

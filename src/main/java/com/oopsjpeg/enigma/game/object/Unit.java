@@ -167,7 +167,7 @@ public enum Unit implements GameObject {
 
                 setSlashedAlready(vars, true);
 
-                DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
+                DamageEvent event = new DamageEvent(actor, target);
                 event.damage += stats.get(ATTACK_POWER) * ASSASSIN_SLASH_AP_RATIO;
                 event.damage += stats.get(SKILL_POWER) * ASSASSIN_SLASH_SP_RATIO;
 
@@ -411,7 +411,7 @@ public enum Unit implements GameObject {
                 int barrageCount = getBarrageCount(vars);
                 for (int i = 0; i < GUNSLINGER_BARRAGE_SHOTS; i++)
                     if (target.isAlive()) {
-                        DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
+                        DamageEvent event = new DamageEvent(actor, target);
                         event.damage += stats.get(ATTACK_POWER) * GUNSLINGER_BARRAGE_AP_RATIO;
                         event.damage += stats.get(SKILL_POWER) * GUNSLINGER_BARRAGE_SP_RATIO;
                         actor.crit(event);
@@ -560,7 +560,7 @@ public enum Unit implements GameObject {
                 deadeyeCooldown.start();
                 setDeadeyeCooldown(vars, deadeyeCooldown);
 
-                DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
+                DamageEvent event = new DamageEvent(actor, target);
                 List<String> output = new ArrayList<>();
 
                 boolean jackpot = false;
@@ -736,7 +736,7 @@ public enum Unit implements GameObject {
                 setBashCooldown(vars, bashCooldown);
                 setPassiveCount(vars, passiveCount);
 
-                DamageEvent event = new DamageEvent(actor.getGame(), actor, target);
+                DamageEvent event = new DamageEvent(actor, target);
                 Stats actorStats = event.actor.getStats();
                 Stats targetStats = event.target.getStats();
 
