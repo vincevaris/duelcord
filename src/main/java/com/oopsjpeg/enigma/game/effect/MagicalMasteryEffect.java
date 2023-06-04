@@ -25,7 +25,7 @@ public class MagicalMasteryEffect extends Effect {
             event.bonus += event.target.getStats().get(MAX_HEALTH) * getPower();
             skillCount.reset();
         }
-        return null;
+        return event;
     }
 
     @Override
