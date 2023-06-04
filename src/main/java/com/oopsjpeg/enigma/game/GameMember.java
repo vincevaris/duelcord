@@ -101,6 +101,7 @@ public class GameMember {
 
     public void removeBuff(Buff buff) {
         buffs.remove(buff);
+        updateStats();
     }
 
     public boolean alreadyPickedUnit() {
