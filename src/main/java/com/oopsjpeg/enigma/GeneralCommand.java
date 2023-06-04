@@ -45,7 +45,7 @@ public enum GeneralCommand implements Command {
                         .collect(Collectors.toList());
 
                 channel.createMessage(MessageCreateSpec.builder()
-                        .content("# Units\nSelect a unit using the menu below to review it.")
+                        .content("Select a unit using the dropdown menu below to review it.")
                         .addComponent(
                                 ActionRow.of(
                                         SelectMenu.of("unit_viewer", options)
