@@ -425,6 +425,10 @@ public class GameMember {
         return hasHealth(0);
     }
 
+    public float getHealthPercentage() {
+        return health / getStats().get(MAX_HEALTH);
+    }
+
     public int getEnergy() {
         return energy;
     }

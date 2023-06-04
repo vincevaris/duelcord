@@ -3,6 +3,7 @@ package com.oopsjpeg.enigma.game;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.buff.SilenceDebuff;
 import com.oopsjpeg.enigma.game.object.Buff;
+import com.oopsjpeg.enigma.game.object.Effect;
 import com.oopsjpeg.enigma.game.object.Skill;
 import com.oopsjpeg.enigma.listener.CommandListener;
 import com.oopsjpeg.enigma.storage.Player;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
 
 import static com.oopsjpeg.enigma.game.GameState.*;
 import static com.oopsjpeg.enigma.game.Stats.*;
-import static com.oopsjpeg.enigma.util.Util.comma;
+import static com.oopsjpeg.enigma.util.Util.percent;
 
 public class Game {
     private final Enigma instance;
@@ -106,9 +107,10 @@ public class Game {
             // First pick message
             if (turnIndex == 0) {
                 String playerList = getPlayers().stream().map(Player::getUsername).collect(Collectors.joining(", "));
-                output.add(Emote.ATTACK + "Welcome to **" + mode.getName() + "**! (" + playerList + ")");
+                output.add("# " + mode.getName());
+                output.add("featuring **" + getMembers().get(0).getUsername() + "** vs. **" + getMembers().get(1).getUsername() + "**!");
             }
-            output.add("[**" + getCurrentMember().getMention() + ", pick your unit!**]");
+            output.add("## " + getCurrentMember().getMention() + "'s Pick");
             output.add("Check " + instance.getUnitsChannel().getMention() + " to view units, then pick with one with `"
                     + commandListener.getPrefix() + GameCommand.PICK.getName() + "`.");
         } else if (gameState == PLAYING) {
@@ -121,8 +123,8 @@ public class Game {
 
             turnCount++;
 
-            output.add("[**" + member.getMention() + ", it's your turn!**]");
-            output.add("Open this channel's description to review your stats and items.");
+            output.add("## " + member.getMention() + "'s Turn");
+            output.add("Open this channel's description to view stats.");
 
             // On turn start
             output.addAll(member.getData().stream().map(e -> e.onTurnStart(member)).collect(Collectors.toList()));
@@ -135,7 +137,7 @@ public class Game {
                             output.add(":repeat: **`" + skill.getName() + "`** is ready to use.");
                     });
             // Low health warning
-            if (member.getHealth() < member.getStats().get(MAX_HEALTH) * 0.2f)
+            if (member.getHealthPercentage() < 0.2f)
                 output.add(Emote.WARN + "**" + member.getUsername() + "** is critically low on health.");
             // Update current member's stats
             getCurrentMember().updateStats();
@@ -149,11 +151,26 @@ public class Game {
 
     public void updateInfo(GameMember member) {
         String info = getInfo(member);
-        infoMessage.edit(MessageEditSpec.builder().addEmbed(EmbedCreateSpec.builder()
-                                .author(member.getUsername(), null, member.getUser().getAvatarUrl())
-                                .description(info)
-                                .color(Color.ORANGE)
-                                .build())
+        EmbedCreateSpec.Builder embed = EmbedCreateSpec.builder();
+
+        if (member.alreadyPickedUnit()) {
+            embed.author(member.getUnit().getName() + " (" + member.getUsername() + ")", null, member.getUser().getAvatarUrl());
+
+            if (member.getHealthPercentage() < 0.2f)
+                embed.color(Color.RED);
+            else if (member.getHealthPercentage() < 0.6f)
+                embed.color(Color.YELLOW);
+            else
+                embed.color(Color.GREEN);
+        } else {
+            embed.author(member.getUsername(), null, member.getUser().getAvatarUrl());
+            embed.color(Color.GRAY);
+        }
+
+        embed.description(info);
+
+        infoMessage.edit(MessageEditSpec.builder()
+                        .addEmbed(embed.build())
                         .build())
                 .subscribe();
     }
@@ -162,20 +179,42 @@ public class Game {
         if (gameState == PICKING)
             return member.getUsername() + " is picking their unit.";
         else {
-            List<String> output = new ArrayList<>();
             Stats stats = member.getStats();
-            output.add(member.getUnit().getName() + " " + member.getMention() + " (" + turnCount + ")");
-            output.add("Gold: " + comma(member.getGold()) + "**");
-            output.add("Health: " + member.getHealth() + " / " + stats.getInt(MAX_HEALTH) + " (+" + stats.getInt(HEALTH_PER_TURN) + "/t)");
-            output.add("Energy: " + member.getEnergy());
-            output.add("Items: " + member.getItems());
+
+            List<String> baseTopic = new ArrayList<>();
+            baseTopic.add("- Health: " + percent(member.getHealthPercentage()) + " (" + member.getHealth() + "/" + stats.getInt(MAX_HEALTH) + ")");
+            baseTopic.add("- Gold: " + member.getGold());
+            baseTopic.add("- Energy: " + member.getEnergy());
+            baseTopic.add("- Items: " + member.getItems());
 
             // Add unit topic
-            Arrays.stream(member.getUnit().getTopic(member)).filter(Objects::nonNull).forEach(output::add);
-            // Add effect topics
-            member.getEffects().stream().map(e -> e.getTopic(member)).filter(Objects::nonNull).flatMap(Arrays::stream).forEach(output::add);
+            List<String> unitTopic = Arrays.stream(member.getUnit().getTopic(member))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
 
-            return Util.joinNonEmpty(",\n", output);
+            // Add buff topics
+            List<String> buffTopics = new ArrayList<>();
+            for (Buff buff : member.getBuffs())
+            {
+                Arrays.stream(buff.getTopic(member))
+                        .filter(Objects::nonNull)
+                        .forEach(buffTopics::add);
+            }
+
+            // Add effect topics
+            List<String> effectTopics = new ArrayList<>();
+            for (Effect effect : member.getEffects())
+            {
+                Arrays.stream(effect.getTopic(member))
+                        .filter(Objects::nonNull)
+                        .forEach(effectTopics::add);
+            }
+
+            return String.join(" \n", baseTopic) + "\n\n" +
+                    String.join(" \n", unitTopic) + "\n\n" +
+                    String.join(" \n", buffTopics) + "\n\n" +
+                    String.join(" \n", effectTopics);
+
         }
     }
 

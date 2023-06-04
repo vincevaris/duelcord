@@ -28,6 +28,13 @@ public abstract class Buff implements GameObject {
         return name;
     }
 
+    @Override
+    public String[] getTopic(GameMember member) {
+        return new String[] {
+                getName() + ": " + (totalTurns - currentTurns) + " turns"
+        };
+    }
+
     public int turn() {
         currentTurns--;
         return currentTurns;

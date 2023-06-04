@@ -4,7 +4,6 @@ import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.object.Buff;
 import com.oopsjpeg.enigma.util.Emote;
-import com.oopsjpeg.enigma.util.Util;
 
 import static com.oopsjpeg.enigma.util.Util.percent;
 
