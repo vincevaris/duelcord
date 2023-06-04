@@ -22,7 +22,7 @@ public enum Item implements GameObject {
 
         @Override
         public String onUse(GameMember member) {
-            member.getBuffs().add(new PotionBuff(member, TURNS, HEAL));
+            member.addBuff(new PotionBuff(member, TURNS, HEAL));
             return member.heal(HEAL / TURNS, "Potion");
         }
 

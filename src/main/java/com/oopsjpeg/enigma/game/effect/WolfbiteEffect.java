@@ -19,7 +19,7 @@ public class WolfbiteEffect extends Effect {
     @Override
     public DamageEvent attackOut(DamageEvent event) {
         if (attackCount.stack()) {
-            event.output.add(event.target.buff(new WeakenDebuff(event.actor, 1, getPower())));
+            event.output.add(event.target.addBuff(new WeakenDebuff(event.actor, 1, getPower())));
             attackCount.reset();
         }
         return event;

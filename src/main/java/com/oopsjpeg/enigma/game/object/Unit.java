@@ -15,6 +15,8 @@ import java.util.List;
 
 import static com.oopsjpeg.enigma.game.Stats.*;
 import static com.oopsjpeg.enigma.game.unit.UnitConstants.*;
+import static com.oopsjpeg.enigma.util.Util.percent;
+import static com.oopsjpeg.enigma.util.Util.percentRaw;
 
 public enum Unit implements GameObject {
     ASSASSIN("Assassin", Color.of(0, 69, 255), new Stats()
@@ -86,8 +88,8 @@ public enum Unit implements GameObject {
 
         @Override
         public String getDescription() {
-            return "__" + Util.percent(ASSASSIN_POTENCY_RATIO) + "__ of damage dealt with Attacks is stored as **Potency**, up to __" + ASSASSIN_POTENCY_MAX + "__ + __" + Util.percent(ASSASSIN_POTENCY_SP_RATIO) + " Spell Power__.\n" +
-                    "When you defend, gain __" + Util.percent(ASSASSIN_STEALTH_DODGE) + "__ Dodge.";
+            return "__" + percent(ASSASSIN_POTENCY_RATIO) + "__ of damage dealt with Attacks is stored as **Potency**, up to __" + ASSASSIN_POTENCY_MAX + "__ + __" + percent(ASSASSIN_POTENCY_SP_RATIO) + " Spell Power__.\n" +
+                    "When you defend, gain __" + percent(ASSASSIN_STEALTH_DODGE) + "__ Dodge.";
         }
 
         @Override
@@ -116,8 +118,8 @@ public enum Unit implements GameObject {
 
         @Override
         public String onDefend(GameMember member) {
-            member.getBuffs().add(new StealthBuff(member, ASSASSIN_STEALTH_DODGE));
-            return Emote.SHIELD + "**" + member.getUsername() + "** is in stealth, gaining __" + Util.percent(ASSASSIN_STEALTH_DODGE) + "__ Dodge.";
+            member.addBuff(new StealthBuff(member, ASSASSIN_STEALTH_DODGE));
+            return Emote.SHIELD + "**" + member.getUsername() + "** is in stealth, gaining __" + percent(ASSASSIN_STEALTH_DODGE) + "__ Dodge.";
         }
 
         @Override
@@ -162,7 +164,7 @@ public enum Unit implements GameObject {
 
             @Override
             public String getDescription() {
-                return "Deal __" + Util.percent(ASSASSIN_SLASH_AP_RATIO) + " Attack Power__ + __" + Util.percent(ASSASSIN_SLASH_SP_RATIO) + " Spell Power__. Can crit.\n" +
+                return "Deal __" + percent(ASSASSIN_SLASH_AP_RATIO) + " Attack Power__ + __" + percent(ASSASSIN_SLASH_SP_RATIO) + " Spell Power__. Can crit.\n" +
                         "Every **" + ASSASSIN_SLASH_MAX + "** uses, **Silence** the target and consume **Potency** to deal bonus damage equal to it.";
             }
 
@@ -200,7 +202,7 @@ public enum Unit implements GameObject {
                     int potency = getPotency(vars);
                     event.bonus += potency;
 
-                    event.output.add(event.target.buff(new SilenceDebuff(actor)));
+                    event.output.add(event.target.addBuff(new SilenceDebuff(actor)));
 
                     slashCount.reset();
                     setPotency(vars, 0);
@@ -232,7 +234,7 @@ public enum Unit implements GameObject {
 
             @Override
             public String getDescription() {
-                return "End the turn and gain __" + Util.percent(ASSASSIN_CLOAK_DODGE) + "__ Dodge. The next dodge generates __" + ASSASSIN_CLOAK_POTENCY + "__ + __" + Util.percent(ASSASSIN_CLOAK_POTENCY_SP_RATIO) + " Spell Power__ Potency and dispels this buff.";
+                return "End the turn and gain __" + percent(ASSASSIN_CLOAK_DODGE) + "__ Dodge. The next dodge generates __" + ASSASSIN_CLOAK_POTENCY + "__ + __" + percent(ASSASSIN_CLOAK_POTENCY_SP_RATIO) + " Spell Power__ Potency and dispels this buff.";
             }
 
             @Override
@@ -249,7 +251,7 @@ public enum Unit implements GameObject {
                 cloakCooldown.start(actor.getStats().getInt(COOLDOWN_REDUCTION));
                 setCloakCooldown(vars, cloakCooldown);
 
-                actor.getBuffs().add(new CloakBuff(actor, ASSASSIN_CLOAK_DODGE));
+                actor.addBuff(new CloakBuff(actor, ASSASSIN_CLOAK_DODGE));
                 actor.setEnergy(0);
 
                 return Emote.USE + "**" + actor.getUsername() + "** used **Cloak**!";
@@ -268,8 +270,6 @@ public enum Unit implements GameObject {
 
             @Override
             public DamageEvent dodgeMe(DamageEvent event) {
-                System.out.println("ASSASSIN DODGED!");
-
                 GameMemberVars vars = event.actor.getVars();
                 Stats stats = event.actor.getStats();
 
@@ -280,7 +280,7 @@ public enum Unit implements GameObject {
 
                 setPotency(vars, potency);
 
-                event.actor.removeBuff(this);
+                remove();
 
                 return event;
             }
@@ -304,7 +304,7 @@ public enum Unit implements GameObject {
 
             @Override
             public String getDescription() {
-                return "Your next **2** Attacks this turn deal __" + Util.percent(ASSASSIN_GOUGE_DAMAGE_AP_RATIO) + " Attack Power__ bonus damage and have __" + Util.percent(ASSASSIN_GOUGE_CRIPPLE_CHANCE) + "__ chance to **Cripple** the target by __" + Util.percent(ASSASSIN_GOUGE_CRIPPLE_AMOUNT) + "__.\n" +
+                return "Your next **2** Attacks this turn deal __" + percent(ASSASSIN_GOUGE_DAMAGE_AP_RATIO) + " Attack Power__ bonus damage and have __" + percent(ASSASSIN_GOUGE_CRIPPLE_CHANCE) + "__ chance to **Cripple** the target by __" + percent(ASSASSIN_GOUGE_CRIPPLE_AMOUNT) + "__.\n" +
                         "Cripple can stack.";
             }
 
@@ -323,7 +323,7 @@ public enum Unit implements GameObject {
                 setGougeCooldown(vars, gougeCooldown);
 
                 int damage = Math.round(actor.getStats().get(ATTACK_POWER) * ASSASSIN_GOUGE_DAMAGE_AP_RATIO);
-                actor.getBuffs().add(new GougeBuff(actor, 2, damage, ASSASSIN_GOUGE_CRIPPLE_CHANCE, ASSASSIN_GOUGE_CRIPPLE_AMOUNT));
+                actor.addBuff(new GougeBuff(actor, 2, damage, ASSASSIN_GOUGE_CRIPPLE_CHANCE, ASSASSIN_GOUGE_CRIPPLE_AMOUNT));
                 return Emote.USE + "**" + actor.getUsername() + "** used **Gouge**!";
             }
 
@@ -355,11 +355,11 @@ public enum Unit implements GameObject {
 
                 float crippleRand = Util.RANDOM.nextFloat();
                 if (crippleRand <= crippleChance)
-                    event.output.add(event.target.buff(new CrippleDebuff(event.actor, 1, crippleAmount)));
+                    event.output.add(event.target.addBuff(new CrippleDebuff(event.actor, 1, crippleAmount)));
 
                 attacks++;
 
-                if (attacks >= maxAttacks) event.actor.removeBuff(this);
+                if (attacks >= maxAttacks) remove();
 
                 return event;
             }
@@ -443,7 +443,7 @@ public enum Unit implements GameObject {
 
         @Override
         public String getDescription() {
-            return "The first Attack per turn always Crits and deals __" + Util.percent(GUNSLINGER_PASSIVE_AP_RATIO) + " Attack Power__ bonus damage.";
+            return "The first Attack per turn always Crits and deals __" + percent(GUNSLINGER_PASSIVE_AP_RATIO) + " Attack Power__ bonus damage.";
         }
 
         @Override
@@ -509,7 +509,7 @@ public enum Unit implements GameObject {
 
             @Override
             public String getDescription() {
-                return "Fire **" + GUNSLINGER_BARRAGE_SHOTS + "** shots, each dealing __" + GUNSLINGER_BARRAGE_DAMAGE + "__ + __" + Util.percent(GUNSLINGER_BARRAGE_AP_RATIO) + " Attack Power__ + __" + Util.percent(GUNSLINGER_BARRAGE_SP_RATIO) + " Skill Power__." +
+                return "Fire **" + GUNSLINGER_BARRAGE_SHOTS + "** shots, each dealing __" + GUNSLINGER_BARRAGE_DAMAGE + "__ + __" + percent(GUNSLINGER_BARRAGE_AP_RATIO) + " Attack Power__ + __" + percent(GUNSLINGER_BARRAGE_SP_RATIO) + " Skill Power__." +
                         "\nShots can crit and apply on-hit effects.";
             }
         }
@@ -576,7 +576,7 @@ public enum Unit implements GameObject {
 
             @Override
             public String getDescription() {
-                return "End the turn and gain __" + Util.percent(GUNSLINGER_ROLL_DODGE) + "__ + __" + Util.percentRaw(GUNSLINGER_ROLL_SP_RATIO) + " Skill Power__ Dodge.";
+                return "End the turn and gain __" + percent(GUNSLINGER_ROLL_DODGE) + "__ + __" + percentRaw(GUNSLINGER_ROLL_SP_RATIO) + " Skill Power__ Dodge.";
             }
         }
 
@@ -591,10 +591,12 @@ public enum Unit implements GameObject {
                 rollCooldown.start(stats.getInt(COOLDOWN_REDUCTION));
                 setRollCooldown(vars, rollCooldown);
 
-                actor.buff(new RollBuff(actor, GUNSLINGER_ROLL_DODGE + (stats.get(SKILL_POWER) * GUNSLINGER_ROLL_SP_RATIO)));
+                float dodge = GUNSLINGER_ROLL_DODGE + (stats.get(SKILL_POWER) * GUNSLINGER_ROLL_SP_RATIO);
+
+                actor.addBuff(new RollBuff(actor, dodge));
                 actor.setEnergy(0);
 
-                return Emote.USE + "**" + actor.getUsername() + "** used **Roll**!";
+                return Emote.USE + "**" + actor.getUsername() + "** used **Roll**, gaining __" + percent(dodge) + "__ Dodge until hit!";
             }
 
             @Override
@@ -632,9 +634,9 @@ public enum Unit implements GameObject {
 
             @Override
             public String getDescription() {
-                return "Deal __" + GUNSLINGER_DEADEYE_DAMAGE + "__ + __" + Util.percent(GUNSLINGER_DEADEYE_AP_RATIO) + " Attack Power__." +
-                        "\nHas a __" + Util.percent(GUNSLINGER_DEADEYE_CHANCE) + "__ chance to **Jackpot**, increased by __" + Util.percentRaw(GUNSLINGER_DEADEYE_JACKPOT_BARRAGE_INCREASE) + "__ per Barrage shot hit." +
-                        "\nJackpot instead deals __" + Util.percent(GUNSLINGER_DEADEYE_JACKPOT_RATIO) + "__ of the target's missing health." +
+                return "Deal __" + GUNSLINGER_DEADEYE_DAMAGE + "__ + __" + percent(GUNSLINGER_DEADEYE_AP_RATIO) + " Attack Power__." +
+                        "\nHas a __" + percent(GUNSLINGER_DEADEYE_CHANCE) + "__ chance to **Jackpot**, increased by __" + percentRaw(GUNSLINGER_DEADEYE_JACKPOT_BARRAGE_INCREASE) + "__ per Barrage shot hit." +
+                        "\nJackpot instead deals __" + percent(GUNSLINGER_DEADEYE_JACKPOT_RATIO) + "__ of the target's missing health." +
                         "\nDeadeye can crit.";
             }
         }
@@ -926,9 +928,9 @@ public enum Unit implements GameObject {
         desc.add("Attack Power: **" + stats.getInt(ATTACK_POWER) + "**");
         desc.add("Energy: **" + stats.getInt(MAX_ENERGY) + "**");
         if (stats.get(CRIT_CHANCE) > 0)
-            desc.add("Critical Chance: **" + Util.percent(stats.get(CRIT_CHANCE)) + "**");
+            desc.add("Critical Chance: **" + percent(stats.get(CRIT_CHANCE)) + "**");
         if (stats.get(LIFE_STEAL) > 0)
-            desc.add("Life Steal: **" + Util.percent(stats.get(LIFE_STEAL)) + "**");
+            desc.add("Life Steal: **" + percent(stats.get(LIFE_STEAL)) + "**");
 
         embed.color(getColor());
         embed.description(String.join("\n", desc));

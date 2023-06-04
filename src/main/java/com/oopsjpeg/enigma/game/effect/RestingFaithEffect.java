@@ -12,7 +12,7 @@ public class RestingFaithEffect extends Effect {
     @Override
     public String onDefend(GameMember member) {
         if (!member.hasBuff(RestingFaithBuff.class))
-            return member.buff(new RestingFaithBuff(member, getPower()));
+            return member.addBuff(new RestingFaithBuff(member, getPower()));
         return null;
     }
 

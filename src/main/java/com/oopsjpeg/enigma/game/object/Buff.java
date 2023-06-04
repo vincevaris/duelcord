@@ -12,6 +12,7 @@ public abstract class Buff implements GameObject {
 
     private int totalTurns;
     private int currentTurns;
+    private boolean shouldRemove = false;
 
     public Buff(String name, boolean debuff, GameMember source, int totalTurns, float power) {
         this.name = name;
@@ -35,9 +36,9 @@ public abstract class Buff implements GameObject {
         };
     }
 
-    public int turn() {
+    public boolean turn() {
         currentTurns--;
-        return currentTurns;
+        return shouldRemove();
     }
 
     public boolean isDebuff() {
@@ -74,6 +75,14 @@ public abstract class Buff implements GameObject {
 
     public void setCurrentTurns(int currentTurns) {
         this.currentTurns = currentTurns;
+    }
+
+    public boolean shouldRemove() {
+        return shouldRemove || currentTurns == 0;
+    }
+
+    public void remove() {
+        shouldRemove = true;
     }
 
     public Stats getStats() {

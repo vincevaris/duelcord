@@ -92,11 +92,11 @@ public class GameMember {
     }
 
     public List<Buff> getBuffs() {
-        return buffs;
+        return new ArrayList<>(buffs);
     }
 
     public boolean hasBuff(Class<? extends Buff> buffType) {
-        return buffs.stream().anyMatch(buff -> buff.getClass().equals(buffType));
+        return getBuffs().stream().anyMatch(buff -> buff.getClass().equals(buffType));
     }
 
     public void removeBuff(Buff buff) {
@@ -129,8 +129,13 @@ public class GameMember {
         for (Effect effect : getEffects())
             stats.addAll(effect.getStats());
 
-        for (Buff buff : getBuffs())
-            stats.addAll(buff.getStats());
+        for (Buff buff : getBuffs()) {
+            if (buff.shouldRemove())
+                removeBuff(buff);
+            else
+                stats.addAll(buff.getStats());
+        }
+
 
         critPity.setChance(stats.get(CRIT_CHANCE));
     }
@@ -147,7 +152,7 @@ public class GameMember {
         }
     }
 
-    public String buff(Buff buff) {
+    public String addBuff(Buff buff) {
         buffs.add(buff);
         updateStats();
         return Emote.BLEED + "**" + buff.getSource().getUsername() + "** applied **" + buff.getName() + "**" +
@@ -265,10 +270,13 @@ public class GameMember {
     }
 
     public String damage(DamageEvent event, String emote, String source) {
-        if (event.cancelled) return Util.joinNonEmpty("\n", event.output);
-
         for (GameObject o : event.actor.getData()) event = o.damageOut(event);
         for (GameObject o : event.target.getData()) event = o.damageIn(event);
+
+        event.actor.updateStats();
+        event.target.updateStats();
+
+        if (event.cancelled) return Util.joinNonEmpty("\n", event.output);
 
         event = game.getMode().handleDamage(event);
 

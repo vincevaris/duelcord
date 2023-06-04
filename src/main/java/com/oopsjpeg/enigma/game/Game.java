@@ -82,12 +82,11 @@ public class Game {
             if (turnCount >= 1 && getCurrentMember().hasEnergy() && !getCurrentMember().hasBuff(SilenceDebuff.class))
                 output.add(getCurrentMember().defend());
             // Check buffs
-            getCurrentMember().getData().stream()
-                    .filter(d -> d instanceof Buff)
-                    .filter(b -> ((Buff) b).turn() == 0)
+            getCurrentMember().getBuffs().stream()
+                    .filter(Buff::turn)
                     .forEach(buff -> {
                 output.add(Emote.INFO + "**" + getCurrentMember().getUsername() + "**'s " + buff.getName() + " has expired.");
-                getCurrentMember().getBuffs().remove(buff);
+                getCurrentMember().removeBuff(buff);
             });
             // Update current member's stats
             getCurrentMember().updateStats();

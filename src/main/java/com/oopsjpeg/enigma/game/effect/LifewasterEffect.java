@@ -18,7 +18,7 @@ public class LifewasterEffect extends Effect {
     @Override
     public DamageEvent hitOut(DamageEvent event) {
         if (hitCount.stack()) {
-            event.output.add(event.target.buff(new WoundDebuff(event.actor, 1, getPower())));
+            event.output.add(event.target.addBuff(new WoundDebuff(event.actor, 1, getPower())));
             hitCount.reset();
         }
         return event;

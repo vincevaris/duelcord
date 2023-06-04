@@ -18,7 +18,7 @@ public class DecimateEffect extends Effect {
     @Override
     public DamageEvent critOut(DamageEvent event) {
         if (critCount.stack()) {
-            event.output.add(event.target.buff(new CrippleDebuff(event.actor, 0, getPower())));
+            event.output.add(event.target.addBuff(new CrippleDebuff(event.actor, 0, getPower())));
             critCount.reset();
         }
         return event;
