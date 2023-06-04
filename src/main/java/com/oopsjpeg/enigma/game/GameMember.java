@@ -99,6 +99,10 @@ public class GameMember {
         return buffs.stream().anyMatch(buff -> buff.getClass().equals(buffType));
     }
 
+    public void removeBuff(Buff buff) {
+        buffs.remove(buff);
+    }
+
     public boolean alreadyPickedUnit() {
         return getUnit() != null;
     }

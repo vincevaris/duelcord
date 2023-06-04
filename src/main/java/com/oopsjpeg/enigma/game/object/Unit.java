@@ -1,8 +1,11 @@
 package com.oopsjpeg.enigma.game.object;
 
 import com.oopsjpeg.enigma.game.*;
+import com.oopsjpeg.enigma.game.buff.CrippleDebuff;
+import com.oopsjpeg.enigma.game.buff.SilenceDebuff;
 import com.oopsjpeg.enigma.util.Cooldown;
 import com.oopsjpeg.enigma.util.Emote;
+import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
@@ -16,13 +19,355 @@ import static com.oopsjpeg.enigma.util.Util.percent;
 import static com.oopsjpeg.enigma.util.Util.percentRaw;
 
 public enum Unit implements GameObject {
-    //ASSASSIN("Assassin", Color.of(0, 69, 255), new Stats()
-    //        .put(MAX_ENERGY, 125)
-    //        .put(MAX_HEALTH, 720)
-    //        .put(ATTACK_POWER, 22)
-    //        .put(HEALTH_PER_TURN, 9)) {
-//
-    //},
+    ASSASSIN("Assassin", Color.of(0, 69, 255), new Stats()
+            .put(MAX_ENERGY, 125)
+            .put(MAX_HEALTH, 940)
+            .put(ATTACK_POWER, 22)
+            .put(HEALTH_PER_TURN, 9)) {
+        private static final String VAR_SLASH_COOLDOWN = "slash_cooldown";
+        private static final String VAR_CLOAK_COOLDOWN = "cloak_cooldown";
+        private static final String VAR_GOUGE_COOLDOWN = "gouge_cooldown";
+
+        private static final String VAR_POTENCY = "potency";
+        private static final String VAR_SLASH_COUNT = "slash_count";
+
+        public Cooldown getSlashCooldown(GameMemberVars vars) {
+            if (!vars.has(this, VAR_SLASH_COOLDOWN))
+                setSlashCooldown(vars, new Cooldown(ASSASSIN_SLASH_COOLDOWN));
+            return vars.get(this, VAR_SLASH_COOLDOWN, Cooldown.class);
+        }
+
+        public void setSlashCooldown(GameMemberVars vars, Cooldown slashCooldown) {
+            vars.put(this, VAR_SLASH_COOLDOWN, slashCooldown);
+        }
+
+        public Cooldown getCloakCooldown(GameMemberVars vars) {
+            if (!vars.has(this, VAR_CLOAK_COOLDOWN))
+                setCloakCooldown(vars, new Cooldown(ASSASSIN_CLOAK_COOLDOWN));
+            return vars.get(this, VAR_CLOAK_COOLDOWN, Cooldown.class);
+        }
+
+        public void setCloakCooldown(GameMemberVars vars, Cooldown cloakCooldown) {
+            vars.put(this, VAR_CLOAK_COOLDOWN, cloakCooldown);
+        }
+
+        public Cooldown getGougeCooldown(GameMemberVars vars) {
+            if (!vars.has(this, VAR_GOUGE_COOLDOWN))
+                setGougeCooldown(vars, new Cooldown(ASSASSIN_GOUGE_COOLDOWN));
+            return vars.get(this, VAR_GOUGE_COOLDOWN, Cooldown.class);
+        }
+
+        public void setGougeCooldown(GameMemberVars vars, Cooldown gougeCooldown) {
+            vars.put(this, VAR_GOUGE_COOLDOWN, gougeCooldown);
+        }
+
+        public int getPotency(GameMemberVars vars) {
+            if (!vars.has(this, VAR_POTENCY))
+                setPotency(vars, 0);
+            return vars.get(this, VAR_POTENCY, Integer.class);
+        }
+
+        public void setPotency(GameMemberVars vars, int potency) {
+            vars.put(this, VAR_POTENCY, potency);
+        }
+
+        public Stacker getSlashCount(GameMemberVars vars) {
+            if (!vars.has(this, VAR_SLASH_COUNT))
+                setSlashCount(vars, new Stacker(ASSASSIN_SLASH_MAX));
+            return vars.get(this, VAR_SLASH_COUNT, Stacker.class);
+        }
+
+        public void setSlashCount(GameMemberVars vars, Stacker slashCount) {
+            vars.put(this, VAR_SLASH_COUNT, slashCount);
+        }
+
+        @Override
+        public Skill[] getSkills() {
+            return new Skill[] { new SlashSkill(), new CloakSkill(), new GougeSkill() };
+        }
+
+        @Override
+        public String getDescription() {
+            return "__" + percent(ASSASSIN_POTENCY_RATIO) + "__ of damage dealt with Attacks is stored as **Potency**, up to __" + ASSASSIN_POTENCY_MAX + "__ + __" + percent(ASSASSIN_POTENCY_SP_RATIO) + " Spell Power__.\n" +
+                    "When you defend, gain __" + percent(ASSASSIN_STEALTH_DODGE) + "__ Dodge.";
+        }
+
+        @Override
+        public String[] getTopic(GameMember member) {
+            GameMemberVars vars = member.getVars();
+            Stacker slashCount = getSlashCount(vars);
+            Cooldown slashCooldown = getSlashCooldown(vars);
+            Cooldown cloakCooldown = getCloakCooldown(vars);
+            Cooldown gougeCooldown = getGougeCooldown(vars);
+
+            Stats stats = member.getStats();
+            return new String[] {
+                    "Potency: " + getPotency(vars) + " / " + getMaxPotency(stats),
+                    (slashCooldown.isDone()
+                            ? "Slash: Ready"
+                            : "Slash: " + slashCount + "/" + ASSASSIN_SLASH_MAX + " - " + slashCooldown.getCurrent() + " turns"),
+                    (cloakCooldown.isDone()
+                            ? "Cloak: Ready"
+                            : "Cloak: " + cloakCooldown.getCurrent() + " turns"),
+                    (gougeCooldown.isDone()
+                            ? "Gouge: Ready"
+                            : "Gouge: " + gougeCooldown.getCurrent() + " turns")
+            };
+        }
+
+        @Override
+        public String onDefend(GameMember member) {
+            member.getBuffs().add(new StealthBuff(member, ASSASSIN_STEALTH_DODGE));
+            return Emote.SHIELD + "**" + member.getUsername() + "** is in stealth, gaining __" + percent(ASSASSIN_STEALTH_DODGE) + "__ Dodge.";
+        }
+
+        @Override
+        public DamageEvent attackOut(DamageEvent event) {
+            GameMember actor = event.actor;
+            GameMemberVars vars = actor.getVars();
+            int potency = getPotency(vars);
+            int potencyToAdd = Math.round(event.damage * ASSASSIN_POTENCY_RATIO);
+
+            potency = Util.limit(potency + potencyToAdd, 0, getMaxPotency(actor.getStats()));
+
+            setPotency(vars, potency);
+
+            return event;
+        }
+
+        @Override
+        public DamageEvent dodgeMe(DamageEvent event) {
+            return super.dodgeMe(event);
+        }
+
+        public int getMaxPotency(Stats stats) {
+            return Math.round(ASSASSIN_POTENCY_MAX + (stats.get(SKILL_POWER) * ASSASSIN_POTENCY_SP_RATIO));
+        }
+
+        class StealthBuff extends Buff {
+            public StealthBuff(GameMember source, float power) {
+                super("Stealth", false, source, 2, power);
+            }
+
+            @Override
+            public Stats getStats() {
+                return new Stats()
+                        .put(DODGE, getPower());
+            }
+        }
+
+        class SlashSkill extends Skill {
+            public SlashSkill() {
+                super(ASSASSIN, ASSASSIN_SLASH_COOLDOWN);
+            }
+
+            @Override
+            public String getName() {
+                return "slash";
+            }
+
+            @Override
+            public String getDescription() {
+                return "Deal __" + percent(ASSASSIN_SLASH_AP_RATIO) + " Attack Power__ + __" + percent(ASSASSIN_SLASH_SP_RATIO) + " Spell Power__. Can crit.\n" +
+                        "Every **" + ASSASSIN_SLASH_MAX + "** uses, **Silence** the target and consume **Potency** to deal bonus damage equal to it.";
+            }
+
+            @Override
+            public GameAction act(Game game, GameMember actor) {
+                return new SlashAction(game.getRandomTarget(actor));
+            }
+        }
+
+        class SlashAction implements GameAction {
+            private final GameMember target;
+
+            public SlashAction(GameMember target) {
+                this.target = target;
+            }
+
+            @Override
+            public String act(GameMember actor) {
+                GameMemberVars vars = actor.getVars();
+                Stats stats = actor.getStats();
+
+                Cooldown slashCooldown = getSlashCooldown(vars);
+                slashCooldown.start(stats.getInt(COOLDOWN_REDUCTION));
+                setSlashCooldown(vars, slashCooldown);
+
+                DamageEvent event = new DamageEvent(actor, target);
+
+                event.damage += stats.get(ATTACK_POWER) * ASSASSIN_SLASH_AP_RATIO;
+                event.damage += stats.get(SKILL_POWER) * ASSASSIN_SLASH_SP_RATIO;
+
+                Stacker slashCount = getSlashCount(vars);
+
+                // Third slash
+                if (slashCount.stack()) {
+                    int potency = getPotency(vars);
+                    event.bonus += potency;
+
+                    event.output.add(event.target.buff(new SilenceDebuff(actor)));
+
+                    slashCount.reset();
+                    setPotency(vars, 0);
+                }
+
+                setSlashCount(vars, slashCount);
+
+                event = actor.crit(event);
+                event = actor.ability(event);
+
+                return target.damage(event, Emote.KNIFE, "Slash");
+            }
+
+            @Override
+            public int getEnergy() {
+                return ASSASSIN_SLASH_COST;
+            }
+        }
+
+        class CloakSkill extends Skill {
+            public CloakSkill() {
+                super(ASSASSIN, ASSASSIN_CLOAK_COOLDOWN);
+            }
+
+            @Override
+            public String getName() {
+                return "cloak";
+            }
+
+            @Override
+            public String getDescription() {
+                return "End the turn and gain __" + percent(ASSASSIN_CLOAK_DODGE) + "__ Dodge. The next dodge generates __" + ASSASSIN_CLOAK_POTENCY + "__ + __" + percent(ASSASSIN_CLOAK_POTENCY_SP_RATIO) + " Spell Power__ Potency and dispels this buff.";
+            }
+
+            @Override
+            public GameAction act(Game game, GameMember actor) {
+                return new CloakAction();
+            }
+        }
+
+        class CloakAction implements GameAction {
+            @Override
+            public String act(GameMember actor) {
+                GameMemberVars vars = actor.getVars();
+                Cooldown cloakCooldown = getCloakCooldown(vars);
+                cloakCooldown.start(actor.getStats().getInt(COOLDOWN_REDUCTION));
+                setCloakCooldown(vars, cloakCooldown);
+
+                actor.getBuffs().add(new CloakBuff(actor, ASSASSIN_CLOAK_DODGE));
+                actor.setEnergy(0);
+
+                return Emote.USE + "**" + actor.getUsername() + "** used **Cloak**!";
+            }
+
+            @Override
+            public int getEnergy() {
+                return 0;
+            }
+        }
+
+        class CloakBuff extends Buff {
+            public CloakBuff(GameMember source, float power) {
+                super("Cloak", false, source, 2, power);
+            }
+
+            @Override
+            public DamageEvent dodgeMe(DamageEvent event) {
+                GameMemberVars vars = event.actor.getVars();
+                Stats stats = event.actor.getStats();
+
+                int potency = getPotency(vars);
+                int potencyToAdd = Math.round(ASSASSIN_CLOAK_POTENCY + (stats.get(SKILL_POWER) * ASSASSIN_CLOAK_POTENCY_SP_RATIO));
+
+                potency = Util.limit(potency + potencyToAdd, 0, getMaxPotency(stats));
+
+                setPotency(vars, potency);
+
+                event.actor.removeBuff(this);
+                return event;
+            }
+
+            @Override
+            public Stats getStats() {
+                return new Stats()
+                        .put(DODGE, ASSASSIN_CLOAK_DODGE);
+            }
+        }
+
+        class GougeSkill extends Skill {
+            public GougeSkill() {
+                super(ASSASSIN, ASSASSIN_GOUGE_COOLDOWN);
+            }
+
+            @Override
+            public String getName() {
+                return "gouge";
+            }
+
+            @Override
+            public String getDescription() {
+                return "Your next **2** Attacks this turn deal __" + percent(ASSASSIN_GOUGE_DAMAGE_AP_RATIO) + " Attack Power__ bonus damage and have __" + percent(ASSASSIN_GOUGE_CRIPPLE_CHANCE) + "__ chance to **Cripple** the target by __" + percent(ASSASSIN_GOUGE_CRIPPLE_AMOUNT) + "__.\n" +
+                        "Cripple can stack.";
+            }
+
+            @Override
+            public GameAction act(Game game, GameMember actor) {
+                return new GougeAction();
+            }
+        }
+
+        class GougeAction implements GameAction {
+            @Override
+            public String act(GameMember actor) {
+                GameMemberVars vars = actor.getVars();
+                Cooldown gougeCooldown = getGougeCooldown(vars);
+                gougeCooldown.start(actor.getStats().getInt(COOLDOWN_REDUCTION));
+                setGougeCooldown(vars, gougeCooldown);
+
+                int damage = Math.round(actor.getStats().get(ATTACK_POWER) * ASSASSIN_GOUGE_DAMAGE_AP_RATIO);
+                actor.getBuffs().add(new GougeBuff(actor, 2, damage, ASSASSIN_GOUGE_CRIPPLE_CHANCE, ASSASSIN_GOUGE_CRIPPLE_AMOUNT));
+                return Emote.USE + "**" + actor.getUsername() + "** used **Gouge**!";
+            }
+
+            @Override
+            public int getEnergy() {
+                return ASSASSIN_GOUGE_COST;
+            }
+        }
+
+        class GougeBuff extends Buff {
+            private final int maxAttacks;
+            private final int damage;
+            private final float crippleChance;
+            private final float crippleAmount;
+
+            private int attacks;
+
+            public GougeBuff(GameMember source, int maxAttacks, int damage, float crippleChance, float crippleAmount) {
+                super("Gouge", false, source, 1, 0);
+                this.maxAttacks = maxAttacks;
+                this.damage = damage;
+                this.crippleChance = crippleChance;
+                this.crippleAmount = crippleAmount;
+            }
+
+            @Override
+            public DamageEvent attackOut(DamageEvent event) {
+                event.bonus += damage;
+
+                float crippleRand = Util.RANDOM.nextFloat();
+                if (crippleRand <= crippleChance)
+                    event.output.add(event.target.buff(new CrippleDebuff(event.actor, 1, crippleAmount)));
+
+                attacks++;
+
+                if (attacks >= maxAttacks) event.actor.removeBuff(this);
+
+                return event;
+            }
+        }
+    },
     //BERSERKER("Berserker", Color.RED, new Stats()
     //        .put(Stats.MAX_ENERGY, 100)
     //        .put(Stats.MAX_HEALTH, 760)
@@ -185,7 +530,7 @@ public enum Unit implements GameObject {
                 Cooldown barrageCooldown = getBarrageCooldown(vars);
                 Stats stats = actor.getStats();
 
-                barrageCooldown.start();
+                barrageCooldown.start(stats.getInt(COOLDOWN_REDUCTION));
 
                 setBarrageCooldown(vars, barrageCooldown);
 
@@ -196,8 +541,9 @@ public enum Unit implements GameObject {
                         DamageEvent event = new DamageEvent(actor, target);
                         event.damage += stats.get(ATTACK_POWER) * GUNSLINGER_BARRAGE_AP_RATIO;
                         event.damage += stats.get(SKILL_POWER) * GUNSLINGER_BARRAGE_SP_RATIO;
-                        actor.crit(event);
-                        actor.hit(event);
+                        event = actor.crit(event);
+                        event = actor.hit(event);
+                        event = actor.ability(event);
 
                         if (!event.cancelled)
                             barrageCount++;
@@ -245,7 +591,7 @@ public enum Unit implements GameObject {
                 Cooldown rollCooldown = getRollCooldown(vars);
                 Stats stats = actor.getStats();
 
-                rollCooldown.start();
+                rollCooldown.start(stats.getInt(COOLDOWN_REDUCTION));
                 setRollCooldown(vars, rollCooldown);
 
                 actor.buff(new RollBuff(actor, GUNSLINGER_ROLL_DODGE + (stats.get(SKILL_POWER) * GUNSLINGER_ROLL_SP_RATIO)));
@@ -311,7 +657,7 @@ public enum Unit implements GameObject {
                 int barrageCount = getBarrageCount(vars);
                 Stats stats = actor.getStats();
 
-                deadeyeCooldown.start();
+                deadeyeCooldown.start(stats.getInt(COOLDOWN_REDUCTION));
                 setDeadeyeCooldown(vars, deadeyeCooldown);
 
                 DamageEvent event = new DamageEvent(actor, target);
@@ -327,7 +673,8 @@ public enum Unit implements GameObject {
                     event.damage += stats.get(ATTACK_POWER) * GUNSLINGER_DEADEYE_AP_RATIO;
                 }
 
-                actor.crit(event);
+                event = actor.crit(event);
+                event = actor.ability(event);
 
                 output.add(actor.damage(event, Emote.GUN, "Deadeye"));
                 output.add(0, Emote.USE + "**" + actor.getUsername() + "** used **Deadeye**!" + (jackpot ? " **JACKPOT**!" : ""));
