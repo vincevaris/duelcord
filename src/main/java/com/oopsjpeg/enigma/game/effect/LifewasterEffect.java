@@ -8,17 +8,21 @@ import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
 
-public class LifewasterEffect extends Effect {
+public class LifewasterEffect extends Effect
+{
     private final Stacker hitCount;
 
-    public LifewasterEffect(int hitLimit, float power) {
+    public LifewasterEffect(int hitLimit, float power)
+    {
         super("Lifewaster", power, null);
         hitCount = new Stacker(hitLimit);
     }
 
     @Override
-    public DamageEvent hitOut(DamageEvent event) {
-        if (hitCount.stack()) {
+    public DamageEvent hitOut(DamageEvent event)
+    {
+        if (hitCount.stack())
+        {
             event.output.add(event.target.addBuff(new WoundDebuff(event.actor, 1, getPower()), Emote.WOUND));
             hitCount.reset();
         }
@@ -26,12 +30,14 @@ public class LifewasterEffect extends Effect {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription()
+    {
         return "Every " + hitCount.getMax() + " Hits, **Wound** the target by __" + Util.percent(getPower()) + "__ on their next turn.";
     }
 
     @Override
-    public String[] getTopic(GameMember member) {
+    public String[] getTopic(GameMember member)
+    {
         return new String[]{
                 "Lifewaster: " + hitCount.getCurrent() + " / " + hitCount.getMax()
         };

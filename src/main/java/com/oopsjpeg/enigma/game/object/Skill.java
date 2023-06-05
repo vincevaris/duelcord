@@ -12,17 +12,20 @@ import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 
-public abstract class Skill implements Command {
+public abstract class Skill implements Command
+{
     private final Unit unit;
     private final int baseCooldown;
 
-    public Skill(Unit unit, int baseCooldown) {
+    public Skill(Unit unit, int baseCooldown)
+    {
         this.unit = unit;
         this.baseCooldown = baseCooldown;
     }
 
     @Override
-    public void execute(Message message, String[] args) {
+    public void execute(Message message, String[] args)
+    {
         MessageChannel channel = message.getChannel().block();
         GameMember actor = Enigma.getGameMemberFromMessage(message);
         Game game = actor.getGame();
@@ -34,12 +37,14 @@ public abstract class Skill implements Command {
 
         message.delete().subscribe();
 
-        if (actor.hasBuff(SilenceDebuff.class)) {
+        if (actor.hasBuff(SilenceDebuff.class))
+        {
             Util.sendFailure(channel, "You can't use skills while silenced.");
             return;
         }
 
-        if (!cooldown.isDone()) {
+        if (!cooldown.isDone())
+        {
             Util.sendFailure(channel, "This skill is on cooldown.");
             return;
         }
@@ -49,29 +54,35 @@ public abstract class Skill implements Command {
 
     public abstract GameAction act(Game game, GameMember actor);
 
-    public String getCooldownVar() {
+    public String getCooldownVar()
+    {
         return getName() + "_cooldown";
     }
 
-    public Cooldown getCooldown(GameMemberVars vars) {
+    public Cooldown getCooldown(GameMemberVars vars)
+    {
         if (!vars.has(unit, getCooldownVar()))
             setCooldown(vars, new Cooldown(baseCooldown));
         return vars.get(unit, getCooldownVar(), Cooldown.class);
     }
 
-    public void setCooldown(GameMemberVars vars, Cooldown cooldown) {
+    public void setCooldown(GameMemberVars vars, Cooldown cooldown)
+    {
         vars.put(unit, getCooldownVar(), cooldown);
     }
 
-    public boolean hasCooldown() {
+    public boolean hasCooldown()
+    {
         return baseCooldown > 0;
     }
 
-    public Unit getUnit() {
+    public Unit getUnit()
+    {
         return unit;
     }
 
-    public int getBaseCooldown() {
+    public int getBaseCooldown()
+    {
         return baseCooldown;
     }
 }

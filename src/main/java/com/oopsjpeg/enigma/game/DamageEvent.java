@@ -3,7 +3,8 @@ package com.oopsjpeg.enigma.game;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DamageEvent {
+public class DamageEvent
+{
     public final List<String> output = new ArrayList<>();
     public GameMember actor;
     public GameMember target;
@@ -15,12 +16,14 @@ public class DamageEvent {
     public float shield;
     public boolean cancelled;
 
-    public DamageEvent(GameMember actor, GameMember target) {
+    public DamageEvent(GameMember actor, GameMember target)
+    {
         this.actor = actor;
         this.target = target;
     }
 
-    public float total() {
+    public float total()
+    {
         return damage + bonus;
     }
 }

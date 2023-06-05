@@ -8,17 +8,21 @@ import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
 
-public class DecimateEffect extends Effect {
+public class DecimateEffect extends Effect
+{
     private final Stacker critCount;
 
-    public DecimateEffect(int critLimit, float power) {
+    public DecimateEffect(int critLimit, float power)
+    {
         super("Decimate", power, null);
         this.critCount = new Stacker(critLimit);
     }
 
     @Override
-    public DamageEvent critOut(DamageEvent event) {
-        if (critCount.stack()) {
+    public DamageEvent critOut(DamageEvent event)
+    {
+        if (critCount.stack())
+        {
             event.output.add(event.target.addBuff(new CrippleDebuff(event.actor, 0, getPower()), Emote.KNIFE));
             critCount.reset();
         }
@@ -26,12 +30,14 @@ public class DecimateEffect extends Effect {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription()
+    {
         return "Every **" + critCount.getMax() + "** Crits, **Cripple** the target by __" + Util.percent(getPower()) + "__ until their next turn.";
     }
 
     @Override
-    public String[] getTopic(GameMember member) {
+    public String[] getTopic(GameMember member)
+    {
         return new String[]{
                 "Decimate: " + critCount.getCurrent() + " / " + critCount.getMax()
         };

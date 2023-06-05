@@ -9,15 +9,18 @@ import com.oopsjpeg.enigma.util.Util;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SellAction implements GameAction {
+public class SellAction implements GameAction
+{
     private final Item item;
 
-    public SellAction(Item item) {
+    public SellAction(Item item)
+    {
         this.item = item;
     }
 
     @Override
-    public String act(GameMember actor) {
+    public String act(GameMember actor)
+    {
         final List<String> output = new ArrayList<>();
         int gold = Math.round(item.getCost() * 0.6f);
         output.add(Emote.BUY + "**" + actor.getUsername() + "** sold **" + item.getName() + "** for __" + gold + "__ gold.");
@@ -28,7 +31,8 @@ public class SellAction implements GameAction {
     }
 
     @Override
-    public int getEnergy() {
+    public int getEnergy()
+    {
         return 25;
     }
 }

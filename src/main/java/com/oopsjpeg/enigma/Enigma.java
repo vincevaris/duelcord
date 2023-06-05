@@ -34,7 +34,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class Enigma {
+public class Enigma
+{
     public static final Logger LOGGER = LoggerFactory.getLogger(Enigma.class);
     public static final Gson GSON = new GsonBuilder().create();
     public static final ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() + 1);
@@ -50,26 +51,33 @@ public class Enigma {
     private GatewayDiscordClient client;
     private CommandListener commands;
 
-    public static File getSettingsFile() {
+    public static File getSettingsFile()
+    {
         return new File("enigma.properties");
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         instance = new Enigma();
         instance.start();
     }
 
-    public static Enigma getInstance() {
+    public static Enigma getInstance()
+    {
         return Enigma.instance;
     }
 
-    private void start() {
-        try {
-            if (!settings.getFile().exists()) {
+    private void start()
+    {
+        try
+        {
+            if (!settings.getFile().exists())
+            {
                 // Create settings if it doesn't exist
                 settings.save();
                 LOGGER.info("Created new settings. Please configure it.");
-            } else {
+            } else
+            {
                 // Load settings
                 settings.load();
                 LOGGER.info("Loaded settings.");
@@ -91,24 +99,29 @@ public class Enigma {
                 addListener(new ComponentListener(this));
                 addListener(commands);
             }
-        } catch (IOException error) {
+        } catch (IOException error)
+        {
             error.printStackTrace();
         }
     }
 
-    public void addListener(Listener listener) {
+    public void addListener(Listener listener)
+    {
         listener.register(client);
         listeners.add(listener);
         LOGGER.info("Added listener of class '" + listener.getClass().getName() + "'.");
     }
 
-    public void removeListener(Listener listener) {
+    public void removeListener(Listener listener)
+    {
         listeners.remove(listener);
         LOGGER.info("Removed listener of class '" + listener.getClass().getName() + "'.");
     }
 
-    public Player getPlayer(long id) {
-        if (!players.containsKey(id)) {
+    public Player getPlayer(long id)
+    {
+        if (!players.containsKey(id))
+        {
             User user = client.getUserById(Snowflake.of(id)).block();
             if (user != null && !user.isBot())
                 players.put(id, new Player(id));
@@ -116,44 +129,53 @@ public class Enigma {
         return players.getOrDefault(id, null);
     }
 
-    public static GameMember getGameMemberFromMessage(Message message) {
+    public static GameMember getGameMemberFromMessage(Message message)
+    {
         User user = message.getAuthor().get();
         Player player = Enigma.getInstance().getPlayer(user);
         Game game = player.getGame();
         return game.getMember(user);
     }
 
-    public Player getPlayer(User user) {
+    public Player getPlayer(User user)
+    {
         return getPlayer(user.getId().asLong());
     }
 
-    public boolean hasPlayer(User user) {
+    public boolean hasPlayer(User user)
+    {
         return players.containsKey(user.getId().asLong());
     }
 
-    public LinkedList<Player> getQueue(GameMode mode) {
+    public LinkedList<Player> getQueue(GameMode mode)
+    {
         if (!queues.containsKey(mode))
             queues.put(mode, new LinkedList<>());
         return queues.get(mode);
     }
 
-    public void refreshQueues() {
+    public void refreshQueues()
+    {
         // Loops queues for each game mode
-        for (Map.Entry<GameMode, LinkedList<Player>> queue : queues.entrySet()) {
+        for (Map.Entry<GameMode, LinkedList<Player>> queue : queues.entrySet())
+        {
             GameMode mode = queue.getKey();
             LinkedList<Player> players = queue.getValue();
             ArrayList<Player> matched = new ArrayList<>();
 
             // Find players for a match
-            for (Player player : players) {
+            for (Player player : players)
+            {
                 matched.add(player);
 
                 // Create the match
-                if (matched.size() >= mode.getSize()) {
+                if (matched.size() >= mode.getSize())
+                {
                     Game game = new Game(this, mode, matched);
 
                     games.add(game);
-                    matched.forEach(p -> {
+                    matched.forEach(p ->
+                    {
                         p.setGame(game);
                         p.removeQueue();
                         queue.getValue().remove(p);
@@ -170,8 +192,10 @@ public class Enigma {
         }
     }
 
-    public void endGame(Game game) {
-        if (game.getTurnCount() > 7 && game.getMode().isRanked()) {
+    public void endGame(Game game)
+    {
+        if (game.getTurnCount() > 7 && game.getMode().isRanked())
+        {
             GameMember winner = game.getWinner();
             List<GameMember> losers = game.getDead();
 
@@ -182,7 +206,8 @@ public class Enigma {
             //mongo.savePlayer(winner.getPlayer());
 
             // Losers
-            for (GameMember loser : losers) {
+            for (GameMember loser : losers)
+            {
                 loser.getPlayer().lose(winner.getRankedPoints());
                 loser.getPlayer().addGems(Util.nextInt(10, 20));
                 loser.getPlayer().getUnitData(loser.getUnit().getName()).addPoints(Util.nextInt(80, 100));
@@ -212,27 +237,33 @@ public class Enigma {
         SCHEDULER.schedule(() -> game.getChannel().delete().subscribe(), 2, TimeUnit.MINUTES);
     }
 
-    public Guild getGuild() {
+    public Guild getGuild()
+    {
         return client.getGuildById(Snowflake.of(settings.get(Settings.GUILD_ID))).block();
     }
 
-    public TextChannel getMatchmakingChannel() {
+    public TextChannel getMatchmakingChannel()
+    {
         return client.getChannelById(Snowflake.of(settings.get(Settings.MATCHMAKING_ID))).cast(TextChannel.class).block();
     }
 
-    public TextChannel getUnitsChannel() {
+    public TextChannel getUnitsChannel()
+    {
         return client.getChannelById(Snowflake.of(settings.get(Settings.UNITS_ID))).cast(TextChannel.class).block();
     }
 
-    public TextChannel getItemsChannel() {
+    public TextChannel getItemsChannel()
+    {
         return client.getChannelById(Snowflake.of(settings.get(Settings.ITEMS_ID))).cast(TextChannel.class).block();
     }
 
-    public TextChannel getLogChannel() {
+    public TextChannel getLogChannel()
+    {
         return client.getChannelById(Snowflake.of(settings.get(Settings.LOG_ID))).cast(TextChannel.class).block();
     }
 
-    public TextChannel getLeaderboardChannel() {
+    public TextChannel getLeaderboardChannel()
+    {
         return client.getChannelById(Snowflake.of(settings.get(Settings.LEADERBOARD_ID))).cast(TextChannel.class).block();
     }
 
@@ -240,31 +271,38 @@ public class Enigma {
     //    return this.mongo;
     //}
 
-    public GatewayDiscordClient getClient() {
+    public GatewayDiscordClient getClient()
+    {
         return this.client;
     }
 
-    public Settings getSettings() {
+    public Settings getSettings()
+    {
         return this.settings;
     }
 
-    public ArrayList<Listener> getListeners() {
+    public ArrayList<Listener> getListeners()
+    {
         return this.listeners;
     }
 
-    public CommandListener getCommands() {
+    public CommandListener getCommands()
+    {
         return this.commands;
     }
 
-    public LinkedList<Game> getGames() {
+    public LinkedList<Game> getGames()
+    {
         return this.games;
     }
 
-    public HashMap<Long, Player> getPlayers() {
+    public HashMap<Long, Player> getPlayers()
+    {
         return this.players;
     }
 
-    public HashMap<GameMode, LinkedList<Player>> getQueues() {
+    public HashMap<GameMode, LinkedList<Player>> getQueues()
+    {
         return this.queues;
     }
 }

@@ -5,7 +5,8 @@ import com.oopsjpeg.enigma.util.Util;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Stats {
+public class Stats
+{
     public static final String MAX_HEALTH = "max_health";
     public static final String MAX_ENERGY = "max_energy";
     public static final String ATTACK_POWER = "attack_power";
@@ -22,7 +23,8 @@ public class Stats {
 
     private final Map<String, Float> values = new HashMap<>();
 
-    public Stats() {
+    public Stats()
+    {
         values.put(MAX_HEALTH, 0.0f);
         values.put(MAX_ENERGY, 0.0f);
         values.put(ATTACK_POWER, 0.0f);
@@ -38,8 +40,10 @@ public class Stats {
         values.put(HEALTH_PER_TURN, 0.0f);
     }
 
-    public Stats put(String key, float value) {
-        switch (key) {
+    public Stats put(String key, float value)
+    {
+        switch (key)
+        {
             case MAX_HEALTH:
             case MAX_ENERGY:
             case ATTACK_POWER:
@@ -59,47 +63,56 @@ public class Stats {
         return this;
     }
 
-    public float get(String key) {
+    public float get(String key)
+    {
         return values.getOrDefault(key, 0.0f);
     }
 
-    public int getInt(String key) {
+    public int getInt(String key)
+    {
         return (int) Math.ceil(get(key));
     }
 
-    public Stats add(String key, float value) {
+    public Stats add(String key, float value)
+    {
         put(key, get(key) + value);
         return this;
     }
 
-    public Stats sub(String key, float value) {
+    public Stats sub(String key, float value)
+    {
         put(key, get(key) - value);
         return this;
     }
 
-    public Stats mul(String key, float value) {
+    public Stats mul(String key, float value)
+    {
         put(key, get(key) * value);
         return this;
     }
 
-    public Stats div(String key, float value) {
+    public Stats div(String key, float value)
+    {
         put(key, get(key) / value);
         return this;
     }
 
-    public Stats putAll(Stats other) {
+    public Stats putAll(Stats other)
+    {
         values.clear();
         other.values.keySet().forEach(k -> put(k, other.values.get(k)));
         return this;
     }
 
-    public Stats addAll(Stats other) {
+    public Stats addAll(Stats other)
+    {
         other.values.keySet().forEach(k -> put(k, values.get(k) + other.values.get(k)));
         return this;
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return values.toString();
     }
 }

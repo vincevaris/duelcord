@@ -10,15 +10,18 @@ import com.oopsjpeg.enigma.util.Util;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BuyAction implements GameAction {
+public class BuyAction implements GameAction
+{
     private final Build build;
 
-    public BuyAction(Build build) {
+    public BuyAction(Build build)
+    {
         this.build = build;
     }
 
     @Override
-    public String act(GameMember actor) {
+    public String act(GameMember actor)
+    {
         List<String> output = new ArrayList<>();
         Item item = build.getItem();
 
@@ -35,7 +38,8 @@ public class BuyAction implements GameAction {
     }
 
     @Override
-    public int getEnergy() {
+    public int getEnergy()
+    {
         return 25;
     }
 }

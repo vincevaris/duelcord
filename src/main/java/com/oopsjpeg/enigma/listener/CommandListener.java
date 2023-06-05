@@ -13,35 +13,41 @@ import discord4j.core.object.entity.channel.TextChannel;
 import java.util.Arrays;
 import java.util.LinkedList;
 
-public class CommandListener implements Listener {
+public class CommandListener implements Listener
+{
     private final Enigma instance;
     private final String prefix;
     private final LinkedList<Command> commands;
     private TextChannel limit;
 
-    public CommandListener(Enigma instance, String prefix, Command[] commands) {
+    public CommandListener(Enigma instance, String prefix, Command[] commands)
+    {
         this.instance = instance;
         this.prefix = prefix;
         this.commands = new LinkedList<>(Arrays.asList(commands));
     }
 
-    public CommandListener(Enigma instance, String prefix, Command[] commands, TextChannel limit) {
+    public CommandListener(Enigma instance, String prefix, Command[] commands, TextChannel limit)
+    {
         this(instance, prefix, commands);
         this.limit = limit;
     }
 
-    public CommandListener(Enigma instance, String prefix, LinkedList<Command> commands) {
+    public CommandListener(Enigma instance, String prefix, LinkedList<Command> commands)
+    {
         this.instance = instance;
         this.prefix = prefix;
         this.commands = commands;
     }
 
     @Override
-    public void register(GatewayDiscordClient client) {
+    public void register(GatewayDiscordClient client)
+    {
         client.on(MessageCreateEvent.class).subscribe(this::onMessage);
     }
 
-    private void onMessage(MessageCreateEvent event) {
+    private void onMessage(MessageCreateEvent event)
+    {
         GatewayDiscordClient client = event.getClient();
         Message message = event.getMessage();
         User author = message.getAuthor().orElse(null);
@@ -51,7 +57,8 @@ public class CommandListener implements Listener {
         if (author != null && channel != null
                 && (limit == null || channel.equals(limit))
                 && !author.equals(client.getSelf().block())
-                && content.toLowerCase().startsWith(prefix.toLowerCase())) {
+                && content.toLowerCase().startsWith(prefix.toLowerCase()))
+        {
             String[] split = content.replaceFirst(prefix, "").split(" ");
             String name = split[0];
             String[] args = Arrays.copyOfRange(split, 1, split.length);
@@ -61,23 +68,28 @@ public class CommandListener implements Listener {
         }
     }
 
-    public Enigma getInstance() {
+    public Enigma getInstance()
+    {
         return this.instance;
     }
 
-    public String getPrefix() {
+    public String getPrefix()
+    {
         return this.prefix;
     }
 
-    public LinkedList<Command> getCommands() {
+    public LinkedList<Command> getCommands()
+    {
         return this.commands;
     }
 
-    public TextChannel getLimit() {
+    public TextChannel getLimit()
+    {
         return this.limit;
     }
 
-    public void setLimit(TextChannel limit) {
+    public void setLimit(TextChannel limit)
+    {
         this.limit = limit;
     }
 }

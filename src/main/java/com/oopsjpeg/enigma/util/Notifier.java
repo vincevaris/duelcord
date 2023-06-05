@@ -1,11 +1,13 @@
 package com.oopsjpeg.enigma.util;
 
-public interface Notifier {
+public interface Notifier
+{
     boolean isNotified();
 
     void setNotified(boolean notified);
 
-    default boolean tryNotify() {
+    default boolean tryNotify()
+    {
         if (isNotified())
             return false;
         setNotified(true);

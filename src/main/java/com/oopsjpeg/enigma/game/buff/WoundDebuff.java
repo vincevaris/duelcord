@@ -6,23 +6,28 @@ import com.oopsjpeg.enigma.util.Emote;
 
 import static com.oopsjpeg.enigma.util.Util.percent;
 
-public class WoundDebuff extends Buff {
-    public WoundDebuff(GameMember source, int totalTurns, float power) {
+public class WoundDebuff extends Buff
+{
+    public WoundDebuff(GameMember source, int totalTurns, float power)
+    {
         super("Wound", true, source, totalTurns, power);
     }
 
     @Override
-    public String onTurnStart(GameMember member) {
+    public String onTurnStart(GameMember member)
+    {
         return Emote.WOUND + "They receive __" + percent(getPower()) + "__ less healing.";
     }
 
     @Override
-    public float onHeal(float healAmount) {
+    public float onHeal(float healAmount)
+    {
         return healAmount * (1 - getPower());
     }
 
     @Override
-    public String formatPower() {
+    public String formatPower()
+    {
         return percent(getPower());
     }
 }

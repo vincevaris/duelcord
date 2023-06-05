@@ -3,29 +3,35 @@ package com.oopsjpeg.enigma.util;
 /*
 
  */
-public class Pity {
+public class Pity
+{
     private float chance;
     private float influence;
 
     private int rolls = 0;
 
-    public Pity(float chance) {
+    public Pity(float chance)
+    {
         this(chance, 1.0f);
     }
 
-    public Pity(float chance, float influence) {
+    public Pity(float chance, float influence)
+    {
         this.chance = chance;
         this.influence = influence;
     }
 
-    public boolean roll() {
+    public boolean roll()
+    {
         return chance > 0 && (attempt() || Util.RANDOM.nextFloat() <= chance);
     }
 
-    private boolean attempt() {
+    private boolean attempt()
+    {
         rolls++;
 
-        if (rolls >= 1 / (chance * influence)) {
+        if (rolls >= 1 / (chance * influence))
+        {
             rolls = 0;
             return true;
         }
@@ -33,27 +39,33 @@ public class Pity {
         return false;
     }
 
-    public float getChance() {
+    public float getChance()
+    {
         return chance;
     }
 
-    public void setChance(float chance) {
+    public void setChance(float chance)
+    {
         this.chance = chance;
     }
 
-    public float getInfluence() {
+    public float getInfluence()
+    {
         return influence;
     }
 
-    public void setInfluence(float influence) {
+    public void setInfluence(float influence)
+    {
         this.influence = influence;
     }
 
-    public int getRolls() {
+    public int getRolls()
+    {
         return rolls;
     }
 
-    public void setRolls(int rolls) {
+    public void setRolls(int rolls)
+    {
         this.rolls = rolls;
     }
 }

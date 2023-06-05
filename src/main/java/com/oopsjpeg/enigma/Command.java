@@ -6,8 +6,10 @@ import discord4j.rest.util.PermissionSet;
 
 import java.util.Collection;
 
-public interface Command {
-    static Command get(Collection<Command> commands, User user, String name) {
+public interface Command
+{
+    static Command get(Collection<Command> commands, User user, String name)
+    {
         return commands.stream()
                 .filter(cmd -> cmd.getName().equalsIgnoreCase(name))
                 .findAny().orElse(null);
@@ -19,7 +21,8 @@ public interface Command {
 
     String getDescription();
 
-    default PermissionSet getPermissions() {
+    default PermissionSet getPermissions()
+    {
         return PermissionSet.none();
     }
 }

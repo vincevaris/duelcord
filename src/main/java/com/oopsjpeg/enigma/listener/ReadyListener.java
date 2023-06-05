@@ -16,15 +16,18 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
-public class ReadyListener implements Listener {
+public class ReadyListener implements Listener
+{
     private final Enigma instance;
 
-    public ReadyListener(Enigma instance) {
+    public ReadyListener(Enigma instance)
+    {
         this.instance = instance;
     }
 
     @Override
-    public void register(GatewayDiscordClient client) {
+    public void register(GatewayDiscordClient client)
+    {
         client.on(ReadyEvent.class).subscribe(this::onReady);
 
         //instance.getMongo().loadPlayers();
@@ -33,13 +36,15 @@ public class ReadyListener implements Listener {
         Enigma.SCHEDULER.scheduleAtFixedRate(() -> instance.getPlayers().values().stream()
                 .filter(Player::isInQueue)
                 .filter(p -> Instant.now().isAfter(p.getQueueTime().plus(5, ChronoUnit.MINUTES)))
-                .forEach(p -> {
+                .forEach(p ->
+                {
                     p.removeQueue();
                     Util.sendFailure(p.getUser().getPrivateChannel().block(), "You've been removed from queue as there are currently no players available for that mode.");
                 }), 2, 2, TimeUnit.MINUTES);
         Enigma.SCHEDULER.scheduleAtFixedRate(() -> instance.getGames().stream()
                 .filter(g -> g.getGameState() == GameState.PLAYING)
-                .forEach(g -> {
+                .forEach(g ->
+                {
                     g.getAfkTimer().stack();
                     if (g.getAfkTimer().getCurrent() == 4)
                         g.getChannel().createMessage(Emote.WARN + g.getCurrentMember().getMention() + ", you have **" + (g.getAfkTimer().getMax() / 2) + "** minutes to perform an action, otherwise you will **forfeit**.").subscribe();
@@ -50,16 +55,18 @@ public class ReadyListener implements Listener {
                 .switchIfEmpty(instance.getLeaderboardChannel().createEmbed(e -> e.setTitle("...")))
                 .blockFirst()
                 .edit(MessageEditSpec.builder().addEmbed(Util.leaderboard()
-                        .withFooter(EmbedCreateFields.Footer.of("Updates every 10 minutes.", null)))
+                                .withFooter(EmbedCreateFields.Footer.of("Updates every 10 minutes.", null)))
                         .build())
                 .subscribe(), 0, 10, TimeUnit.MINUTES);
     }
 
-    public void onReady(ReadyEvent event) {
+    public void onReady(ReadyEvent event)
+    {
         Enigma.LOGGER.info("Enigma is ready.");
     }
 
-    public Enigma getInstance() {
+    public Enigma getInstance()
+    {
         return this.instance;
     }
 }

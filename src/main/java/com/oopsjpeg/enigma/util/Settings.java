@@ -6,7 +6,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Properties;
 
-public class Settings {
+public class Settings
+{
     public static final String TOKEN = "token";
     public static final String MAIN_PREFIX = "main_prefix";
     public static final String GAME_PREFIX = "game_prefix";
@@ -20,7 +21,8 @@ public class Settings {
     public static final String LEADERBOARD_ID = "leaderboard_id";
     private static final Properties DEFAULTS = new Properties();
 
-    static {
+    static
+    {
         DEFAULTS.put(TOKEN, "");
         DEFAULTS.put(MAIN_PREFIX, ".");
         DEFAULTS.put(GAME_PREFIX, ">");
@@ -37,36 +39,45 @@ public class Settings {
     private final File file;
     private final Properties properties = new Properties();
 
-    public Settings(File file) {
+    public Settings(File file)
+    {
         this.file = file;
         properties.putAll(DEFAULTS);
     }
 
-    public void load() throws IOException {
-        try (FileReader fr = new FileReader(file)) {
+    public void load() throws IOException
+    {
+        try (FileReader fr = new FileReader(file))
+        {
             properties.load(fr);
         }
     }
 
-    public void save() throws IOException {
-        try (FileWriter fw = new FileWriter(file)) {
+    public void save() throws IOException
+    {
+        try (FileWriter fw = new FileWriter(file))
+        {
             properties.store(fw, "Enigma Settings");
         }
     }
 
-    public String get(String key) {
+    public String get(String key)
+    {
         return properties.getProperty(key, "");
     }
 
-    public int getInt(String key) {
+    public int getInt(String key)
+    {
         return Integer.parseInt(get(key));
     }
 
-    public long getLong(String key) {
+    public long getLong(String key)
+    {
         return Long.parseLong(get(key));
     }
 
-    public File getFile() {
+    public File getFile()
+    {
         return this.file;
     }
 }

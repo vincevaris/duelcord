@@ -1,6 +1,7 @@
 package com.oopsjpeg.enigma.game.unit;
 
-public class UnitConstants {
+public class UnitConstants
+{
     // Assassin
     public static final float ASSASSIN_POTENCY_RATIO = .2f;
     public static final int ASSASSIN_POTENCY_MAX = 40;

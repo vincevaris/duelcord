@@ -9,15 +9,18 @@ import com.oopsjpeg.enigma.util.Util;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UseAction implements GameAction {
+public class UseAction implements GameAction
+{
     private final Item item;
 
-    public UseAction(Item item) {
+    public UseAction(Item item)
+    {
         this.item = item;
     }
 
     @Override
-    public String act(GameMember actor) {
+    public String act(GameMember actor)
+    {
         final List<String> output = new ArrayList<>();
         output.add(Emote.USE + "**" + actor.getUsername() + "** used **" + item.getName() + "**.");
         output.add(item.onUse(actor));
@@ -29,7 +32,8 @@ public class UseAction implements GameAction {
     }
 
     @Override
-    public int getEnergy() {
+    public int getEnergy()
+    {
         return 25;
     }
 }

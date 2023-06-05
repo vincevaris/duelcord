@@ -1,25 +1,31 @@
 package com.oopsjpeg.enigma.game;
 
-public interface GameObject {
+public interface GameObject
+{
     String getName();
 
-    default String getDescription() {
+    default String getDescription()
+    {
         return null;
     }
 
-    default String[] getTopic(GameMember member) {
+    default String[] getTopic(GameMember member)
+    {
         return null;
     }
 
-    default String onTurnStart(GameMember member) {
+    default String onTurnStart(GameMember member)
+    {
         return null;
     }
 
-    default String onTurnEnd(GameMember member) {
+    default String onTurnEnd(GameMember member)
+    {
         return null;
     }
 
-    default String onDefend(GameMember member) {
+    default String onDefend(GameMember member)
+    {
         return null;
     }
 
@@ -33,51 +39,63 @@ public interface GameObject {
         return shieldAmount;
     }
 
-    default DamageEvent damageOut(DamageEvent event) {
+    default DamageEvent damageOut(DamageEvent event)
+    {
         return event;
     }
 
-    default DamageEvent damageIn(DamageEvent event) {
+    default DamageEvent damageIn(DamageEvent event)
+    {
         return event;
     }
 
-    default DamageEvent attackOut(DamageEvent event) {
+    default DamageEvent attackOut(DamageEvent event)
+    {
         return event;
     }
 
-    default DamageEvent attackIn(DamageEvent event) {
+    default DamageEvent attackIn(DamageEvent event)
+    {
         return event;
     }
 
-    default DamageEvent hitOut(DamageEvent event) {
+    default DamageEvent hitOut(DamageEvent event)
+    {
         return event;
     }
 
-    default DamageEvent hitIn(DamageEvent event) {
+    default DamageEvent hitIn(DamageEvent event)
+    {
         return event;
     }
 
-    default DamageEvent critOut(DamageEvent event) {
+    default DamageEvent critOut(DamageEvent event)
+    {
         return event;
     }
 
-    default DamageEvent critIn(DamageEvent event) {
+    default DamageEvent critIn(DamageEvent event)
+    {
         return event;
     }
 
-    default DamageEvent abilityOut(DamageEvent event) {
+    default DamageEvent abilityOut(DamageEvent event)
+    {
         return event;
     }
 
-    default DamageEvent abilityIn(DamageEvent event) {
+    default DamageEvent abilityIn(DamageEvent event)
+    {
         return event;
     }
 
-    default DamageEvent dodgeYou(DamageEvent event) {
+    default DamageEvent dodgeYou(DamageEvent event)
+    {
         return event;
     }
 
-    default DamageEvent dodgeMe(DamageEvent event) {
+    default DamageEvent dodgeMe(DamageEvent event)
+    {
         return event;
     }
 }

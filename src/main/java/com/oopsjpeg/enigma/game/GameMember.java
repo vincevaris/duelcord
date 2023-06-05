@@ -5,8 +5,8 @@ import com.oopsjpeg.enigma.game.object.Effect;
 import com.oopsjpeg.enigma.game.object.Item;
 import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.storage.Player;
-import com.oopsjpeg.enigma.util.Pity;
 import com.oopsjpeg.enigma.util.Emote;
+import com.oopsjpeg.enigma.util.Pity;
 import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.User;
 
@@ -15,7 +15,8 @@ import java.util.stream.Collectors;
 
 import static com.oopsjpeg.enigma.game.Stats.*;
 
-public class GameMember {
+public class GameMember
+{
     private final Game game;
     private final Player player;
     private Unit unit;
@@ -37,32 +38,39 @@ public class GameMember {
 
     private Stats stats = new Stats();
 
-    public GameMember(Game game, Player player) {
+    public GameMember(Game game, Player player)
+    {
         this.game = game;
         this.player = player;
     }
 
-    public User getUser() {
+    public User getUser()
+    {
         return player.getUser();
     }
 
-    public String getUsername() {
+    public String getUsername()
+    {
         return getUser().getUsername();
     }
 
-    public String getMention() {
+    public String getMention()
+    {
         return getUser().getMention();
     }
 
-    public Player.UnitData getUnitData() {
+    public Player.UnitData getUnitData()
+    {
         return getPlayer().getUnitData(unit.getName());
     }
 
-    public float getRankedPoints() {
+    public float getRankedPoints()
+    {
         return getPlayer().getRankedPoints();
     }
 
-    public List<GameObject> getData() {
+    public List<GameObject> getData()
+    {
         List<GameObject> data = new ArrayList<>();
         data.add(getUnit());
         data.addAll(getItems());
@@ -71,35 +79,43 @@ public class GameMember {
         return data;
     }
 
-    public List<Item> getItems() {
+    public List<Item> getItems()
+    {
         return items;
     }
 
-    public List<Effect> getEffects() {
+    public List<Effect> getEffects()
+    {
         return new ArrayList<>(effects.values());
     }
 
-    public Effect getEffect(Class<? extends Effect> effect) {
+    public Effect getEffect(Class<? extends Effect> effect)
+    {
         return effects.get(effect);
     }
 
-    public void addEffect(Effect effect) {
+    public void addEffect(Effect effect)
+    {
         effects.put(effect.getClass(), effect);
     }
 
-    public boolean hasEffect(Effect effect) {
+    public boolean hasEffect(Effect effect)
+    {
         return effects.containsKey(effect.getClass());
     }
 
-    public List<Buff> getBuffs() {
+    public List<Buff> getBuffs()
+    {
         return new ArrayList<>(buffs);
     }
 
-    public boolean hasBuff(Class<? extends Buff> buffType) {
+    public boolean hasBuff(Class<? extends Buff> buffType)
+    {
         return getBuffs().stream().anyMatch(buff -> buff.getClass().equals(buffType));
     }
 
-    public String addBuff(Buff buff, String emote) {
+    public String addBuff(Buff buff, String emote)
+    {
         final List<String> output = new ArrayList<>();
         buffs.add(buff);
         output.add(emote + "**" + getUsername() + "** received **" + buff.getName() + "**" +
@@ -109,7 +125,8 @@ public class GameMember {
         return Util.joinNonEmpty("\n", output);
     }
 
-    public String removeBuff(Buff buff) {
+    public String removeBuff(Buff buff)
+    {
         final List<String> output = new ArrayList<>();
         buffs.remove(buff);
         output.add(Emote.SILENCE + "**" + getUsername() + "'s " + buff.getName() + "** " +
@@ -118,23 +135,27 @@ public class GameMember {
         return Util.joinNonEmpty("\n", output);
     }
 
-    public boolean alreadyPickedUnit() {
+    public boolean alreadyPickedUnit()
+    {
         return getUnit() != null;
     }
 
-    public String updateStats() {
+    public String updateStats()
+    {
         final List<String> output = new ArrayList<>();
 
         effects.clear();
 
         stats.putAll(unit.getStats());
 
-        for (Item item : getItems()) {
+        for (Item item : getItems())
+        {
             stats.addAll(item.getStats());
 
             for (Effect newEffect : item.getEffects())
                 if (!hasEffect(newEffect)) addEffect(newEffect);
-                else {
+                else
+                {
                     // If this effect is stronger than the old one, replace it
                     Effect oldEffect = getEffect(newEffect.getClass());
                     if (newEffect.getPower() > oldEffect.getPower())
@@ -145,7 +166,8 @@ public class GameMember {
         for (Effect effect : getEffects())
             stats.addAll(effect.getStats());
 
-        for (Buff buff : getBuffs()) {
+        for (Buff buff : getBuffs())
+        {
             if (buff.shouldRemove())
                 output.add(removeBuff(buff));
             else
@@ -157,10 +179,12 @@ public class GameMember {
         return Util.joinNonEmpty("\n", output);
     }
 
-    public void act(GameAction action) {
+    public void act(GameAction action)
+    {
         if (getEnergy() < action.getEnergy())
             Util.sendFailure(game.getChannel(), "That action costs **" + action.getEnergy() + "** Energy.");
-        else {
+        else
+        {
             game.getActions().add(action);
 
             takeEnergy(action.getEnergy());
@@ -178,7 +202,8 @@ public class GameMember {
         }
     }
 
-    public String shield(float shieldAmount) {
+    public String shield(float shieldAmount)
+    {
         for (GameObject o : getData()) shieldAmount = o.onShield(shieldAmount);
 
         giveShield(Math.round(shieldAmount));
@@ -187,29 +212,34 @@ public class GameMember {
                 + "**! [**" + getShield() + "**]";
     }
 
-    public String heal(float healAmount) {
+    public String heal(float healAmount)
+    {
         return heal(healAmount, null, true);
     }
 
-    public String heal(float healAmount, String source) {
+    public String heal(float healAmount, String source)
+    {
         return heal(healAmount, source, true);
     }
 
-    public String heal(float healAmount, String source, boolean message) {
+    public String heal(float healAmount, String source, boolean message)
+    {
         for (GameObject o : getData()) healAmount = o.onHeal(healAmount);
 
         giveHealth(Math.round(healAmount));
 
         if (message)
             return Emote.HEAL + "**" + getUsername() + "** healed for **" + Math.round(healAmount) + "**! [**"
-                + getHealth() + " / " + stats.getInt(MAX_HEALTH) + "**]"
-                + (source == null ? "" : " (" + source + ")");
+                    + getHealth() + " / " + stats.getInt(MAX_HEALTH) + "**]"
+                    + (source == null ? "" : " (" + source + ")");
 
         return null;
     }
 
-    public String defend() {
-        if (!defensive) {
+    public String defend()
+    {
+        if (!defensive)
+        {
             defensive = true;
             List<String> output = getData().stream().map(o -> o.onDefend(this)).collect(Collectors.toList());
             output.add(0, Emote.SHIELD + "**" + getUsername() + "** is defending (**" + Util.percent(getResist()) + "** resist, **" + (stats.getInt(HEALTH_PER_TURN) * 2) + "** regen)!");
@@ -218,14 +248,17 @@ public class GameMember {
         return null;
     }
 
-    public DamageEvent hit(DamageEvent event) {
+    public DamageEvent hit(DamageEvent event)
+    {
         for (GameObject o : event.actor.getData()) event = o.hitOut(event);
         for (GameObject o : event.target.getData()) event = o.hitIn(event);
 
         // Dodge
-        if (event.target.stats.get(DODGE) > 0) {
+        if (event.target.stats.get(DODGE) > 0)
+        {
             float dodgeRand = Util.RANDOM.nextFloat();
-            if (dodgeRand <= event.target.stats.get(DODGE)) {
+            if (dodgeRand <= event.target.stats.get(DODGE))
+            {
                 event.output.add(Emote.DODGE + "**" + event.target.getUsername() + "** dodged the hit!");
                 event.cancelled = true;
 
@@ -243,9 +276,11 @@ public class GameMember {
         return event;
     }
 
-    public DamageEvent crit(DamageEvent event) {
+    public DamageEvent crit(DamageEvent event)
+    {
         // Crit checks
-        if (event.crit || critPity.roll()) {
+        if (event.crit || critPity.roll())
+        {
             // Pseudo RNG crit bag
             event.crit = true;
 
@@ -254,7 +289,8 @@ public class GameMember {
         }
 
         // Critical strike bonus damage
-        if (event.crit) {
+        if (event.crit)
+        {
             event.critMul += .5f + stats.get(CRIT_DAMAGE);
             event.damage += event.damage * event.critMul;
         }
@@ -262,13 +298,15 @@ public class GameMember {
         return event;
     }
 
-    public DamageEvent ability(DamageEvent event) {
+    public DamageEvent ability(DamageEvent event)
+    {
         for (GameObject o : event.actor.getData()) event = o.abilityOut(event);
         for (GameObject o : event.target.getData()) event = o.abilityIn(event);
         return event;
     }
 
-    public DamageEvent attack(GameMember target) {
+    public DamageEvent attack(GameMember target)
+    {
         DamageEvent event = new DamageEvent(this, target);
         event.damage += stats.get(ATTACK_POWER);
 
@@ -278,16 +316,19 @@ public class GameMember {
         event = hit(event);
         event = crit(event);
 
-        if (!event.cancelled) event.actor.giveGold(game.getMode().handleGold(Math.round(Util.nextInt(20, 30) + (game.getTurnCount() * 0.5f))));
+        if (!event.cancelled)
+            event.actor.giveGold(game.getMode().handleGold(Math.round(Util.nextInt(20, 30) + (game.getTurnCount() * 0.5f))));
 
         return event;
     }
 
-    public String damage(DamageEvent event, String emote) {
+    public String damage(DamageEvent event, String emote)
+    {
         return damage(event, emote, "");
     }
 
-    public String damage(DamageEvent event, String emote, String source) {
+    public String damage(DamageEvent event, String emote, String source)
+    {
         for (GameObject o : event.actor.getData()) event = o.damageOut(event);
         for (GameObject o : event.target.getData()) event = o.damageIn(event);
 
@@ -305,14 +346,16 @@ public class GameMember {
         event.bonus *= 1 - event.target.getResist();
 
         // Shield damaging
-        if (event.target.hasShield()) {
+        if (event.target.hasShield())
+        {
             // Remove bonus damage first
             float shdBonus = Util.limit(event.bonus, 0, event.target.getShield());
             float shdDamage = 0;
             event.target.takeShield(Math.round(shdBonus));
 
             // Remove main damage after
-            if (event.target.hasShield()) {
+            if (event.target.hasShield())
+            {
                 shdDamage = Util.limit(event.damage, 0, event.target.getShield());
                 event.target.takeShield(Math.round(shdDamage));
             }
@@ -326,7 +369,8 @@ public class GameMember {
             event.damage -= shdDamage;
         }
 
-        if (!event.target.hasShield() && event.total() > 0) {
+        if (!event.target.hasShield() && event.total() > 0)
+        {
             event.target.takeHealth(Math.round(event.total()));
             event.output.add(0, Util.damageText(event, event.actor.getUsername(), event.target.getUsername(), emote, source));
             if (!event.target.hasHealth())
@@ -336,18 +380,21 @@ public class GameMember {
         return Util.joinNonEmpty("\n", event.output);
     }
 
-    public String win() {
+    public String win()
+    {
         game.getInstance().endGame(game);
         return Emote.TROPHY + getUser().getMention() + ", you have won the game!\n";
     }
 
-    public String lose() {
+    public String lose()
+    {
         List<String> output = new ArrayList<>();
         output.add(Emote.SKULL + getUser().getMention() + " has been slain and removed from the game!");
 
         alive = false;
 
-        if (game.getAlive().size() == 1) {
+        if (game.getAlive().size() == 1)
+        {
             game.setGameState(GameState.FINISHED);
             output.add(game.getAlive().get(0).win());
         } else if (game.getCurrentMember().equals(this))
@@ -356,36 +403,44 @@ public class GameMember {
         return Util.joinNonEmpty("\n", output);
     }
 
-    public float getResist() {
+    public float getResist()
+    {
         return stats.get(RESIST) + (defensive ? 0.2f : 0);
     }
 
-    public float getBonusDamage() {
+    public float getBonusDamage()
+    {
         return stats.get(ATTACK_POWER) - unit.getStats().get(ATTACK_POWER);
     }
 
-    public float getBonusHealth() {
+    public float getBonusHealth()
+    {
         return stats.get(MAX_HEALTH) - unit.getStats().get(MAX_HEALTH);
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return getPlayer().toString();
     }
 
-    public Game getGame() {
+    public Game getGame()
+    {
         return this.game;
     }
 
-    public Player getPlayer() {
+    public Player getPlayer()
+    {
         return this.player;
     }
 
-    public Unit getUnit() {
+    public Unit getUnit()
+    {
         return this.unit;
     }
 
-    public void setUnit(Unit unit) {
+    public void setUnit(Unit unit)
+    {
         this.unit = unit;
 
         items.clear();
@@ -405,139 +460,171 @@ public class GameMember {
         //    ((Berserker) unit).getRage().setCurrent(game.getAlive().indexOf(this));
     }
 
-    public boolean isAlive() {
+    public boolean isAlive()
+    {
         return this.alive;
     }
 
-    public void setAlive(boolean alive) {
+    public void setAlive(boolean alive)
+    {
         this.alive = alive;
     }
 
-    public boolean isDefensive() {
+    public boolean isDefensive()
+    {
         return this.defensive;
     }
 
-    public void setDefensive(boolean defensive) {
+    public void setDefensive(boolean defensive)
+    {
         this.defensive = defensive;
     }
 
-    public Pity getCritPity() {
+    public Pity getCritPity()
+    {
         return critPity;
     }
 
-    public int getHealth() {
+    public int getHealth()
+    {
         return health;
     }
 
-    public void setHealth(int healthAmount) {
+    public void setHealth(int healthAmount)
+    {
         health = Util.limit(healthAmount, 0, stats.getInt(MAX_HEALTH));
     }
 
-    public int giveHealth(int healthAmount) {
+    public int giveHealth(int healthAmount)
+    {
         setHealth(getHealth() + healthAmount);
         return getHealth();
     }
 
-    public int takeHealth(int healthAmount) {
+    public int takeHealth(int healthAmount)
+    {
         setHealth(getHealth() - healthAmount);
         return getHealth();
     }
 
-    public boolean hasHealth(int healthAmount) {
+    public boolean hasHealth(int healthAmount)
+    {
         return getHealth() > healthAmount;
     }
 
-    public boolean hasHealth() {
+    public boolean hasHealth()
+    {
         return hasHealth(0);
     }
 
-    public float getHealthPercentage() {
+    public float getHealthPercentage()
+    {
         return health / getStats().get(MAX_HEALTH);
     }
 
-    public int getEnergy() {
+    public int getEnergy()
+    {
         return energy;
     }
 
-    public void setEnergy(int energyAmount) {
+    public void setEnergy(int energyAmount)
+    {
         energy = Util.limit(energyAmount, 0, stats.getInt(MAX_ENERGY));
     }
 
-    public int giveEnergy(int energyAmount) {
+    public int giveEnergy(int energyAmount)
+    {
         setEnergy(getEnergy() + energyAmount);
         return getEnergy();
     }
 
-    public int takeEnergy(int energyAmount) {
+    public int takeEnergy(int energyAmount)
+    {
         setEnergy(getEnergy() - energyAmount);
         return getEnergy();
     }
 
-    public boolean hasEnergy(int energyAmount) {
+    public boolean hasEnergy(int energyAmount)
+    {
         return getEnergy() > energyAmount;
     }
 
-    public boolean hasEnergy() {
+    public boolean hasEnergy()
+    {
         return hasEnergy(0);
     }
 
-    public int getGold() {
+    public int getGold()
+    {
         return gold;
     }
 
-    public void setGold(int goldAmount) {
+    public void setGold(int goldAmount)
+    {
         gold = Math.max(goldAmount, 0);
     }
 
-    public int giveGold(int goldAmount) {
+    public int giveGold(int goldAmount)
+    {
         setGold(getGold() + goldAmount);
         return getGold();
     }
 
-    public int takeGold(int goldAmount) {
+    public int takeGold(int goldAmount)
+    {
         setGold(getGold() - goldAmount);
         return getGold();
     }
 
-    public boolean hasGold(int goldAmount) {
+    public boolean hasGold(int goldAmount)
+    {
         return getGold() >= goldAmount;
     }
 
-    public int getGoldDifference(int targetGoldAmount) {
+    public int getGoldDifference(int targetGoldAmount)
+    {
         return targetGoldAmount - getGold();
     }
 
-    public int getShield() {
+    public int getShield()
+    {
         return shield;
     }
 
-    public void setShield(int shieldAmount) {
+    public void setShield(int shieldAmount)
+    {
         shield = Math.max(shieldAmount, 0);
     }
 
-    public int giveShield(int shieldAmount) {
+    public int giveShield(int shieldAmount)
+    {
         setShield(getShield() + shieldAmount);
         return getShield();
     }
 
-    public int takeShield(int shieldAmount) {
+    public int takeShield(int shieldAmount)
+    {
         setShield(getShield() - shieldAmount);
         return getShield();
     }
 
-    public boolean hasShield() {
+    public boolean hasShield()
+    {
         return getShield() > 0;
     }
 
-    public Stats getStats() {
+    public Stats getStats()
+    {
         return this.stats;
     }
 
-    public void setStats(Stats stats) {
+    public void setStats(Stats stats)
+    {
         this.stats = stats;
     }
 
-    public GameMemberVars getVars() {
+    public GameMemberVars getVars()
+    {
         return vars;
     }
 }

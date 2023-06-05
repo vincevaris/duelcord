@@ -11,37 +11,44 @@ import java.util.Collection;
 
 import static com.oopsjpeg.enigma.game.Stats.*;
 
-public enum Item implements GameObject {
-    POTION("Potion", 50) {
-        private final float HEAL = 120;
-        private final int TURNS = 2;
+public enum Item implements GameObject
+{
+    POTION("Potion", 50)
+            {
+                private final float HEAL = 120;
+                private final int TURNS = 2;
 
-        @Override
-        public String getDescription() {
-            return "Heals for **" + Math.round(HEAL) + "**";
-        }
+                @Override
+                public String getDescription()
+                {
+                    return "Heals for **" + Math.round(HEAL) + "**";
+                }
 
-        @Override
-        public String onUse(GameMember member) {
-            member.addBuff(new PotionBuff(member, TURNS, HEAL), Emote.HEAL);
-            return member.heal(HEAL / TURNS, "Potion");
-        }
+                @Override
+                public String onUse(GameMember member)
+                {
+                    member.addBuff(new PotionBuff(member, TURNS, HEAL), Emote.HEAL);
+                    return member.heal(HEAL / TURNS, "Potion");
+                }
 
-        @Override
-        public boolean canUse(GameMember member) {
-            return !member.hasBuff(PotionBuff.class);
-        }
+                @Override
+                public boolean canUse(GameMember member)
+                {
+                    return !member.hasBuff(PotionBuff.class);
+                }
 
-        @Override
-        public boolean removeOnUse() {
-            return true;
-        }
+                @Override
+                public boolean removeOnUse()
+                {
+                    return true;
+                }
 
-        @Override
-        public boolean isBuyable() {
-            return false;
-        }
-    },
+                @Override
+                public boolean isBuyable()
+                {
+                    return false;
+                }
+            },
 
     RING("Ring", Tree.BASIC, 200, new Stats()
             .put(SKILL_POWER, 10)),
@@ -85,12 +92,12 @@ public enum Item implements GameObject {
             new Stats()
                     .put(SKILL_POWER, 45)),
     CRIMSON_MIGHT("Crimson Might", Tree.COMPLETE, 1175,
-            new Item[] {HOLY_BAND, RING},
-            new Effect[] {new MagicalMasteryEffect(1, 2, .03f)},
+            new Item[]{HOLY_BAND, RING},
+            new Effect[]{new MagicalMasteryEffect(1, 2, .03f)},
             new Stats()
                     .put(SKILL_POWER, 50)),
     DAWN_HAMMER("Dawn Hammer", Tree.COMPLETE, 1200,
-            new Item[] {HOLY_BAND, KNIFE},
+            new Item[]{HOLY_BAND, KNIFE},
             new Effect[]{
                     new DivinityEffect(25, .2f),
                     new RestingFaithEffect(25)},
@@ -98,30 +105,30 @@ public enum Item implements GameObject {
                     .put(ATTACK_POWER, 25)
                     .put(SKILL_POWER, 30)),
     WOLFS_FANG("Wolf's Fang", Tree.COMPLETE, 1200,
-            new Item[] {BONE_SPEAR, KNIFE},
-            new Effect[] {
+            new Item[]{BONE_SPEAR, KNIFE},
+            new Effect[]{
                     new LifewasterEffect(3, .25f),
                     new WolfbiteEffect(5, .25f)
             },
             new Stats()
                     .put(ATTACK_POWER, 35)),
     SOULSTEALER("Soulstealer", Tree.COMPLETE, 1200,
-            new Item[] { BLOODLUST_BLADE, KNIFE },
-            new Effect[] {
+            new Item[]{BLOODLUST_BLADE, KNIFE},
+            new Effect[]{
                     new BloodWellEffect(.2f, 50),
             },
             new Stats()
                     .put(ATTACK_POWER, 55)
                     .put(LIFE_STEAL, .2f)),
     IRON_SCIMITAR("Iron Scimitar", Tree.COMPLETE, 1200,
-            new Item[] { BRONZE_CUTLASS, KNIFE },
-            new Effect[] { new DecimateEffect(3, .12f)},
+            new Item[]{BRONZE_CUTLASS, KNIFE},
+            new Effect[]{new DecimateEffect(3, .12f)},
             new Stats()
                     .put(ATTACK_POWER, 50)
                     .put(CRIT_CHANCE, .4f)),
     SHADOW_REAVER("Shadow Reaver", Tree.COMPLETE, 1225,
-            new Item[] { MIDNIGHT_DAGGER, RING },
-            new Effect[] { new EndlessStrikesEffect(.2f) },
+            new Item[]{MIDNIGHT_DAGGER, RING},
+            new Effect[]{new EndlessStrikesEffect(.2f)},
             new Stats()
                     .put(ATTACK_POWER, 30)
                     .put(SKILL_POWER, 30));
@@ -134,19 +141,23 @@ public enum Item implements GameObject {
     private final Item[] build;
     private final Effect[] effects;
 
-    Item(String name, int cost) {
+    Item(String name, int cost)
+    {
         this(name, null, cost, null, null, null);
     }
 
-    Item(String name, Tree tree, int cost, Stats stats) {
+    Item(String name, Tree tree, int cost, Stats stats)
+    {
         this(name, tree, cost, null, null, stats);
     }
 
-    Item(String name, Tree tree, int cost, Item[] build, Stats stats) {
+    Item(String name, Tree tree, int cost, Item[] build, Stats stats)
+    {
         this(name, tree, cost, build, null, stats);
     }
 
-    Item(String name, Tree tree, int cost, Item[] build, Effect[] effects, Stats stats) {
+    Item(String name, Tree tree, int cost, Item[] build, Effect[] effects, Stats stats)
+    {
         this.name = name;
         this.tree = tree;
         this.cost = cost;
@@ -155,7 +166,8 @@ public enum Item implements GameObject {
         this.effects = effects;
     }
 
-    public static Item fromName(String name) {
+    public static Item fromName(String name)
+    {
         return Arrays.stream(values())
                 .filter(i -> name.equalsIgnoreCase(i.getName()) || (name.length() >= 3
                         && i.getName().toLowerCase().startsWith(name.toLowerCase())))
@@ -163,21 +175,26 @@ public enum Item implements GameObject {
     }
 
     @Override
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
-    public Build build(Collection<Item> items) {
+    public Build build(Collection<Item> items)
+    {
         int reduction = 0;
         ArrayList<Item> postData = new ArrayList<>(items);
 
         // If item has build, calculate reductions
-        for (Item item : getBuild()) {
-            if (postData.contains(item)) {
+        for (Item item : getBuild())
+        {
+            if (postData.contains(item))
+            {
                 // Reduce directly
                 reduction += item.cost;
                 postData.remove(item);
-            } else if (item.getBuild() != null) {
+            } else if (item.getBuild() != null)
+            {
                 // Find a reduction in the build
                 Build build = item.build(postData);
                 reduction += build.getReduction();
@@ -188,56 +205,69 @@ public enum Item implements GameObject {
         return new Build(this, reduction, postData);
     }
 
-    public String onUse(GameMember member) {
+    public String onUse(GameMember member)
+    {
         return null;
     }
 
-    public boolean canUse(GameMember member) {
+    public boolean canUse(GameMember member)
+    {
         return false;
     }
 
-    public boolean removeOnUse() {
+    public boolean removeOnUse()
+    {
         return false;
     }
 
-    public Tree getTree() {
+    public Tree getTree()
+    {
         return tree;
     }
 
-    public String getTip() {
+    public String getTip()
+    {
         return null;
     }
 
-    public boolean hasTip() {
+    public boolean hasTip()
+    {
         return getTip() != null;
     }
 
-    public int getCost() {
+    public int getCost()
+    {
         return cost;
     }
 
-    public Item[] getBuild() {
+    public Item[] getBuild()
+    {
         return build != null ? build : new Item[0];
     }
 
-    public boolean hasBuild() {
+    public boolean hasBuild()
+    {
         return build != null;
     }
 
-    public Effect[] getEffects() {
+    public Effect[] getEffects()
+    {
         return effects != null ? effects : new Effect[0];
     }
 
-    public Stats getStats() {
+    public Stats getStats()
+    {
         return stats != null ? stats : new Stats();
     }
 
-    public boolean isBuyable() {
+    public boolean isBuyable()
+    {
         return true;
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return getName();
     }
 }
