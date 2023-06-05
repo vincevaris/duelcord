@@ -3,6 +3,7 @@ package com.oopsjpeg.enigma.game.effect;
 import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.buff.RestingFaithBuff;
 import com.oopsjpeg.enigma.game.object.Effect;
+import com.oopsjpeg.enigma.util.Emote;
 
 public class RestingFaithEffect extends Effect {
     public RestingFaithEffect(float power) {
@@ -12,7 +13,7 @@ public class RestingFaithEffect extends Effect {
     @Override
     public String onDefend(GameMember member) {
         if (!member.hasBuff(RestingFaithBuff.class))
-            return member.addBuff(new RestingFaithBuff(member, getPower()));
+            return member.addBuff(new RestingFaithBuff(member, getPower()), Emote.ENERGY);
         return null;
     }
 

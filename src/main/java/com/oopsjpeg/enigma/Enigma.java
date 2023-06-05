@@ -202,14 +202,14 @@ public class Enigma {
                     .collect(Collectors.joining(", ")));
             logEmbed.footer(now.getYear() + "/" + now.getMonthValue() + "/" + now.getDayOfMonth(), null);
 
-            getLogChannel().createMessage(logEmbed.build()).block();
+            getLogChannel().createMessage(logEmbed.build()).subscribe();
         }
 
         game.getPlayers().forEach(Player::removeGame);
         listeners.remove(game.getCommandListener());
         games.remove(game);
 
-        SCHEDULER.schedule(() -> game.getChannel().delete().block(), 2, TimeUnit.MINUTES);
+        SCHEDULER.schedule(() -> game.getChannel().delete().subscribe(), 2, TimeUnit.MINUTES);
     }
 
     public Guild getGuild() {

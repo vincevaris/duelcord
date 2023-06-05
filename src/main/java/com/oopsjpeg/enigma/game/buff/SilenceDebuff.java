@@ -11,6 +11,6 @@ public class SilenceDebuff extends Buff {
 
     @Override
     public String onTurnStart(GameMember member) {
-        return Emote.SILENCE + "**" + member.getUsername() + "** is silenced by **" + getSource().getUsername() + "**.";
+        return Emote.SILENCE + "They can't use skills or defend.";
     }
 }

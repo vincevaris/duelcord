@@ -4,6 +4,7 @@ import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.buff.CrippleDebuff;
 import com.oopsjpeg.enigma.game.object.Effect;
+import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
 
@@ -18,7 +19,7 @@ public class DecimateEffect extends Effect {
     @Override
     public DamageEvent critOut(DamageEvent event) {
         if (critCount.stack()) {
-            event.output.add(event.target.addBuff(new CrippleDebuff(event.actor, 0, getPower())));
+            event.output.add(event.target.addBuff(new CrippleDebuff(event.actor, 0, getPower()), Emote.KNIFE));
             critCount.reset();
         }
         return event;

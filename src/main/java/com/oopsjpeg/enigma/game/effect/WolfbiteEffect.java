@@ -4,6 +4,7 @@ import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.buff.WeakenDebuff;
 import com.oopsjpeg.enigma.game.object.Effect;
+import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Stacker;
 
 import static com.oopsjpeg.enigma.util.Util.percent;
@@ -19,7 +20,7 @@ public class WolfbiteEffect extends Effect {
     @Override
     public DamageEvent attackOut(DamageEvent event) {
         if (attackCount.stack()) {
-            event.output.add(event.target.addBuff(new WeakenDebuff(event.actor, 1, getPower())));
+            event.output.add(event.target.addBuff(new WeakenDebuff(event.actor, 1, getPower()), Emote.SILENCE));
             attackCount.reset();
         }
         return event;

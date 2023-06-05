@@ -31,10 +31,9 @@ public enum GeneralCommand implements Command {
         public void execute(Message message, String[] args) {
             if (args[0].equalsIgnoreCase("items")) {
                 TextChannel channel = Enigma.getInstance().getItemsChannel();
-                //channel.createMessage(buildItemTree(Tree.CONSUMABLES)).block();
-                channel.createMessage(buildItemTree(Tree.BASIC)).block();
-                channel.createMessage(buildItemTree(Tree.ADVANCED)).block();
-                channel.createMessage(buildItemTree(Tree.COMPLETE)).block();
+                channel.createMessage(buildItemTree(Tree.BASIC)).subscribe();
+                channel.createMessage(buildItemTree(Tree.ADVANCED)).subscribe();
+                channel.createMessage(buildItemTree(Tree.COMPLETE)).subscribe();
             } else if (args[0].equalsIgnoreCase("units")) {
                 GatewayDiscordClient client = message.getClient();
                 TextChannel channel = Enigma.getInstance().getUnitsChannel();
@@ -50,7 +49,7 @@ public enum GeneralCommand implements Command {
                                 ActionRow.of(
                                         SelectMenu.of("unit_viewer", options)
                                 ))
-                        .build()).block();
+                        .build()).subscribe();
             }
         }
 
@@ -120,14 +119,14 @@ public enum GeneralCommand implements Command {
                             .limit(3)
                             .map(data -> data.getUnitName() + " (" + data.getPoints() + " pts)")
                             .collect(Collectors.joining("\n")), true);
-            }).block();
+            }).subscribe();
         }
     },
     LEADERBOARD("leaderboard") {
         @Override
         public void execute(Message message, String[] args) {
             MessageChannel channel = message.getChannel().block();
-            channel.createEmbed(Util.leaderboard()).block();
+            channel.createEmbed(Util.leaderboard()).subscribe();
         }
     },
     SPECTATE("spectate") {

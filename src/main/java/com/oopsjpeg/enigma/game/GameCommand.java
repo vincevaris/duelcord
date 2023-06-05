@@ -15,7 +15,9 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public enum GameCommand implements Command {
     ATTACK("attack") {
@@ -27,7 +29,7 @@ public enum GameCommand implements Command {
             GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
-                message.delete().block();
+                message.delete().subscribe();
                 if (game.getGameState() == GameState.PICKING)
                     Util.sendFailure(channel, "You cannot attack until the game has started.");
                 else
@@ -44,7 +46,7 @@ public enum GameCommand implements Command {
             GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
-                message.delete().block();
+                message.delete().subscribe();
                 if (game.getGameState() == GameState.PICKING)
                     Util.sendFailure(channel, "You cannot buy items until the game has started.");
                 else {
@@ -76,7 +78,7 @@ public enum GameCommand implements Command {
             GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel())) {
-                message.delete().block();
+                message.delete().subscribe();
                 if (game.getGameState() == GameState.PICKING)
                     Util.sendFailure(channel, "You cannot check stats until the game has started.");
                 else {
@@ -90,7 +92,7 @@ public enum GameCommand implements Command {
                     } else {
                         Unit unit = Unit.fromName(String.join(" ", args));
                         if (unit != null)
-                            channel.createMessage(unit.format()).block();
+                            channel.createMessage(unit.format()).subscribe();
                         else
                             Util.sendFailure(channel, "Invalid item/unit name.");
                     }
@@ -107,11 +109,11 @@ public enum GameCommand implements Command {
             GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
-                message.delete().block();
+                message.delete().subscribe();
                 if (game.getGameState() == GameState.PICKING)
                     Util.sendFailure(channel, "You cannot end your turn until the game has started.");
                 else
-                    game.nextTurn();
+                    channel.createMessage(game.nextTurn()).subscribe();
             }
         }
     },
@@ -123,8 +125,8 @@ public enum GameCommand implements Command {
             Game game = Enigma.getInstance().getPlayer(author).getGame();
 
             if (channel.equals(game.getChannel())) {
-                message.delete().block();
-                channel.createMessage(game.getMember(author).lose()).block();
+                message.delete().subscribe();
+                channel.createMessage(game.getMember(author).lose()).subscribe();
             }
         }
     },
@@ -137,7 +139,7 @@ public enum GameCommand implements Command {
             GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
-                message.delete().block();
+                message.delete().subscribe();
                 if (game.getGameState() == GameState.PLAYING)
                     Util.sendFailure(channel, "You cannot pick a unit after the game has started.");
                 else {
@@ -149,8 +151,10 @@ public enum GameCommand implements Command {
                         Util.sendFailure(channel, "Invalid unit.");
                     else {
                         member.setUnit(unit);
-                        channel.createMessage(Emote.YES + "**" + author.getUsername() + "** has picked **" + unit.getName() + "**.").block();
-                        game.nextTurn();
+                        final List<String> output = new ArrayList<>();
+                        output.add(Emote.YES + "**" + author.getUsername() + "** will play as **" + unit.getName() + "**!");
+                        output.add(game.nextTurn());
+                        channel.createMessage(Util.joinNonEmpty("\n", output)).subscribe();
                     }
                 }
             }
@@ -164,7 +168,7 @@ public enum GameCommand implements Command {
             Game game = Enigma.getInstance().getPlayer(author).getGame();
 
             if (channel.equals(game.getChannel())) {
-                message.delete().block();
+                message.delete().subscribe();
                 game.updateInfo(game.getMember(author));
             }
         }
@@ -178,7 +182,7 @@ public enum GameCommand implements Command {
             GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
-                message.delete().block();
+                message.delete().subscribe();
                 if (game.getGameState() == GameState.PICKING)
                     Util.sendFailure(channel, "You cannot sell items until the game has started.");
                 else {
@@ -202,7 +206,7 @@ public enum GameCommand implements Command {
             GameMember member = game.getMember(author);
 
             if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
-                message.delete().block();
+                message.delete().subscribe();
                 if (game.getGameState() == GameState.PICKING)
                     Util.sendFailure(channel, "You cannot use items until the game has started.");
                 else {

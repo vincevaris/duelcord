@@ -13,7 +13,7 @@ public class WoundDebuff extends Buff {
 
     @Override
     public String onTurnStart(GameMember member) {
-        return Emote.WOUND + "**" + member.getUsername() + "** is wounded for **" + percent(getPower()) + "** by **" + getSource().getUsername() + "**.";
+        return Emote.WOUND + "They receive __" + percent(getPower()) + "__ less healing.";
     }
 
     @Override

@@ -26,10 +26,10 @@ public class BuyAction implements GameAction {
         actor.getItems().clear();
         actor.getItems().add(item);
         actor.getItems().addAll(build.getPostData());
-        actor.updateStats();
+        output.add(actor.updateStats());
 
-        output.add(0, Emote.BUY + "**" + actor.getUsername() + "** purchased a(n) **"
-                + item.getName() + "** for **" + build.getCost() + "** gold.");
+        output.add(0, Emote.BUY + "**" + actor.getUsername() + "** purchased **"
+                + item.getName() + "** for __" + build.getCost() + "__ gold.");
 
         return Util.joinNonEmpty("\n", output);
     }

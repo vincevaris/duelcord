@@ -4,6 +4,10 @@ import com.oopsjpeg.enigma.game.GameAction;
 import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.object.Item;
 import com.oopsjpeg.enigma.util.Emote;
+import com.oopsjpeg.enigma.util.Util;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SellAction implements GameAction {
     private final Item item;
@@ -14,12 +18,13 @@ public class SellAction implements GameAction {
 
     @Override
     public String act(GameMember actor) {
+        final List<String> output = new ArrayList<>();
         int gold = Math.round(item.getCost() * 0.6f);
-        String output = Emote.BUY + "**" + actor.getUsername() + "** sold a(n) **" + item.getName() + "** for **" + gold + "** gold.";
+        output.add(Emote.BUY + "**" + actor.getUsername() + "** sold **" + item.getName() + "** for __" + gold + "__ gold.");
         actor.giveGold(gold);
         actor.getItems().remove(item);
-        actor.updateStats();
-        return output;
+        output.add(actor.updateStats());
+        return Util.joinNonEmpty("\n", output);
     }
 
     @Override

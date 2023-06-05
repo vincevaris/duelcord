@@ -4,6 +4,7 @@ import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.buff.WoundDebuff;
 import com.oopsjpeg.enigma.game.object.Effect;
+import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
 
@@ -18,7 +19,7 @@ public class LifewasterEffect extends Effect {
     @Override
     public DamageEvent hitOut(DamageEvent event) {
         if (hitCount.stack()) {
-            event.output.add(event.target.addBuff(new WoundDebuff(event.actor, 1, getPower())));
+            event.output.add(event.target.addBuff(new WoundDebuff(event.actor, 1, getPower()), Emote.WOUND));
             hitCount.reset();
         }
         return event;

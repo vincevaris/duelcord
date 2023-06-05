@@ -66,6 +66,24 @@ public class Util {
                 .collect(Collectors.joining("\n"));
     }
 
+    public static String joinWithAnd(String... array) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = array.length - 1; i >= 0; i--)
+        {
+            if (i == 0)
+                builder.append(array[i]);
+            else if (i == 1)
+                builder.append(array[i]).append(" and ");
+            else
+                builder.append(array[i]).append(", ");
+        }
+        return builder.toString();
+    }
+
+    public static String joinWithAnd(List<String> list) {
+        return joinWithAnd(list.toArray(new String[0]));
+    }
+
     public static EmbedCreateSpec leaderboard() {
         EmbedCreateSpec.Builder embed = EmbedCreateSpec.builder();
         embed.author("Top 10 Players", null, Enigma.getInstance().getClient().getSelf().block().getAvatarUrl());
@@ -151,26 +169,26 @@ public class Util {
     }
 
     public static void send(MessageChannel channel, String content) {
-        channel.createMessage(embed("", content, Color.CYAN)).block();
+        channel.createMessage(embed("", content, Color.CYAN)).subscribe();
     }
 
     public static void send(MessageChannel channel, String title, String content) {
-        channel.createMessage(embed(title, content, Color.CYAN)).block();
+        channel.createMessage(embed(title, content, Color.CYAN)).subscribe();
     }
 
     public static void sendFailure(MessageChannel channel, String content) {
-        channel.createMessage(embed("", Emote.NO + content, COLOR_FAILURE)).block();
+        channel.createMessage(embed("", Emote.NO + content, COLOR_FAILURE)).subscribe();
     }
 
     public static void sendFailure(MessageChannel channel, String title, String content) {
-        channel.createMessage(embed(title, Emote.NO + content, COLOR_FAILURE)).block();
+        channel.createMessage(embed(title, Emote.NO + content, COLOR_FAILURE)).subscribe();
     }
 
     public static void sendSuccess(MessageChannel channel, String content) {
-        channel.createMessage(embed("", Emote.YES + content, COLOR_SUCCESS)).block();
+        channel.createMessage(embed("", Emote.YES + content, COLOR_SUCCESS)).subscribe();
     }
 
     public static void sendSuccess(MessageChannel channel, String title, String content) {
-        channel.createMessage(embed(title, Emote.YES + content, COLOR_SUCCESS)).block();
+        channel.createMessage(embed(title, Emote.YES + content, COLOR_SUCCESS)).subscribe();
     }
 }

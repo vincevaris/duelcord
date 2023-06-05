@@ -3,6 +3,7 @@ package com.oopsjpeg.enigma.game.object;
 import com.oopsjpeg.enigma.game.*;
 import com.oopsjpeg.enigma.game.buff.PotionBuff;
 import com.oopsjpeg.enigma.game.effect.*;
+import com.oopsjpeg.enigma.util.Emote;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,7 +23,7 @@ public enum Item implements GameObject {
 
         @Override
         public String onUse(GameMember member) {
-            member.addBuff(new PotionBuff(member, TURNS, HEAL));
+            member.addBuff(new PotionBuff(member, TURNS, HEAL), Emote.HEAL);
             return member.heal(HEAL / TURNS, "Potion");
         }
 

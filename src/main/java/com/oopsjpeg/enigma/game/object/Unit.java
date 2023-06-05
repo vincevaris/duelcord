@@ -118,8 +118,8 @@ public enum Unit implements GameObject {
 
         @Override
         public String onDefend(GameMember member) {
-            member.addBuff(new StealthBuff(member, ASSASSIN_STEALTH_DODGE));
-            return Emote.SHIELD + "**" + member.getUsername() + "** is in stealth, gaining __" + percent(ASSASSIN_STEALTH_DODGE) + "__ Dodge.";
+            member.addBuff(new StealthBuff(member, ASSASSIN_STEALTH_DODGE), Emote.SHIELD);
+            return Emote.SHIELD + "They're in stealth, gaining __" + percent(ASSASSIN_STEALTH_DODGE) + "__ Dodge.";
         }
 
         @Override
@@ -202,7 +202,7 @@ public enum Unit implements GameObject {
                     int potency = getPotency(vars);
                     event.bonus += potency;
 
-                    event.output.add(event.target.addBuff(new SilenceDebuff(actor)));
+                    event.output.add(event.target.addBuff(new SilenceDebuff(actor), Emote.SILENCE));
 
                     slashCount.reset();
                     setPotency(vars, 0);
@@ -251,10 +251,10 @@ public enum Unit implements GameObject {
                 cloakCooldown.start(actor.getStats().getInt(COOLDOWN_REDUCTION));
                 setCloakCooldown(vars, cloakCooldown);
 
-                actor.addBuff(new CloakBuff(actor, ASSASSIN_CLOAK_DODGE));
+                actor.addBuff(new CloakBuff(actor, ASSASSIN_CLOAK_DODGE), Emote.SHIELD);
                 actor.setEnergy(0);
 
-                return Emote.USE + "**" + actor.getUsername() + "** used **Cloak**!";
+                return Emote.USE + "**" + actor.getUsername() + "** used **Cloak**, gaining __" + percent(ASSASSIN_CLOAK_DODGE) + "__ until hit!";
             }
 
             @Override
@@ -323,8 +323,8 @@ public enum Unit implements GameObject {
                 setGougeCooldown(vars, gougeCooldown);
 
                 int damage = Math.round(actor.getStats().get(ATTACK_POWER) * ASSASSIN_GOUGE_DAMAGE_AP_RATIO);
-                actor.addBuff(new GougeBuff(actor, 2, damage, ASSASSIN_GOUGE_CRIPPLE_CHANCE, ASSASSIN_GOUGE_CRIPPLE_AMOUNT));
-                return Emote.USE + "**" + actor.getUsername() + "** used **Gouge**!";
+                actor.addBuff(new GougeBuff(actor, 2, damage, ASSASSIN_GOUGE_CRIPPLE_CHANCE, ASSASSIN_GOUGE_CRIPPLE_AMOUNT), Emote.BLEED);
+                return Emote.USE + "**" + actor.getUsername() + "** used **Gouge**, buffing their next **2** Attacks!";
             }
 
             @Override
@@ -355,7 +355,7 @@ public enum Unit implements GameObject {
 
                 float crippleRand = Util.RANDOM.nextFloat();
                 if (crippleRand <= crippleChance)
-                    event.output.add(event.target.addBuff(new CrippleDebuff(event.actor, 1, crippleAmount)));
+                    event.output.add(event.target.addBuff(new CrippleDebuff(event.actor, 1, crippleAmount), Emote.BLEED));
 
                 attacks++;
 
@@ -593,10 +593,10 @@ public enum Unit implements GameObject {
 
                 float dodge = GUNSLINGER_ROLL_DODGE + (stats.get(SKILL_POWER) * GUNSLINGER_ROLL_SP_RATIO);
 
-                actor.addBuff(new RollBuff(actor, dodge));
+                actor.addBuff(new RollBuff(actor, dodge), Emote.SHIELD);
                 actor.setEnergy(0);
 
-                return Emote.USE + "**" + actor.getUsername() + "** used **Roll**, gaining __" + percent(dodge) + "__ Dodge until hit!";
+                return Emote.USE + "**" + actor.getUsername() + "** used **Roll**, gaining __" + percent(dodge) + "__ Dodge!";
             }
 
             @Override
@@ -790,7 +790,7 @@ public enum Unit implements GameObject {
     //            GameMember member = game.getMember(author);
 //
     //            if (channel.equals(game.getChannel()) && member.equals(game.getCurrentMember())) {
-    //                message.delete().block();
+    //                message.delete().subscribe();
     //                if (member.hasBuff(SilenceDebuff.class))
     //                    Util.sendFailure(channel, "You cannot **Bash** while silenced.");
     //                else {

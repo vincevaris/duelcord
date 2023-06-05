@@ -4,6 +4,10 @@ import com.oopsjpeg.enigma.game.GameAction;
 import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.object.Item;
 import com.oopsjpeg.enigma.util.Emote;
+import com.oopsjpeg.enigma.util.Util;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class UseAction implements GameAction {
     private final Item item;
@@ -14,10 +18,14 @@ public class UseAction implements GameAction {
 
     @Override
     public String act(GameMember actor) {
-        String output = Emote.USE + "**" + actor.getUsername() + "** used a(n) **" + item.getName() + "**.\n" + item.onUse(actor);
-        if (item.removeOnUse()) actor.getItems().remove(item);
-        actor.updateStats();
-        return output;
+        final List<String> output = new ArrayList<>();
+        output.add(Emote.USE + "**" + actor.getUsername() + "** used **" + item.getName() + "**.");
+        output.add(item.onUse(actor));
+
+        if (item.removeOnUse())
+            actor.getItems().remove(item);
+
+        return Util.joinNonEmpty("\n", output);
     }
 
     @Override

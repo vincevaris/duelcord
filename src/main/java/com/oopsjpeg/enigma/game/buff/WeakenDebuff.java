@@ -14,7 +14,7 @@ public class WeakenDebuff extends Buff {
 
     @Override
     public String onTurnStart(GameMember member) {
-        return Emote.SILENCE + "**" + member.getUsername() + "** is weakened for **" + percent(getPower()) + "** by **" + getSource().getUsername() + "**.";
+        return Emote.SILENCE + "They deal __" + percent(getPower()) + "__ less damage.";
     }
 
     @Override

@@ -99,16 +99,32 @@ public class GameMember {
         return getBuffs().stream().anyMatch(buff -> buff.getClass().equals(buffType));
     }
 
-    public void removeBuff(Buff buff) {
+    public String addBuff(Buff buff, String emote) {
+        final List<String> output = new ArrayList<>();
+        buffs.add(buff);
+        output.add(emote + "**" + getUsername() + "** received **" + buff.getName() + "**" +
+                (buff.hasPower() ? " (" + buff.formatPower() + ")" : "") +
+                (buff.getTotalTurns() > 1 ? " for **" + buff.getTotalTurns() + "** turns" : "") + "!");
+        output.add(updateStats());
+        return Util.joinNonEmpty("\n", output);
+    }
+
+    public String removeBuff(Buff buff) {
+        final List<String> output = new ArrayList<>();
         buffs.remove(buff);
-        updateStats();
+        output.add(Emote.SILENCE + "**" + getUsername() + "'s " + buff.getName() + "** " +
+                (buff.hasPower() ? "(" + buff.formatPower() + ") " : "") + "has dispelled.");
+        output.add(updateStats());
+        return Util.joinNonEmpty("\n", output);
     }
 
     public boolean alreadyPickedUnit() {
         return getUnit() != null;
     }
 
-    public void updateStats() {
+    public String updateStats() {
+        final List<String> output = new ArrayList<>();
+
         effects.clear();
 
         stats.putAll(unit.getStats());
@@ -131,33 +147,35 @@ public class GameMember {
 
         for (Buff buff : getBuffs()) {
             if (buff.shouldRemove())
-                removeBuff(buff);
+                output.add(removeBuff(buff));
             else
                 stats.addAll(buff.getStats());
         }
 
-
         critPity.setChance(stats.get(CRIT_CHANCE));
+
+        return Util.joinNonEmpty("\n", output);
     }
 
     public void act(GameAction action) {
         if (getEnergy() < action.getEnergy())
-            Util.sendFailure(game.getChannel(), "You do not have **" + action.getEnergy() + "** energy.");
+            Util.sendFailure(game.getChannel(), "That action costs **" + action.getEnergy() + "** Energy.");
         else {
-            game.getChannel().createMessage(action.execute(this)).block();
             game.getActions().add(action);
-            takeEnergy(action.getEnergy());
-            if (!hasEnergy()) game.nextTurn();
-            else game.updateInfo(this);
-        }
-    }
 
-    public String addBuff(Buff buff) {
-        buffs.add(buff);
-        updateStats();
-        return Emote.BLEED + "**" + buff.getSource().getUsername() + "** applied **" + buff.getName() + "**" +
-                (buff.hasPower() ? " (" + buff.formatPower() + ")" : "") +
-                (buff.getTotalTurns() > 1 ? " for **" + buff.getTotalTurns() + "** turns" : "") + "!";
+            takeEnergy(action.getEnergy());
+
+            final List<String> output = new ArrayList<>();
+            output.add(action.execute(this));
+            output.add(updateStats());
+
+            if (!hasEnergy())
+                output.add(game.nextTurn());
+            else
+                game.updateInfo(this);
+
+            game.getChannel().createMessage(Util.joinNonEmpty("\n", output)).subscribe();
+        }
     }
 
     public String shield(float shieldAmount) {
@@ -165,7 +183,7 @@ public class GameMember {
 
         giveShield(Math.round(shieldAmount));
 
-        return Emote.HEAL + "**" + getUsername() + "** shielded by **" + Math.round(shieldAmount)
+        return Emote.HEAL + "**" + getUsername() + "** shielded for **" + Math.round(shieldAmount)
                 + "**! [**" + getShield() + "**]";
     }
 
@@ -183,7 +201,7 @@ public class GameMember {
         giveHealth(Math.round(healAmount));
 
         if (message)
-            return Emote.HEAL + "**" + getUsername() + "** healed by **" + Math.round(healAmount) + "**! [**"
+            return Emote.HEAL + "**" + getUsername() + "** healed for **" + Math.round(healAmount) + "**! [**"
                 + getHealth() + " / " + stats.getInt(MAX_HEALTH) + "**]"
                 + (source == null ? "" : " (" + source + ")");
 
@@ -194,7 +212,7 @@ public class GameMember {
         if (!defensive) {
             defensive = true;
             List<String> output = getData().stream().map(o -> o.onDefend(this)).collect(Collectors.toList());
-            output.add(Emote.SHIELD + "**" + getUsername() + "** is defending (**" + Util.percent(getResist()) + "** resist, **" + (stats.getInt(HEALTH_PER_TURN) * 2) + "** regen)!");
+            output.add(0, Emote.SHIELD + "**" + getUsername() + "** is defending (**" + Util.percent(getResist()) + "** resist, **" + (stats.getInt(HEALTH_PER_TURN) * 2) + "** regen)!");
             return Util.joinNonEmpty("\n", output);
         }
         return null;
@@ -273,8 +291,8 @@ public class GameMember {
         for (GameObject o : event.actor.getData()) event = o.damageOut(event);
         for (GameObject o : event.target.getData()) event = o.damageIn(event);
 
-        event.actor.updateStats();
-        event.target.updateStats();
+        event.output.add(event.actor.updateStats());
+        event.output.add(event.target.updateStats());
 
         if (event.cancelled) return Util.joinNonEmpty("\n", event.output);
 
@@ -302,7 +320,7 @@ public class GameMember {
             if (event.target.hasShield())
                 event.output.add(0, Util.damageText(event, event.actor.getUsername(), event.target.getUsername() + "'s Shield", emote, source));
             else
-                event.output.add(Emote.SHIELD + "**" + event.actor.getUsername() + "** destroyed **" + event.target.getUsername() + "'s Shield**!");
+                event.output.add(Emote.SHIELD + "Their Shield was destroyed!");
 
             event.bonus -= shdBonus;
             event.damage -= shdDamage;
@@ -333,7 +351,7 @@ public class GameMember {
             game.setGameState(GameState.FINISHED);
             output.add(game.getAlive().get(0).win());
         } else if (game.getCurrentMember().equals(this))
-            game.nextTurn();
+            output.add(game.nextTurn());
 
         return Util.joinNonEmpty("\n", output);
     }

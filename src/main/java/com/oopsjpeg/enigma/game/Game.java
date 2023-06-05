@@ -1,5 +1,6 @@
 package com.oopsjpeg.enigma.game;
 
+import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.buff.SilenceDebuff;
 import com.oopsjpeg.enigma.game.object.Buff;
@@ -53,9 +54,9 @@ public class Game {
 
         Snowflake roleId = getGuild().getEveryoneRole().block().getId();
         channel.addRoleOverwrite(roleId, PermissionOverwrite.forRole(roleId,
-                PermissionSet.none(), PermissionSet.of(Permission.VIEW_CHANNEL))).block();
+                PermissionSet.none(), PermissionSet.of(Permission.VIEW_CHANNEL))).subscribe();
         players.forEach(p -> channel.addMemberOverwrite(Snowflake.of(p.getId()), PermissionOverwrite.forMember(Snowflake.of(p.getId()),
-                PermissionSet.of(Permission.VIEW_CHANNEL), PermissionSet.none())).block());
+                PermissionSet.of(Permission.VIEW_CHANNEL), PermissionSet.none())).subscribe());
 
         infoMessage = channel.createEmbed(EmbedCreateSpec.builder().description("Game information will appear here.").build()).block();
         infoMessage.pin().subscribe();
@@ -68,11 +69,11 @@ public class Game {
         members = players.stream().map(p -> new GameMember(this, p)).collect(Collectors.toList());
         Collections.shuffle(members);
 
-        nextTurn();
+        channel.createMessage(nextTurn()).subscribe();
     }
 
-    public void nextTurn() {
-        List<String> output = new ArrayList<>();
+    public String nextTurn() {
+        final List<String> output = new ArrayList<>();
 
         // Handle turn ending
         if (gameState == PLAYING) {
@@ -81,15 +82,11 @@ public class Game {
             // On defend
             if (turnCount >= 1 && getCurrentMember().hasEnergy() && !getCurrentMember().hasBuff(SilenceDebuff.class))
                 output.add(getCurrentMember().defend());
-            // Check buffs
-            getCurrentMember().getBuffs().stream()
-                    .filter(Buff::turn)
-                    .forEach(buff -> {
-                output.add(Emote.INFO + "**" + getCurrentMember().getUsername() + "**'s " + buff.getName() + " has expired.");
-                getCurrentMember().removeBuff(buff);
-            });
+            // Decrement buff timers
+            // This used to also add to output, but updateStats() now checks for expired buffs.
+            getCurrentMember().getBuffs().forEach(Buff::turn);
             // Update current member's stats
-            getCurrentMember().updateStats();
+            output.add(getCurrentMember().updateStats());
         }
 
         // Start next turn
@@ -123,29 +120,34 @@ public class Game {
             turnCount++;
 
             output.add("## " + member.getMention() + "'s Turn");
-            output.add("Open this channel's description to view stats.");
 
             // On turn start
             output.addAll(member.getData().stream().map(e -> e.onTurnStart(member)).collect(Collectors.toList()));
             // Count skill cooldowns
-            Arrays.stream(member.getUnit().getSkills())
+            List<String> readiedSkills = Arrays.stream(member.getUnit().getSkills())
                     .filter(Skill::hasCooldown)
-                    .forEach(skill -> {
+                    .filter(skill -> {
                         Cooldown cooldown = skill.getCooldown(member.getVars());
-                        if (cooldown.count() && cooldown.tryNotify())
-                            output.add(":repeat: **`" + skill.getName() + "`** is ready to use.");
-                    });
+                        return cooldown.count() && cooldown.tryNotify();
+                    })
+                    .map(skill -> "**`>" + skill.getName() + "`**")
+                    .collect(Collectors.toList());
+            if (readiedSkills.size() == 1)
+                output.add(Emote.USE + readiedSkills.get(0) + " is ready to use.");
+            else if (readiedSkills.size() >= 1)
+                output.add(Emote.USE + Util.joinWithAnd(readiedSkills) + " are ready to use.");
             // Low health warning
             if (member.getHealthPercentage() < 0.2f)
-                output.add(Emote.WARN + "**" + member.getUsername() + "** is critically low on health.");
+                output.add(Emote.WARN + "They're critically low on health.");
             // Update current member's stats
-            getCurrentMember().updateStats();
+            output.add(getCurrentMember().updateStats());
 
             member.setShield(0);
         }
 
-        channel.createMessage(Util.joinNonEmpty("\n", output)).block();
         updateInfo(getCurrentMember());
+
+        return Util.joinNonEmpty("\n", output);
     }
 
     public void updateInfo(GameMember member) {

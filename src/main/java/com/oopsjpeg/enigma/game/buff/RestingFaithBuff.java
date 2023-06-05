@@ -14,7 +14,7 @@ public class RestingFaithBuff extends Buff {
 
     @Override
     public String onTurnStart(GameMember member) {
-        return Emote.ENERGY + "**" + member.getUsername() + "** gained **" + formatPower() + "** bonus energy this turn.";
+        return Emote.ENERGY + "They have __" + formatPower() + "__ bonus Energy.";
     }
 
     @Override
