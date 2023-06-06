@@ -19,7 +19,7 @@ public class DamageEvent
     public boolean isAttack;
     public boolean isSkill;
 
-    public float onHitScale;
+    public float onHitScale = 1;
 
     public DamageEvent(GameMember actor, GameMember target)
     {
