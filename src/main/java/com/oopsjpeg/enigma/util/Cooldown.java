@@ -13,7 +13,7 @@ public class Cooldown implements Notifier
 
     public void start(int reduction)
     {
-        setCurrent(getDuration() - reduction);
+        setCurrent(Math.max(1, getDuration() - reduction));
         setNotified(false);
     }
 
