@@ -23,7 +23,7 @@ public enum Unit implements GameObject
     ASSASSIN("Assassin", Color.of(0, 69, 255), new Stats()
             .put(MAX_ENERGY, 125)
             .put(MAX_HEALTH, 940)
-            .put(ATTACK_POWER, 24)
+            .put(ATTACK_POWER, 22)
             .put(HEALTH_PER_TURN, 9))
             {
                 private static final String VAR_SLASH_COOLDOWN = "slash_cooldown";

@@ -4,12 +4,14 @@ import com.oopsjpeg.enigma.game.*;
 import com.oopsjpeg.enigma.game.buff.PotionBuff;
 import com.oopsjpeg.enigma.game.effect.*;
 import com.oopsjpeg.enigma.util.Emote;
+import com.oopsjpeg.enigma.util.Util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
 import static com.oopsjpeg.enigma.game.Stats.*;
+import static com.oopsjpeg.enigma.util.Util.percent;
 
 public enum Item implements GameObject
 {
@@ -49,6 +51,126 @@ public enum Item implements GameObject
                     return false;
                 }
             },
+    ALCHEMISTS_ELIXIR("Alchemist's Elixir", 50) {
+        @Override
+        public String getDescription()
+        {
+            return "Grants a random effect.";
+        }
+
+        @Override
+        public String onUse(GameMember member)
+        {
+            int rand = Util.RANDOM.nextInt(3);
+
+            switch (rand) {
+                case 0: // Attack Power and Resist elixir
+                    return member.addBuff(new ElixirOfMightBuff(member, 25, 0.2f), Emote.POTION);
+                case 1: // Skill Power and Dodge elixir
+                    return member.addBuff(new ElixirOfWillBuff(member, 30, 0.35f), Emote.POTION);
+                case 2:
+                    return member.addBuff(new ElixirOfHasteBuff(member, 25, 1), Emote.POTION);
+                default:
+                    return "The elixir did nothing..!";
+            }
+        }
+
+        @Override
+        public boolean canUse(GameMember member)
+        {
+            return true;
+        }
+
+        @Override
+        public boolean removeOnUse()
+        {
+            return true;
+        }
+
+        @Override
+        public boolean isBuyable()
+        {
+            return false;
+        }
+
+        class ElixirOfMightBuff extends Buff {
+            private final int attackPower;
+            private final float resist;
+
+            public ElixirOfMightBuff(GameMember source, int attackPower, float resist)
+            {
+                super("Elixir of Might", false, source, 2, attackPower + resist);
+                this.attackPower = attackPower;
+                this.resist = resist;
+            }
+
+            @Override
+            public String onTurnStart(GameMember member)
+            {
+                return Emote.KNIFE + "**" + member.getUsername() + "** has __" + attackPower + " bonus Attack Power__ and __" + percent(resist) + " bonus Resist__.";
+            }
+
+            @Override
+            public Stats getStats()
+            {
+                return new Stats()
+                        .put(ATTACK_POWER, attackPower)
+                        .put(RESIST, resist);
+            }
+        }
+
+        class ElixirOfWillBuff extends Buff {
+            private final int skillPower;
+            private final float dodge;
+
+            public ElixirOfWillBuff(GameMember source, int skillPower, float dodge)
+            {
+                super("Elixir of Will", false, source, 2, skillPower + dodge);
+                this.skillPower = skillPower;
+                this.dodge = dodge;
+            }
+
+            @Override
+            public String onTurnStart(GameMember member)
+            {
+                return Emote.KNIFE + "**" + member.getUsername() + "** has __" + skillPower + " bonus Skill Power__ and __" + percent(dodge) + " bonus Dodge__.";
+            }
+
+            @Override
+            public Stats getStats()
+            {
+                return new Stats()
+                        .put(SKILL_POWER, skillPower)
+                        .put(DODGE, dodge);
+            }
+        }
+
+        class ElixirOfHasteBuff extends Buff {
+            private final int maxEnergy;
+            private final int cdReduction;
+
+            public ElixirOfHasteBuff(GameMember source, int maxEnergy, int cdReduction)
+            {
+                super("Elixir of Haste", false, source, 2, maxEnergy + cdReduction);
+                this.maxEnergy = maxEnergy;
+                this.cdReduction = cdReduction;
+            }
+
+            @Override
+            public String onTurnStart(GameMember member)
+            {
+                return Emote.KNIFE + "**" + member.getUsername() + "** has __" + maxEnergy + " bonus Energy__ and their Skills recharge __" + cdReduction + "__ turns faster.";
+            }
+
+            @Override
+            public Stats getStats()
+            {
+                return new Stats()
+                        .put(MAX_ENERGY, maxEnergy)
+                        .put(COOLDOWN_REDUCTION, cdReduction);
+            }
+        }
+    },
 
     RING("Ring", Tree.BASIC, 200, new Stats()
             .put(SKILL_POWER, 10)),

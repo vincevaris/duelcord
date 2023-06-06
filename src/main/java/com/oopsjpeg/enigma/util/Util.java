@@ -39,6 +39,10 @@ public class Util
         return array[RANDOM.nextInt(array.length)];
     }
 
+    public static <T> T pickRandom(List<T> list) {
+        return list.get(RANDOM.nextInt(list.size()));
+    }
+
     public static String formatStats(Stats stats)
     {
         List<String> output = new ArrayList<>();

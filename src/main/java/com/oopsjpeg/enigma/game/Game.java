@@ -2,6 +2,7 @@ package com.oopsjpeg.enigma.game;
 
 import com.oopsjpeg.enigma.Enigma;
 import com.oopsjpeg.enigma.game.buff.SilenceDebuff;
+import com.oopsjpeg.enigma.game.object.Augment;
 import com.oopsjpeg.enigma.game.object.Buff;
 import com.oopsjpeg.enigma.game.object.Effect;
 import com.oopsjpeg.enigma.game.object.Skill;
@@ -40,6 +41,7 @@ public class Game
     private final Stacker afkTimer = new Stacker(10);
 
     private List<GameAction> actions = new ArrayList<>();
+    private List<Augment> augments = new ArrayList<>();
     private LocalDateTime lastAction = LocalDateTime.now();
 
     private GameState gameState = PICKING;
@@ -109,10 +111,10 @@ public class Game
             if (turnIndex == 0)
             {
                 String playerList = getPlayers().stream().map(Player::getUsername).collect(Collectors.joining(", "));
-                output.add("# " + mode.getName());
+                output.add("## " + mode.getName());
                 output.add("featuring **" + getMembers().get(0).getUsername() + "** vs. **" + getMembers().get(1).getUsername() + "**!");
             }
-            output.add("## " + getCurrentMember().getMention() + "'s Pick");
+            output.add("### " + getCurrentMember().getMention() + "'s Pick");
             output.add("Check " + instance.getUnitsChannel().getMention() + " to view units, then pick with one with `"
                     + commandListener.getPrefix() + GameCommand.PICK.getName() + "`.");
         } else if (gameState == PLAYING)
@@ -126,7 +128,26 @@ public class Game
 
             turnCount++;
 
-            output.add("## " + member.getMention() + "'s Turn");
+            if (turnCount >= 7 && augments.size() < 1)
+            {
+                Augment augment = Util.pickRandom(getUnusedAugments());
+                output.add("# First Augment");
+                output.add(Emote.AUGMENT + "**" + augment.getName() + "** - " + augment.getDescription());
+                augments.add(augment);
+                augment.start(this);
+            }
+
+            if (turnCount >= 18 && augments.size() < 2)
+            {
+                Augment augment = Util.pickRandom(getUnusedAugments());
+                output.add("# Second Augment");
+                output.add(Emote.AUGMENT + "**" + augment.getName() + "** - " + augment.getDescription());
+                augments.add(augment);
+                augment.start(this);
+            }
+
+            output.add("### " + member.getMention() + "'s Turn");
+            output.add("Open this channel's pinned messages to see your stats.");
 
             // On turn start
             output.addAll(member.getData().stream().map(e -> e.onTurnStart(member)).collect(Collectors.toList()));
@@ -318,6 +339,24 @@ public class Game
     public void setActions(List<GameAction> actions)
     {
         this.actions = actions;
+    }
+
+    public List<Augment> getAugments()
+    {
+        return augments;
+    }
+
+    public void setAugments(List<Augment> augments)
+    {
+        this.augments = augments;
+    }
+
+    public List<Augment> getUnusedAugments() {
+        // Get all augments
+        List<Augment> allAugments = Arrays.stream(Augment.values()).collect(Collectors.toList());
+        // Remove augments we already have
+        allAugments.removeIf(a -> augments.contains(a));
+        return allAugments;
     }
 
     public LocalDateTime getLastAction()

@@ -23,9 +23,10 @@ public class Emote
     public static final String ENERGY = ":sparkle: ";
     public static final String BUFF = ":eight_spoked_asterisk: ";
     public static final String DODGE = ":interrobang: ";
+    public static final String AUGMENT = ":globe_with_meridians: ";
 
     // Custom emotes
     public static final String HEAL = "<:enigmaHeal:944702328177569892> ";
-    public static final String RAGE = "<:enigmaRage:629168653438418950> ";
+    public static final String POTION = "<:potion:1115437725030551603> ";
     // public static final String BASH = "";
 }
