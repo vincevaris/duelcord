@@ -341,8 +341,10 @@ public class GameMember
 
         event = game.getMode().handleDamage(event);
 
-        if (event.heal > 0) event.output.add(heal(Math.round(event.heal)));
-        if (event.shield > 0) event.output.add(shield(Math.round(event.shield)));
+        if (event.heal > 0)
+            event.output.add(event.actor.heal(Math.round(event.heal)));
+        if (event.shield > 0)
+            event.output.add(event.actor.shield(Math.round(event.shield)));
 
         event.damage *= 1 - event.target.getResist();
         event.bonus *= 1 - event.target.getResist();
