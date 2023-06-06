@@ -16,11 +16,13 @@ public abstract class Skill implements Command
 {
     private final Unit unit;
     private final int baseCooldown;
+    private final int energyCost;
 
-    public Skill(Unit unit, int baseCooldown)
+    public Skill(Unit unit, int baseCooldown, int energyCost)
     {
         this.unit = unit;
         this.baseCooldown = baseCooldown;
+        this.energyCost = energyCost;
     }
 
     @Override
@@ -43,9 +45,15 @@ public abstract class Skill implements Command
             return;
         }
 
-        if (!cooldown.isDone())
+        if (hasCooldown() && !cooldown.isDone())
         {
-            Util.sendFailure(channel, "This skill is on cooldown.");
+            Util.sendFailure(channel, "**" + getName() + "** will be ready in **" + cooldown.getCurrent() + "** turns.");
+            return;
+        }
+
+        if (hasEnergyCost() && actor.getEnergy() < getEnergyCost())
+        {
+            Util.sendFailure(channel, "**" + getName() + "** costs **" + energyCost + "** energy. You have **" + actor.getEnergy() + "**.");
             return;
         }
 
@@ -53,6 +61,11 @@ public abstract class Skill implements Command
     }
 
     public abstract GameAction act(Game game, GameMember actor);
+
+    public Unit getUnit()
+    {
+        return unit;
+    }
 
     public String getCooldownVar()
     {
@@ -76,13 +89,17 @@ public abstract class Skill implements Command
         return baseCooldown > 0;
     }
 
-    public Unit getUnit()
-    {
-        return unit;
-    }
-
     public int getBaseCooldown()
     {
         return baseCooldown;
+    }
+
+    public int getEnergyCost()
+    {
+        return energyCost;
+    }
+
+    public boolean hasEnergyCost() {
+        return energyCost > 0;
     }
 }

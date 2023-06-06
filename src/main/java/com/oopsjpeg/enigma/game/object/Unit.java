@@ -177,7 +177,7 @@ public enum Unit implements GameObject
                 {
                     public SlashSkill()
                     {
-                        super(ASSASSIN, ASSASSIN_SLASH_COOLDOWN);
+                        super(ASSASSIN, ASSASSIN_SLASH_COOLDOWN, ASSASSIN_SLASH_ENERGY_COST);
                     }
 
                     @Override
@@ -249,7 +249,7 @@ public enum Unit implements GameObject
                     @Override
                     public int getEnergy()
                     {
-                        return ASSASSIN_SLASH_COST;
+                        return ASSASSIN_SLASH_ENERGY_COST;
                     }
                 }
 
@@ -257,7 +257,7 @@ public enum Unit implements GameObject
                 {
                     public CloakSkill()
                     {
-                        super(ASSASSIN, ASSASSIN_CLOAK_COOLDOWN);
+                        super(ASSASSIN, ASSASSIN_CLOAK_COOLDOWN, 0);
                     }
 
                     @Override
@@ -339,7 +339,7 @@ public enum Unit implements GameObject
                 {
                     public GougeSkill()
                     {
-                        super(ASSASSIN, ASSASSIN_GOUGE_COOLDOWN);
+                        super(ASSASSIN, ASSASSIN_GOUGE_COOLDOWN, ASSASSIN_GOUGE_ENERGY_COST);
                     }
 
                     @Override
@@ -380,7 +380,7 @@ public enum Unit implements GameObject
                     @Override
                     public int getEnergy()
                     {
-                        return ASSASSIN_GOUGE_COST;
+                        return ASSASSIN_GOUGE_ENERGY_COST;
                     }
                 }
 
@@ -567,7 +567,7 @@ public enum Unit implements GameObject
                 {
                     public BarrageSkill()
                     {
-                        super(GUNSLINGER, GUNSLINGER_BARRAGE_COOLDOWN);
+                        super(GUNSLINGER, GUNSLINGER_BARRAGE_COOLDOWN, GUNSLINGER_BARRAGE_ENERGY_COST);
                     }
 
                     @Override
@@ -645,7 +645,7 @@ public enum Unit implements GameObject
                 {
                     public RollSkill()
                     {
-                        super(GUNSLINGER, GUNSLINGER_ROLL_COOLDOWN);
+                        super(GUNSLINGER, GUNSLINGER_ROLL_COOLDOWN, 0);
                     }
 
                     @Override
@@ -714,7 +714,7 @@ public enum Unit implements GameObject
                 {
                     public DeadeyeSkill()
                     {
-                        super(GUNSLINGER, GUNSLINGER_DEADEYE_COOLDOWN);
+                        super(GUNSLINGER, GUNSLINGER_DEADEYE_COOLDOWN, GUNSLINGER_DEADEYE_ENERGY_COST);
                     }
 
                     @Override
@@ -1026,7 +1026,11 @@ public enum Unit implements GameObject
         embed.description("## " + getName() + "\n" + getDescription() + "\n\u1CBC\u1CBC");
 
         for (Skill skill : getSkills())
-            embed.addField("`>" + skill.getName() + "`", skill.getDescription(), false);
+            embed.addField("`>" + skill.getName() + "` - Cooldown: **" +
+                    (skill.hasCooldown() ? skill.getBaseCooldown() : "None") +
+                    "** - Energy Cost: **" +
+                    (skill.hasEnergyCost() ? skill.getEnergyCost() : "Free") +
+                    "**", skill.getDescription(), false);
 
         return embed.build();
     }
