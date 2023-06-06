@@ -11,7 +11,7 @@ public class RestingFaithBuff extends Buff
 {
     public RestingFaithBuff(GameMember source, float power)
     {
-        super("Resting Faith", false, source, 1, power);
+        super("Resting Faith", false, source, 2, power);
     }
 
     @Override
