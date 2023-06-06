@@ -17,20 +17,26 @@ public enum Item implements GameObject
 {
     POTION("Potion", 50)
             {
-                private final float HEAL = 120;
+                private final int HEAL = 120;
                 private final int TURNS = 2;
 
                 @Override
                 public String getDescription()
                 {
-                    return "Heals for **" + Math.round(HEAL) + "**";
+                    return "Heal for __" + HEAL + "__ over **" + TURNS + "** turns.";
+                }
+
+                @Override
+                public String getTip()
+                {
+                    return "Heal for __" + HEAL + "__";
                 }
 
                 @Override
                 public String onUse(GameMember member)
                 {
                     member.addBuff(new PotionBuff(member, TURNS, HEAL), Emote.HEAL);
-                    return member.heal(HEAL / TURNS, "Potion");
+                    return member.heal((float) HEAL / TURNS, "Potion");
                 }
 
                 @Override
@@ -56,6 +62,12 @@ public enum Item implements GameObject
         public String getDescription()
         {
             return "Grants a random effect.";
+        }
+
+        @Override
+        public String getTip()
+        {
+            return "Get a random effect";
         }
 
         @Override
@@ -181,17 +193,35 @@ public enum Item implements GameObject
             new Item[]{KNIFE},
             new Effect[]{new LifewasterEffect(5, .25f)},
             new Stats()
-                    .put(ATTACK_POWER, 10)),
+                    .put(ATTACK_POWER, 10)) {
+        @Override
+        public String getTip()
+        {
+            return "Lower enemy healing";
+        }
+    },
     KORAS_AMULET("Kora's Amulet", Tree.ADVANCED, 525,
             new Item[]{RING},
             new Effect[]{new KorasWillEffect(10)},
             new Stats()
-                    .put(SKILL_POWER, 20)),
+                    .put(SKILL_POWER, 20)) {
+        @Override
+        public String getTip()
+        {
+            return "More skill damage";
+        }
+    },
     HOLY_BAND("Holy Band", Tree.ADVANCED, 550,
             new Item[]{RING},
             new Effect[]{new DivinityEffect(10)},
             new Stats()
-                    .put(SKILL_POWER, 25)),
+                    .put(SKILL_POWER, 25)) {
+        @Override
+        public String getTip()
+        {
+            return "Shield when defending";
+        }
+    },
     BLOODLUST_BLADE("Bloodlust Blade", Tree.ADVANCED, 550,
             new Item[]{KNIFE},
             new Stats()
@@ -206,18 +236,36 @@ public enum Item implements GameObject
             new Item[]{KNIFE},
             new Effect[]{new EndlessStrikesEffect(.12f)},
             new Stats()
-                    .put(ATTACK_POWER, 15)),
+                    .put(ATTACK_POWER, 15)) {
+        @Override
+        public String getTip()
+        {
+            return "More multi-attack damage";
+        }
+    },
 
     FAITHBREAKER("Faithbreaker", Tree.COMPLETE, 1150,
             new Item[]{KORAS_AMULET, RING},
             new Effect[]{new KorasWillEffect(12, .5f)},
             new Stats()
-                    .put(SKILL_POWER, 45)),
+                    .put(SKILL_POWER, 45)) {
+        @Override
+        public String getTip()
+        {
+            return "More skill damage";
+        }
+    },
     CRIMSON_MIGHT("Crimson Might", Tree.COMPLETE, 1175,
-            new Item[]{HOLY_BAND, RING},
+            new Item[]{KORAS_AMULET, RING},
             new Effect[]{new MagicalMasteryEffect(1, 2, .03f)},
             new Stats()
-                    .put(SKILL_POWER, 50)),
+                    .put(SKILL_POWER, 40)) {
+        @Override
+        public String getTip()
+        {
+            return "Lower cooldowns";
+        }
+    },
     DAWN_HAMMER("Dawn Hammer", Tree.COMPLETE, 1200,
             new Item[]{HOLY_BAND, KNIFE},
             new Effect[]{
@@ -225,15 +273,27 @@ public enum Item implements GameObject
                     new RestingFaithEffect(25)},
             new Stats()
                     .put(ATTACK_POWER, 25)
-                    .put(SKILL_POWER, 30)),
-    WOLFS_FANG("Wolf's Fang", Tree.COMPLETE, 1200,
+                    .put(SKILL_POWER, 30)) {
+        @Override
+        public String getTip()
+        {
+            return "Bonus energy";
+        }
+    },
+    WOLFS_FANG("Wolf's Fang", Tree.COMPLETE, 1175,
             new Item[]{BONE_SPEAR, KNIFE},
             new Effect[]{
                     new LifewasterEffect(3, .25f),
-                    new WolfbiteEffect(5, .25f)
+                    new WolfbiteEffect(3, .25f)
             },
             new Stats()
-                    .put(ATTACK_POWER, 35)),
+                    .put(ATTACK_POWER, 35)) {
+        @Override
+        public String getTip()
+        {
+            return "Attacks Weaken enemy";
+        }
+    },
     SOULSTEALER("Soulstealer", Tree.COMPLETE, 1200,
             new Item[]{BLOODLUST_BLADE, KNIFE},
             new Effect[]{
@@ -241,19 +301,37 @@ public enum Item implements GameObject
             },
             new Stats()
                     .put(ATTACK_POWER, 55)
-                    .put(LIFE_STEAL, .2f)),
+                    .put(LIFE_STEAL, .2f)) {
+        @Override
+        public String getTip()
+        {
+            return "Attacks shield";
+        }
+    },
     IRON_SCIMITAR("Iron Scimitar", Tree.COMPLETE, 1200,
             new Item[]{BRONZE_CUTLASS, KNIFE},
             new Effect[]{new DecimateEffect(3, .12f)},
             new Stats()
                     .put(ATTACK_POWER, 50)
-                    .put(CRIT_CHANCE, .4f)),
+                    .put(CRIT_CHANCE, .4f)) {
+        @Override
+        public String getTip()
+        {
+            return "Crits Cripple enemy";
+        }
+    },
     SHADOW_REAVER("Shadow Reaver", Tree.COMPLETE, 1225,
             new Item[]{MIDNIGHT_DAGGER, RING},
             new Effect[]{new EndlessStrikesEffect(.2f)},
             new Stats()
                     .put(ATTACK_POWER, 30)
-                    .put(SKILL_POWER, 30));
+                    .put(SKILL_POWER, 30)) {
+        @Override
+        public String getTip()
+        {
+            return "More multi-attack damage";
+        }
+    };
 
 
     private final String name;
@@ -359,6 +437,14 @@ public enum Item implements GameObject
 
     public int getCost()
     {
+        return cost;
+    }
+
+    public int getCostWithBuild()
+    {
+        int cost = getCost();
+        for (Item item : getBuild())
+            cost -= item.getCost();
         return cost;
     }
 

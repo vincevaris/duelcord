@@ -69,17 +69,22 @@ public enum GeneralCommand implements Command
                     EmbedCreateSpec.Builder embed = EmbedCreateSpec.builder();
                     embed.title("**" + tree.getName() + "**");
                     embed.color(tree.getColor());
+
                     Arrays.stream(Item.values())
                             .filter(item -> item.getTree() == tree)
                             .filter(Item::isBuyable)
                             .sorted(Comparator.comparingInt(Item::getCost))
                             .forEach(i ->
                             {
-                                String value = (i.hasTip() ? "_" + i.getTip() + "_\n" : "")
-                                        + Util.formatStats(i.getStats()) + "\n"
-                                        + (i.hasBuild() ? "[_" + Arrays.stream(i.getBuild()).map(Item::getName).collect(Collectors.joining(", ")) + "_]" : "");
-                                embed.addField(i.getName() + " (" + i.getCost() + "g)", value, true);
+                                String value = (i.hasBuild() ? "[" + Arrays.stream(i.getBuild())
+                                        .map(c -> "`" + c.getName() + "`")
+                                        .collect(Collectors.joining(", ")) + "]" : "") + "\n" +
+                                        Util.formatStats(i.getStats()) + "\n" +
+                                        (i.hasTip() ? "*" + i.getTip() + "*\n" : "");
+
+                                embed.addField(i.getName() + " (__" + i.getCost() + "g__)", value, true);
                             });
+
                     return embed.build();
                 }
             },
