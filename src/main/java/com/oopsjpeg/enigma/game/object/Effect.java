@@ -1,5 +1,6 @@
 package com.oopsjpeg.enigma.game.object;
 
+import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.GameObject;
 import com.oopsjpeg.enigma.game.Stats;
 
@@ -25,6 +26,12 @@ public abstract class Effect implements GameObject
     public float getPower()
     {
         return power;
+    }
+
+    @Override
+    public String[] getTopic(GameMember member)
+    {
+        return new String[] {name + ": " + getPower()};
     }
 
     public Stats getStats()
