@@ -241,7 +241,7 @@ public enum Unit implements GameObject
                         setSlashCount(vars, slashCount);
 
                         event = actor.crit(event);
-                        event = actor.ability(event);
+                        event = actor.skill(event);
 
                         return target.damage(event, Emote.KNIFE, "Slash");
                     }
@@ -620,7 +620,7 @@ public enum Unit implements GameObject
                                 event.damage += stats.get(SKILL_POWER) * GUNSLINGER_BARRAGE_SP_RATIO;
                                 event = actor.crit(event);
                                 event = actor.hit(event);
-                                event = actor.ability(event);
+                                event = actor.skill(event);
 
                                 if (!event.cancelled)
                                     barrageCount++;
@@ -775,7 +775,7 @@ public enum Unit implements GameObject
                         }
 
                         event = actor.crit(event);
-                        event = actor.ability(event);
+                        event = actor.skill(event);
 
                         output.add(actor.damage(event, Emote.GUN, "Deadeye"));
                         output.add(0, Emote.USE + "**" + actor.getUsername() + "** used **Deadeye**!" + (jackpot ? " **JACKPOT**!" : ""));
@@ -958,7 +958,7 @@ public enum Unit implements GameObject
     //            event.damage += actorStats.get(ATTACK_POWER) * WARRIOR_BASH_AP_RATIO;
     //            event.damage += actorStats.get(SKILL_POWER) * WARRIOR_BASH_SP_RATIO;
 //
-    //            event = event.actor.ability(event);
+    //            event = event.actor.skill(event);
 //
     //            return actor.damage(event, Emote.KNIFE, "Bash");
     //        }

@@ -79,12 +79,12 @@ public interface GameObject
         return event;
     }
 
-    default DamageEvent abilityOut(DamageEvent event)
+    default DamageEvent skillOut(DamageEvent event)
     {
         return event;
     }
 
-    default DamageEvent abilityIn(DamageEvent event)
+    default DamageEvent skillIn(DamageEvent event)
     {
         return event;
     }

@@ -22,7 +22,7 @@ public class MagicalMasteryEffect extends Effect
     }
 
     @Override
-    public DamageEvent abilityOut(DamageEvent event)
+    public DamageEvent skillOut(DamageEvent event)
     {
         if (skillCount.stack())
         {

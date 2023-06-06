@@ -28,7 +28,7 @@ public class KorasWillEffect extends Effect
     }
 
     @Override
-    public DamageEvent abilityOut(DamageEvent event)
+    public DamageEvent skillOut(DamageEvent event)
     {
         event.bonus += getTotalPower(event.actor.getStats().get(SKILL_POWER));
         return event;

@@ -298,10 +298,10 @@ public class GameMember
         return event;
     }
 
-    public DamageEvent ability(DamageEvent event)
+    public DamageEvent skill(DamageEvent event)
     {
-        for (GameObject o : event.actor.getData()) event = o.abilityOut(event);
-        for (GameObject o : event.target.getData()) event = o.abilityIn(event);
+        for (GameObject o : event.actor.getData()) event = o.skillOut(event);
+        for (GameObject o : event.target.getData()) event = o.skillIn(event);
         return event;
     }
 
