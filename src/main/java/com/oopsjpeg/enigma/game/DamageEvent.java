@@ -16,6 +16,11 @@ public class DamageEvent
     public float shield;
     public boolean cancelled;
 
+    public boolean isAttack;
+    public boolean isSkill;
+
+    public float onHitScale;
+
     public DamageEvent(GameMember actor, GameMember target)
     {
         this.actor = actor;

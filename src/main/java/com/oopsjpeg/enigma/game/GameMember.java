@@ -300,6 +300,7 @@ public class GameMember
 
     public DamageEvent skill(DamageEvent event)
     {
+        event.isSkill = true;
         for (GameObject o : event.actor.getData()) event = o.skillOut(event);
         for (GameObject o : event.target.getData()) event = o.skillIn(event);
         return event;
@@ -308,6 +309,7 @@ public class GameMember
     public DamageEvent attack(GameMember target)
     {
         DamageEvent event = new DamageEvent(this, target);
+        event.isAttack = true;
         event.damage += stats.get(ATTACK_POWER);
 
         for (GameObject o : event.actor.getData()) event = o.attackOut(event);

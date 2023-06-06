@@ -586,7 +586,7 @@ public enum Unit implements GameObject
                     public String getDescription()
                     {
                         return "Fire **" + GUNSLINGER_BARRAGE_SHOTS + "** shots, each dealing __" + GUNSLINGER_BARRAGE_DAMAGE + "__ + __" + percent(GUNSLINGER_BARRAGE_AP_RATIO) + " Attack Power__ + __" + percent(GUNSLINGER_BARRAGE_SP_RATIO) + " Skill Power__." +
-                                "\nShots can crit and apply on-hit effects.";
+                                "\nShots can crit and apply on-hit effects at __25%__ power.";
                     }
                 }
 
@@ -616,6 +616,7 @@ public enum Unit implements GameObject
                             if (target.isAlive())
                             {
                                 DamageEvent event = new DamageEvent(actor, target);
+                                event.onHitScale = .25f;
                                 event.damage += stats.get(ATTACK_POWER) * GUNSLINGER_BARRAGE_AP_RATIO;
                                 event.damage += stats.get(SKILL_POWER) * GUNSLINGER_BARRAGE_SP_RATIO;
                                 event = actor.crit(event);
