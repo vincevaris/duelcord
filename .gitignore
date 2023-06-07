@@ -3,4 +3,5 @@
 target/
 out/
 enigma.properties
+DUELCORD.properties
 dependency-reduced-pom.xml

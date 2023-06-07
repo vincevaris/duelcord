@@ -65,7 +65,7 @@ public class Game
         statusMessage.pin().subscribe();
 
         commandListener = new CommandListener(instance,
-                instance.getSettings().get(Settings.GAME_PREFIX),
+                Config.getGamePrefix(),
                 GameCommand.values(), channel);
         instance.addListener(commandListener);
 

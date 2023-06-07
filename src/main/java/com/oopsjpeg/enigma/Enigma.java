@@ -9,8 +9,9 @@ import com.oopsjpeg.enigma.listener.CommandListener;
 import com.oopsjpeg.enigma.listener.ComponentListener;
 import com.oopsjpeg.enigma.listener.ReadyListener;
 import com.oopsjpeg.enigma.storage.Player;
+import com.oopsjpeg.enigma.util.Config;
+import com.oopsjpeg.enigma.util.ConfigException;
 import com.oopsjpeg.enigma.util.Listener;
-import com.oopsjpeg.enigma.util.Settings;
 import com.oopsjpeg.enigma.util.Util;
 import discord4j.common.util.Snowflake;
 import discord4j.core.DiscordClient;
@@ -42,7 +43,6 @@ public class Enigma
 
     private static Enigma instance;
 
-    private final Settings settings = new Settings(getSettingsFile());
     private final ArrayList<Listener> listeners = new ArrayList<>();
     private final LinkedList<Game> games = new LinkedList<>();
     private final HashMap<Long, Player> players = new HashMap<>();
@@ -56,7 +56,7 @@ public class Enigma
         return new File("enigma.properties");
     }
 
-    public static void main(String[] args)
+    public static void main(String[] args) throws ConfigException, IOException
     {
         instance = new Enigma();
         instance.start();
@@ -67,42 +67,47 @@ public class Enigma
         return Enigma.instance;
     }
 
-    private void start()
+    private void start() throws ConfigException, IOException
     {
-        try
+        LOGGER.info("Loading configuration..");
+        loadConfig();
+
+        // Create mongo manager
+        //mongo = new MongoManager(settings.get(Settings.MONGO_HOST), settings.get(Settings.MONGO_DATABASE));
+
+        // Create discord client
+        DiscordClient client = DiscordClientBuilder.create(Config.getBotToken()).build();
+
+        // Create command listener
+        commands = new CommandListener(this, Config.getPrimaryPrefix(), GeneralCommand.values());
+
+        // Log in client
+        this.client = client.login().block();
+
+        // Add listeners
+        addListener(new ReadyListener(this));
+        addListener(new ComponentListener(this));
+        addListener(commands);
+    }
+
+    public void loadConfig() throws IOException, ConfigException
+    {
+        File configFile = new File(Config.CONFIG_FILE);
+
+        if (!configFile.exists())
         {
-            if (!settings.getFile().exists())
-            {
-                // Create settings if it doesn't exist
-                settings.save();
-                LOGGER.info("Created new settings. Please configure it.");
-            } else
-            {
-                // Load settings
-                settings.load();
-                LOGGER.info("Loaded settings.");
-
-                // Create mongo manager
-                //mongo = new MongoManager(settings.get(Settings.MONGO_HOST), settings.get(Settings.MONGO_DATABASE));
-
-                // Create discord client
-                DiscordClient client = DiscordClientBuilder.create(settings.get(Settings.TOKEN)).build();
-
-                // Create command listener
-                commands = new CommandListener(this, settings.get(Settings.MAIN_PREFIX), GeneralCommand.values());
-
-                // Log in client
-                this.client = client.login().block();
-
-                // Add listeners
-                addListener(new ReadyListener(this));
-                addListener(new ComponentListener(this));
-                addListener(commands);
-            }
-        } catch (IOException error)
-        {
-            error.printStackTrace();
+            Config.store();
+            throw new ConfigException("Configuration file created");
         }
+
+        Config.load();
+
+        if (Config.getBotToken().isEmpty())
+            throw new ConfigException("Bot token can't be empty");
+        if (Config.getPrimaryPrefix().isEmpty())
+            throw new ConfigException("Primary prefix can't be empty");
+        if (Config.getGamePrefix().isEmpty())
+            throw new ConfigException("Game prefix can't be empty");
     }
 
     public void addListener(Listener listener)
@@ -227,7 +232,7 @@ public class Enigma
                     .collect(Collectors.joining(", ")));
             logEmbed.footer(now.getYear() + "/" + now.getMonthValue() + "/" + now.getDayOfMonth(), null);
 
-            getLogChannel().createMessage(logEmbed.build()).subscribe();
+            getMatchLogChannel().createMessage(logEmbed.build()).subscribe();
         }
 
         game.getPlayers().forEach(Player::removeGame);
@@ -239,32 +244,27 @@ public class Enigma
 
     public Guild getGuild()
     {
-        return client.getGuildById(Snowflake.of(settings.get(Settings.GUILD_ID))).block();
-    }
-
-    public TextChannel getMatchmakingChannel()
-    {
-        return client.getChannelById(Snowflake.of(settings.get(Settings.MATCHMAKING_ID))).cast(TextChannel.class).block();
+        return client.getGuildById(Snowflake.of(Config.getGuildId())).block();
     }
 
     public TextChannel getUnitsChannel()
     {
-        return client.getChannelById(Snowflake.of(settings.get(Settings.UNITS_ID))).cast(TextChannel.class).block();
+        return client.getChannelById(Snowflake.of(Config.getUnitsChannelId())).cast(TextChannel.class).block();
     }
 
-    public TextChannel getItemsChannel()
+    public TextChannel getMatchmakingChannel()
     {
-        return client.getChannelById(Snowflake.of(settings.get(Settings.ITEMS_ID))).cast(TextChannel.class).block();
+        return client.getChannelById(Snowflake.of(Config.getMatchmakingChannelId())).cast(TextChannel.class).block();
     }
 
-    public TextChannel getLogChannel()
+    public TextChannel getMatchLogChannel()
     {
-        return client.getChannelById(Snowflake.of(settings.get(Settings.LOG_ID))).cast(TextChannel.class).block();
+        return client.getChannelById(Snowflake.of(Config.getMatchLogChannelId())).cast(TextChannel.class).block();
     }
 
     public TextChannel getLeaderboardChannel()
     {
-        return client.getChannelById(Snowflake.of(settings.get(Settings.LEADERBOARD_ID))).cast(TextChannel.class).block();
+        return client.getChannelById(Snowflake.of(Config.getLeaderboardChannelId())).cast(TextChannel.class).block();
     }
 
     //public MongoManager getMongo() {
@@ -274,11 +274,6 @@ public class Enigma
     public GatewayDiscordClient getClient()
     {
         return this.client;
-    }
-
-    public Settings getSettings()
-    {
-        return this.settings;
     }
 
     public ArrayList<Listener> getListeners()

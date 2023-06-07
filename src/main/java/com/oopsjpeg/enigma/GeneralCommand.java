@@ -8,13 +8,11 @@ import com.oopsjpeg.enigma.game.object.Item;
 import com.oopsjpeg.enigma.game.object.Unit;
 import com.oopsjpeg.enigma.storage.Player;
 import com.oopsjpeg.enigma.util.Util;
-import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.SelectMenu;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
-import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.Permission;
@@ -32,17 +30,14 @@ public enum GeneralCommand implements Command
                 @Override
                 public void execute(Message message, String[] args)
                 {
+                    MessageChannel channel = message.getChannel().block();
                     if (args[0].equalsIgnoreCase("items"))
                     {
-                        TextChannel channel = Enigma.getInstance().getItemsChannel();
                         channel.createMessage(buildItemTree(Tree.BASIC)).subscribe();
                         channel.createMessage(buildItemTree(Tree.ADVANCED)).subscribe();
                         channel.createMessage(buildItemTree(Tree.COMPLETE)).subscribe();
                     } else if (args[0].equalsIgnoreCase("units"))
                     {
-                        GatewayDiscordClient client = message.getClient();
-                        TextChannel channel = Enigma.getInstance().getUnitsChannel();
-
                         // Create a list of select menu options for units
                         List<SelectMenu.Option> options = Arrays.stream(Unit.values())
                                 .map(unit -> SelectMenu.Option.of(unit.getName(), unit.name()))
