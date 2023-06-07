@@ -2,30 +2,6 @@ package com.oopsjpeg.enigma.game.unit;
 
 public class UnitConstants
 {
-    // Assassin
-    public static final float ASSASSIN_POTENCY_RATIO = .2f;
-    public static final int ASSASSIN_POTENCY_MAX = 40;
-    public static final float ASSASSIN_POTENCY_SP_RATIO = .2f;
-
-    public static final float ASSASSIN_STEALTH_DODGE = .1f;
-
-    public static final int ASSASSIN_SLASH_COOLDOWN = 1;
-    public static final int ASSASSIN_SLASH_ENERGY_COST = 25;
-    public static final int ASSASSIN_SLASH_MAX = 3;
-    public static final float ASSASSIN_SLASH_AP_RATIO = .65f;
-    public static final float ASSASSIN_SLASH_SP_RATIO = .75f;
-
-    public static final int ASSASSIN_CLOAK_COOLDOWN = 3;
-    public static final float ASSASSIN_CLOAK_DODGE = .75f;
-    public static final int ASSASSIN_CLOAK_POTENCY = 20;
-    public static final float ASSASSIN_CLOAK_POTENCY_SP_RATIO = .95f;
-
-    public static final int ASSASSIN_GOUGE_COOLDOWN = 2;
-    public static final int ASSASSIN_GOUGE_ENERGY_COST = 25;
-    public static final float ASSASSIN_GOUGE_DAMAGE_AP_RATIO = .15f;
-    public static final float ASSASSIN_GOUGE_CRIPPLE_CHANCE = .6f;
-    public static final float ASSASSIN_GOUGE_CRIPPLE_AMOUNT = .15f;
-
     // Warrior
     public static final int WARRIOR_PASSIVE_LIMIT = 3;
     public static final float WARRIOR_PASSIVE_AP_RATIO = .25f;

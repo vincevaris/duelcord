@@ -1,6 +1,7 @@
 package com.oopsjpeg.enigma.game.effect;
 
 import com.oopsjpeg.enigma.game.DamageEvent;
+import com.oopsjpeg.enigma.game.GameMember;
 import com.oopsjpeg.enigma.game.Stats;
 import com.oopsjpeg.enigma.game.object.Effect;
 import com.oopsjpeg.enigma.util.Stacker;
@@ -37,6 +38,12 @@ public class MagicalMasteryEffect extends Effect
     {
         return "Skills recharge **" + cdReduction + "** turns faster." +
                 "\nEvery **" + skillCount.getMax() + "** damaging Skills, deal __" + percent(getPower()) + "__ of the target's max health.";
+    }
+
+    @Override
+    public String getStatus(GameMember member)
+    {
+        return "Magical Mastery: " + percent(getPower());
     }
 
     @Override

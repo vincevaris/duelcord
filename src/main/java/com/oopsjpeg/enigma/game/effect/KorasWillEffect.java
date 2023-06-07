@@ -30,7 +30,7 @@ public class KorasWillEffect extends Effect
     @Override
     public DamageEvent skillOut(DamageEvent event)
     {
-        event.bonus += getTotalPower(event.actor.getStats().get(SKILL_POWER));
+        event.bonus += getTotalPower(event.actor.getStats().get(SKILL_POWER)) * event.onHitScale;
         return event;
     }
 
@@ -41,10 +41,8 @@ public class KorasWillEffect extends Effect
     }
 
     @Override
-    public String[] getTopic(GameMember member)
+    public String getStatus(GameMember member)
     {
-        return new String[]{
-                "Kora's Will: " + getTotalPower(member.getStats().get(SKILL_POWER))
-        };
+        return "Kora's Will: " + Math.round(getTotalPower(member.getStats().get(SKILL_POWER)));
     }
 }

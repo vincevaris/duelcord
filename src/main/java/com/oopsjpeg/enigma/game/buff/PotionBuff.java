@@ -17,8 +17,8 @@ public class PotionBuff extends Buff
     }
 
     @Override
-    public String getName()
+    public String getStatus(GameMember member)
     {
-        return "Potion";
+        return "Potion: Healing " + Math.round(getPower());
     }
 }

@@ -1,10 +1,9 @@
 package com.oopsjpeg.enigma.game;
 
 import com.oopsjpeg.enigma.Enigma;
-import com.oopsjpeg.enigma.game.buff.SilenceDebuff;
-import com.oopsjpeg.enigma.game.object.Augment;
+import com.oopsjpeg.enigma.game.buff.SilencedDebuff;
 import com.oopsjpeg.enigma.game.object.Buff;
-import com.oopsjpeg.enigma.game.object.Effect;
+import com.oopsjpeg.enigma.game.object.Distortion;
 import com.oopsjpeg.enigma.game.object.Skill;
 import com.oopsjpeg.enigma.listener.CommandListener;
 import com.oopsjpeg.enigma.storage.Player;
@@ -18,30 +17,31 @@ import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.spec.TextChannelCreateSpec;
-import discord4j.rest.util.Color;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.oopsjpeg.enigma.game.GameState.*;
 import static com.oopsjpeg.enigma.game.Stats.*;
-import static com.oopsjpeg.enigma.util.Util.percent;
 
 public class Game
 {
     private final Enigma instance;
     private final TextChannel channel;
-    private final Message infoMessage;
+    private final Message statusMessage;
     private final GameMode mode;
     private final List<GameMember> members;
     private final CommandListener commandListener;
     private final Stacker afkTimer = new Stacker(10);
 
     private List<GameAction> actions = new ArrayList<>();
-    private List<Augment> augments = new ArrayList<>();
+    private List<Distortion> distortions = new ArrayList<>();
     private LocalDateTime lastAction = LocalDateTime.now();
 
     private GameState gameState = PICKING;
@@ -61,8 +61,8 @@ public class Game
         players.forEach(p -> channel.addMemberOverwrite(Snowflake.of(p.getId()), PermissionOverwrite.forMember(Snowflake.of(p.getId()),
                 PermissionSet.of(Permission.VIEW_CHANNEL), PermissionSet.none())).subscribe());
 
-        infoMessage = channel.createEmbed(EmbedCreateSpec.builder().description("Game information will appear here.").build()).block();
-        infoMessage.pin().subscribe();
+        statusMessage = channel.createEmbed(EmbedCreateSpec.builder().description("Game status will appear here.").build()).block();
+        statusMessage.pin().subscribe();
 
         commandListener = new CommandListener(instance,
                 instance.getSettings().get(Settings.GAME_PREFIX),
@@ -85,7 +85,7 @@ public class Game
             // On turn end
             output.addAll(getCurrentMember().getData().stream().map(e -> e.onTurnEnd(getCurrentMember())).collect(Collectors.toList()));
             // On defend
-            if (turnCount >= 1 && getCurrentMember().hasEnergy() && !getCurrentMember().hasBuff(SilenceDebuff.class))
+            if (turnCount >= 1 && getCurrentMember().hasEnergy() && !getCurrentMember().hasBuff(SilencedDebuff.class))
                 output.add(getCurrentMember().defend());
             // Decrement buff timers
             // This used to also add to output, but updateStats() now checks for expired buffs.
@@ -128,22 +128,22 @@ public class Game
 
             turnCount++;
 
-            if (turnCount >= 7 && augments.size() < 1)
+            if (turnCount >= 6 && distortions.size() < 1)
             {
-                Augment augment = Util.pickRandom(getUnusedAugments());
-                output.add("# First Augment");
-                output.add(Emote.AUGMENT + "**" + augment.getName() + "** - " + augment.getDescription());
-                augments.add(augment);
-                augment.start(this);
+                Distortion distortion = Util.pickRandom(getUnusedDistortions());
+                output.add("# First Distortion");
+                output.add(Emote.DISTORTION + "**" + distortion.getName() + "** - " + distortion.getDescription());
+                distortions.add(distortion);
+                distortion.start(this);
             }
 
-            if (turnCount >= 18 && augments.size() < 2)
+            if (turnCount >= 17 && distortions.size() < 2)
             {
-                Augment augment = Util.pickRandom(getUnusedAugments());
-                output.add("# Second Augment");
-                output.add(Emote.AUGMENT + "**" + augment.getName() + "** - " + augment.getDescription());
-                augments.add(augment);
-                augment.start(this);
+                Distortion distortion = Util.pickRandom(getUnusedDistortions());
+                output.add("# Second Distortion");
+                output.add(Emote.DISTORTION + "**" + distortion.getName() + "** - " + distortion.getDescription());
+                distortions.add(distortion);
+                distortion.start(this);
             }
 
             output.add("### " + member.getMention() + "'s Turn");
@@ -162,95 +162,41 @@ public class Game
                     .map(skill -> "**`>" + skill.getName() + "`**")
                     .collect(Collectors.toList());
             if (readiedSkills.size() == 1)
-                output.add(Emote.USE + readiedSkills.get(0) + " is ready to use.");
+                output.add(Emote.REFRESH + readiedSkills.get(0) + " is ready to use.");
             else if (readiedSkills.size() >= 1)
-                output.add(Emote.USE + Util.joinWithAnd(readiedSkills) + " are ready to use.");
+                output.add(Emote.REFRESH + Util.joinWithAnd(readiedSkills) + " are ready to use.");
             // Low health warning
             if (member.getHealthPercentage() < 0.2f)
-                output.add(Emote.WARN + "They're critically low on health.");
+                output.add(Emote.WARN + "**" + member.getUsername() + "** is critically low on health.");
             // Update current member's stats
             output.add(getCurrentMember().updateStats());
 
             member.setShield(0);
         }
 
-        updateInfo(getCurrentMember());
+        updateStatus();
 
         return Util.joinNonEmpty("\n", output);
     }
 
-    public void updateInfo(GameMember member)
+    public void updateStatus()
     {
-        String info = getInfo(member);
-        EmbedCreateSpec.Builder embed = EmbedCreateSpec.builder();
+        List<EmbedCreateSpec> statuses = getNonCurrentMembers().stream()
+                .map(GameMember::getStatus)
+                .collect(Collectors.toList());
+        statuses.add(0, getCurrentMember().getStatus());
 
-        if (member.alreadyPickedUnit())
-        {
-            embed.author(member.getUnit().getName() + " (" + member.getUsername() + ")", null, member.getUser().getAvatarUrl());
-
-            if (member.getHealthPercentage() < 0.2f)
-                embed.color(Color.RED);
-            else if (member.getHealthPercentage() < 0.6f)
-                embed.color(Color.YELLOW);
-            else
-                embed.color(Color.GREEN);
-        } else
-        {
-            embed.author(member.getUsername(), null, member.getUser().getAvatarUrl());
-            embed.color(Color.GRAY);
-        }
-
-        embed.description(info);
-
-        infoMessage.edit(MessageEditSpec.builder()
-                        .addEmbed(embed.build())
+        statusMessage.edit(MessageEditSpec.builder()
+                        .embeds(statuses)
                         .build())
                 .subscribe();
     }
 
-    public String getInfo(GameMember member)
+    public List<GameMember> getNonCurrentMembers()
     {
-        if (gameState == PICKING)
-            return member.getUsername() + " is picking their unit.";
-        else
-        {
-            Stats stats = member.getStats();
-
-            List<String> baseTopic = new ArrayList<>();
-            baseTopic.add("- Health: " + percent(member.getHealthPercentage()) + " (" + member.getHealth() + "/" + stats.getInt(MAX_HEALTH) + ")");
-            baseTopic.add("- Gold: " + member.getGold());
-            baseTopic.add("- Energy: " + member.getEnergy());
-            baseTopic.add("- Items: " + member.getItems());
-
-            // Add unit topic
-            List<String> unitTopic = Arrays.stream(member.getUnit().getTopic(member))
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-
-            // Add buff topics
-            List<String> buffTopics = new ArrayList<>();
-            for (Buff buff : member.getBuffs())
-            {
-                Arrays.stream(buff.getTopic(member))
-                        .filter(Objects::nonNull)
-                        .forEach(buffTopics::add);
-            }
-
-            // Add effect topics
-            List<String> effectTopics = new ArrayList<>();
-            for (Effect effect : member.getEffects())
-            {
-                Arrays.stream(effect.getTopic(member))
-                        .filter(Objects::nonNull)
-                        .forEach(effectTopics::add);
-            }
-
-            return String.join(" \n", baseTopic) + "\n\n" +
-                    String.join(" \n", unitTopic) + "\n\n" +
-                    String.join(" \n", buffTopics) + "\n\n" +
-                    String.join(" \n", effectTopics);
-
-        }
+        return getMembers().stream()
+                .filter(member -> !getCurrentMember().equals(member))
+                .collect(Collectors.toList());
     }
 
     public Guild getGuild()
@@ -341,22 +287,22 @@ public class Game
         this.actions = actions;
     }
 
-    public List<Augment> getAugments()
+    public List<Distortion> getDistortions()
     {
-        return augments;
+        return distortions;
     }
 
-    public void setAugments(List<Augment> augments)
+    public void setDistortions(List<Distortion> distortions)
     {
-        this.augments = augments;
+        this.distortions = distortions;
     }
 
-    public List<Augment> getUnusedAugments() {
-        // Get all augments
-        List<Augment> allAugments = Arrays.stream(Augment.values()).collect(Collectors.toList());
-        // Remove augments we already have
-        allAugments.removeIf(a -> augments.contains(a));
-        return allAugments;
+    public List<Distortion> getUnusedDistortions() {
+        // Get all distortions
+        List<Distortion> allDistortions = Arrays.stream(Distortion.values()).collect(Collectors.toList());
+        // Remove distortions we already have
+        allDistortions.removeIf(a -> distortions.contains(a));
+        return allDistortions;
     }
 
     public LocalDateTime getLastAction()

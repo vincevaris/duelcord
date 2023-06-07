@@ -37,10 +37,8 @@ public class EndlessStrikesEffect extends Effect
     }
 
     @Override
-    public String[] getTopic(GameMember member)
+    public String getStatus(GameMember member)
     {
-        return new String[]{
-                "Endless Strikes: " + percent(multiplier * getPower())
-        };
+        return "Endless Strikes: " + percent(multiplier * getPower());
     }
 }

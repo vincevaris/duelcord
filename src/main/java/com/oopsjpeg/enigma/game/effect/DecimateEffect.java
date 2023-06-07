@@ -2,11 +2,13 @@ package com.oopsjpeg.enigma.game.effect;
 
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.GameMember;
-import com.oopsjpeg.enigma.game.buff.CrippleDebuff;
+import com.oopsjpeg.enigma.game.buff.CrippledDebuff;
 import com.oopsjpeg.enigma.game.object.Effect;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
+
+import static com.oopsjpeg.enigma.util.Util.percent;
 
 public class DecimateEffect extends Effect
 {
@@ -23,7 +25,7 @@ public class DecimateEffect extends Effect
     {
         if (critCount.stack())
         {
-            event.output.add(event.target.addBuff(new CrippleDebuff(event.actor, 0, getPower()), Emote.KNIFE));
+            event.output.add(event.target.addBuff(new CrippledDebuff(event.actor, 1, getPower()), Emote.CRIPPLE));
             critCount.reset();
         }
         return event;
@@ -32,14 +34,12 @@ public class DecimateEffect extends Effect
     @Override
     public String getDescription()
     {
-        return "Every **" + critCount.getMax() + "** Crits, **Cripple** the target by __" + Util.percent(getPower()) + "__ until their next turn.";
+        return "Every **" + critCount.getMax() + "** Crits, **Cripple** the target by __" + percent(getPower()) + "__ until their next turn.";
     }
 
     @Override
-    public String[] getTopic(GameMember member)
+    public String getStatus(GameMember member)
     {
-        return new String[]{
-                "Decimate: " + critCount.getCurrent() + " / " + critCount.getMax()
-        };
+        return "Decimate: " + critCount.getCurrent() + "/" + critCount.getMax() + " (" + percent(getPower()) + ")";
     }
 }

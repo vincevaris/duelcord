@@ -6,17 +6,23 @@ import com.oopsjpeg.enigma.util.Emote;
 
 import static com.oopsjpeg.enigma.util.Util.percent;
 
-public class WoundDebuff extends Buff
+public class WoundedDebuff extends Buff
 {
-    public WoundDebuff(GameMember source, int totalTurns, float power)
+    public WoundedDebuff(GameMember source, int totalTurns, float power)
     {
-        super("Wound", true, source, totalTurns, power);
+        super("Wounded", true, source, totalTurns, power);
+    }
+
+    @Override
+    public String getStatus(GameMember member)
+    {
+        return "Wounded: " + percent(getPower()) + " (" + getCurrentTurns() + " turns left)";
     }
 
     @Override
     public String onTurnStart(GameMember member)
     {
-        return Emote.WOUND + "They receive __" + percent(getPower()) + "__ less healing.";
+        return Emote.WOUND + "**" + member.getUsername() + "** receives __" + formatPower() + "__ less healing this turn.";
     }
 
     @Override

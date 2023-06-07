@@ -2,11 +2,12 @@ package com.oopsjpeg.enigma.game.effect;
 
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.GameMember;
-import com.oopsjpeg.enigma.game.buff.WoundDebuff;
+import com.oopsjpeg.enigma.game.buff.WoundedDebuff;
 import com.oopsjpeg.enigma.game.object.Effect;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Stacker;
-import com.oopsjpeg.enigma.util.Util;
+
+import static com.oopsjpeg.enigma.util.Util.percent;
 
 public class LifewasterEffect extends Effect
 {
@@ -23,7 +24,7 @@ public class LifewasterEffect extends Effect
     {
         if (hitCount.stack())
         {
-            event.output.add(event.target.addBuff(new WoundDebuff(event.actor, 1, getPower()), Emote.WOUND));
+            event.output.add(event.target.addBuff(new WoundedDebuff(event.actor, 1, getPower()), Emote.WOUND));
             hitCount.reset();
         }
         return event;
@@ -32,14 +33,12 @@ public class LifewasterEffect extends Effect
     @Override
     public String getDescription()
     {
-        return "Every " + hitCount.getMax() + " Hits, **Wound** the target by __" + Util.percent(getPower()) + "__ on their next turn.";
+        return "Every " + hitCount.getMax() + " Hits, **Wound** the target by __" + percent(getPower()) + "__ on their next turn.";
     }
 
     @Override
-    public String[] getTopic(GameMember member)
+    public String getStatus(GameMember member)
     {
-        return new String[]{
-                "Lifewaster: " + hitCount.getCurrent() + " / " + hitCount.getMax()
-        };
+        return "Lifewaster: " + hitCount.getCurrent() + "/" + hitCount.getMax() + " (" + percent(getPower()) + ")";
     }
 }

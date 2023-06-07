@@ -1,11 +1,10 @@
 package com.oopsjpeg.enigma.game.object;
 
 import com.oopsjpeg.enigma.game.*;
-import com.oopsjpeg.enigma.game.buff.CrippleDebuff;
-import com.oopsjpeg.enigma.game.buff.SilenceDebuff;
+import com.oopsjpeg.enigma.game.buff.BleedingDebuff;
+import com.oopsjpeg.enigma.game.buff.CrippledDebuff;
 import com.oopsjpeg.enigma.util.Cooldown;
 import com.oopsjpeg.enigma.util.Emote;
-import com.oopsjpeg.enigma.util.Stacker;
 import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
@@ -20,156 +19,132 @@ import static com.oopsjpeg.enigma.util.Util.percentRaw;
 
 public enum Unit implements GameObject
 {
-    ASSASSIN("Assassin", Color.of(0, 69, 255), new Stats()
-            .put(MAX_ENERGY, 125)
-            .put(MAX_HEALTH, 940)
-            .put(ATTACK_POWER, 22)
-            .put(HEALTH_PER_TURN, 9))
+    ASSASSIN("Assassin", Color.SEA_GREEN, new Stats()
+            .put(MAX_ENERGY, 100)
+            .put(MAX_HEALTH, 930)
+            .put(ATTACK_POWER, 14)
+            .put(HEALTH_PER_TURN, 15))
             {
                 private static final String VAR_SLASH_COOLDOWN = "slash_cooldown";
-                private static final String VAR_CLOAK_COOLDOWN = "cloak_cooldown";
-                private static final String VAR_GOUGE_COOLDOWN = "gouge_cooldown";
 
-                private static final String VAR_POTENCY = "potency";
-                private static final String VAR_SLASH_COUNT = "slash_count";
+                private static final int PASSIVE_DAMAGE_BASE = 10;
+                private static final float PASSIVE_DAMAGE_AP_RATIO = .15f;
+                private static final float PASSIVE_DAMAGE_SP_RATIO = .6f;
+                private static final int PASSIVE_ENERGY_RESTORE = 25;
 
-                public Cooldown getSlashCooldown(GameMemberVars vars)
+                private static final int SLASH_COST = 25;
+                private static final int SLASH_COOLDOWN = 2;
+                private static final int SLASH_DAMAGE_BASE = 15;
+                private static final float SLASH_DAMAGE_AP_RATIO = .20f;
+                private static final float SLASH_DAMAGE_SP_RATIO = .55f;
+                private static final float SLASH_BLEED_CHANCE = .2f;
+                private static final int SLASH_BLEED_TURNS = 2;
+                private static final float SLASH_BLEED_DAMAGE_RATIO = .2f;
+
+                private static final int MARK_COST = 25;
+                private static final int MARK_COOLDOWN = 4;
+                private static final float MARK_CRIPPLE = .35f;
+
+                private static final int EXECUTE_COST = 75;
+                private static final int EXECUTE_COOLDOWN = 6;
+                private static final int EXECUTE_DAMAGE_BASE = 40;
+                private static final float EXECUTE_DAMAGE_MISSING_HP = .04f;
+                private static final float EXECUTE_DAMAGE_PER_DEBUFF = .065f;
+
+                private static final int CLOAK_COST = 50;
+                private static final int CLOAK_COOLDOWN = 4;
+                private static final float CLOAK_DODGE = .8f;
+
+                private Cooldown getSlashCooldown(GameMemberVars vars)
                 {
                     if (!vars.has(this, VAR_SLASH_COOLDOWN))
-                        setSlashCooldown(vars, new Cooldown(ASSASSIN_SLASH_COOLDOWN));
+                        setSlashCooldown(vars, new Cooldown(SLASH_COOLDOWN));
                     return vars.get(this, VAR_SLASH_COOLDOWN, Cooldown.class);
                 }
 
-                public void setSlashCooldown(GameMemberVars vars, Cooldown slashCooldown)
+                private void setSlashCooldown(GameMemberVars vars, Cooldown slashCooldown)
                 {
                     vars.put(this, VAR_SLASH_COOLDOWN, slashCooldown);
-                }
-
-                public Cooldown getCloakCooldown(GameMemberVars vars)
-                {
-                    if (!vars.has(this, VAR_CLOAK_COOLDOWN))
-                        setCloakCooldown(vars, new Cooldown(ASSASSIN_CLOAK_COOLDOWN));
-                    return vars.get(this, VAR_CLOAK_COOLDOWN, Cooldown.class);
-                }
-
-                public void setCloakCooldown(GameMemberVars vars, Cooldown cloakCooldown)
-                {
-                    vars.put(this, VAR_CLOAK_COOLDOWN, cloakCooldown);
-                }
-
-                public Cooldown getGougeCooldown(GameMemberVars vars)
-                {
-                    if (!vars.has(this, VAR_GOUGE_COOLDOWN))
-                        setGougeCooldown(vars, new Cooldown(ASSASSIN_GOUGE_COOLDOWN));
-                    return vars.get(this, VAR_GOUGE_COOLDOWN, Cooldown.class);
-                }
-
-                public void setGougeCooldown(GameMemberVars vars, Cooldown gougeCooldown)
-                {
-                    vars.put(this, VAR_GOUGE_COOLDOWN, gougeCooldown);
-                }
-
-                public int getPotency(GameMemberVars vars)
-                {
-                    if (!vars.has(this, VAR_POTENCY))
-                        setPotency(vars, 0);
-                    return vars.get(this, VAR_POTENCY, Integer.class);
-                }
-
-                public void setPotency(GameMemberVars vars, int potency)
-                {
-                    vars.put(this, VAR_POTENCY, potency);
-                }
-
-                public Stacker getSlashCount(GameMemberVars vars)
-                {
-                    if (!vars.has(this, VAR_SLASH_COUNT))
-                        setSlashCount(vars, new Stacker(ASSASSIN_SLASH_MAX));
-                    return vars.get(this, VAR_SLASH_COUNT, Stacker.class);
-                }
-
-                public void setSlashCount(GameMemberVars vars, Stacker slashCount)
-                {
-                    vars.put(this, VAR_SLASH_COUNT, slashCount);
-                }
-
-                @Override
-                public Skill[] getSkills()
-                {
-                    return new Skill[]{new SlashSkill(), new CloakSkill(), new GougeSkill()};
                 }
 
                 @Override
                 public String getDescription()
                 {
-                    return "__" + percent(ASSASSIN_POTENCY_RATIO) + "__ of damage dealt with Attacks is stored as **Potency**, up to __" + ASSASSIN_POTENCY_MAX + "__ + __" + percent(ASSASSIN_POTENCY_SP_RATIO) + " Spell Power__.\n" +
-                            "When you defend, gain __" + percent(ASSASSIN_STEALTH_DODGE) + "__ Dodge.";
+                    return "After using a damaging Skill, your next Attack deals __" + PASSIVE_DAMAGE_BASE + "__ + __" +
+                            percent(PASSIVE_DAMAGE_AP_RATIO) + " AP__ + __" + percent(PASSIVE_DAMAGE_SP_RATIO) +
+                            " SP__ bonus damage, restores **" + PASSIVE_ENERGY_RESTORE + "** Energy, and resets **Slash** cooldown.";
                 }
 
                 @Override
-                public String[] getTopic(GameMember member)
+                public String onTurnStart(GameMember member)
                 {
-                    GameMemberVars vars = member.getVars();
-                    Stacker slashCount = getSlashCount(vars);
-                    Cooldown slashCooldown = getSlashCooldown(vars);
-                    Cooldown cloakCooldown = getCloakCooldown(vars);
-                    Cooldown gougeCooldown = getGougeCooldown(vars);
+                    Game game = member.getGame();
+                    GameMember enemy = game.getRandomTarget(member);
 
-                    Stats stats = member.getStats();
-                    return new String[]{
-                            "Potency: " + getPotency(vars) + " / " + getMaxPotency(stats),
-                            "Slash: " + slashCount.getCurrent() + "/" + ASSASSIN_SLASH_MAX + " - " +
-                                    (slashCooldown.isDone()
-                                            ? "Ready"
-                                            : slashCooldown.getCurrent() + " turns"),
-                            (cloakCooldown.isDone()
-                                    ? "Cloak: Ready"
-                                    : "Cloak: " + cloakCooldown.getCurrent() + " turns"),
-                            (gougeCooldown.isDone()
-                                    ? "Gouge: Ready"
-                                    : "Gouge: " + gougeCooldown.getCurrent() + " turns")
-                    };
+                    if (enemy.hasBuff(MarkedDebuff.class))
+                    {
+                        enemy.removeBuffs(MarkedDebuff.class);
+                        enemy.addBuff(new CrippledDebuff(member, 1, MARK_CRIPPLE), Emote.CRIPPLE);
+                        return Emote.CRIPPLE + "**" + enemy.getUsername() + "** was marked by the assassin, suffering **Cripple** (" + percent(MARK_CRIPPLE) + ").";
+                    }
+
+                    return null;
                 }
 
                 @Override
-                public String onDefend(GameMember member)
+                public DamageEvent skillOut(DamageEvent event)
                 {
-                    member.addBuff(new StealthBuff(member, ASSASSIN_STEALTH_DODGE), Emote.SHIELD);
-                    return Emote.SHIELD + "They're in stealth, gaining __" + percent(ASSASSIN_STEALTH_DODGE) + "__ Dodge.";
-                }
-
-                @Override
-                public DamageEvent attackOut(DamageEvent event)
-                {
-                    GameMember actor = event.actor;
-                    GameMemberVars vars = actor.getVars();
-                    int potency = getPotency(vars);
-                    int potencyToAdd = Math.round(event.damage * ASSASSIN_POTENCY_RATIO);
-
-                    potency = Util.limit(potency + potencyToAdd, 0, getMaxPotency(actor.getStats()));
-
-                    setPotency(vars, potency);
-
+                    if (!event.cancelled && !event.actor.hasBuff(TracingBuff.class))
+                        event.actor.addBuff(new TracingBuff(event.actor), Emote.TRACE);
                     return event;
                 }
 
-                public int getMaxPotency(Stats stats)
+                @Override
+                public Skill[] getSkills()
                 {
-                    return Math.round(ASSASSIN_POTENCY_MAX + (stats.get(SKILL_POWER) * ASSASSIN_POTENCY_SP_RATIO));
+                    return new Skill[]{new SlashSkill(), new MarkSkill(), new ExecuteSkill(), new CloakSkill()};
                 }
 
-                class StealthBuff extends Buff
+                class TracingBuff extends Buff
                 {
-                    public StealthBuff(GameMember source, float power)
+                    public TracingBuff(GameMember source)
                     {
-                        super("Stealth", false, source, 2, power);
+                        super("Tracing", false, source, 1, 0);
                     }
 
                     @Override
-                    public Stats getStats()
+                    public String getStatus(GameMember member)
                     {
-                        return new Stats()
-                                .put(DODGE, getPower());
+                        return "Tracing: " + getTotalDamage(member.getStats()) + " bonus on Attack, restore " + PASSIVE_ENERGY_RESTORE + " Energy, reset Slash";
+                    }
+
+                    public int getTotalDamage(Stats stats)
+                    {
+                        return Math.round(PASSIVE_DAMAGE_BASE +
+                                (stats.get(ATTACK_POWER) * PASSIVE_DAMAGE_AP_RATIO) +
+                                (stats.get(SKILL_POWER) * PASSIVE_DAMAGE_SP_RATIO));
+                    }
+
+                    @Override
+                    public DamageEvent attackOut(DamageEvent event)
+                    {
+                        GameMemberVars vars = event.actor.getVars();
+                        Cooldown slashCooldown = getSlashCooldown(vars);
+
+                        if (!event.cancelled)
+                        {
+                            Stats stats = event.actor.getStats();
+                            event.bonus += PASSIVE_DAMAGE_BASE;
+                            event.bonus += stats.get(ATTACK_POWER) * PASSIVE_DAMAGE_AP_RATIO;
+                            event.bonus += stats.get(SKILL_POWER) * PASSIVE_DAMAGE_SP_RATIO;
+                            event.actor.giveEnergy(PASSIVE_ENERGY_RESTORE);
+                            slashCooldown.reset();
+                        }
+
+                        setSlashCooldown(vars, slashCooldown);
+                        remove(true);
+
+                        return event;
                     }
                 }
 
@@ -177,20 +152,23 @@ public enum Unit implements GameObject
                 {
                     public SlashSkill()
                     {
-                        super(ASSASSIN, ASSASSIN_SLASH_COOLDOWN, ASSASSIN_SLASH_ENERGY_COST);
+                        super(ASSASSIN, SLASH_COOLDOWN, SLASH_COST);
                     }
 
                     @Override
                     public String getName()
                     {
-                        return "slash";
+                        return "Slash";
                     }
 
                     @Override
                     public String getDescription()
                     {
-                        return "Deal __" + percent(ASSASSIN_SLASH_AP_RATIO) + " Attack Power__ + __" + percent(ASSASSIN_SLASH_SP_RATIO) + " Spell Power__. Can crit.\n" +
-                                "Every **" + ASSASSIN_SLASH_MAX + "** uses, **Silence** the target and consume **Potency** to deal bonus damage equal to it.";
+                        return "Deal __" + SLASH_DAMAGE_BASE + "__ + __" + percent(SLASH_DAMAGE_AP_RATIO) +
+                                " AP__ + __" + percent(SLASH_DAMAGE_SP_RATIO) + " SP__.\n" +
+                                "Has a __" + percent(SLASH_BLEED_CHANCE) + "__ chance to Bleed for __" +
+                                percent(SLASH_BLEED_DAMAGE_RATIO) + "__ of damage dealt over **" + SLASH_BLEED_TURNS +
+                                "** turns.";
                     }
 
                     @Override
@@ -212,44 +190,164 @@ public enum Unit implements GameObject
                     @Override
                     public String act(GameMember actor)
                     {
-                        GameMemberVars vars = actor.getVars();
-                        Stats stats = actor.getStats();
-
-                        Cooldown slashCooldown = getSlashCooldown(vars);
-                        slashCooldown.start(stats.getInt(COOLDOWN_REDUCTION));
-                        setSlashCooldown(vars, slashCooldown);
+                        List<String> output = new ArrayList<>();
+                        output.add(Emote.SKILL + "**" + actor.getUsername() + "** used **Slash**!");
 
                         DamageEvent event = new DamageEvent(actor, target);
-
-                        event.damage += stats.get(ATTACK_POWER) * ASSASSIN_SLASH_AP_RATIO;
-                        event.damage += stats.get(SKILL_POWER) * ASSASSIN_SLASH_SP_RATIO;
-
-                        Stacker slashCount = getSlashCount(vars);
-
-                        // Third slash
-                        if (slashCount.stack())
-                        {
-                            int potency = getPotency(vars);
-                            event.bonus += potency;
-
-                            event.output.add(event.target.addBuff(new SilenceDebuff(actor), Emote.SILENCE));
-
-                            slashCount.reset();
-                            setPotency(vars, 0);
-                        }
-
-                        setSlashCount(vars, slashCount);
-
-                        event = actor.crit(event);
+                        Stats stats = actor.getStats();
+                        event.damage += SLASH_DAMAGE_BASE;
+                        event.damage += stats.get(ATTACK_POWER) * SLASH_DAMAGE_AP_RATIO;
+                        event.damage += stats.get(SKILL_POWER) * SLASH_DAMAGE_SP_RATIO;
                         event = actor.skill(event);
 
-                        return target.damage(event, Emote.KNIFE, "Slash");
+                        output.add(actor.damage(event, Emote.KNIFE, "Slash"));
+
+                        if (!event.cancelled)
+                        {
+                            float rand = Util.RANDOM.nextFloat();
+                            if (rand <= SLASH_BLEED_CHANCE)
+                            {
+                                float bleedDamage = event.damage * SLASH_BLEED_DAMAGE_RATIO;
+                                output.add(target.addBuff(new BleedingDebuff(actor, SLASH_BLEED_TURNS, bleedDamage), Emote.BLEED));
+                            }
+                        }
+
+                        return Util.joinNonEmpty("\n", output);
                     }
 
                     @Override
                     public int getEnergy()
                     {
-                        return ASSASSIN_SLASH_ENERGY_COST;
+                        return SLASH_COST;
+                    }
+                }
+
+                class MarkSkill extends Skill
+                {
+                    public MarkSkill()
+                    {
+                        super(ASSASSIN, MARK_COOLDOWN, MARK_COST);
+                    }
+
+                    @Override
+                    public String getName()
+                    {
+                        return "Mark";
+                    }
+
+                    @Override
+                    public String getDescription()
+                    {
+                        return "Mark the enemy. If they're still marked on your next turn, consume the mark to Cripple them by __" + percent(MARK_CRIPPLE) + "__.";
+                    }
+
+                    @Override
+                    public GameAction act(Game game, GameMember actor)
+                    {
+                        return new MarkAction(game.getRandomTarget(actor));
+                    }
+                }
+
+                class MarkAction implements GameAction
+                {
+                    private final GameMember target;
+
+                    public MarkAction(GameMember target)
+                    {
+                        this.target = target;
+                    }
+
+                    @Override
+                    public String act(GameMember actor)
+                    {
+                        target.addBuff(new MarkedDebuff(actor), ":bangbang: ");
+                        return ":bangbang: **" + actor.getUsername() + "** used **Mark** on **" + target.getUsername() + "**.";
+                    }
+
+                    @Override
+                    public int getEnergy()
+                    {
+                        return MARK_COST;
+                    }
+                }
+
+                class MarkedDebuff extends Buff
+                {
+                    public MarkedDebuff(GameMember source)
+                    {
+                        super("Marked", true, source, 3, 0);
+                    }
+
+                    @Override
+                    public String getStatus(GameMember member)
+                    {
+                        return "Marked: Will be Crippled on " + getSource().getUsername() + "'s turn";
+                    }
+
+                    @Override
+                    public String onTurnStart(GameMember member)
+                    {
+                        return ":bangbang: **" + member.getUsername() + "** is marked for assassination by **" + getSource().getUsername() + "**.";
+                    }
+                }
+
+                class ExecuteSkill extends Skill
+                {
+                    public ExecuteSkill()
+                    {
+                        super(ASSASSIN, EXECUTE_COOLDOWN, EXECUTE_COST);
+                    }
+
+                    @Override
+                    public String getName()
+                    {
+                        return "Execute";
+                    }
+
+                    @Override
+                    public String getDescription()
+                    {
+                        return "Deal __" + EXECUTE_DAMAGE_BASE + "__ + __" + percent(EXECUTE_DAMAGE_MISSING_HP) +
+                                "__ of enemy missing health, increased by __" + percentRaw(EXECUTE_DAMAGE_PER_DEBUFF) + "__ per debuff they have.";
+                    }
+
+                    @Override
+                    public GameAction act(Game game, GameMember actor)
+                    {
+                        return new ExecuteAction(game.getRandomTarget(actor));
+                    }
+                }
+
+                class ExecuteAction implements GameAction
+                {
+                    private final GameMember target;
+
+                    public ExecuteAction(GameMember target)
+                    {
+                        this.target = target;
+                    }
+
+                    @Override
+                    public String act(GameMember actor)
+                    {
+                        DamageEvent event = new DamageEvent(actor, target);
+
+                        event.damage += EXECUTE_DAMAGE_BASE;
+                        event.damage += EXECUTE_DAMAGE_MISSING_HP * target.getMissingHealth();
+
+                        target.getBuffs().stream()
+                                .filter(Buff::isDebuff)
+                                .forEach(debuff -> event.bonus += EXECUTE_DAMAGE_PER_DEBUFF * target.getMissingHealth());
+
+                        actor.skill(event);
+
+                        return Emote.SKILL + "**" + actor.getUsername() + "** used **Execute**!\n" + actor.damage(event, Emote.KNIFE, "Execute");
+                    }
+
+                    @Override
+                    public int getEnergy()
+                    {
+                        return EXECUTE_COST;
                     }
                 }
 
@@ -257,19 +355,20 @@ public enum Unit implements GameObject
                 {
                     public CloakSkill()
                     {
-                        super(ASSASSIN, ASSASSIN_CLOAK_COOLDOWN, 0);
+                        super(ASSASSIN, CLOAK_COOLDOWN, CLOAK_COST);
                     }
 
                     @Override
                     public String getName()
                     {
-                        return "cloak";
+                        return "Cloak";
                     }
 
                     @Override
                     public String getDescription()
                     {
-                        return "End the turn and gain __" + percent(ASSASSIN_CLOAK_DODGE) + "__ Dodge. The next dodge generates __" + ASSASSIN_CLOAK_POTENCY + "__ + __" + percent(ASSASSIN_CLOAK_POTENCY_SP_RATIO) + " Spell Power__ Potency and dispels this buff.";
+                        return "End the turn and gain __" + percent(CLOAK_DODGE) + " Dodge__ until your next turn.\n" +
+                                "Enemy damaging Skills end this effect.";
                     }
 
                     @Override
@@ -285,137 +384,47 @@ public enum Unit implements GameObject
                     public String act(GameMember actor)
                     {
                         GameMemberVars vars = actor.getVars();
-                        Cooldown cloakCooldown = getCloakCooldown(vars);
-                        cloakCooldown.start(actor.getStats().getInt(COOLDOWN_REDUCTION));
-                        setCloakCooldown(vars, cloakCooldown);
+                        Game game = actor.getGame();
+                        Stats stats = actor.getStats();;
 
-                        actor.addBuff(new CloakBuff(actor, ASSASSIN_CLOAK_DODGE), Emote.SHIELD);
+                        actor.addBuff(new CloakedBuff(actor, CLOAK_DODGE), Emote.NINJA);
                         actor.setEnergy(0);
 
-                        return Emote.USE + "**" + actor.getUsername() + "** used **Cloak**, gaining __" + percent(ASSASSIN_CLOAK_DODGE) + "__ until hit!";
+                        return Emote.NINJA + "**" + actor.getUsername() + "** used **Cloak**, gaining __" + percent(CLOAK_DODGE) + "__ Dodge until damaged by a Skill.";
                     }
 
                     @Override
                     public int getEnergy()
                     {
-                        return 0;
+                        return CLOAK_COST;
                     }
                 }
 
-                class CloakBuff extends Buff
+                class CloakedBuff extends Buff
                 {
-                    public CloakBuff(GameMember source, float power)
+                    public CloakedBuff(GameMember source, float power)
                     {
-                        super("Cloak", false, source, 2, power);
+                        super("Cloaked", false, source, 2, power);
                     }
 
                     @Override
-                    public DamageEvent dodgeMe(DamageEvent event)
+                    public DamageEvent skillIn(DamageEvent event)
                     {
-                        GameMemberVars vars = event.actor.getVars();
-                        Stats stats = event.actor.getStats();
-
-                        int potency = getPotency(vars);
-                        int potencyToAdd = Math.round(ASSASSIN_CLOAK_POTENCY + (stats.get(SKILL_POWER) * ASSASSIN_CLOAK_POTENCY_SP_RATIO));
-
-                        potency = Util.limit(potency + potencyToAdd, 0, getMaxPotency(stats));
-
-                        setPotency(vars, potency);
-
-                        remove();
-
+                        if (!event.cancelled) remove();
                         return event;
+                    }
+
+                    @Override
+                    public String getStatus(GameMember member)
+                    {
+                        return "Cloaked: " + percent(getPower()) + " bonus Dodge until damaged by Skill";
                     }
 
                     @Override
                     public Stats getStats()
                     {
                         return new Stats()
-                                .put(DODGE, ASSASSIN_CLOAK_DODGE);
-                    }
-                }
-
-                class GougeSkill extends Skill
-                {
-                    public GougeSkill()
-                    {
-                        super(ASSASSIN, ASSASSIN_GOUGE_COOLDOWN, ASSASSIN_GOUGE_ENERGY_COST);
-                    }
-
-                    @Override
-                    public String getName()
-                    {
-                        return "gouge";
-                    }
-
-                    @Override
-                    public String getDescription()
-                    {
-                        return "Your next **2** Attacks this turn deal __" + percent(ASSASSIN_GOUGE_DAMAGE_AP_RATIO) + " Attack Power__ bonus damage and have __" + percent(ASSASSIN_GOUGE_CRIPPLE_CHANCE) + "__ chance to **Cripple** the target by __" + percent(ASSASSIN_GOUGE_CRIPPLE_AMOUNT) + "__.\n" +
-                                "Cripple can stack.";
-                    }
-
-                    @Override
-                    public GameAction act(Game game, GameMember actor)
-                    {
-                        return new GougeAction();
-                    }
-                }
-
-                class GougeAction implements GameAction
-                {
-                    @Override
-                    public String act(GameMember actor)
-                    {
-                        GameMemberVars vars = actor.getVars();
-                        Cooldown gougeCooldown = getGougeCooldown(vars);
-                        gougeCooldown.start(actor.getStats().getInt(COOLDOWN_REDUCTION));
-                        setGougeCooldown(vars, gougeCooldown);
-
-                        int damage = Math.round(actor.getStats().get(ATTACK_POWER) * ASSASSIN_GOUGE_DAMAGE_AP_RATIO);
-                        actor.addBuff(new GougeBuff(actor, 2, damage, ASSASSIN_GOUGE_CRIPPLE_CHANCE, ASSASSIN_GOUGE_CRIPPLE_AMOUNT), Emote.BLEED);
-                        return Emote.USE + "**" + actor.getUsername() + "** used **Gouge**, buffing their next **2** Attacks!";
-                    }
-
-                    @Override
-                    public int getEnergy()
-                    {
-                        return ASSASSIN_GOUGE_ENERGY_COST;
-                    }
-                }
-
-                class GougeBuff extends Buff
-                {
-                    private final int maxAttacks;
-                    private final int damage;
-                    private final float crippleChance;
-                    private final float crippleAmount;
-
-                    private int attacks;
-
-                    public GougeBuff(GameMember source, int maxAttacks, int damage, float crippleChance, float crippleAmount)
-                    {
-                        super("Gouge", false, source, 1, 0);
-                        this.maxAttacks = maxAttacks;
-                        this.damage = damage;
-                        this.crippleChance = crippleChance;
-                        this.crippleAmount = crippleAmount;
-                    }
-
-                    @Override
-                    public DamageEvent attackOut(DamageEvent event)
-                    {
-                        event.bonus += damage;
-
-                        float crippleRand = Util.RANDOM.nextFloat();
-                        if (crippleRand <= crippleChance)
-                            event.output.add(event.target.addBuff(new CrippleDebuff(event.actor, 1, crippleAmount), Emote.BLEED));
-
-                        attacks++;
-
-                        if (attacks >= maxAttacks) remove();
-
-                        return event;
+                                .put(DODGE, getPower());
                     }
                 }
             },
@@ -513,27 +522,6 @@ public enum Unit implements GameObject
                 }
 
                 @Override
-                public String[] getTopic(GameMember member)
-                {
-                    GameMemberVars vars = member.getVars();
-                    Cooldown barrageCooldown = getBarrageCooldown(vars);
-                    Cooldown rollCooldown = getRollCooldown(vars);
-                    Cooldown deadeyeCooldown = getDeadeyeCooldown(vars);
-
-                    return new String[]{
-                            (barrageCooldown.isDone()
-                                    ? "Barrage: Ready"
-                                    : "Barrage: " + barrageCooldown.getCurrent() + " turns"),
-                            (rollCooldown.isDone()
-                                    ? "Roll: Ready"
-                                    : "Roll: " + rollCooldown.getCurrent() + " turns"),
-                            (deadeyeCooldown.isDone()
-                                    ? "Deadeye: Ready"
-                                    : "Deadeye: " + deadeyeCooldown.getCurrent() + " turns")
-                    };
-                }
-
-                @Override
                 public Skill[] getSkills()
                 {
                     return new Skill[]{new BarrageSkill(), new RollSkill(), new DeadeyeSkill()};
@@ -579,7 +567,7 @@ public enum Unit implements GameObject
                     @Override
                     public String getName()
                     {
-                        return "barrage";
+                        return "Barrage";
                     }
 
                     @Override
@@ -629,7 +617,7 @@ public enum Unit implements GameObject
                                 output.add(actor.damage(event, Emote.GUN, "Barrage"));
                             }
                         setBarrageCount(vars, barrageCount);
-                        output.add(0, Emote.USE + "**" + actor.getUsername() + "** used **Barrage**!");
+                        output.add(0, Emote.SKILL + "**" + actor.getUsername() + "** used **Barrage**!");
 
                         return Util.joinNonEmpty("\n", output);
                     }
@@ -657,7 +645,7 @@ public enum Unit implements GameObject
                     @Override
                     public String getName()
                     {
-                        return "roll";
+                        return "Roll";
                     }
 
                     @Override
@@ -682,10 +670,10 @@ public enum Unit implements GameObject
 
                         float dodge = GUNSLINGER_ROLL_DODGE + (stats.get(SKILL_POWER) * GUNSLINGER_ROLL_SP_RATIO);
 
-                        actor.addBuff(new RollBuff(actor, dodge), Emote.SHIELD);
+                        actor.addBuff(new RollingBuff(actor, dodge), Emote.NINJA);
                         actor.setEnergy(0);
 
-                        return Emote.USE + "**" + actor.getUsername() + "** used **Roll**, gaining __" + percent(dodge) + "__ Dodge!";
+                        return Emote.NINJA + "**" + actor.getUsername() + "** used **Roll**, gaining __" + percent(dodge) + "__ Dodge!";
                     }
 
                     @Override
@@ -695,11 +683,17 @@ public enum Unit implements GameObject
                     }
                 }
 
-                class RollBuff extends Buff
+                class RollingBuff extends Buff
                 {
-                    public RollBuff(GameMember source, float power)
+                    public RollingBuff(GameMember source, float power)
                     {
-                        super("Roll", false, source, 2, power);
+                        super("Rolling", false, source, 2, power);
+                    }
+
+                    @Override
+                    public String getStatus(GameMember member)
+                    {
+                        return "Rolling: " + percent(getPower()) + " bonus Dodge";
                     }
 
                     @Override
@@ -726,7 +720,7 @@ public enum Unit implements GameObject
                     @Override
                     public String getName()
                     {
-                        return "deadeye";
+                        return "Deadeye";
                     }
 
                     @Override
@@ -779,7 +773,7 @@ public enum Unit implements GameObject
                         event = actor.skill(event);
 
                         output.add(actor.damage(event, Emote.GUN, "Deadeye"));
-                        output.add(0, Emote.USE + "**" + actor.getUsername() + "** used **Deadeye**!" + (jackpot ? " **JACKPOT**!" : ""));
+                        output.add(0, Emote.SKILL + "**" + actor.getUsername() + "** used **Deadeye**!" + (jackpot ? " **JACKPOT**!" : ""));
 
                         return Util.joinNonEmpty("\n", output);
                     }
@@ -1000,7 +994,6 @@ public enum Unit implements GameObject
         return name;
     }
 
-    @Override
     public abstract String getDescription();
 
     public Color getColor()
@@ -1013,10 +1006,7 @@ public enum Unit implements GameObject
         return stats;
     }
 
-    public Skill[] getSkills()
-    {
-        return new Skill[0];
-    }
+    public abstract Skill[] getSkills();
 
     public EmbedCreateSpec format()
     {

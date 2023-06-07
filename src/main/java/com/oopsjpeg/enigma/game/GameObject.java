@@ -4,12 +4,7 @@ public interface GameObject
 {
     String getName();
 
-    default String getDescription()
-    {
-        return null;
-    }
-
-    default String[] getTopic(GameMember member)
+    default String getStatus(GameMember member)
     {
         return null;
     }

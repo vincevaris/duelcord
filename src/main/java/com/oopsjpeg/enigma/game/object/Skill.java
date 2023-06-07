@@ -2,11 +2,8 @@ package com.oopsjpeg.enigma.game.object;
 
 import com.oopsjpeg.enigma.Command;
 import com.oopsjpeg.enigma.Enigma;
-import com.oopsjpeg.enigma.game.Game;
-import com.oopsjpeg.enigma.game.GameAction;
-import com.oopsjpeg.enigma.game.GameMember;
-import com.oopsjpeg.enigma.game.GameMemberVars;
-import com.oopsjpeg.enigma.game.buff.SilenceDebuff;
+import com.oopsjpeg.enigma.game.*;
+import com.oopsjpeg.enigma.game.buff.SilencedDebuff;
 import com.oopsjpeg.enigma.util.Cooldown;
 import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.Message;
@@ -39,7 +36,7 @@ public abstract class Skill implements Command
 
         message.delete().subscribe();
 
-        if (actor.hasBuff(SilenceDebuff.class))
+        if (actor.hasBuff(SilencedDebuff.class))
         {
             Util.sendFailure(channel, "You can't use skills while silenced.");
             return;
@@ -47,17 +44,25 @@ public abstract class Skill implements Command
 
         if (hasCooldown() && !cooldown.isDone())
         {
-            Util.sendFailure(channel, "**" + getName() + "** will be ready in **" + cooldown.getCurrent() + "** turns.");
+            Util.sendFailure(channel, "**`>" + getName() + "`** will be ready in **" + cooldown.getCurrent() + "** turns.");
             return;
         }
 
         if (hasEnergyCost() && actor.getEnergy() < getEnergyCost())
         {
-            Util.sendFailure(channel, "**" + getName() + "** costs **" + energyCost + "** energy. You have **" + actor.getEnergy() + "**.");
+            Util.sendFailure(channel, "**`>" + getName() + "`** costs **" + energyCost + "** energy. You have **" + actor.getEnergy() + "**.");
             return;
         }
 
         actor.act(act(game, actor));
+        cooldown.start(actor.getStats().getInt(Stats.COOLDOWN_REDUCTION));
+        setCooldown(vars, cooldown);
+    }
+
+    public String getStatus(GameMember member)
+    {
+        Cooldown cooldown = getCooldown(member.getVars());
+        return getName() + ": " + (cooldown.isDone() ? "Ready" : "in " + cooldown.getCurrent() + " turn" + (cooldown.getCurrent() > 1 ? "s" : ""));
     }
 
     public abstract GameAction act(Game game, GameMember actor);

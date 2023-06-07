@@ -7,17 +7,23 @@ import com.oopsjpeg.enigma.util.Emote;
 
 import static com.oopsjpeg.enigma.util.Util.percent;
 
-public class WeakenDebuff extends Buff
+public class WeakenedDebuff extends Buff
 {
-    public WeakenDebuff(GameMember source, int totalTurns, float power)
+    public WeakenedDebuff(GameMember source, int totalTurns, float power)
     {
-        super("Weaken", true, source, totalTurns, power);
+        super("Weakened", true, source, totalTurns, power);
+    }
+
+    @Override
+    public String getStatus(GameMember member)
+    {
+        return "Weakened: " + percent(getPower()) + " (" + getCurrentTurns() + " turns left)";
     }
 
     @Override
     public String onTurnStart(GameMember member)
     {
-        return Emote.SILENCE + "They deal __" + percent(getPower()) + "__ less damage.";
+        return Emote.WEAKEN + "**" + member.getUsername() + "** deals __" + formatPower() + "__ less damage this turn.";
     }
 
     @Override

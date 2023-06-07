@@ -16,17 +16,17 @@ public class GameMemberVars
 
     public <T> T get(GameObject object, String key, Class<?> type)
     {
-        return (T) getObjectVars(object).get(key);
+        return (T) getObjectVars(object).get(key.toLowerCase());
     }
 
     public <T> void put(GameObject object, String key, T value)
     {
-        getObjectVars(object).put(key, value);
+        getObjectVars(object).put(key.toLowerCase(), value);
     }
 
     public boolean has(GameObject object, String key)
     {
-        return getObjectVars(object).containsKey(key);
+        return getObjectVars(object).containsKey(key.toLowerCase());
     }
 
 }

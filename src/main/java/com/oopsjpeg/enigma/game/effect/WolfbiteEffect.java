@@ -2,7 +2,7 @@ package com.oopsjpeg.enigma.game.effect;
 
 import com.oopsjpeg.enigma.game.DamageEvent;
 import com.oopsjpeg.enigma.game.GameMember;
-import com.oopsjpeg.enigma.game.buff.WeakenDebuff;
+import com.oopsjpeg.enigma.game.buff.WeakenedDebuff;
 import com.oopsjpeg.enigma.game.object.Effect;
 import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Stacker;
@@ -24,7 +24,7 @@ public class WolfbiteEffect extends Effect
     {
         if (attackCount.stack())
         {
-            event.output.add(event.target.addBuff(new WeakenDebuff(event.actor, 1, getPower()), Emote.SILENCE));
+            event.output.add(event.target.addBuff(new WeakenedDebuff(event.actor, 1, getPower()), Emote.WEAKEN));
             attackCount.reset();
         }
         return event;
@@ -37,10 +37,8 @@ public class WolfbiteEffect extends Effect
     }
 
     @Override
-    public String[] getTopic(GameMember member)
+    public String getStatus(GameMember member)
     {
-        return new String[]{
-                "Wolfbite: " + attackCount.getCurrent() + " / " + attackCount.getMax()
-        };
+        return "Wolfbite: " + attackCount.getCurrent() + "/" + attackCount.getMax() + " (" + percent(getPower()) + ")";
     }
 }

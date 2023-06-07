@@ -33,8 +33,14 @@ public class DivinityEffect extends Effect
     }
 
     @Override
+    public String getStatus(GameMember member)
+    {
+        return "Divinity: " + Math.round(getTotalPower(member.getStats().get(SKILL_POWER)));
+    }
+
+    @Override
     public String getDescription()
     {
-        return "Defending Shields for **" + getPower() + "** " + (spRatio > 0 ? "+ __" + percent(spRatio) + " Skill Power__" : "") + ".";
+        return "Defending shields for **" + getPower() + "** " + (spRatio > 0 ? "+ __" + percent(spRatio) + " Skill Power__" : "") + ".";
     }
 }

@@ -23,7 +23,7 @@ public class SellAction implements GameAction
     {
         final List<String> output = new ArrayList<>();
         int gold = Math.round(item.getCost() * 0.6f);
-        output.add(Emote.BUY + "**" + actor.getUsername() + "** sold **" + item.getName() + "** for __" + gold + "__ gold.");
+        output.add(Emote.GOLD + "**" + actor.getUsername() + "** sold **" + item.getName() + "** for __" + gold + "__ gold.");
         actor.giveGold(gold);
         actor.getItems().remove(item);
         output.add(actor.updateStats());

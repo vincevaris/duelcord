@@ -22,7 +22,7 @@ public class UseAction implements GameAction
     public String act(GameMember actor)
     {
         final List<String> output = new ArrayList<>();
-        output.add(Emote.USE + "**" + actor.getUsername() + "** used **" + item.getName() + "**.");
+        output.add(Emote.SKILL + "**" + actor.getUsername() + "** used **" + item.getName() + "**.");
         output.add(item.onUse(actor));
 
         if (item.removeOnUse())

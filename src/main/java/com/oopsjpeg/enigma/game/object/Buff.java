@@ -14,6 +14,7 @@ public abstract class Buff implements GameObject
     private int totalTurns;
     private int currentTurns;
     private boolean shouldRemove = false;
+    private boolean isSilent = false;
 
     public Buff(String name, boolean debuff, GameMember source, int totalTurns, float power)
     {
@@ -33,12 +34,7 @@ public abstract class Buff implements GameObject
     }
 
     @Override
-    public String[] getTopic(GameMember member)
-    {
-        return new String[]{
-                getName() + ": " + (totalTurns - currentTurns) + " turns"
-        };
-    }
+    public abstract String getStatus(GameMember member);
 
     public boolean turn()
     {
@@ -96,9 +92,20 @@ public abstract class Buff implements GameObject
         return shouldRemove || currentTurns == 0;
     }
 
+    public boolean isSilent()
+    {
+        return isSilent;
+    }
+
     public void remove()
     {
+        remove(false);
+    }
+
+    public void remove(boolean isSilent)
+    {
         shouldRemove = true;
+        this.isSilent = isSilent;
     }
 
     public Stats getStats()

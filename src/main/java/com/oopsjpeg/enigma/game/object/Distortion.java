@@ -11,9 +11,10 @@ import java.util.stream.Collectors;
 import static com.oopsjpeg.enigma.game.Stats.ATTACK_POWER;
 import static com.oopsjpeg.enigma.game.Stats.SKILL_POWER;
 import static com.oopsjpeg.enigma.game.object.Item.ALCHEMISTS_ELIXIR;
+import static com.oopsjpeg.enigma.util.Util.percent;
 import static com.oopsjpeg.enigma.util.Util.pickRandom;
 
-public enum Augment
+public enum Distortion
 {
     ENTER_THE_FORGE("Enter the Forge", "Each player has received a random **Complete Item**.") {
         @Override
@@ -31,7 +32,7 @@ public enum Augment
 
                 member.getItems().add(item);
 
-                return Emote.BUY + "**" + member.getUsername() + "** received **" + item.getName() + "**.";
+                return Emote.GOLD + "**" + member.getUsername() + "** received **" + item.getName() + "**.";
             }).collect(Collectors.toList());
             return Util.joinNonEmpty("\n", output);
         }
@@ -47,39 +48,16 @@ public enum Augment
 
                 member.getItems().add(ALCHEMISTS_ELIXIR);
 
-                return Emote.BUY + "**" + member.getUsername() + "** received **" + ALCHEMISTS_ELIXIR.getName() + "**.";
+                return Emote.GOLD + "**" + member.getUsername() + "** received **" + ALCHEMISTS_ELIXIR.getName() + "**.";
             }).collect(Collectors.toList());
             return Util.joinNonEmpty("\n", output);
-        }
-    },
-    MENDING_MAGE("Mending Mage", "Skills heal for __20%__ of damage dealt.") {
-        @Override
-        public String start(Game game)
-        {
-            game.getMembers().forEach(member -> member.addBuff(new MendingMageBuff(member, 0.2f), Emote.HEAL));
-            return null;
-        }
-
-        class MendingMageBuff extends Buff {
-            public MendingMageBuff(GameMember source, float power)
-            {
-                super("Mending Mage", false, source, 99, power);
-            }
-
-            @Override
-            public DamageEvent skillOut(DamageEvent event)
-            {
-                event.heal += event.damage * getPower();
-                event.heal += event.damage * getPower();
-                return event;
-            }
         }
     },
     LUCKY_BLADE("Lucky Blade", "Attacks and Skills permanently grant either __1 Attack Power__ or __1 Skill Power__.") {
         @Override
         public String start(Game game)
         {
-            game.getMembers().forEach(member -> member.addBuff(new LuckyBladeBuff(member, 1), Emote.ENERGY));
+            game.getMembers().forEach(member -> member.addBuff(new LuckyBladeBuff(member, 1), Emote.SHIELD));
             return null;
         }
 
@@ -108,9 +86,9 @@ public enum Augment
             }
 
             @Override
-            public String[] getTopic(GameMember member)
+            public String getStatus(GameMember member)
             {
-                return new String[]{"Lucky Blade: " + Math.round(attackPower) + " AP, " + Math.round(skillPower) + " SP"};
+                return "Lucky Blade: " + Math.round(attackPower) + " AP, " + Math.round(skillPower) + " SP";
             }
 
             @Override
@@ -122,11 +100,14 @@ public enum Augment
             }
         }
     },
-    BURIED_TREASURE("Buried Treasure", "Each player has received __400__ Gold. Attacks and Skills have a __10%__ chance to grant __100__-__200__ Gold.") {
+    BURIED_TREASURE("Buried Treasure", "Each player has received __300__ Gold. Attacks and Skills have a __10%__ chance to grant __100__-__200__ Gold.") {
         @Override
         public String start(Game game)
         {
-            game.getMembers().forEach(member -> member.addBuff(new BuriedTreasureBuff(member, .1f, 100, 200), Emote.BUY));
+            game.getMembers().forEach(member -> {
+                member.giveGold(300);
+                member.addBuff(new BuriedTreasureBuff(member, .1f, 100, 200), Emote.GOLD);
+            });
             return null;
         }
 
@@ -151,13 +132,19 @@ public enum Augment
                 {
                     float rand = Util.RANDOM.nextFloat();
 
-                    if (rand <= chance) {
+                    if (rand <= chance * event.onHitScale) {
                         int randAmount = Util.nextInt(minAmount, maxAmount);
                         event.actor.giveGold(randAmount);
-                        event.output.add(Emote.BUY + "**" + event.actor.getUsername() + "** found buried treasure worth __" + randAmount + "__ gold!");
+                        event.output.add(Emote.GOLD + "**" + event.actor.getUsername() + "** found buried treasure worth __" + randAmount + "__ gold!");
                     }
                 }
                 return event;
+            }
+
+            @Override
+            public String getStatus(GameMember member)
+            {
+                return "Buried Treasure: " + percent(chance) + " chance of treasure on Attack/Skill";
             }
         }
     };
@@ -165,7 +152,7 @@ public enum Augment
     private final String name;
     private final String description;
 
-    Augment(String name, String description)
+    Distortion(String name, String description)
     {
         this.name = name;
         this.description = description;

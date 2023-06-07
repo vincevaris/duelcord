@@ -28,11 +28,7 @@ public abstract class Effect implements GameObject
         return power;
     }
 
-    @Override
-    public String[] getTopic(GameMember member)
-    {
-        return new String[] {name + ": " + getPower()};
-    }
+    public abstract String getDescription();
 
     public Stats getStats()
     {

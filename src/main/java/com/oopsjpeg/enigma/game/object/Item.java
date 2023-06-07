@@ -119,7 +119,13 @@ public enum Item implements GameObject
             @Override
             public String onTurnStart(GameMember member)
             {
-                return Emote.KNIFE + "**" + member.getUsername() + "** has __" + attackPower + " bonus Attack Power__ and __" + percent(resist) + " bonus Resist__.";
+                return Emote.POTION + "**" + member.getUsername() + "** has __" + attackPower + " bonus Attack Power__ and __" + percent(resist) + " bonus Resist__.";
+            }
+
+            @Override
+            public String getStatus(GameMember member)
+            {
+                return "Elixir of Might: " + attackPower + " bonus AP, " + percent(resist) + " bonus Resist";
             }
 
             @Override
@@ -145,7 +151,13 @@ public enum Item implements GameObject
             @Override
             public String onTurnStart(GameMember member)
             {
-                return Emote.KNIFE + "**" + member.getUsername() + "** has __" + skillPower + " bonus Skill Power__ and __" + percent(dodge) + " bonus Dodge__.";
+                return Emote.POTION + "**" + member.getUsername() + "** has __" + skillPower + " bonus Skill Power__ and __" + percent(dodge) + " bonus Dodge__.";
+            }
+
+            @Override
+            public String getStatus(GameMember member)
+            {
+                return "Elixir of Will: " + skillPower + " bonus SP, " + percent(dodge) + " bonus Dodge";
             }
 
             @Override
@@ -171,7 +183,13 @@ public enum Item implements GameObject
             @Override
             public String onTurnStart(GameMember member)
             {
-                return Emote.KNIFE + "**" + member.getUsername() + "** has __" + maxEnergy + " bonus Energy__ and their Skills recharge __" + cdReduction + "__ turns faster.";
+                return Emote.POTION + "**" + member.getUsername() + "** has __" + maxEnergy + " bonus Energy__ and their Skills recharge __" + cdReduction + "__ turns faster.";
+            }
+
+            @Override
+            public String getStatus(GameMember member)
+            {
+                return "Elixir of Haste: " + maxEnergy + " bonus Energy, " + cdReduction + " CDR";
             }
 
             @Override
@@ -403,6 +421,11 @@ public enum Item implements GameObject
         }
 
         return new Build(this, reduction, postData);
+    }
+
+    public String getDescription()
+    {
+        return null;
     }
 
     public String onUse(GameMember member)

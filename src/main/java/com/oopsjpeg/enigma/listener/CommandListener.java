@@ -12,6 +12,7 @@ import discord4j.core.object.entity.channel.TextChannel;
 
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.regex.Pattern;
 
 public class CommandListener implements Listener
 {
@@ -59,12 +60,24 @@ public class CommandListener implements Listener
                 && !author.equals(client.getSelf().block())
                 && content.toLowerCase().startsWith(prefix.toLowerCase()))
         {
-            String[] split = content.replaceFirst(prefix, "").split(" ");
-            String name = split[0];
-            String[] args = Arrays.copyOfRange(split, 1, split.length);
-            Command command = Command.get(commands, author, name);
+            String pat = Pattern.quote(prefix);
 
-            if (command != null) command.execute(message, args);
+            // Split multiple commands into chunks
+            String[] chunks = content.replaceFirst(pat, "").split(pat);
+
+            // Loop chunks and execute each command
+            for (String cmdChunk : chunks)
+            {
+                String[] split = cmdChunk.split(" ");
+                String alias = split[0].replaceFirst(pat, "");
+                System.out.println(alias);
+                String[] args = Arrays.copyOfRange(split, 1, split.length);
+                Command command = Command.get(commands, author, alias);
+
+                if (command == null) continue;
+
+                command.execute(message, args);
+            }
         }
     }
 

@@ -9,11 +9,14 @@ import com.oopsjpeg.enigma.util.Emote;
 import com.oopsjpeg.enigma.util.Pity;
 import com.oopsjpeg.enigma.util.Util;
 import discord4j.core.object.entity.User;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.rest.util.Color;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.oopsjpeg.enigma.game.Stats.*;
+import static com.oopsjpeg.enigma.util.Util.percent;
 
 public class GameMember
 {
@@ -129,10 +132,18 @@ public class GameMember
     {
         final List<String> output = new ArrayList<>();
         buffs.remove(buff);
-        output.add(Emote.SILENCE + "**" + getUsername() + "'s " + buff.getName() + "** " +
-                (buff.hasPower() ? "(" + buff.formatPower() + ") " : "") + "has dispelled.");
+        if (!buff.isSilent())
+            output.add(Emote.TIME + "**" + getUsername() + "'s " + buff.getName() + "** has expired.");
         output.add(updateStats());
         return Util.joinNonEmpty("\n", output);
+    }
+
+    public String removeBuffs(Class<? extends Buff> buffType)
+    {
+        return Util.joinNonEmpty("\n", getBuffs().stream()
+                .filter(buff -> buff.getClass().equals(buffType))
+                .map(this::removeBuff).
+                collect(Collectors.toList()));
     }
 
     public boolean alreadyPickedUnit()
@@ -196,7 +207,7 @@ public class GameMember
             if (!hasEnergy())
                 output.add(game.nextTurn());
             else
-                game.updateInfo(this);
+                game.updateStatus();
 
             game.getChannel().createMessage(Util.joinNonEmpty("\n", output)).subscribe();
         }
@@ -208,7 +219,7 @@ public class GameMember
 
         giveShield(Math.round(shieldAmount));
 
-        return Emote.HEAL + "**" + getUsername() + "** shielded for **" + Math.round(shieldAmount)
+        return Emote.SHIELD + "**" + getUsername() + "** shielded for **" + Math.round(shieldAmount)
                 + "**! [**" + getShield() + "**]";
     }
 
@@ -242,7 +253,7 @@ public class GameMember
         {
             defensive = true;
             List<String> output = getData().stream().map(o -> o.onDefend(this)).collect(Collectors.toList());
-            output.add(0, Emote.SHIELD + "**" + getUsername() + "** is defending (**" + Util.percent(getResist()) + "** resist, **" + (stats.getInt(HEALTH_PER_TURN) * 2) + "** regen)!");
+            output.add(0, Emote.DEFEND + "**" + getUsername() + "** is defending (**" + Util.percent(getResist()) + "** resist, **" + (stats.getInt(HEALTH_PER_TURN) * 2) + "** regen)!");
             return Util.joinNonEmpty("\n", output);
         }
         return null;
@@ -367,7 +378,7 @@ public class GameMember
             if (event.target.hasShield())
                 event.output.add(0, Util.damageText(event, event.actor.getUsername(), event.target.getUsername() + "'s Shield", emote, source));
             else
-                event.output.add(Emote.SHIELD + "Their Shield was destroyed!");
+                event.output.add(Emote.DEFEND + "**" + event.target.getUsername() + "'s Shield** was destroyed!");
 
             event.bonus -= shdBonus;
             event.damage -= shdDamage;
@@ -387,13 +398,13 @@ public class GameMember
     public String win()
     {
         game.getInstance().endGame(game);
-        return Emote.TROPHY + getUser().getMention() + ", you have won the game!\n";
+        return Emote.VICTORY + getUser().getMention() + ", you have won the game!\n";
     }
 
     public String lose()
     {
         List<String> output = new ArrayList<>();
-        output.add(Emote.SKULL + getUser().getMention() + " has been slain and removed from the game!");
+        output.add(Emote.DEFEAT + getUser().getMention() + " has been slain and removed from the game!");
 
         alive = false;
 
@@ -526,6 +537,11 @@ public class GameMember
         return health / getStats().get(MAX_HEALTH);
     }
 
+    public int getMissingHealth()
+    {
+        return stats.getInt(MAX_HEALTH) - getHealth();
+    }
+
     public int getEnergy()
     {
         return energy;
@@ -630,5 +646,63 @@ public class GameMember
     public GameMemberVars getVars()
     {
         return vars;
+    }
+
+    public EmbedCreateSpec getStatus()
+    {
+        EmbedCreateSpec.Builder embed = EmbedCreateSpec.builder();
+        if (!alreadyPickedUnit())
+        {
+            embed.color(Color.GRAY);
+            embed.author(getUsername(), null, getUser().getAvatarUrl());
+            embed.description(getUsername() + " is choosing a unit to play as.");
+        }
+        else
+        {
+            GameMemberVars vars = getVars();
+            Stats stats = getStats();
+
+            if (game.getCurrentMember().equals(this))
+                embed.title("**Current Turn**");
+
+            // Core statuses
+            List<String> coreStatuses = new ArrayList<>();
+            coreStatuses.add("- Health: " + percent(getHealthPercentage()) + " (" + getHealth() + "/" + stats.getInt(MAX_HEALTH) + ")");
+            coreStatuses.add("- Gold: " + getGold());
+            coreStatuses.add("- Energy: " + getEnergy());
+            coreStatuses.add("- Items: " + getItems());
+
+            // Unit status
+            String unitStatus = getUnit().getStatus(this);
+
+            // Skill statuses
+            List<String> skillStatuses = Arrays.stream(getUnit().getSkills())
+                    .map(skill -> skill.getStatus(this))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            // Buff statuses
+            List<String> buffStatuses = getBuffs().stream()
+                    .map(buff -> buff.getStatus(this))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            // Effect statuses
+            List<String> effectStatuses = getEffects().stream()
+                    .map(effect -> effect.getStatus(this))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            embed.author(getUnit().getName() + " (" + getUsername() + ")", null, getUser().getAvatarUrl());
+
+            embed.description(String.join(" \n", coreStatuses) +
+                    (unitStatus != null ? "\n\n" + unitStatus : "") +
+                    (!skillStatuses.isEmpty() ? "\n\n" + String.join(" \n", skillStatuses) : "") +
+                    (!buffStatuses.isEmpty() ? "\n\n" + String.join(" \n", buffStatuses) : "") +
+                    (!effectStatuses.isEmpty() ? "\n\n" + String.join(" \n", effectStatuses) : ""));
+
+            embed.color(unit.getColor());
+        }
+        return embed.build();
     }
 }

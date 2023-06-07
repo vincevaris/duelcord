@@ -17,6 +17,11 @@ public class Cooldown implements Notifier
         setNotified(false);
     }
 
+    public void reset()
+    {
+        setCurrent(0);
+    }
+
     public boolean count()
     {
         setCurrent(getCurrent() - 1);

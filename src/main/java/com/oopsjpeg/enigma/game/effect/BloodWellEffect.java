@@ -52,14 +52,12 @@ public class BloodWellEffect extends Effect
     @Override
     public String getDescription()
     {
-        return "Attacks Shield for __" + percent(getPower()) + "__ of damage dealt, up to **" + maxShield + "**.";
+        return "Attacks shield for __" + percent(getPower()) + "__ of damage dealt, up to **" + maxShield + "**.";
     }
 
     @Override
-    public String[] getTopic(GameMember member)
+    public String getStatus(GameMember member)
     {
-        return new String[]{
-                "Blood Well: " + currentShield + " / " + maxShield
-        };
+        return "Blood Well: " + currentShield + "/" + maxShield;
     }
 }

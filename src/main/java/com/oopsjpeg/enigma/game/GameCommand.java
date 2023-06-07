@@ -77,43 +77,6 @@ public enum GameCommand implements Command
                     }
                 }
             },
-    STATS("stats")
-            {
-                @Override
-                public void execute(Message message, String[] args)
-                {
-                    User author = message.getAuthor().orElse(null);
-                    MessageChannel channel = message.getChannel().block();
-                    Game game = Enigma.getInstance().getPlayer(author).getGame();
-                    GameMember member = game.getMember(author);
-
-                    if (channel.equals(game.getChannel()))
-                    {
-                        message.delete().subscribe();
-                        if (game.getGameState() == GameState.PICKING)
-                            Util.sendFailure(channel, "You cannot check stats until the game has started.");
-                        else
-                        {
-                            Item item = Item.fromName(String.join(" ", args));
-                            if (item != null)
-                            {
-                                Build build = item.build(member.getItems());
-                                Util.send(channel, item.getName() + " (" + build.getCost() + "g)", Util.joinNonEmpty("\n",
-                                        item.hasBuild() ? "*Build: " + Arrays.toString(item.getBuild()) + "*\n" : null,
-                                        Util.formatStats(item.getStats()),
-                                        Util.formatEffects(item.getEffects())));
-                            } else
-                            {
-                                Unit unit = Unit.fromName(String.join(" ", args));
-                                if (unit != null)
-                                    channel.createMessage(unit.format()).subscribe();
-                                else
-                                    Util.sendFailure(channel, "Invalid item/unit name.");
-                            }
-                        }
-                    }
-                }
-            },
     END("end")
             {
                 @Override
@@ -197,7 +160,7 @@ public enum GameCommand implements Command
                     if (channel.equals(game.getChannel()))
                     {
                         message.delete().subscribe();
-                        game.updateInfo(game.getMember(author));
+                        game.updateStatus();
                     }
                 }
             },
