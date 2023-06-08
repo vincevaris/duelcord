@@ -33,6 +33,6 @@ public class SellAction implements GameAction
     @Override
     public int getEnergy()
     {
-        return 25;
+        return 0;
     }
 }

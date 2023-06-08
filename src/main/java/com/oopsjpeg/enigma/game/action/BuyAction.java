@@ -40,6 +40,6 @@ public class BuyAction implements GameAction
     @Override
     public int getEnergy()
     {
-        return 25;
+        return 0;
     }
 }
