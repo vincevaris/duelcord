@@ -209,7 +209,7 @@ public enum Item implements GameObject
 
     BONE_SPEAR("Bone Spear", Tree.ADVANCED, 500,
             new Item[]{KNIFE},
-            new Effect[]{new LifewasterEffect(5, .25f)},
+            new Effect[]{new LifewasterEffect(5, .75f)},
             new Stats()
                     .put(ATTACK_POWER, 10)) {
         @Override
@@ -301,8 +301,8 @@ public enum Item implements GameObject
     WOLFS_FANG("Wolf's Fang", Tree.COMPLETE, 1175,
             new Item[]{BONE_SPEAR, KNIFE},
             new Effect[]{
-                    new LifewasterEffect(3, .25f),
-                    new WolfbiteEffect(3, .25f)
+                    new LifewasterEffect(3, .75f),
+                    new WolfbiteEffect(3, .5f)
             },
             new Stats()
                     .put(ATTACK_POWER, 35)) {
