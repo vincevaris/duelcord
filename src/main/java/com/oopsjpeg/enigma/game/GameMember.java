@@ -132,8 +132,6 @@ public class GameMember
     {
         final List<String> output = new ArrayList<>();
         buffs.remove(buff);
-        if (!buff.isSilent())
-            output.add(Emote.TIME + "**" + getUsername() + "'s " + buff.getName() + "** has expired.");
         output.add(updateStats());
         return Util.joinNonEmpty("\n", output);
     }
@@ -180,8 +178,11 @@ public class GameMember
         for (Buff buff : getBuffs())
         {
             if (buff.shouldRemove())
-                output.add(removeBuff(buff));
-            else
+            {
+                buffs.remove(buff);
+                if (!buff.isSilent())
+                    output.add(Emote.TIME + "**" + getUsername() + "'s " + buff.getName() + "** has expired.");
+            } else
                 stats.addAll(buff.getStats());
         }
 
