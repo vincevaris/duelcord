@@ -607,9 +607,9 @@ public enum Unit implements GameObject
                                 event.onHitScale = .25f;
                                 event.damage += stats.get(ATTACK_POWER) * GUNSLINGER_BARRAGE_AP_RATIO;
                                 event.damage += stats.get(SKILL_POWER) * GUNSLINGER_BARRAGE_SP_RATIO;
+                                event = actor.skill(event);
                                 event = actor.crit(event);
                                 event = actor.hit(event);
-                                event = actor.skill(event);
 
                                 if (!event.cancelled)
                                     barrageCount++;
