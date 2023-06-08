@@ -146,6 +146,15 @@ public class Game
                 distortion.start(this);
             }
 
+            if (turnCount >= 28 && distortions.size() < 3)
+            {
+                Distortion distortion = Util.pickRandom(getUnusedDistortions());
+                output.add("# Final Distortion");
+                output.add(Emote.DISTORTION + "**" + distortion.getName() + "** - " + distortion.getDescription());
+                distortions.add(distortion);
+                distortion.start(this);
+            }
+
             output.add("### " + member.getMention() + "'s Turn");
             output.add("Open this channel's pinned messages to see your stats.");
 
